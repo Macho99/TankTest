@@ -3,12 +3,9 @@ using System;
 
 public class BezierSpline : MonoBehaviour {
 
-	[SerializeField]
-	public Vector3[] points;
-	[SerializeField]
-	private BezierControlPointMode[] modes;
-	[SerializeField]
-	private bool loop;
+	[SerializeField] private Vector3[] points;
+	[SerializeField] private BezierControlPointMode[] modes;
+	[SerializeField] private bool loop;
 
 	public bool Loop {
 		get { return loop; }
@@ -23,6 +20,11 @@ public class BezierSpline : MonoBehaviour {
 
 	public int ControlPointCount {
 		get { return points.Length; }
+	}
+
+	public Vector3 GetVertexPoint(int vertex)
+	{
+		return points[vertex * 3];
 	}
 
 	public Vector3 GetControlPoint (int index) {
@@ -178,18 +180,18 @@ public class BezierSpline : MonoBehaviour {
 		};
 	}
 
-	public float GetTotalLength(int nrOfSegments)
+	public float GetLength(int segments)
 	{
-		float totalLength = 0;
-		float t = 1.0f/(float)nrOfSegments;
+		float length = 0;
+		float t = 1.0f/(float)segments;
 		Vector3 p0,p1;
 
-		for(int i=0; i<nrOfSegments; i++)
+		for(int i=0; i<segments; i++)
 		{
 			p0 = GetPoint( t*i );
 			p1 = GetPoint( t*(i+1));
-			totalLength += Vector3.Distance(p0,p1);
+			length += Vector3.Distance(p0,p1);
 		}
-		return totalLength;
+		return length;
 	}
 }

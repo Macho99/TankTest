@@ -24,6 +24,9 @@ public class Tank : MonoBehaviour
 	Vector2 lerpMoveInput;
 	int wheelNum;
 
+	public WheelCollider[] LeftWheelCols { get { return leftWheelCols; } }
+	public WheelCollider[] RightWheelCols { get { return rightWheelCols; } }
+
 	private void Awake()
 	{
 		wheelNum = leftRenderers.Length;
