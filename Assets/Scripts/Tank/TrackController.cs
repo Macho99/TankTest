@@ -20,12 +20,16 @@ public class TrackController : MonoBehaviour
 	[SerializeField] float maxTensionY = 0.3694584f;
 	[SerializeField] float maxUnderDiff = 0.2f;
 	[SerializeField] int trackNum = 100;
+	[SerializeField] float controlMagMultiplier = 1f;
+	[SerializeField] float speed = 0f;
 
+	Transform[] tracks;
 	WheelCollider[] wheelCols;
 	float baseUnderLength;
 	BezierSpline spline;
 	Tank tank;
 	float nextUpdateTime;
+	float curTrackOffset;
 
 	private void Awake()
 	{
@@ -39,13 +43,11 @@ public class TrackController : MonoBehaviour
 		Update();
 
 		baseUnderLength = GetLength(backIdx, frontIdx, 20);
+
+		InitSpline();
+		CreateTracks();
 	}
 
-	private void Start()
-	{
-		//CreateTracks();
-		_ = StartCoroutine(CoTrackWalker());
-	}
 
 	private void Update()
 	{
@@ -57,8 +59,8 @@ public class TrackController : MonoBehaviour
 		for (int i = 0; i < wheelCols.Length; i++)
 		{
 			wheelCols[i].GetWorldPose(out Vector3 pos, out Quaternion quat);
-			pos.y -= wheelCols[i].radius;
 			Vector3 trackPos = transform.InverseTransformPoint(pos);
+			trackPos.y -= wheelCols[i].radius;
 			spline.SetControlPoint(vertexIdx * 3, trackPos);
 			vertexIdx--;
 			if (vertexIdx < 0)
@@ -77,6 +79,14 @@ public class TrackController : MonoBehaviour
 			vertexs[i] = spline.GetControlPoint(i * 3);
 		}
 
+		AdjustTension();
+		RefreshLengths(5);
+
+		TrackPlace();
+	}
+
+	private void AdjustTension()
+	{
 		float underDiff = GetLength(backIdx, frontIdx, 20) - baseUnderLength;
 		float ratio = underDiff / maxUnderDiff;
 		ratio = Mathf.Clamp01(ratio);
@@ -84,40 +94,70 @@ public class TrackController : MonoBehaviour
 		Vector3 newTensionPos = vertexs[tensionIdx];
 		newTensionPos.y = Mathf.Lerp(minTensionY, maxTensionY, ratio);
 		spline.SetControlPoint(tensionIdx * 3, newTensionPos);
-		RefreshLengths(40);
+
+		Vector3 prevControl = spline.GetControlPoint(tensionIdx * 3 - 2);
+		Vector3 prevVertex = spline.GetVertexPoint(tensionIdx - 1);
+		float magnitude = (prevControl - prevVertex).magnitude;
+		Vector3 prevDir = (newTensionPos - prevVertex).normalized;
+		spline.SetControlPoint(tensionIdx * 3 - 2, prevVertex + prevDir * magnitude);
+
+		//Vector3 nextControl = spline.GetControlPoint(tensionIdx * 3 + 2);
+		Vector3 nextVertex = spline.GetVertexPoint(tensionIdx + 1);
+		Vector3 nextDir = prevDir;
+		nextDir.y = -nextDir.y;
+		spline.SetControlPoint(tensionIdx * 3 + 2, nextVertex - nextDir * magnitude);
 	}
 
-	private IEnumerator CoTrackWalker()
+	private void TrackPlace()
 	{
-		float distRatio = 0f;
-		Transform trackWalker = Instantiate(trackPrefab).transform;
+		if (tracks == null) return;
 
-		while (true)
+		//if (Mathf.Approximately(speed, 0f) == true) return;
+		curTrackOffset -= speed * 0.1f * Time.deltaTime;
+
+		float distRatioStep = 1f / tracks.Length;
+		for (int i = 0; i < tracks.Length; i++)
 		{
-			yield return null;
-
-			distRatio += Time.deltaTime * 0.1f;
-			if (distRatio > 1f)
-				distRatio -= 1f;
+			float distRatio = curTrackOffset + distRatioStep * i;
+			distRatio = Mathf.Repeat(distRatio, 1f);
 
 			float t = GetTFromDistRatio(distRatio);
 
 			Vector3 pos = spline.GetPoint(t);
 			Vector3 dir = spline.GetDirection(t);
 			Quaternion rot = Quaternion.LookRotation(dir, Vector3.Cross(dir, transform.forward));
-			trackWalker.SetPositionAndRotation(pos, rot);
+			tracks[i].SetPositionAndRotation(pos, rot);
 		}
 	}
 
-	float prevDist;
+	//private IEnumerator CoTrackWalker()
+	//{
+	//	float distRatio = 0f;
+	//	Transform trackWalker = Instantiate(trackPrefab).transform;
+
+	//	while (true)
+	//	{
+	//		yield return null;
+
+	//		distRatio += Time.deltaTime * 0.1f;
+	//		if (distRatio > 1f)
+	//			distRatio -= 1f;
+
+	//		float t = GetTFromDistRatio(distRatio);
+
+	//		Vector3 pos = spline.GetPoint(t);
+	//		Vector3 dir = spline.GetDirection(t);
+	//		Quaternion rot = Quaternion.LookRotation(dir, Vector3.Cross(dir, transform.forward));
+	//		trackWalker.SetPositionAndRotation(pos, rot);
+	//	}
+	//}
+
 	private float GetTFromDistRatio(float distRatio)
 	{
 		distRatio = Mathf.Clamp01(distRatio);
 
 		float t;
 		float curDist = distRatio * totalLength;
-		print(curDist - prevDist);
-		prevDist = curDist;
 		int i;
 		for(i = 0; i < vertexLengths.Length; i++)
 		{
@@ -137,7 +177,7 @@ public class TrackController : MonoBehaviour
 		return t;
 	}
 
-	private void RefreshLengths(int segments)
+	private void RefreshLengths(int segmentPerCurve)
 	{
 		float totalLength = 0f;
 		for(int startIdx = 0; startIdx < spline.CurveCount; startIdx++)
@@ -149,8 +189,8 @@ public class TrackController : MonoBehaviour
 			float endT = 1f / spline.CurveCount * endIdx;
 			Vector3 p0, p1;
 
-			float deltaT = (endT - startT) / segments;
-			for (int i = 0; i < segments; i++)
+			float deltaT = (endT - startT) / segmentPerCurve;
+			for (int i = 0; i < segmentPerCurve; i++)
 			{
 				p0 = spline.GetPoint(startT + deltaT * i);
 				p1 = spline.GetPoint(startT + deltaT * (i + 1));
@@ -162,7 +202,7 @@ public class TrackController : MonoBehaviour
 		this.totalLength = totalLength;
 	}
 
-	private float GetLength(int startIdx, int endIdx, int segments)
+	private float GetLength(int startIdx, int endIdx, int segment)
 	{
 		if (startIdx < 0 || endIdx > spline.ControlPointCount / 3)
 		{
@@ -187,8 +227,8 @@ public class TrackController : MonoBehaviour
 
 		if (startIdx < endIdx)
 		{
-			float deltaT = (endT - startT) / segments;
-			for (int i = 0; i < segments; i++)
+			float deltaT = (endT - startT) / segment;
+			for (int i = 0; i < segment; i++)
 			{
 				p0 = spline.GetPoint(startT + deltaT * i);
 				p1 = spline.GetPoint(startT + deltaT * (i + 1));
@@ -197,7 +237,7 @@ public class TrackController : MonoBehaviour
 		}
 		else
 		{
-			float deltaT = (1f - startT + endT) / segments;
+			float deltaT = (1f - startT + endT) / segment;
 			int i;
 			for (i = 0; startT + deltaT * i < 1f; i++)
 			{
@@ -206,7 +246,7 @@ public class TrackController : MonoBehaviour
 				length += Vector3.Distance(p0, p1);
 			}
 			int lastI = i;
-			for (; i < segments; i++)
+			for (; i < segment; i++)
 			{
 				p0 = spline.GetPoint(deltaT * (i - lastI));
 				p1 = spline.GetPoint(deltaT * (i - lastI + 1));
@@ -216,8 +256,28 @@ public class TrackController : MonoBehaviour
 
 		return length;
 	}
+
+	private void InitSpline()
+	{
+		for (int i = 0; i < vertexs.Length; i++)
+		{
+			float length = vertexLengths[i];
+			float magnitude = length * controlMagMultiplier;
+			Vector3 prevVertex = spline.GetVertexPoint(i);
+			Vector3 nextVertex = spline.GetVertexPoint(i + 1);
+			Vector3 prevControl = spline.GetControlPoint(i * 3 + 1);
+			Vector3 nextControl = spline.GetControlPoint(i * 3 + 2);
+
+			Vector3 prevDir = (prevControl - prevVertex).normalized;
+			Vector3 nextDir = (nextControl - nextVertex).normalized;
+			spline.SetControlPoint(i * 3 + 1, prevVertex + prevDir * magnitude);
+			spline.SetControlPoint(i * 3 + 2, nextVertex + nextDir * magnitude);
+		}
+	}
+
 	private void CreateTracks()
 	{
+		tracks = new Transform[trackNum];
 		float stepSize = 1f / trackNum;
 		for (int i = 0; i < trackNum; i++)
 		{
@@ -225,8 +285,7 @@ public class TrackController : MonoBehaviour
 			Vector3 pos = spline.GetPoint(t);
 			Vector3 dir = spline.GetDirection(t);
 			Quaternion rot = Quaternion.LookRotation(dir, Vector3.Cross(dir, transform.forward));
-			Instantiate(trackPrefab, pos, rot, transform);
+			tracks[i] = Instantiate(trackPrefab, pos, rot, transform).transform;
 		}
 	}
-
 }

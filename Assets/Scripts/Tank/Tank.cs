@@ -77,8 +77,10 @@ public class Tank : MonoBehaviour
 	private void SyncWheelRenderer(WheelCollider col, Transform target)
 	{
 		col.GetWorldPose(out Vector3 pos, out Quaternion quat);
-		pos.y += trackYOffset;
 		target.SetPositionAndRotation(pos, quat);
+		Vector3 localPos = target.localPosition;
+		localPos.y += trackYOffset;
+		target.localPosition = localPos;
 	}
 
 	private void OnMove(InputValue value)
