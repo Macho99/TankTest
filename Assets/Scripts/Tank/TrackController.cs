@@ -7,8 +7,11 @@ using static UnityEditor.Progress;
 [RequireComponent(typeof(BezierSpline))]
 public class TrackController : MonoBehaviour
 {
+	[Serializable]
+	public enum TrackType { Left, Right };
+
+	[SerializeField] TrackType trackType;
 	[SerializeField] float totalLength;
-	[SerializeField] float updateInterval;
 	[SerializeField] Vector3[] points;
 	[SerializeField] Vector3[] vertexs;
 	[SerializeField] float[] vertexLengths;
@@ -18,23 +21,32 @@ public class TrackController : MonoBehaviour
 	[SerializeField] int backIdx = 8;
 	[SerializeField] float minTensionY = -0.03482562f;
 	[SerializeField] float maxTensionY = 0.3694584f;
-	[SerializeField] float maxUnderDiff = 0.2f;
-	[SerializeField] int trackNum = 100;
-	[SerializeField] float controlMagMultiplier = 1f;
-	[SerializeField] float speed = 0f;
+	[SerializeField] float maxUnderDiff = 0.3f;
+	[SerializeField] int trackNum = 78;
+	[SerializeField] float controlMagMultiplier = 0.32f;
+	public float Velocity { get; set; }
 
+	Tank tank;
 	Transform[] tracks;
 	WheelCollider[] wheelCols;
+	Transform[] wheelTrans;
 	float baseUnderLength;
 	BezierSpline spline;
-	Tank tank;
-	float nextUpdateTime;
 	float curTrackOffset;
 
 	private void Awake()
 	{
 		tank = GetComponentInParent<Tank>();
-		wheelCols = tank.LeftWheelCols;
+		if (trackType == TrackType.Left)
+		{
+			wheelCols = tank.LeftWheelCols;
+			wheelTrans = tank.LeftWheelTrans;
+		}
+		else//(trackType == TrackType.Right)
+		{
+			wheelCols = tank.RightWheelCols;
+			wheelTrans = tank.RightWheelTrans;
+		}
 
 		spline = GetComponent<BezierSpline>();
 		points = new Vector3[spline.ControlPointCount];
@@ -56,7 +68,7 @@ public class TrackController : MonoBehaviour
 		//nextUpdateTime = Time.time + updateInterval;
 
 		int vertexIdx = frontIdx - 1;
-		for (int i = 0; i < wheelCols.Length; i++)
+		for (int i = 1; i < wheelCols.Length - 1; i++)
 		{
 			wheelCols[i].GetWorldPose(out Vector3 pos, out Quaternion quat);
 			Vector3 trackPos = transform.InverseTransformPoint(pos);
@@ -113,7 +125,7 @@ public class TrackController : MonoBehaviour
 		if (tracks == null) return;
 
 		//if (Mathf.Approximately(speed, 0f) == true) return;
-		curTrackOffset -= speed * 0.1f * Time.deltaTime;
+		curTrackOffset -= Velocity * 0.1f * Time.deltaTime;
 
 		float distRatioStep = 1f / tracks.Length;
 		for (int i = 0; i < tracks.Length; i++)
