@@ -11,7 +11,7 @@ public class Tank : MonoBehaviour
 	[SerializeField] AnimationCurve torquePerRpm;
 	[SerializeField] float rotationAngle = 35f;
 	[SerializeField] float torque = 2000f;
-	[SerializeField] float brakeTorque = 10000f;
+	[SerializeField] float brakeTorque = 2000f;
 	[SerializeField] float trackYOffset = 0.2f;
 
 	[SerializeField] Transform[] leftWheelTrans;
@@ -30,6 +30,8 @@ public class Tank : MonoBehaviour
 	[SerializeField] float leftTorque;
 	[SerializeField] float rightTorque;
 
+	float leftRpm;
+	float rightRpm;
 	Vector2 moveInput;
 	Vector2 lerpMoveInput;
 	int wheelNum;
@@ -50,8 +52,9 @@ public class Tank : MonoBehaviour
 		lerpMoveInput = Vector2.Lerp(lerpMoveInput, moveInput, Time.deltaTime * 5f);
 
 		Move();
-		float wheelRPM = CalculateWheelRPM(out float velocity);
-		dashBoard.SetRPMAndVelUI(wheelRPM, velocity);
+		float wheelRpm = CalculateWheelRPM(out float velocity);
+		//float engineRpm = CalculateEngineRPM(wheelRpm, );
+		dashBoard.SetRPMAndVelUI(wheelRpm, velocity);
 
 		for (int i = 1; i < wheelNum - 1; i++)
 		{
@@ -63,22 +66,40 @@ public class Tank : MonoBehaviour
 	private float CalculateWheelRPM(out float velocity)
 	{
 		float radios = leftWheelCols[1].radius;
-		float leftRpm = 0f;
+
+
+		float measuredLeftRpm = float.MaxValue;
+		float measuredRightRpm = float.MaxValue;
 		for (int i = 1; i < wheelNum - 1; i++)
 		{
-			leftRpm += leftWheelCols[i].rpm;
+			measuredLeftRpm = Mathf.Min(measuredLeftRpm, leftWheelCols[i].rpm);
 		}
-		leftRpm /= wheelNum;
-		print(leftRpm);
+
+		for (int i = 1; i < wheelNum - 1; i++)
+		{
+			measuredRightRpm = Mathf.Min(measuredRightRpm, rightWheelCols[i].rpm);
+		}
+
+		//float measuredLeftRpm = 0f;
+		//float measuredRightRpm = 0f;
+		//for (int i = 1; i < wheelNum - 1; i++)
+		//{
+		//	measuredLeftRpm += leftWheelCols[i].rpm;
+		//}
+		//measuredLeftRpm /= wheelNum - 2;
+
+		//for (int i = 1; i < wheelNum - 1; i++)
+		//{
+		//	measuredRightRpm += rightWheelCols[i].rpm;
+		//}
+		//measuredRightRpm /= wheelNum - 2;
+
+		leftRpm = Mathf.Lerp(leftRpm, measuredLeftRpm, Time.deltaTime * 2f);
+		rightRpm = Mathf.Lerp(rightRpm, measuredRightRpm, Time.deltaTime * 2f);
+
 		float leftVelocity = leftRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
 		leftTrack.Velocity = leftVelocity;
 
-		float rightRpm = 0f;
-		for (int i = 1; i < wheelNum - 1; i++)
-		{
-			rightRpm += rightWheelCols[i].rpm;
-		}
-		rightRpm /= wheelNum;
 		float rightVelocity = rightRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
 		rightTrack.Velocity = rightVelocity;
 
