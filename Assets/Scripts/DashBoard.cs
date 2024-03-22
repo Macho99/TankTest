@@ -20,8 +20,8 @@ public class DashBoard : MonoBehaviour
 		velocityText.text = ((int)velocity).ToString();
 	}
 
-	public void SetGearUI(int gear)
+	public void SetGearUI(string gear)
 	{
-		gearText.text = gear.ToString();
+		gearText.text = gear;
 	}
 }

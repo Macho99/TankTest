@@ -125,7 +125,7 @@ public class TrackController : MonoBehaviour
 		if (tracks == null) return;
 
 		//if (Mathf.Approximately(speed, 0f) == true) return;
-		curTrackOffset -= Velocity * 0.1f * Time.deltaTime;
+		curTrackOffset -= Velocity * 1000 / 3600 / totalLength * Time.deltaTime ;
 
 		float distRatioStep = 1f / tracks.Length;
 		for (int i = 0; i < tracks.Length; i++)
@@ -142,28 +142,6 @@ public class TrackController : MonoBehaviour
 		}
 	}
 
-	//private IEnumerator CoTrackWalker()
-	//{
-	//	float distRatio = 0f;
-	//	Transform trackWalker = Instantiate(trackPrefab).transform;
-
-	//	while (true)
-	//	{
-	//		yield return null;
-
-	//		distRatio += Time.deltaTime * 0.1f;
-	//		if (distRatio > 1f)
-	//			distRatio -= 1f;
-
-	//		float t = GetTFromDistRatio(distRatio);
-
-	//		Vector3 pos = spline.GetPoint(t);
-	//		Vector3 dir = spline.GetDirection(t);
-	//		Quaternion rot = Quaternion.LookRotation(dir, Vector3.Cross(dir, transform.forward));
-	//		trackWalker.SetPositionAndRotation(pos, rot);
-	//	}
-	//}
-
 	private float GetTFromDistRatio(float distRatio)
 	{
 		distRatio = Mathf.Clamp01(distRatio);
@@ -171,6 +149,7 @@ public class TrackController : MonoBehaviour
 		float t;
 		float curDist = distRatio * totalLength;
 		int i;
+
 		for(i = 0; i < vertexLengths.Length; i++)
 		{
 			if(curDist - vertexLengths[i] < 0f)
@@ -180,6 +159,22 @@ public class TrackController : MonoBehaviour
 			else
 			{
 				curDist -= vertexLengths[i];
+			}
+		}
+
+		// 예외상황일경우 한바퀴 더 돌리기(트랙 길이는 유동적)
+		if(i == vertexLengths.Length)
+		{
+			for (i = 0; i < vertexLengths.Length; i++)
+			{
+				if (curDist - vertexLengths[i] < 0f)
+				{
+					break;
+				}
+				else
+				{
+					curDist -= vertexLengths[i];
+				}
 			}
 		}
 
