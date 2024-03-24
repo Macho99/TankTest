@@ -148,8 +148,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 20890640}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.051446237, y: 0.69398624, z: 0.049839, w: 0.71641654}
-  m_LocalPosition: {x: -3.420452, y: 0.66431427, z: -2.9047318}
+  m_LocalRotation: {x: 0.038110558, y: -0.68095654, z: -0.03562124, w: -0.73046356}
+  m_LocalPosition: {x: -4.132942, y: 0.6179571, z: 2.6250792}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -587,6 +587,140 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
+--- !u!1 &246611552
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 246611557}
+  - component: {fileID: 246611556}
+  - component: {fileID: 246611555}
+  - component: {fileID: 246611553}
+  - component: {fileID: 246611558}
+  m_Layer: 0
+  m_Name: Capsule
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!54 &246611553
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246611552}
+  serializedVersion: 4
+  m_Mass: 10000
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!23 &246611555
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246611552}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &246611556
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246611552}
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &246611557
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246611552}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 21.1, y: 13.53, z: 23.9}
+  m_LocalScale: {x: 0.5, y: 5, z: 10}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+--- !u!64 &246611558
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 246611552}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &292426406
 GameObject:
   m_ObjectHideFlags: 0
@@ -933,7 +1067,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &563087783
 Transform:
   m_ObjectHideFlags: 0
@@ -961,9 +1095,9 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 3000
-    targetPosition: 0.8
-  m_SuspensionDistance: 1.3
+    damper: 45000
+    targetPosition: 0.5
+  m_SuspensionDistance: 0.5
   m_ForceAppPointDistance: 0
   m_Mass: 3000
   m_WheelDampingRate: 0.25
@@ -1097,7 +1231,7 @@ Transform:
   m_GameObject: {fileID: 621256712}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.15, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1860,7 +1994,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &972762198
 Transform:
   m_ObjectHideFlags: 0
@@ -1888,9 +2022,9 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 3000
-    targetPosition: 0.8
-  m_SuspensionDistance: 1.3
+    damper: 45000
+    targetPosition: 0.5
+  m_SuspensionDistance: 0.5
   m_ForceAppPointDistance: 0
   m_Mass: 3000
   m_WheelDampingRate: 0.25
@@ -2838,8 +2972,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trackType: 0
   totalLength: 0
-  points: []
-  vertexs: []
   vertexLengths: []
   trackPrefab: {fileID: 4759292810365926038, guid: 74d8a6c36348249b68ce01901721d401, type: 3}
   tensionIdx: 6
@@ -2998,6 +3130,7 @@ MonoBehaviour:
   minEngineRpm: 1000
   maxEngineRpm: 8000
   sidewayFrictionValue: 2
+  power: 100000
   leftWheelTrans:
   - {fileID: 4993986050089426}
   - {fileID: 4247647449306454}
@@ -3040,15 +3173,13 @@ MonoBehaviour:
   - {fileID: 972762199}
   gears:
   - 30
-  - 20
   - 15
   - 10
   - 7
   gearChangeSpeeds:
   - 20
-  - 30
-  - 45
-  - 60
+  - 35
+  - 50
   leftTrack: {fileID: 1494128965}
   rightTrack: {fileID: 1998596219}
   leftTorque: 0
@@ -3527,6 +3658,7 @@ MonoBehaviour:
   minEngineRpm: 1000
   maxEngineRpm: 6000
   sidewayFrictionValue: 2
+  power: 10000
   leftWheelTrans: []
   rightWheelTrans: []
   leftWheelCols:
@@ -3690,7 +3822,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1877522188
 Transform:
   m_ObjectHideFlags: 0
@@ -3718,9 +3850,9 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 3000
-    targetPosition: 0.8
-  m_SuspensionDistance: 1.3
+    damper: 45000
+    targetPosition: 0.5
+  m_SuspensionDistance: 0.5
   m_ForceAppPointDistance: 0
   m_Mass: 3000
   m_WheelDampingRate: 0.25
@@ -3761,7 +3893,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1927071264
 Transform:
   m_ObjectHideFlags: 0
@@ -3789,9 +3921,9 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 3000
-    targetPosition: 0.8
-  m_SuspensionDistance: 1.3
+    damper: 45000
+    targetPosition: 0.5
+  m_SuspensionDistance: 0.5
   m_ForceAppPointDistance: 0
   m_Mass: 3000
   m_WheelDampingRate: 0.25
@@ -4018,8 +4150,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trackType: 1
   totalLength: 0
-  points: []
-  vertexs: []
   vertexLengths: []
   trackPrefab: {fileID: 4759292810365926038, guid: 74d8a6c36348249b68ce01901721d401, type: 3}
   tensionIdx: 6
@@ -7588,3 +7718,4 @@ SceneRoots:
   - {fileID: 2072248136}
   - {fileID: 962005301}
   - {fileID: 690238473}
+  - {fileID: 246611557}

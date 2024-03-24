@@ -12,8 +12,8 @@ public class TrackController : MonoBehaviour
 
 	[SerializeField] TrackType trackType;
 	[SerializeField] float totalLength;
-	[SerializeField] Vector3[] points;
-	[SerializeField] Vector3[] vertexs;
+	//[SerializeField] Vector3[] points;
+	//[SerializeField] Vector3[] vertexs;
 	[SerializeField] float[] vertexLengths;
 	[SerializeField] GameObject trackPrefab;
 	[SerializeField] int tensionIdx = 6;
@@ -49,8 +49,8 @@ public class TrackController : MonoBehaviour
 		}
 
 		spline = GetComponent<BezierSpline>();
-		points = new Vector3[spline.ControlPointCount];
-		vertexs = new Vector3[spline.CurveCount];
+		//points = new Vector3[spline.ControlPointCount];
+		//vertexs = new Vector3[spline.CurveCount];
 		vertexLengths = new float[spline.CurveCount];
 		Update();
 
@@ -81,15 +81,15 @@ public class TrackController : MonoBehaviour
 			}
 		}
 
-		for (int i = 0; i < spline.ControlPointCount; i++)
-		{
-			points[i] = spline.GetControlPoint(i);
-		}
+		//for (int i = 0; i < spline.ControlPointCount; i++)
+		//{
+		//	points[i] = spline.GetControlPoint(i);
+		//}
 
-		for (int i = 0; i < spline.CurveCount; i++)
-		{
-			vertexs[i] = spline.GetControlPoint(i * 3);
-		}
+		//for (int i = 0; i < spline.CurveCount; i++)
+		//{
+		//	vertexs[i] = spline.GetControlPoint(i * 3);
+		//}
 
 		AdjustTension();
 		RefreshLengths(5);
@@ -103,7 +103,7 @@ public class TrackController : MonoBehaviour
 		float ratio = underDiff / maxUnderDiff;
 		ratio = Mathf.Clamp01(ratio);
 
-		Vector3 newTensionPos = vertexs[tensionIdx];
+		Vector3 newTensionPos = spline.GetControlPoint(tensionIdx * 3);
 		newTensionPos.y = Mathf.Lerp(minTensionY, maxTensionY, ratio);
 		spline.SetControlPoint(tensionIdx * 3, newTensionPos);
 
@@ -266,7 +266,7 @@ public class TrackController : MonoBehaviour
 
 	private void InitSpline()
 	{
-		for (int i = 0; i < vertexs.Length; i++)
+		for (int i = 0; i < spline.CurveCount; i++)
 		{
 			float length = vertexLengths[i];
 			float magnitude = length * controlMagMultiplier;

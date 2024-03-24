@@ -15,6 +15,7 @@ public class Tank : MonoBehaviour
 	[SerializeField] float minEngineRpm = 1000f;
 	[SerializeField] float maxEngineRpm = 6000f;
 	[SerializeField] float sidewayFrictionValue = 2f;
+	[SerializeField] float power = 10000f;
 
 	[SerializeField] Transform[] leftWheelTrans;
 	[SerializeField] Transform[] rightWheelTrans;
@@ -31,6 +32,8 @@ public class Tank : MonoBehaviour
 	[Header("Debug")]
 	[SerializeField] float leftTorque;
 	[SerializeField] float rightTorque;
+
+	Rigidbody rb;
 
 	float rawLeftRpm;
 	float rawRightRpm;
@@ -49,6 +52,7 @@ public class Tank : MonoBehaviour
 
 	private void Awake()
 	{
+		rb = GetComponent<Rigidbody>();
 		wheelNum = leftWheelTrans.Length;
 	}
 
@@ -121,7 +125,7 @@ public class Tank : MonoBehaviour
 
 		velocity = (leftVelocity + rightVelocity) * 0.5f;
 
-		return (leftRpm + rightRpm) * 0.5f;
+		return (Mathf.Abs(leftRpm) + Mathf.Abs(rightRpm)) * 0.5f;
 	}
 
 	private float CalculateEngineRPM(float wheelRpm)
@@ -178,7 +182,7 @@ public class Tank : MonoBehaviour
 	{
 		float xInput = moveInput.x;
 
-		if (velocity < -0.1f)
+		if (velocity < -0.1f && moveInput.y < -0.1f)
 		{
 			xInput = -xInput;
 		}
@@ -207,19 +211,8 @@ public class Tank : MonoBehaviour
 
 		for (int i = 1; i < wheelNum - 1; i++)
 		{
-			if (Mathf.Approximately(leftWheelCols[i].motorTorque, 0f) == true
-				&& Mathf.Approximately(RightWheelCols[i].motorTorque, 0f) == true)
-			{
-				leftWheelCols[i].brakeTorque = 0f;
-				rightWheelCols[i].brakeTorque = 0f;
-				leftWheelCols[i].motorTorque -= xInput * motorTorque;
-				rightWheelCols[i].motorTorque += xInput * motorTorque;
-			}
-			else
-			{
-				leftWheelCols[i].motorTorque += xInput * motorTorque * 0.5f;
-				rightWheelCols[i].motorTorque -= xInput * motorTorque * 0.5f;
-			}
+			leftWheelCols[i].motorTorque += xInput * motorTorque * 0.5f;
+			rightWheelCols[i].motorTorque -= xInput * motorTorque * 0.5f;
 		}
 
 		leftTorque = leftWheelCols[1].motorTorque;
@@ -281,5 +274,15 @@ public class Tank : MonoBehaviour
 	private void OnMove(InputValue value)
 	{
 		moveInput = value.Get<Vector2>();
+	}
+
+	private void OnFire(InputValue value)
+	{
+		bool pressed = value.Get<float>() > 0.9f;
+
+		if(pressed)
+		{
+			rb.AddForceAtPosition(transform.up * power, transform.position + transform.forward * 2f + transform.up, ForceMode.Impulse);
+		}
 	}
 }
