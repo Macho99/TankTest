@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Tank : MonoBehaviour
+public class TankMove : MonoBehaviour
 {
+	public enum State { Neutral, RPMMatch, Drive, Reverse, GearShift, Park, }
+
 	[SerializeField] DashBoard dashBoard;
 	[SerializeField] AnimationCurve torquePerRpm;
 	[SerializeField] float rotationAngle = 35f;
@@ -16,6 +18,8 @@ public class Tank : MonoBehaviour
 	[SerializeField] float maxEngineRpm = 6000f;
 	[SerializeField] float sidewayFrictionValue = 2f;
 	[SerializeField] float power = 10000f;
+	[SerializeField] float inputSensitivity = 3f;
+	[SerializeField] float rpmMatchSpeed = 100f;
 
 	[SerializeField] Transform[] leftWheelTrans;
 	[SerializeField] Transform[] rightWheelTrans;
@@ -40,11 +44,24 @@ public class Tank : MonoBehaviour
 	float leftRpm;
 	float rightRpm;
 
-	int curGear = 0;
-
-	Vector2 moveInput;
+	Vector2 rawMoveInput;
+	Vector2 lerpedMoveInput;
 	int wheelNum;
 
+	float curMotorTorque;
+	StateMachine stateMachine;
+
+	
+	public float maxTorqueRpm { get; private set; }
+	public float RpmMatchSpeed { get { return rpmMatchSpeed; } }
+	public int CurGear { get; private set; }
+	public float CurGearRatio { get { return gears[CurGear]; } }
+	public float MinEngineRpm { get { return MinEngineRpm; } }
+	public float BrakeMultiplier { get; set; }
+	public float WheelRpm { get; set; }
+	public float EngineRpm { get; set; }
+	public Vector2 RawMoveInput { get { return rawMoveInput; } }
+	public Vector2 LerpedMoveInput { get { return lerpedMoveInput; } }
 	public WheelCollider[] LeftWheelCols { get { return leftWheelCols; } }
 	public WheelCollider[] RightWheelCols { get { return rightWheelCols; } }
 	public Transform[] LeftWheelTrans { get { return leftWheelTrans; } }
@@ -52,20 +69,50 @@ public class Tank : MonoBehaviour
 
 	private void Awake()
 	{
+		stateMachine = gameObject.AddComponent<StateMachine>();
+		stateMachine.AddState(State.Park, new TankPark(this));
+		stateMachine.AddState(State.Neutral, new TankNeutral(this));
+		stateMachine.AddState(State.RPMMatch, new TankRpmMatch(this));
+
+		stateMachine.InitState(State.Park);
+
+		EngineRpm = minEngineRpm;
+
+		GetMaxTorqueRpm();
+
 		rb = GetComponent<Rigidbody>();
 		wheelNum = leftWheelTrans.Length;
 	}
 
 	private void Update()
 	{
-		float wheelRpm = CalculateWheelRPM(out float velocity);
-		GearShift(velocity);
-		float engineRpm = CalculateEngineRPM(wheelRpm);
-		dashBoard.SetRPMAndVelUI(engineRpm, velocity);
-		float motorTorque = SetTorque(engineRpm, velocity);
-		Steering(motorTorque, velocity);
+		lerpedMoveInput = Vector2.Lerp(lerpedMoveInput, rawMoveInput, Time.deltaTime * inputSensitivity);
 
+		WheelRpm = CalculateWheelRPM(out float velocity);
+		//GearShift(velocity);
+		//EngineRpm = CalculateEngineRPM(WheelRpm);
+		//float motorTorque = SetTorque(EngineRpm, velocity);
+		//Steering(motorTorque, velocity);
+
+		dashBoard.SetRPMAndVelUI(EngineRpm, velocity);
 		SyncWheelRenderer();
+	}
+
+	private void FixedUpdate()
+	{
+		CalcTorque();
+		SetWheelTorque();
+	}
+
+	private void GetMaxTorqueRpm()
+	{
+		Keyframe[] keys = torquePerRpm.keys;
+		Keyframe? maxKey = null;
+		float maxValue = float.MinValue;
+		foreach (Keyframe key in keys)
+		{
+
+		}
 	}
 
 	private float CalculateWheelRPM(out float velocity)
@@ -128,61 +175,76 @@ public class Tank : MonoBehaviour
 		return (Mathf.Abs(leftRpm) + Mathf.Abs(rightRpm)) * 0.5f;
 	}
 
-	private float CalculateEngineRPM(float wheelRpm)
+	public void SetWheelTorque()
 	{
-		float gearRatio;
-		if(curGear == -1) // P or N
+		for(int i = 0; i < wheelNum; i++)
 		{
-			return minEngineRpm;
+			leftWheelCols[i].brakeTorque = brakeTorque * BrakeMultiplier;
+			rightWheelCols[i].brakeTorque = brakeTorque * BrakeMultiplier;
 		}
-		else if(curGear == -2) // R
+
+		for(int i = 1; i< wheelNum - 1; i++) 
 		{
-			gearRatio = gears[0];
+			leftWheelCols[i].motorTorque = curMotorTorque;
+			rightWheelCols[i].motorTorque = curMotorTorque;
 		}
-		else
-		{
-			gearRatio = gears[curGear];
-		}
-		float engineRpm = Mathf.Abs(wheelRpm) * gearRatio;
-		return engineRpm;
 	}
 
-	private float SetTorque(float engineRpm, float velocity)
+	public void CalcTorque()
 	{
-		float motorTorque = torquePerRpm.Evaluate((minEngineRpm + engineRpm) / maxEngineRpm);
-		motorTorque *= gears[curGear];
-		motorTorque /= wheelNum - 2;
-		motorTorque *= 3f;
+		float torque = torquePerRpm.Evaluate(EngineRpm / maxEngineRpm);
+		torque *= gears[CurGear];
+		torque /= wheelNum - 2;
+		torque *= 3f;
 
-		for (int i = 1; i < wheelNum - 1; i++)
-		{
-
-			if (moveInput.y > 0.1f)
-			{
-				leftWheelCols[i].brakeTorque = 0f;
-				rightWheelCols[i].brakeTorque = 0f;
-				leftWheelCols[i].motorTorque = motorTorque;
-				rightWheelCols[i].motorTorque = motorTorque;
-			}
-			else
-			{
-				leftWheelCols[i].motorTorque = 0f;
-				rightWheelCols[i].motorTorque = 0f;
-				if (moveInput.y < -0.1f)
-				{
-					leftWheelCols[i].brakeTorque = brakeTorque;
-					rightWheelCols[i].brakeTorque = brakeTorque;
-				}
-			}
-		}
-		return motorTorque;
+		curMotorTorque = torque;
 	}
+
+	public void SetEngineRpmWithWheel()
+	{
+		EngineRpm = WheelRpm * gears[CurGear];
+	}
+
+	public void SetEngineRpmWithoutWheel(float value)
+	{
+		EngineRpm = value;
+	}
+
+	//private float SetTorque(float engineRpm, float velocity)
+	//{
+	//	curMotorTorque = torquePerRpm.Evaluate((minEngineRpm + engineRpm) / maxEngineRpm);
+	//	curMotorTorque *= gears[curGear];
+	//	curMotorTorque /= wheelNum - 2;
+	//	curMotorTorque *= 3f;
+
+	//	for (int i = 1; i < wheelNum - 1; i++)
+	//	{
+	//		if (rawMoveInput.y > 0.1f)
+	//		{
+	//			leftWheelCols[i].brakeTorque = 0f;
+	//			rightWheelCols[i].brakeTorque = 0f;
+	//			leftWheelCols[i].motorTorque = curMotorTorque;
+	//			rightWheelCols[i].motorTorque = curMotorTorque;
+	//		}
+	//		else
+	//		{
+	//			leftWheelCols[i].motorTorque = 0f;
+	//			rightWheelCols[i].motorTorque = 0f;
+	//			if (rawMoveInput.y < -0.1f)
+	//			{
+	//				leftWheelCols[i].brakeTorque = brakeTorque;
+	//				rightWheelCols[i].brakeTorque = brakeTorque;
+	//			}
+	//		}
+	//	}
+	//	return curMotorTorque;
+	//}
 
 	private void Steering(float motorTorque, float velocity)
 	{
-		float xInput = moveInput.x;
+		float xInput = rawMoveInput.x;
 
-		if (velocity < -0.1f && moveInput.y < -0.1f)
+		if (velocity < -0.1f && rawMoveInput.y < -0.1f)
 		{
 			xInput = -xInput;
 		}
@@ -248,32 +310,32 @@ public class Tank : MonoBehaviour
 
 	private void GearShift(float velocity)
 	{
-		int prevGear = curGear;
-		if(gears.Length - 1 > curGear && velocity > gearChangeSpeeds[curGear])
+		int prevGear = CurGear;
+		if(gears.Length - 1 > CurGear && velocity > gearChangeSpeeds[CurGear])
 		{
-			curGear++;
+			CurGear++;
 		}
-		else if(curGear > 0 && velocity < gearChangeSpeeds[curGear - 1] - 5f )
+		else if(CurGear > 0 && velocity < gearChangeSpeeds[CurGear - 1] - 5f )
 		{
-			curGear--;
+			CurGear--;
 		}
 
 
-		if (prevGear == curGear) return;
+		if (prevGear == CurGear) return;
 
 
-		if(curGear >= 0)
-			dashBoard.SetGearUI((curGear + 1).ToString());
-		else if(curGear == -1)
+		if(CurGear >= 0)
+			dashBoard.SetGearUI((CurGear + 1).ToString());
+		else if(CurGear == -1)
 			dashBoard.SetGearUI("P");
-		else if(curGear == -2)
+		else if(CurGear == -2)
 			dashBoard.SetGearUI("R");
 	}
 
 
 	private void OnMove(InputValue value)
 	{
-		moveInput = value.Get<Vector2>();
+		rawMoveInput = value.Get<Vector2>();
 	}
 
 	private void OnFire(InputValue value)

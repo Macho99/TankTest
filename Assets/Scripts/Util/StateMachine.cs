@@ -1,55 +1,63 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
-public class StateMachine<TState, TOwner>
+public class StateMachine : MonoBehaviour
 {
-	private TOwner owner;
-	private TState curStateEnum;
-	private Dictionary<TState, StateBase<TState, TOwner>> states;
-	private StateBase<TState, TOwner> curState;
-	public StateMachine(TOwner owner)
-	{
-		this.owner = owner;
-		this.states = new Dictionary<TState, StateBase<TState, TOwner>>();
-	}
+	private Dictionary<string, BaseState> stateDic = new Dictionary<string, BaseState>();
+	private BaseState curState;
 
-	public void AddState(TState state, StateBase<TState, TOwner> stateBase)
+	private void Start()
 	{
-		states.Add(state, stateBase);
-	}
-
-	public void SetUp(TState startState)
-	{
-		foreach (StateBase<TState, TOwner> state in states.Values)
-		{
-			state.Setup();
-		}
-
-		curStateEnum = startState;
-		curState = states[startState];
 		curState.Enter();
 	}
 
-	public void Update()
+	private void Update()
 	{
-		curState?.Update();
-		curState?.Transition();
+		curState.Update();
+		curState.Transition();
 	}
 
-	public void ChangeState(TState newState)
+	private void LateUpdate()
 	{
-		//Debug.Log(newState);
-		curState?.Exit();
-		curStateEnum = newState;
-		curState = states[newState];
+		curState.LateUpdate();
+	}
+
+	private void FixedUpdate()
+	{
+		curState.FixedUpdate();
+	}
+
+	public void InitState(string stateName)
+	{
+		curState = stateDic[stateName];
+	}
+
+	public void AddState(string stateName, BaseState state)
+	{
+		state.SetStateMachine(this);
+		stateDic.Add(stateName, state);
+	}
+
+	public void ChangeState(string stateName)
+	{
+		curState.Exit();
+		curState = stateDic[stateName];
 		curState.Enter();
 	}
 
-	public TState GetCurState()
+	public void InitState<T>(T stateType) where T : Enum
 	{
-		return curStateEnum;
+		InitState(stateType.ToString());
+	}
+
+	public void AddState<T>(T stateType, BaseState state) where T : Enum
+	{
+		AddState(stateType.ToString(), state);
+	}
+
+	public void ChangeState<T>(T stateType) where T : Enum
+	{
+		ChangeState(stateType.ToString());
 	}
 }

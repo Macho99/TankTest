@@ -26,7 +26,7 @@ public class TrackController : MonoBehaviour
 	[SerializeField] float controlMagMultiplier = 0.32f;
 	public float Velocity { get; set; }
 
-	Tank tank;
+	TankMove tank;
 	Transform[] tracks;
 	WheelCollider[] wheelCols;
 	Transform[] wheelTrans;
@@ -36,7 +36,7 @@ public class TrackController : MonoBehaviour
 
 	private void Awake()
 	{
-		tank = GetComponentInParent<Tank>();
+		tank = GetComponentInParent<TankMove>();
 		if (trackType == TrackType.Left)
 		{
 			wheelCols = tank.LeftWheelCols;
