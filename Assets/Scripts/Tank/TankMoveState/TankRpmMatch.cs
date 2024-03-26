@@ -15,25 +15,52 @@ public class TankRpmMatch : TankMoveState
 
 	public override void Enter()
 	{
+		owner.SetDashBoardGear((owner.CurGear + 1).ToString());
+		owner.TorqueMultiplier = 1f;
 		rpm = owner.MinEngineRpm;
 	}
 
 	public override void Exit()
+	{
+		owner.TorqueMultiplier = 1f;
+	}
+
+	public override void SetUp()
 	{
 
 	}
 
 	public override void Transition()
 	{
-		//owner.WheelRpm
+		if(owner.Direction == 1 && owner.WheelRpm * owner.CurGearRatio > rpm)
+		{
+			ChangeState(TankMove.State.Drive);
+			return;
+		}
+
+		if(rpm < owner.MinEngineRpm)
+		{
+			ChangeState(TankMove.State.Park);
+		}
 	}
 
 	public override void Update()
 	{
-		//if ()
+		if(owner.RawMoveInput.sqrMagnitude > 0.1f)
 		{
-			rpm += Time.deltaTime * owner.RpmMatchSpeed;
+			if (rpm < owner.MaxTorqueRpm)
+			{
+				owner.TorqueMultiplier = 1f;
+				rpm += Time.deltaTime * owner.RpmMatchSpeed;
+				owner.SetEngineRpmWithoutWheel(rpm);
+			}
+			//if(owner.)
 		}
-		owner.SetEngineRpmWithoutWheel(rpm);
+		else if(owner.RawMoveInput.y < 0.1f)
+		{
+			owner.TorqueMultiplier = 1f;
+			rpm -= Time.deltaTime * owner.RpmMatchSpeed * 2f;
+			owner.SetEngineRpmWithoutWheel(rpm);
+		}
 	}
 }

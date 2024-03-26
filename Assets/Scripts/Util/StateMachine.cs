@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class StateMachine : MonoBehaviour
 {
+	[SerializeField] string curStateStr;
 	private Dictionary<string, BaseState> stateDic = new Dictionary<string, BaseState>();
 	private BaseState curState;
 
@@ -30,6 +31,7 @@ public class StateMachine : MonoBehaviour
 
 	public void InitState(string stateName)
 	{
+		curStateStr = stateName;
 		curState = stateDic[stateName];
 	}
 
@@ -42,6 +44,7 @@ public class StateMachine : MonoBehaviour
 	public void ChangeState(string stateName)
 	{
 		curState.Exit();
+		curStateStr = stateName;
 		curState = stateDic[stateName];
 		curState.Enter();
 	}

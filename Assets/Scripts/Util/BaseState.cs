@@ -10,6 +10,7 @@ public abstract class BaseState
 	public void SetStateMachine(StateMachine stateMachine)
 	{
 		this.stateMachine = stateMachine;
+		SetUp();
 	}
 
 	protected void ChangeState(string stateName)
@@ -22,6 +23,7 @@ public abstract class BaseState
 		ChangeState(stateType.ToString());
 	}
 
+	public abstract void SetUp();
 	public abstract void Enter();
 	public abstract void Exit();
 	public abstract void Update();

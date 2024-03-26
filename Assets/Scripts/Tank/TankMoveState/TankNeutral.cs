@@ -29,4 +29,9 @@ public class TankNeutral : TankMoveState
 	{
 
 	}
+
+	public override void SetUp()
+	{
+
+	}
 }

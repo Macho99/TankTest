@@ -13,6 +13,7 @@ public class TankPark : TankMoveState
 
 	public override void Enter()
 	{
+		owner.SetDashBoardGear("P");
 		owner.BrakeMultiplier = 1f;
 	}
 
@@ -21,9 +22,19 @@ public class TankPark : TankMoveState
 		owner.BrakeMultiplier = 0f;
 	}
 
+	public override void SetUp()
+	{
+
+	}
+
 	public override void Transition()
 	{
-		if(owner.RawMoveInput.sqrMagnitude > 0.1f)
+		float y = owner.RawMoveInput.y;
+		if(y < -0.1f)
+		{
+
+		}
+		else if (owner.RawMoveInput.sqrMagnitude > 0.1f)
 		{
 			ChangeState(TankMove.State.RPMMatch);
 		}
