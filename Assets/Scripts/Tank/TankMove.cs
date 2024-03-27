@@ -4,10 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 public class TankMove : MonoBehaviour
 {
-	public enum State { Neutral, RPMMatch, Drive, Reverse, GearShift, Park, }
+	public enum State { Park, RpmMatch, Drive, ReverseRpmMatch, Reverse, GearShift, }
 
 	[SerializeField] DashBoard dashBoard;
 	[SerializeField] AnimationCurve torquePerRpm;
@@ -20,6 +21,7 @@ public class TankMove : MonoBehaviour
 	[SerializeField] float inputSensitivity = 3f;
 	[SerializeField] float rpmMatchSpeed = 100f;
 	[SerializeField] float maxSpeed = 50f;
+	[SerializeField] float maxReverseSpeed = -15f;
 	[SerializeField] float minRotateRpmDiff = 100f;
 	[SerializeField] float maxRotateRpmDiff = 300f;
 
@@ -54,6 +56,7 @@ public class TankMove : MonoBehaviour
 	StateMachine stateMachine;
 	
 	public int Direction { get; private set; }
+	public bool Reverse { get; set; }
 	public float TorqueMultiplier { get; set; }
 	public float MaxTorqueRpm { get; private set; }
 	public float RpmMatchSpeed { get { return rpmMatchSpeed; } }
@@ -64,9 +67,10 @@ public class TankMove : MonoBehaviour
 	public float MaxEngineRpm { get { return maxEngineRpm; } }
 	public float BrakeMultiplier { get; set; }
 	public float Velocity { get; private set; }
-	public float WheelRpm { get; set; }
+	public float AbsWheelRpm { get; set; }
 	public float EngineRpm { get; set; }
 	public float MaxSpeed {  get { return maxSpeed; } }
+	public float MaxReverseSpeed { get { return maxReverseSpeed; } }
 	public Vector2 RawMoveInput { get { return rawMoveInput; } }
 	public Vector2 LerpedMoveInput { get { return lerpedMoveInput; } }
 	public WheelCollider[] LeftWheelCols { get { return leftWheelCols; } }
@@ -78,10 +82,11 @@ public class TankMove : MonoBehaviour
 	{
 		stateMachine = gameObject.AddComponent<StateMachine>();
 		stateMachine.AddState(State.Park, new TankPark(this));
-		stateMachine.AddState(State.Neutral, new TankNeutral(this));
-		stateMachine.AddState(State.RPMMatch, new TankRpmMatch(this));
+		stateMachine.AddState(State.RpmMatch, new TankRpmMatch(this));
 		stateMachine.AddState(State.Drive, new TankDrive(this));
 		stateMachine.AddState(State.GearShift, new TankGearShift(this));
+		stateMachine.AddState(State.ReverseRpmMatch, new TankReverseRpmMatch(this));
+		stateMachine.AddState(State.Reverse, new TankReverse(this));
 
 		stateMachine.InitState(State.Park);
 
@@ -102,7 +107,7 @@ public class TankMove : MonoBehaviour
 	{
 		lerpedMoveInput = Vector2.Lerp(lerpedMoveInput, rawMoveInput, Time.deltaTime * inputSensitivity);
 
-		WheelRpm = CalculateWheelRPM(out float velocity);
+		AbsWheelRpm = CalculateWheelRPM(out float velocity);
 
 		dashBoard.SetRPMAndVelUI(EngineRpm, velocity);
 		this.Velocity = velocity;
@@ -217,12 +222,58 @@ public class TankMove : MonoBehaviour
 	private void Steering()
 	{
 		float xInput = lerpedMoveInput.x;
+		FrictionAdjust(xInput);
 
-		if (Velocity < -0.1f && lerpedMoveInput.y < -0.1f)
+		float rotateRpmDiff = Mathf.Lerp(minRotateRpmDiff, maxRotateRpmDiff, 30f - Mathf.Abs(Velocity));
+		if(Reverse == false)
 		{
-			xInput = -xInput;
+			float leftTargetRpm = AbsWheelRpm + xInput * rotateRpmDiff;
+			float rightTargetRpm = AbsWheelRpm - xInput * rotateRpmDiff;
+
+			if (Mathf.Abs(leftTargetRpm - leftRpm) > 10)
+			{
+				for (int i = 1; i < wheelNum - 1; i++)
+				{
+					leftWheelCols[i].motorTorque += leftTargetRpm < leftRpm ? -2000f : 2000f;
+				}
+			}
+
+			if (Mathf.Abs(rightTargetRpm - rightRpm) > 10)
+			{
+				for (int i = 1; i < wheelNum - 1; i++)
+				{
+					rightWheelCols[i].motorTorque += rightTargetRpm < rightRpm ? -2000f : 2000f;
+				}
+			}
+		}
+		else
+		{
+			float leftTargetRpm = -AbsWheelRpm + xInput * rotateRpmDiff;
+			float rightTargetRpm = -AbsWheelRpm - xInput * rotateRpmDiff;
+
+			if (Mathf.Abs(leftTargetRpm - leftRpm) > 10)
+			{
+				for (int i = 1; i < wheelNum - 1; i++)
+				{
+					leftWheelCols[i].motorTorque += leftTargetRpm < leftRpm ? 2000f : -2000f;
+				}
+			}
+
+			if (Mathf.Abs(rightTargetRpm - rightRpm) > 10)
+			{
+				for (int i = 1; i < wheelNum - 1; i++)
+				{
+					rightWheelCols[i].motorTorque += rightTargetRpm < rightRpm ? 2000f : -2000f;
+				}
+			}
 		}
 
+		leftTorque = leftWheelCols[1].motorTorque;
+		rightTorque = rightWheelCols[1].motorTorque;
+	}
+
+	private void FrictionAdjust(float xInput)
+	{
 		int midIdx = 4;
 		for (int i = 1; i < wheelNum - 1; i++)
 		{
@@ -237,32 +288,7 @@ public class TankMove : MonoBehaviour
 			leftWheelCols[i].sidewaysFriction = sidewayFriction;
 			rightWheelCols[i].sidewaysFriction = sidewayFriction;
 		}
-
-		float rotateRpmDiff = Mathf.Lerp(minRotateRpmDiff, maxRotateRpmDiff, 30f - Velocity);
-		float leftTargetRpm = WheelRpm + xInput * rotateRpmDiff;
-		float rightTargetRpm = WheelRpm - xInput * rotateRpmDiff;
-
-		if(Mathf.Abs(leftTargetRpm - leftRpm) > 10)
-		{
-			for (int i = 1; i < wheelNum - 1; i++)
-			{
-				leftWheelCols[i].motorTorque += leftTargetRpm < leftRpm ? -2000f : 2000f;
-			}
-		}
-
-		if(Mathf.Abs(rightTargetRpm - rightRpm) > 10)
-		{
-			for (int i = 1; i < wheelNum - 1; i++)
-			{
-				rightWheelCols[i].motorTorque += rightTargetRpm < rightRpm ? -2000f : 2000f;
-			}
-		}
-
-
-		leftTorque = leftWheelCols[1].motorTorque;
-		rightTorque = rightWheelCols[1].motorTorque;
 	}
-
 
 	public void CalcTorque()
 	{
@@ -276,7 +302,7 @@ public class TankMove : MonoBehaviour
 
 	public void SetEngineRpmWithWheel()
 	{
-		EngineRpm = WheelRpm * gears[CurGear];
+		EngineRpm = AbsWheelRpm * gears[CurGear];
 		if(EngineRpm > maxEngineRpm)
 		{
 			EngineRpm = maxEngineRpm;

@@ -10,14 +10,17 @@ public class TankGearShift : TankMoveState
 	float rpm;
 	float startRpm;
 	float elapsed;
+	float velocity;
+
 	public TankGearShift(TankMove owner) : base(owner)
 	{
 	}
 
 	public override void Enter()
 	{
+		velocity = 0f;
 		elapsed = 0f;
-		owner.TorqueMultiplier = 1f;
+		owner.TorqueMultiplier = 0f;
 		rpm = owner.EngineRpm;
 		startRpm = rpm;
 	}
@@ -40,10 +43,20 @@ public class TankGearShift : TankMoveState
 	public override void Update()
 	{
 		elapsed += Time.deltaTime;
-		float targetRpm = owner.CurGearRatio * owner.WheelRpm;
-		rpm = Mathf.Lerp(startRpm, targetRpm, elapsed / 0.1f);
+		float targetRpm = owner.CurGearRatio * owner.AbsWheelRpm;
+		rpm = Mathf.SmoothDamp(rpm, targetRpm, ref velocity, 0.05f);
 
 		owner.SetEngineRpmWithoutWheel(rpm);
+		//if(targetRpm > startRpm)
+		//{
+		//	owner.CurGear++;
+		//	ChangeState(TankMove.State.GearShift);
+		//}
+		if(elapsed > 1f)
+		{
+			int a = 1;
+		}
+
 		if(targetRpm < owner.MinEngineRpm)
 		{
 			if(owner.CurGear > 0)
