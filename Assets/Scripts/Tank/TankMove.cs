@@ -295,7 +295,7 @@ public class TankMove : MonoBehaviour
 		float torque = torquePerRpm.Evaluate((EngineRpm - minEngineRpm) / maxEngineRpm);
 		torque *= gears[CurGear];
 		torque /= wheelNum - 2;
-		torque *= 3f;
+		torque *= 2.5f;
 
 		curMotorTorque = torque;
 	}

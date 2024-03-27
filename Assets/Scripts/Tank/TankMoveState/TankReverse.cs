@@ -33,9 +33,8 @@ public class TankReverse : TankMoveState
 	public override void Update()
 	{
 		float y = owner.RawMoveInput.y;
-		float x = owner.RawMoveInput.x;
 		owner.SetEngineRpmWithWheel();
-		if (y < 0.1f)
+		if (y < -0.1f)
 		{
 			if (owner.Velocity < owner.MaxReverseSpeed)
 			{
@@ -55,18 +54,13 @@ public class TankReverse : TankMoveState
 				owner.TorqueMultiplier = 0f;
 				owner.BrakeMultiplier = 0.1f;
 			}
-			else if (y < -0.1f)
+			else
 			{
 				owner.TorqueMultiplier = -1f;
 				owner.BrakeMultiplier = 0f;
 			}
-			else
-			{
-				owner.TorqueMultiplier = 0f;
-				owner.BrakeMultiplier = 0f;
-			}
 		}
-		else if (y > 0.1f)
+		else
 		{
 			owner.TorqueMultiplier = 0f;
 			owner.BrakeMultiplier = 1f;

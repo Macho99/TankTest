@@ -51,7 +51,7 @@ public class TankRpmMatch : TankMoveState
 		if(moveInput.y < 0.1f && Mathf.Approximately(moveInput.x, 0f) == true)
 		{
 			owner.TorqueMultiplier = 0f;
-			rpm -= Time.deltaTime * owner.RpmMatchSpeed * 2f;
+			rpm -= Time.deltaTime * owner.RpmMatchSpeed * 3f;
 			owner.SetEngineRpmWithoutWheel(rpm);
 		}
 		else

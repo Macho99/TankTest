@@ -56,7 +56,6 @@ public class TankDrive : TankMoveState
 	public override void Update()
 	{
 		float y = owner.RawMoveInput.y;
-		float x = owner.RawMoveInput.x;
 		owner.SetEngineRpmWithWheel();
 		if(y > -0.1f)
 		{
