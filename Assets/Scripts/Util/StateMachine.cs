@@ -44,6 +44,7 @@ public class StateMachine : MonoBehaviour
 	public void ChangeState(string stateName)
 	{
 		curState.Exit();
+		StopAllCoroutines();
 		curStateStr = stateName;
 		curState = stateDic[stateName];
 		curState.Enter();

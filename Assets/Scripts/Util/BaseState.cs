@@ -38,6 +38,11 @@ public abstract class BaseState
 		stateMachine.StopCoroutine(coroutine);
 	}
 
+	protected void print(object obj)
+	{
+		Debug.Log(obj);
+	}
+
 	public abstract void SetUp();
 	public abstract void Enter();
 	public abstract void Exit();
