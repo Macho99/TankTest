@@ -47,15 +47,6 @@ public class TankGearShift : TankMoveState
 		rpm = Mathf.SmoothDamp(rpm, targetRpm, ref velocity, 0.05f);
 
 		owner.SetEngineRpmWithoutWheel(rpm);
-		//if(targetRpm > startRpm)
-		//{
-		//	owner.CurGear++;
-		//	ChangeState(TankMove.State.GearShift);
-		//}
-		if(elapsed > 1f)
-		{
-			int a = 1;
-		}
 
 		if(targetRpm < owner.MinEngineRpm)
 		{

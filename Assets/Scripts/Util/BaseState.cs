@@ -23,6 +23,21 @@ public abstract class BaseState
 		ChangeState(stateType.ToString());
 	}
 
+	protected Coroutine StartCoroutine(IEnumerator routine)
+	{
+		return stateMachine.StartCoroutine(routine);
+	}
+
+	protected void StopAllCoroutines()
+	{
+		stateMachine.StopAllCoroutines();
+	}
+
+	protected void StopCoroutine(Coroutine coroutine)
+	{
+		stateMachine.StopCoroutine(coroutine);
+	}
+
 	public abstract void SetUp();
 	public abstract void Enter();
 	public abstract void Exit();
