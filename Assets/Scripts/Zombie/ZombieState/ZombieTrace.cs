@@ -14,13 +14,16 @@ public class ZombieTrace : ZombieState
 	float speed;
 	float rotateSpeed;
 
+	Vector3 prevPos;
+
 	public ZombieTrace(Zombie owner) : base(owner)
 	{
 	}
 
 	public override void Enter()
 	{
-		if(owner.Turned == false)
+		prevPos = owner.transform.position;
+		if (owner.Turned == false)
 		{
 			owner.TurnDirection = (owner.Target.position - owner.transform.position).normalized;
 			ChangeState(Zombie.State.Turn);
@@ -55,7 +58,6 @@ public class ZombieTrace : ZombieState
 
 	public override void SetUp()
 	{
-
 	}
 
 	public override void Transition()
@@ -65,6 +67,11 @@ public class ZombieTrace : ZombieState
 
 	public override void Update()
 	{
+		if(CheckFallAsleep() == true)
+		{
+			return;
+		}
+
 		float speedX = 0f;
 		float speedY = 0f;
 		if (owner.HasPath)
@@ -96,6 +103,23 @@ public class ZombieTrace : ZombieState
 	private void SetShifterAndSpeedY()
 	{
 		owner.SetAnimFloat("Shifter", shifter);
-		owner.SetAnimFloat("SpeedY", speed);
+		//owner.SetAnimFloat("SpeedY", speed);
+	}
+
+	private bool CheckFallAsleep()
+	{
+		Vector3 curPos = owner.transform.position;
+
+
+		if(Mathf.Abs(curPos.y - prevPos.y) > owner.FallAsleepThreshold)
+		{
+			//owner.Agent.enabled = false;
+			owner.transform.position = prevPos;
+			ChangeState(Zombie.State.FallAsleep);
+			return true;
+		}
+		prevPos = curPos;
+
+		return false;
 	}
 }
