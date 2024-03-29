@@ -16,8 +16,6 @@ public class ZombieIdle : ZombieState
 		elapsed = 0f;
 		shifter = Random.Range(0, 3);
 		idleTime = Random.Range(owner.MinIdleTime, owner.MaxIdleTime);
-
-		owner.Turned = false;
 	}
 
 	public override void Exit()
@@ -32,7 +30,7 @@ public class ZombieIdle : ZombieState
 
 	public override void Transition()
 	{
-		if(owner.Follow == true && owner.Target != null)
+		if(owner.Target != null)
 		{
 			ChangeState(Zombie.State.Trace);
 			return;

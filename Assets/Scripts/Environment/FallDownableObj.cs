@@ -38,7 +38,7 @@ public class FallDownableObj : MonoBehaviour
 	{
 		if(TryGetComponent(out Zombie zombie))
 		{
-			zombie.Falldown(falldownType);
+			//zombie.Falldown(falldownType);
 		}
 	}
 }

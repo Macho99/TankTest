@@ -12,7 +12,7 @@ public class ZombieCrawlIdle : ZombieState
 
 	public override void Enter()
 	{
-		ChangeState(Zombie.State.StandUp);
+		StandUp();
 	}
 
 	public override void Exit()
@@ -33,5 +33,12 @@ public class ZombieCrawlIdle : ZombieState
 	public override void Update()
 	{
 
+	}
+
+	private void StandUp()
+	{
+		owner.SetAnimBool("Crawl", false);
+		owner.AnimWaitStruct = new AnimWaitStruct("StandUp", owner.DecisionState().ToString());
+		ChangeState(Zombie.State.AnimWait);
 	}
 }

@@ -22,24 +22,11 @@ public class ZombieTrace : ZombieState
 
 	public override void Enter()
 	{
-		prevPos = owner.transform.position;
-		if (owner.Turned == false)
-		{
-			owner.TurnDirection = (owner.Target.position - owner.transform.position).normalized;
-			ChangeState(Zombie.State.Turn);
+		if (CheckTurn() == true) { return; }
 
-			shifter = Random.Range(0, 5);
-			speed = owner.TraceSpeed;
-			rotateSpeed = 60f * speed;
-
-			owner.AnimStartAction = SetShifterAndSpeedY;
-			return;
-		}
-		else
-		{
-			StartCoroutine(CoSetDestination());
-			owner.AnimStartAction = null;
-		}
+		speed = owner.TraceSpeed;
+		rotateSpeed = 60f * speed;
+		StartCoroutine(CoSetDestination());
 	}
 
 	private IEnumerator CoSetDestination()
@@ -58,6 +45,7 @@ public class ZombieTrace : ZombieState
 
 	public override void SetUp()
 	{
+		shifter = Random.Range(0, 5);
 	}
 
 	public override void Transition()
@@ -86,11 +74,10 @@ public class ZombieTrace : ZombieState
 
 			speedX = animDir.x * speed;
 			speedY = animDir.z * speed;
-
 		}
 		else if(owner.Agent.pathPending == false && owner.RemainDist < 1f)
 		{
-			owner.Follow = false;
+			shifter = Random.Range(0, 5);
 			owner.Agent.ResetPath();
 			ChangeState(Zombie.State.Idle);
 		}
@@ -100,26 +87,61 @@ public class ZombieTrace : ZombieState
 		owner.SetAnimFloat("Shifter", shifter, 0.2f);
 	}
 
-	private void SetShifterAndSpeedY()
-	{
-		owner.SetAnimFloat("Shifter", shifter);
-		//owner.SetAnimFloat("SpeedY", speed);
-	}
-
 	private bool CheckFallAsleep()
 	{
 		Vector3 curPos = owner.transform.position;
 
-
 		if(Mathf.Abs(curPos.y - prevPos.y) > owner.FallAsleepThreshold)
 		{
-			//owner.Agent.enabled = false;
-			owner.transform.position = prevPos;
-			ChangeState(Zombie.State.FallAsleep);
+			owner.SetAnimFloat("FallAsleep", 1f);
+			owner.SetAnimBool("Crawl", true);
+			owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),
+				updateAction: ()=>owner.SetAnimFloat("SpeedY", 0f, 0.3f));
+			ChangeState(Zombie.State.AnimWait);
 			return true;
 		}
 		prevPos = curPos;
 
+		if(Physics.CheckSphere(curPos + Vector3.up * 0.3f + owner.transform.forward * 0.1f, 0.05f, 
+			LayerMask.NameToLayer("FallAsleepObject")))
+		{
+			print(LayerMask.NameToLayer("FallAsleepObject"));
+			owner.SetAnimFloat("FallAsleep", 1f);
+			owner.SetAnimBool("Crawl", true);
+			owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),
+				updateAction: () => owner.SetAnimFloat("SpeedY", 0f, 0.3f));
+			ChangeState(Zombie.State.AnimWait);
+			return true;
+		}
+
 		return false;
+	}
+
+	private bool CheckTurn()
+	{
+		prevPos = owner.transform.position;
+		Vector3 TurnDirection = (owner.Target.position - owner.transform.position).normalized;
+
+		float angle = Vector3.SignedAngle(owner.transform.forward, TurnDirection, owner.transform.up);
+		float sign = (angle >= 0f) ? 1f : -1f;
+		angle = Mathf.Abs(angle);
+
+		if (angle < 60f)
+		{
+			return false;
+		}
+		else if (angle < 135f)
+		{
+			owner.SetAnimFloat("TurnDir", sign);
+		}
+		else
+		{
+			owner.SetAnimFloat("TurnDir", 0f);
+		}
+		owner.SetAnimTrigger("Turn");
+		owner.AnimWaitStruct = new AnimWaitStruct("Turn", Zombie.State.Trace.ToString(), 
+			animStartAction: () => owner.SetAnimFloat("Shifter", shifter));
+		ChangeState(Zombie.State.AnimWait);
+		return true;
 	}
 }

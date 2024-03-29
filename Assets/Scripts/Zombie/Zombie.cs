@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
 public class Zombie : MonoBehaviour
 {
-	public enum State { Idle, Wander, Turn, Trace, AnimWait, FallAsleep, CrawlIdle, StandUp, }
+	public enum State { Idle, Wander, Trace, AnimWait, CrawlIdle, }
 	[SerializeField] Transform target;
 	[Range(1, 3)]
 	[SerializeField] float traceSpeed;
 	[SerializeField] float minIdleTime = 1f;
 	[SerializeField] float maxIdleTime = 10f;
-	[SerializeField] bool follow = false;
 	[SerializeField] Transform skins;
 	[SerializeField] float fallAsleepThreshold = 0.2f;
 
@@ -27,7 +27,6 @@ public class Zombie : MonoBehaviour
 	public float TraceSpeed { get { return traceSpeed; } }
 	public bool Aggresive { get; set; }
 	public Transform Target { get { return target; } }
-	public bool Follow { get { return follow; } set { follow = value; } }
 	public bool HasPath { get { return agent.hasPath; } }
 	public float RemainDist { get { return agent.remainingDistance; } }
 	public Vector3 SteeringTarget { get { return agent.steeringTarget; } }
@@ -37,16 +36,8 @@ public class Zombie : MonoBehaviour
 	public float MinIdleTime { get { return minIdleTime; } }
 	public float MaxIdleTime { get { return maxIdleTime; } }
 
-	// Turn State
-	public bool Turned { get; set; }
-	public Vector3 TurnDirection { get; set; }
-
 	// AnimWait State
-	public string AnimNameToWaitEnd { get; set; }
-	public State AfterAnimEndState { get; set; }
-	public Action AnimStartAction { get; set; }
-
-	public FallType FallDownType { get; set; }
+	public AnimWaitStruct? AnimWaitStruct { get; set; }
 	#endregion
 
 
@@ -61,11 +52,8 @@ public class Zombie : MonoBehaviour
 		stateMachine.AddState(State.Idle, new ZombieIdle(this));
 		stateMachine.AddState(State.Trace, new ZombieTrace(this));
 		stateMachine.AddState(State.Wander, new ZombieWander(this));
-		stateMachine.AddState(State.Turn, new ZombieTurn(this));
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
-		stateMachine.AddState(State.FallAsleep, new ZombieFallAsleep(this));
 		stateMachine.AddState(State.CrawlIdle, new ZombieCrawlIdle(this));
-		stateMachine.AddState(State.StandUp, new ZombieStandUp(this));
 
 		stateMachine.InitState(State.Idle);
 		Init();
@@ -120,21 +108,13 @@ public class Zombie : MonoBehaviour
 		agent.SetDestination(vec);
 	}
 
-	public void Falldown(FallType type)
+	private void OnDrawGizmos()
 	{
-		FallDownType = type;
-		stateMachine.ChangeState(State.FallAsleep);
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawSphere(transform.position + Vector3.up * 0.3f + transform.forward * 0.1f, 0.05f);
 	}
 
-	//private void OnDrawGizmos()
-	//{
-	//	if (agent == null) return;
-
-	//	Gizmos.color = Color.red;
-	//	Gizmos.DrawLine(transform.position, agent.steeringTarget);
-	//}
-
-	public State StateDecision()
+	public State DecisionState()
 	{
 		if(anim.GetBool("Crawl") == true)
 		{

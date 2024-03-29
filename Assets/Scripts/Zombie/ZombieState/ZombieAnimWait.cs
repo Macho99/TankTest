@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
+
 public class ZombieAnimWait : ZombieState
 {
-	string animName;
-	Zombie.State nextState;
+	AnimWaitStruct waitStruct;
 	bool animEntered;
 
 	public ZombieAnimWait(Zombie owner) : base(owner)
@@ -11,13 +13,21 @@ public class ZombieAnimWait : ZombieState
 
 	public override void Enter()
 	{
+		if (owner.AnimWaitStruct.HasValue == false)
+		{
+			Debug.LogError("AnimWaitStruct를 설정하세요");
+			return;
+		}
+
 		animEntered = false;
-		animName = owner.AnimNameToWaitEnd;
-		nextState = owner.AfterAnimEndState;
+		waitStruct = owner.AnimWaitStruct.Value;
+		waitStruct.startAction?.Invoke();
 	}
 
 	public override void Exit()
 	{
+		waitStruct.animEndAction?.Invoke();
+		owner.AnimWaitStruct = null;
 	}
 
 	public override void SetUp()
@@ -29,23 +39,23 @@ public class ZombieAnimWait : ZombieState
 	{
 		if (animEntered == true)
 		{
-			if(owner.IsAnimName(animName) == false)
+			if(owner.IsAnimName(waitStruct.animName) == false)
 			{
-				ChangeState(nextState);
+				ChangeState(waitStruct.nextState);
 			}
 		}
 	}
 
 	public override void Update()
 	{
+		waitStruct.updateAction?.Invoke();
 		if(animEntered == true) { return; }
 
 
-		if(owner.IsAnimName(animName) == true)
+		if(owner.IsAnimName(waitStruct.animName) == true)
 		{
 			animEntered = true;
-			owner.AnimStartAction?.Invoke();
-			owner.AnimStartAction = null;
+			waitStruct.animStartAction?.Invoke();
 		}
 	}
 }
