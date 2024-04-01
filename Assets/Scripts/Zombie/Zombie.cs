@@ -31,18 +31,20 @@ public class Zombie : MonoBehaviour
 	public float RemainDist { get { return agent.remainingDistance; } }
 	public Vector3 SteeringTarget { get { return agent.steeringTarget; } }
 	public Vector3 DesiredDir { get { return agent.desiredVelocity.normalized; } }
-	#region Variable For Specific State
+	public LayerMask FallAsleepMask { get; set; }
+//	#region Variable For Specific State
 	// Idle State
 	public float MinIdleTime { get { return minIdleTime; } }
 	public float MaxIdleTime { get { return maxIdleTime; } }
 
 	// AnimWait State
 	public AnimWaitStruct? AnimWaitStruct { get; set; }
-	#endregion
+//	#endregion
 
 
 	private void Awake()
 	{
+		FallAsleepMask = LayerMask.GetMask("FallAsleepObject");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
 		stateMachine = GetComponent<StateMachine>();
@@ -73,7 +75,7 @@ public class Zombie : MonoBehaviour
 			cnt++;
 		}
 	}
-	
+
 	public void SetAnimBool(string name, bool value)
 	{
 		anim.SetBool(name, value);
@@ -128,7 +130,8 @@ public class Zombie : MonoBehaviour
 				//공격으로 전환
 			}
 		}
-		
+
+
 		if(Target != null)
 		{
 			return State.Trace;

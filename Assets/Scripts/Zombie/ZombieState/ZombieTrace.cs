@@ -14,7 +14,8 @@ public class ZombieTrace : ZombieState
 	float speed;
 	float rotateSpeed;
 
-	Vector3 prevPos;
+	float prevPosY;
+	Collider[] cols = new Collider[1];
 
 	public ZombieTrace(Zombie owner) : base(owner)
 	{
@@ -22,6 +23,7 @@ public class ZombieTrace : ZombieState
 
 	public override void Enter()
 	{
+		prevPosY = owner.transform.position.y;
 		if (CheckTurn() == true) { return; }
 
 		speed = owner.TraceSpeed;
@@ -91,27 +93,41 @@ public class ZombieTrace : ZombieState
 	{
 		Vector3 curPos = owner.transform.position;
 
-		if(Mathf.Abs(curPos.y - prevPos.y) > owner.FallAsleepThreshold)
+		float yDiff = Mathf.Abs(curPos.y - prevPosY);
+		if (yDiff > owner.FallAsleepThreshold)
 		{
-			owner.SetAnimFloat("FallAsleep", 1f);
+			owner.SetAnimFloat("FallAsleep", 1f + yDiff - owner.FallAsleepThreshold);
 			owner.SetAnimBool("Crawl", true);
 			owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),
 				updateAction: ()=>owner.SetAnimFloat("SpeedY", 0f, 0.3f));
 			ChangeState(Zombie.State.AnimWait);
 			return true;
 		}
-		prevPos = curPos;
+		prevPosY = Mathf.Lerp(prevPosY, curPos.y, Time.deltaTime * 5f);
 
-		if(Physics.CheckSphere(curPos + Vector3.up * 0.3f + owner.transform.forward * 0.1f, 0.05f, 
-			LayerMask.NameToLayer("FallAsleepObject")))
+		Collider prevCol, curCol;
+		prevCol = cols[0];
+		int cnt = Physics.OverlapSphereNonAlloc(curPos + Vector3.up * 0.3f + owner.transform.forward * 0.1f, 0.05f,
+			cols, owner.FallAsleepMask);
+
+		if (cnt > 0)
 		{
-			print(LayerMask.NameToLayer("FallAsleepObject"));
-			owner.SetAnimFloat("FallAsleep", 1f);
-			owner.SetAnimBool("Crawl", true);
-			owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),
-				updateAction: () => owner.SetAnimFloat("SpeedY", 0f, 0.3f));
-			ChangeState(Zombie.State.AnimWait);
-			return true;
+			curCol = cols[0];
+			if(curCol != prevCol)
+			{
+				float fallValue = curCol.bounds.size.y + 0.7f;
+				print(fallValue);
+				owner.SetAnimFloat("FallAsleep", fallValue);
+				owner.SetAnimBool("Crawl", true);
+				owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),
+					updateAction: () => owner.SetAnimFloat("SpeedY", 0f, 0.3f));
+				ChangeState(Zombie.State.AnimWait);
+				return true;
+			}
+		}
+		else
+		{
+			cols[0] = null;
 		}
 
 		return false;
@@ -119,7 +135,6 @@ public class ZombieTrace : ZombieState
 
 	private bool CheckTurn()
 	{
-		prevPos = owner.transform.position;
 		Vector3 TurnDirection = (owner.Target.position - owner.transform.position).normalized;
 
 		float angle = Vector3.SignedAngle(owner.transform.forward, TurnDirection, owner.transform.up);
