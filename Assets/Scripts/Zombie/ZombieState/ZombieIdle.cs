@@ -46,6 +46,6 @@ public class ZombieIdle : ZombieState
 	public override void Update()
 	{
 		owner.SetAnimFloat("Shifter", shifter, 0.1f);
-		elapsed += Time.deltaTime;
+		elapsed += owner.Runner.DeltaTime;
 	}
 }

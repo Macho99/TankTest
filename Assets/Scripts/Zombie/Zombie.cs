@@ -1,3 +1,4 @@
+using Fusion;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using UnityEngine.AI;
 using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
-public class Zombie : MonoBehaviour
+public class Zombie : NetworkBehaviour
 {
 	public enum State { Idle, Wander, Trace, AnimWait, CrawlIdle, }
 	[SerializeField] Transform target;
@@ -39,8 +40,13 @@ public class Zombie : MonoBehaviour
 
 	// AnimWait State
 	public AnimWaitStruct? AnimWaitStruct { get; set; }
-//	#endregion
+	//	#endregion
 
+	public void Init(Transform target)
+	{
+		this.target = target;
+		traceSpeed = Random.Range(1, 4);
+	}
 
 	private void Awake()
 	{
@@ -90,7 +96,7 @@ public class Zombie : MonoBehaviour
 	{
 		if(deltaTime.HasValue == false)
 		{
-			deltaTime = Time.deltaTime;
+			deltaTime = Runner.DeltaTime;
 		}
 		anim.SetFloat(name, value, dampTime, deltaTime.Value);
 	}

@@ -70,7 +70,7 @@ public class ZombieTrace : ZombieState
 			lookDir.y = 0f;
 			lookDir.Normalize();
 			owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
-				Quaternion.LookRotation(lookDir), rotateSpeed * Time.deltaTime);
+				Quaternion.LookRotation(lookDir), rotateSpeed * owner.Runner.DeltaTime);
 			Vector3 moveDir = owner.DesiredDir;
 			Vector3 animDir = owner.transform.InverseTransformDirection(moveDir);
 
@@ -103,7 +103,7 @@ public class ZombieTrace : ZombieState
 			ChangeState(Zombie.State.AnimWait);
 			return true;
 		}
-		prevPosY = Mathf.Lerp(prevPosY, curPos.y, Time.deltaTime * 5f);
+		prevPosY = Mathf.Lerp(prevPosY, curPos.y, owner.Runner.DeltaTime * 5f);
 
 		Collider prevCol, curCol;
 		prevCol = cols[0];

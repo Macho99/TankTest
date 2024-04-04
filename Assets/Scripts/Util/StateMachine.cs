@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Fusion;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StateMachine : MonoBehaviour
+public class StateMachine : NetworkBehaviour
 {
 	[SerializeField] string curStateStr;
 	private Dictionary<string, BaseState> stateDic = new Dictionary<string, BaseState>();
@@ -13,7 +14,7 @@ public class StateMachine : MonoBehaviour
 		curState.Enter();
 	}
 
-	private void Update()
+	public override void FixedUpdateNetwork()
 	{
 		curState.Update();
 		curState.Transition();
