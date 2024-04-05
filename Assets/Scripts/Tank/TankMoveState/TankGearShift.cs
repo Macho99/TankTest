@@ -40,7 +40,7 @@ public class TankGearShift : TankMoveState
 
 	}
 
-	public override void Update()
+	public override void FixedUpdateNetwork()
 	{
 		elapsed += Time.deltaTime;
 		float targetRpm = owner.CurGearRatio * owner.AbsWheelRpm;

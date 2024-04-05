@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class ZombieState : BaseState
+public abstract class ZombieState : NetworkBaseState
 {
 	protected Zombie owner;
 

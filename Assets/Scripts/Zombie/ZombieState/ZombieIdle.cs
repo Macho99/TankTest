@@ -30,7 +30,8 @@ public class ZombieIdle : ZombieState
 
 	public override void Transition()
 	{
-		if(owner.Target != null)
+		print(owner.Target.name);
+		if (owner.Target != null)
 		{
 			ChangeState(Zombie.State.Trace);
 			return;
@@ -43,7 +44,7 @@ public class ZombieIdle : ZombieState
 		}
 	}
 
-	public override void Update()
+	public override void FixedUpdateNetwork()
 	{
 		owner.SetAnimFloat("Shifter", shifter, 0.1f);
 		elapsed += owner.Runner.DeltaTime;

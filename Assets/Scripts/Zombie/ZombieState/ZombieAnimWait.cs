@@ -46,7 +46,7 @@ public class ZombieAnimWait : ZombieState
 		}
 	}
 
-	public override void Update()
+	public override void FixedUpdateNetwork()
 	{
 		waitStruct.updateAction?.Invoke();
 		if(animEntered == true) { return; }

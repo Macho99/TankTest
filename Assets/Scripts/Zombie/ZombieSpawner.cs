@@ -4,13 +4,15 @@ using UnityEngine;
 using Fusion;
 using Fusion.Sockets;
 using UnityEngine.SceneManagement;
+using UnityEngine.AI;
 
-public class ZombieSpawner : MonoBehaviour, INetworkRunnerCallbacks
+public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
-	[SerializeField] Zombie zombiePrefab;
-	[SerializeField] Transform target;
+	[SerializeField] NetworkPrefabRef zombiePrefab;
+	[SerializeField] NetworkObject target;
 
-	private NetworkRunner _runner;
+	private NetworkRunner runner;
+	private TickTimer timer;
 
 	private void OnEnable()
 	{
@@ -20,8 +22,8 @@ public class ZombieSpawner : MonoBehaviour, INetworkRunnerCallbacks
 	async void StartGame(GameMode mode)
 	{
 		// Create the Fusion runner and let it know that we will be providing user input
-		_runner = gameObject.AddComponent<NetworkRunner>();
-		_runner.ProvideInput = true;
+		runner = gameObject.AddComponent<NetworkRunner>();
+		runner.ProvideInput = true;
 
 		// Create the NetworkSceneInfo from the current scene
 		var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
@@ -32,31 +34,32 @@ public class ZombieSpawner : MonoBehaviour, INetworkRunnerCallbacks
 		}
 
 		// Start or join (depends on gamemode) a session with a specific name
-		await _runner.StartGame(new StartGameArgs()
+		await runner.StartGame(new StartGameArgs()
 		{
 			GameMode = mode,
 			SessionName = "TestRoom",
 			Scene = scene,
 			SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
 		});
-
-		print(_runner.IsServer);
-		if(_runner.IsServer)
-		{
-			StartCoroutine(CoSpawn());
-		}
 	}
 
-	private IEnumerator CoSpawn()
+	public override void FixedUpdateNetwork()
 	{
-		while (true)
-		{
-			Vector3 pos = Random.insideUnitSphere * 10f;
-			pos.y = 0f;
-			Zombie zombie = _runner.Spawn(zombiePrefab, pos);
-			zombie.Init(target);
-			yield return new WaitForSeconds(2f);
-		}
+		if (Runner.IsClient == true) return;
+		if (timer.ExpiredOrNotRunning(Runner) == false) return;
+
+		timer = TickTimer.CreateFromSeconds(Runner, 2f);
+		Vector3 pos = Random.insideUnitSphere * 10f;
+		pos.y = 0f;
+		runner.Spawn(zombiePrefab, transform.position + pos,
+			onBeforeSpawned: BeforeSpawned);
+	}
+
+	private void BeforeSpawned(NetworkRunner runner, NetworkObject netObj)
+	{
+		Zombie zombie = netObj.GetComponent<Zombie>();
+		zombie.Agent.enabled = false;
+		zombie.Init(target);
 	}
 
 	public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
@@ -96,10 +99,6 @@ public class ZombieSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
 	public void OnConnectedToServer(NetworkRunner runner)
 	{
-		//if (Runner.IsServer)
-		{
-			_ = StartCoroutine(CoSpawn());
-		}
 	}
 
 	public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
@@ -149,11 +148,9 @@ public class ZombieSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
 	public void OnSceneLoadDone(NetworkRunner runner)
 	{
-
 	}
 
 	public void OnSceneLoadStart(NetworkRunner runner)
 	{
-
 	}
 }

@@ -35,7 +35,7 @@ public class ZombieTrace : ZombieState
 	{
 		while (true)
 		{
-			owner.SetDestination(owner.Target.position);
+			owner.SetDestination(owner.Target.transform.position);
 			yield return new WaitForSeconds(0.5f);
 		}
 	}
@@ -55,7 +55,7 @@ public class ZombieTrace : ZombieState
 
 	}
 
-	public override void Update()
+	public override void FixedUpdateNetwork()
 	{
 		if(CheckFallAsleep() == true)
 		{
@@ -135,7 +135,7 @@ public class ZombieTrace : ZombieState
 
 	private bool CheckTurn()
 	{
-		Vector3 TurnDirection = (owner.Target.position - owner.transform.position).normalized;
+		Vector3 TurnDirection = (owner.Target.transform.position - owner.transform.position).normalized;
 
 		float angle = Vector3.SignedAngle(owner.transform.forward, TurnDirection, owner.transform.up);
 		float sign = (angle >= 0f) ? 1f : -1f;

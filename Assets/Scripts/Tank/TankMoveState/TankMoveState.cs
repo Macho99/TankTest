@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public abstract class TankMoveState : BaseState
+public abstract class TankMoveState : NetworkBaseState
 {
 	protected TankMove owner;
 

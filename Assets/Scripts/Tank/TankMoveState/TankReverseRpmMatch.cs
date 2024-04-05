@@ -41,7 +41,7 @@ public class TankReverseRpmMatch : TankMoveState
 		}
 	}
 
-	public override void Update()
+	public override void FixedUpdateNetwork()
 	{
 		Vector2 moveInput = owner.RawMoveInput;
 		//후진 입력 없고, 좌우 입력 없으면 rpm 낮추기

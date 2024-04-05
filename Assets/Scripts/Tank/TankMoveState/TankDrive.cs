@@ -53,7 +53,7 @@ public class TankDrive : TankMoveState
 		}
 	}
 
-	public override void Update()
+	public override void FixedUpdateNetwork()
 	{
 		float y = owner.RawMoveInput.y;
 		owner.SetEngineRpmWithWheel();

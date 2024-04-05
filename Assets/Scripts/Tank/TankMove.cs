@@ -52,7 +52,7 @@ public class TankMove : MonoBehaviour
 	int wheelNum;
 
 	float curMotorTorque;
-	StateMachine stateMachine;
+	NetworkStateMachine stateMachine;
 	
 	public int Direction { get; private set; }
 	public bool Reverse { get; set; }
@@ -79,7 +79,7 @@ public class TankMove : MonoBehaviour
 
 	private void Awake()
 	{
-		stateMachine = gameObject.AddComponent<StateMachine>();
+		stateMachine = gameObject.AddComponent<NetworkStateMachine>();
 		stateMachine.AddState(State.Park, new TankPark(this));
 		stateMachine.AddState(State.RpmMatch, new TankRpmMatch(this));
 		stateMachine.AddState(State.Drive, new TankDrive(this));

@@ -42,7 +42,7 @@ public class TankPark : TankMoveState
 		}
 	}
 
-	public override void Update()
+	public override void FixedUpdateNetwork()
 	{
 
 	}

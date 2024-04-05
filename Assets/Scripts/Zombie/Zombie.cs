@@ -2,6 +2,9 @@ using Fusion;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
@@ -11,23 +14,19 @@ using Random = UnityEngine.Random;
 public class Zombie : NetworkBehaviour
 {
 	public enum State { Idle, Wander, Trace, AnimWait, CrawlIdle, }
-	[SerializeField] Transform target;
-	[Range(1, 3)]
-	[SerializeField] float traceSpeed;
 	[SerializeField] float minIdleTime = 1f;
 	[SerializeField] float maxIdleTime = 10f;
 	[SerializeField] Transform skins;
 	[SerializeField] float fallAsleepThreshold = 0.2f;
+	[SerializeField] TextMeshProUGUI curStateText;
 
 	NavMeshAgent agent;
-	StateMachine stateMachine;
+	NetworkStateMachine stateMachine;
 	Animator anim;
 
 	public float FallAsleepThreshold { get { return fallAsleepThreshold; } }
 	public NavMeshAgent Agent { get { return agent; } }
-	public float TraceSpeed { get { return traceSpeed; } }
 	public bool Aggresive { get; set; }
-	public Transform Target { get { return target; } }
 	public bool HasPath { get { return agent.hasPath; } }
 	public float RemainDist { get { return agent.remainingDistance; } }
 	public Vector3 SteeringTarget { get { return agent.steeringTarget; } }
@@ -42,20 +41,18 @@ public class Zombie : NetworkBehaviour
 	public AnimWaitStruct? AnimWaitStruct { get; set; }
 	//	#endregion
 
-	public void Init(Transform target)
-	{
-		this.target = target;
-		traceSpeed = Random.Range(1, 4);
-	}
+	[Networked, OnChangedRender(nameof(OnChangedRender))] public NetworkObject Target { get; set; }
+	[Networked] public float TraceSpeed { get; set; }
+	[Networked] public int SkinIdx { get; set; }
 
 	private void Awake()
 	{
 		FallAsleepMask = LayerMask.GetMask("FallAsleepObject");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
-		stateMachine = GetComponent<StateMachine>();
+		stateMachine = GetComponent<NetworkStateMachine>();
 		if(stateMachine == null)
-			stateMachine = gameObject.AddComponent<StateMachine>();
+			stateMachine = gameObject.AddComponent<NetworkStateMachine>();
 
 		stateMachine.AddState(State.Idle, new ZombieIdle(this));
 		stateMachine.AddState(State.Trace, new ZombieTrace(this));
@@ -64,22 +61,44 @@ public class Zombie : NetworkBehaviour
 		stateMachine.AddState(State.CrawlIdle, new ZombieCrawlIdle(this));
 
 		stateMachine.InitState(State.Idle);
-		Init();
 	}
 
-	public void Init()
+	private void OnChangedRender()
 	{
-		int skinCnt = skins.childCount;
-		int onIdx = Random.Range(0, skinCnt);
+		print(Target == null);
+	}
+
+	public void Update()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.AppendLine($"현재 상태: {stateMachine.curStateStr}");
+		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
+		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
+
+		curStateText.text = sb.ToString();
+	}
+
+	public override void Spawned()
+	{
+		Agent.enabled = true;
 		int cnt = 0;
-		foreach(Transform child in skins)
+		foreach (Transform child in skins)
 		{
-			if (cnt == onIdx)
+			if (cnt == SkinIdx)
 				child.gameObject.SetActive(true);
 			else
 				child.gameObject.SetActive(false);
 			cnt++;
 		}
+	}
+
+	public void Init(NetworkObject target)
+	{
+		Target = target;
+		TraceSpeed = Random.Range(1, 4);
+
+		int skinCnt = skins.childCount;
+		SkinIdx = Random.Range(0, skinCnt);
 	}
 
 	public void SetAnimBool(string name, bool value)
