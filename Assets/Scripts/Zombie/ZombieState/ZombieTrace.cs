@@ -61,7 +61,10 @@ public class ZombieTrace : ZombieState
 		{
 			return;
 		}
+	}
 
+	public override void Render()
+	{
 		float speedX = 0f;
 		float speedY = 0f;
 		if (owner.HasPath)
@@ -77,7 +80,7 @@ public class ZombieTrace : ZombieState
 			speedX = animDir.x * speed;
 			speedY = animDir.z * speed;
 		}
-		else if(owner.Agent.pathPending == false && owner.RemainDist < 1f)
+		else if (owner.Agent.pathPending == false && owner.RemainDist < 1f)
 		{
 			shifter = Random.Range(0, 5);
 			owner.Agent.ResetPath();

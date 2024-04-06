@@ -9,7 +9,7 @@ public class NetworkStateMachine : NetworkBehaviour
 	private Dictionary<string, NetworkBaseState> stateDic = new Dictionary<string, NetworkBaseState>();
 	private NetworkBaseState curState;
 
-	private void Start()
+	public override void Spawned()
 	{
 		curState.Enter();
 	}

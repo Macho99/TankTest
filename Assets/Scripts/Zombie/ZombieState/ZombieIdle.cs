@@ -30,7 +30,6 @@ public class ZombieIdle : ZombieState
 
 	public override void Transition()
 	{
-		print(owner.Target.name);
 		if (owner.Target != null)
 		{
 			ChangeState(Zombie.State.Trace);

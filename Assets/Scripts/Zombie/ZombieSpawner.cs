@@ -6,17 +6,30 @@ using Fusion.Sockets;
 using UnityEngine.SceneManagement;
 using UnityEngine.AI;
 
+public struct TestInputData : INetworkInput
+{
+	public const byte MOUSEBUTTON0 = 1;
+
+	public NetworkButtons buttons;
+}
+
 public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
-	[SerializeField] NetworkPrefabRef zombiePrefab;
+	[SerializeField] NetworkObject zombiePrefab;
 	[SerializeField] NetworkObject target;
 
 	private NetworkRunner runner;
 	private TickTimer timer;
+	private bool mouseButton;
 
 	private void OnEnable()
 	{
 		StartGame(GameMode.AutoHostOrClient);
+	}
+
+	private void Update()
+	{
+		mouseButton = mouseButton | Input.GetMouseButton(0);
 	}
 
 	async void StartGame(GameMode mode)
@@ -49,17 +62,18 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 		if (timer.ExpiredOrNotRunning(Runner) == false) return;
 
 		timer = TickTimer.CreateFromSeconds(Runner, 2f);
-		Vector3 pos = Random.insideUnitSphere * 10f;
-		pos.y = 0f;
-		runner.Spawn(zombiePrefab, transform.position + pos,
+		runner.Spawn(zombiePrefab,
 			onBeforeSpawned: BeforeSpawned);
 	}
 
 	private void BeforeSpawned(NetworkRunner runner, NetworkObject netObj)
 	{
+		Vector3 pos = Random.insideUnitSphere * 10f;
+		pos.y = 0f;
 		Zombie zombie = netObj.GetComponent<Zombie>();
-		zombie.Agent.enabled = false;
 		zombie.Init(target);
+		zombie.Position = transform.position + pos;
+		zombie.transform.position = transform.position + pos;
 	}
 
 	public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
@@ -84,7 +98,12 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	public void OnInput(NetworkRunner runner, NetworkInput input)
 	{
+		var data = new TestInputData();
 
+		data.buttons.Set(TestInputData.MOUSEBUTTON0, mouseButton);
+		mouseButton = false;
+
+		input.Set(data);
 	}
 
 	public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)

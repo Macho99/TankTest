@@ -28,7 +28,7 @@ public class CamMover : MonoBehaviour
 		transform.Translate(new Vector3(moveInput.x, 0f, moveInput.y) * moveSpeed * Time.deltaTime, Space.Self);
 		yAngle -= lookInput.y * Time.deltaTime * lookSpeed;
 		xAngle += lookInput.x * Time.deltaTime * lookSpeed;
-		yAngle = Mathf.Clamp(yAngle, -80f, 40f);
+		yAngle = Mathf.Clamp(yAngle, -80f, 80f);
 		transform.rotation = Quaternion.Euler(yAngle, xAngle, 0f);
 	}
 }
