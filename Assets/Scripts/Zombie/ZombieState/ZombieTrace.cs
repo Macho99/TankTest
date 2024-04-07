@@ -61,10 +61,7 @@ public class ZombieTrace : ZombieState
 		{
 			return;
 		}
-	}
 
-	public override void Render()
-	{
 		float speedX = 0f;
 		float speedY = 0f;
 		if (owner.HasPath)
@@ -119,7 +116,6 @@ public class ZombieTrace : ZombieState
 			if(curCol != prevCol)
 			{
 				float fallValue = curCol.bounds.size.y + 0.7f;
-				print(fallValue);
 				owner.SetAnimFloat("FallAsleep", fallValue);
 				owner.SetAnimBool("Crawl", true);
 				owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),

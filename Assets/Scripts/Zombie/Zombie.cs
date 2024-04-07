@@ -7,6 +7,7 @@ using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
 public class Zombie : NetworkBehaviour
@@ -42,11 +43,15 @@ public class Zombie : NetworkBehaviour
 	public NetworkObject Target { get; private set; }
 	public float TraceSpeed { get; private set; }
 
-	[Networked] public int SkinIdx { get; set; }
+	[Networked] public int SkinIdx { get; private set; }
 	[Networked] public Vector3 Position { get; set; }
 	[Networked] public Quaternion Rotation { get; set; }
-	[Networked] public Vector3 RagdollVelocity { get; set; }
-	[Networked] public int CurHP { get; set; }
+	[Networked] public Vector3 RagdollVelocity { get; private set; }
+	[Networked] public ZombieBody HitBody { get; private set; }
+	[Networked] public int HitCnt { get; private set; }
+	//[Networked] public int CurHP { get; set; }
+
+	public int VisualHitCnt { get; set; }
 
 	private void Awake()
 	{
@@ -73,27 +78,27 @@ public class Zombie : NetworkBehaviour
 		}
 	}
 
-	private IEnumerator Start()
-	{
-		yield return new WaitForSeconds(1f);
+	//private IEnumerator Start()
+	//{
+	//	yield return new WaitForSeconds(1f);
 
-		anim.enabled = false;
-		Agent.enabled = false;
-		Rigidbody[] bodys = GetComponentsInChildren<Rigidbody>();
-		bool pushed = false;
-		foreach (Rigidbody body in bodys)
-		{
-			body.isKinematic = false;
-			body.detectCollisions = true;
-			Collider col = body.GetComponent<Collider>();
-			col.isTrigger = false;
-			if(pushed == false)
-			{
-				body.AddForce((-transform.forward + transform.up * 0.3f) * 400f, ForceMode.Impulse);
-				pushed = true;
-			}
-		}
-	}
+	//	anim.enabled = false;
+	//	Agent.enabled = false;
+	//	Rigidbody[] bodys = GetComponentsInChildren<Rigidbody>();
+	//	bool pushed = false;
+	//	foreach (Rigidbody body in bodys)
+	//	{
+	//		body.isKinematic = false;
+	//		body.detectCollisions = true;
+	//		Collider col = body.GetComponent<Collider>();
+	//		col.isTrigger = false;
+	//		if(pushed == false)
+	//		{
+	//			body.AddForce((-transform.forward + transform.up * 0.3f) * 400f, ForceMode.Impulse);
+	//			pushed = true;
+	//		}
+	//	}
+	//}
 
 	public override void Spawned()
 	{
@@ -113,6 +118,7 @@ public class Zombie : NetworkBehaviour
 	{
 		Position = transform.position;
 		Rotation = transform.rotation;
+
 	}
 
 	public override void Render()
@@ -136,7 +142,60 @@ public class Zombie : NetworkBehaviour
 				Agent.enabled = true;
 			}
 			transform.rotation = Rotation;
+
+			if(VisualHitCnt < HitCnt)
+			{
+				VisualHitCnt = HitCnt;
+				anim.SetFloat("HitBodyType", GetHitBodyFloat(HitBody));
+				anim.SetTrigger("Hit");
+			}
 		}
+		else
+		{
+			if (VisualHitCnt < HitCnt)
+			{
+				SetAnimFloat("HitBodyType", GetHitBodyFloat(HitBody));
+				SetAnimTrigger("Hit");
+				AnimWaitStruct = new AnimWaitStruct("StandHit", "Idle",
+					updateAction: () => SetAnimFloat("SpeedY", 0f, 0.1f));
+				stateMachine.ChangeState(Zombie.State.AnimWait);
+
+				VisualHitCnt = HitCnt;
+			}
+		}
+	}
+
+	public float GetHitBodyFloat(ZombieBody zombieBody)
+	{
+		float hitBodyType = 0f;
+		switch (HitBody)
+		{
+			case ZombieBody.Head:
+			case ZombieBody.MiddleSpine:
+			case ZombieBody.Pelvis:
+				hitBodyType = 0f;
+				break;
+			case ZombieBody.LeftArm:
+			case ZombieBody.LeftElbow:
+				hitBodyType = 1f;
+				break;
+			case ZombieBody.RightArm:
+			case ZombieBody.RightElbow:
+				hitBodyType = 2f;
+				break;
+			case ZombieBody.LeftHips:
+			case ZombieBody.LeftKnee:
+				hitBodyType = 3f;
+				break;
+			case ZombieBody.RightHips:
+			case ZombieBody.RightKnee:
+				hitBodyType = 4f;
+				break;
+			default:
+				Debug.LogError($"ZombieBody 예외 처리 안됨: {HitBody}");
+				break;
+		}
+		return hitBodyType;
 	}
 
 	public void Init(NetworkObject target)
@@ -212,5 +271,11 @@ public class Zombie : NetworkBehaviour
 		{
 			return State.Idle;
 		}
+	}
+
+	public void ApplyDamage(ZombieBody bodyType, Vector3 dir, float power, int damage)
+	{
+		HitBody = bodyType;
+		HitCnt++;
 	}
 }

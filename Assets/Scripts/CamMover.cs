@@ -12,7 +12,7 @@ public class CamMover : MonoBehaviour
 	Vector2 lookInput;
 	float yAngle;
 	float xAngle;
-
+	
 	private void OnLook(InputValue value)
 	{
 		lookInput = value.Get<Vector2>();

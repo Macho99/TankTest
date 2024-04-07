@@ -5,6 +5,7 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine.SceneManagement;
 using UnityEngine.AI;
+using TMPro;
 
 public struct TestInputData : INetworkInput
 {
@@ -17,6 +18,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
 	[SerializeField] NetworkObject zombiePrefab;
 	[SerializeField] NetworkObject target;
+	[SerializeField] TextMeshProUGUI connectInfoText;
 
 	private NetworkRunner runner;
 	private TickTimer timer;
@@ -54,6 +56,15 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 			Scene = scene,
 			SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
 		});
+
+		if (Runner.IsServer)
+		{
+			connectInfoText.text = "호스트로 연결됨";
+		}
+		else
+		{
+			connectInfoText.text = "클라이언트로 연결됨";
+		}
 	}
 
 	public override void FixedUpdateNetwork()
