@@ -15,19 +15,19 @@ public class ZombieAnimWait : ZombieState
 	{
 		if (owner.AnimWaitStruct.HasValue == false)
 		{
-			Debug.LogError("AnimWaitStruct를 설정하세요");
+			Debug.LogError($"{photonView.ViewID}: AnimWaitStruct를 설정하세요");
 			return;
 		}
 
 		animEntered = false;
 		waitStruct = owner.AnimWaitStruct.Value;
+		owner.AnimWaitStruct = null;
 		waitStruct.startAction?.Invoke();
 	}
 
 	public override void Exit()
 	{
 		waitStruct.animEndAction?.Invoke();
-		owner.AnimWaitStruct = null;
 	}
 
 	public override void SetUp()
@@ -46,7 +46,7 @@ public class ZombieAnimWait : ZombieState
 		}
 	}
 
-	public override void FixedUpdateNetwork()
+	public override void Update()
 	{
 		waitStruct.updateAction?.Invoke();
 		if(animEntered == true) { return; }

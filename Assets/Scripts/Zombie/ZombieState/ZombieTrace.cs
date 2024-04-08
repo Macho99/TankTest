@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,11 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 public class ZombieTrace : ZombieState
 {
-	float shifter;
 	float speed;
 	float rotateSpeed;
 
@@ -24,18 +25,22 @@ public class ZombieTrace : ZombieState
 	public override void Enter()
 	{
 		prevPosY = owner.transform.position.y;
-		if (CheckTurn() == true) { return; }
+		if (photonView.IsMine)
+		{
+			if (CheckTurn() == true) { return; }
+			StartCoroutine(CoSetDestination());
+		}
 
-		speed = owner.TraceSpeed;
+		speed = owner.MaxTraceSpeed;
 		rotateSpeed = 60f * speed;
-		StartCoroutine(CoSetDestination());
 	}
 
 	private IEnumerator CoSetDestination()
 	{
 		while (true)
 		{
-			owner.SetDestination(owner.Target.transform.position);
+			owner.photonView.RPC(nameof(owner.SetTracePath), 
+				RpcTarget.AllViaServer, owner.transform.position, owner.Target.transform.position);
 			yield return new WaitForSeconds(0.5f);
 		}
 	}
@@ -47,46 +52,47 @@ public class ZombieTrace : ZombieState
 
 	public override void SetUp()
 	{
-		shifter = Random.Range(0, 5);
+		
 	}
 
 	public override void Transition()
 	{
+		if (owner.photonView.IsMine == false) return;
 
-	}
-
-	public override void FixedUpdateNetwork()
-	{
-		if(CheckFallAsleep() == true)
+		if (CheckFallAsleep() == true)
 		{
 			return;
 		}
 
+		if (owner.HasPath && owner.Agent.remainingDistance < 1f)
+		{
+			PhotonNetwork.Destroy(photonView);
+			ChangeState(Zombie.State.Wait);
+		}
+	}
+
+	public override void Update()
+	{
 		float speedX = 0f;
 		float speedY = 0f;
+
 		if (owner.HasPath)
 		{
 			Vector3 lookDir = (owner.SteeringTarget - owner.transform.position);
 			lookDir.y = 0f;
 			lookDir.Normalize();
 			owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
-				Quaternion.LookRotation(lookDir), rotateSpeed * owner.Runner.DeltaTime);
+				Quaternion.LookRotation(lookDir), rotateSpeed * Time.deltaTime);
 			Vector3 moveDir = owner.DesiredDir;
 			Vector3 animDir = owner.transform.InverseTransformDirection(moveDir);
 
 			speedX = animDir.x * speed;
 			speedY = animDir.z * speed;
 		}
-		else if (owner.Agent.pathPending == false && owner.RemainDist < 1f)
-		{
-			shifter = Random.Range(0, 5);
-			owner.Agent.ResetPath();
-			ChangeState(Zombie.State.Idle);
-		}
+
 
 		owner.SetAnimFloat("SpeedX", speedX, 0.2f);
 		owner.SetAnimFloat("SpeedY", speedY, 0.2f);
-		owner.SetAnimFloat("Shifter", shifter, 0.2f);
 	}
 
 	private bool CheckFallAsleep()
@@ -96,14 +102,11 @@ public class ZombieTrace : ZombieState
 		float yDiff = Mathf.Abs(curPos.y - prevPosY);
 		if (yDiff > owner.FallAsleepThreshold)
 		{
-			owner.SetAnimFloat("FallAsleep", 1f + yDiff - owner.FallAsleepThreshold);
-			owner.SetAnimBool("Crawl", true);
-			owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),
-				updateAction: ()=>owner.SetAnimFloat("SpeedY", 0f, 0.3f));
-			ChangeState(Zombie.State.AnimWait);
+			ChangeState(Zombie.State.Wait);
+			photonView.RPC(nameof(owner.FallAsleepRPC), RpcTarget.AllViaServer, 1f + yDiff - owner.FallAsleepThreshold);
 			return true;
 		}
-		prevPosY = Mathf.Lerp(prevPosY, curPos.y, owner.Runner.DeltaTime * 5f);
+		prevPosY = Mathf.Lerp(prevPosY, curPos.y, Time.deltaTime * 5f);
 
 		Collider prevCol, curCol;
 		prevCol = cols[0];
@@ -115,12 +118,8 @@ public class ZombieTrace : ZombieState
 			curCol = cols[0];
 			if(curCol != prevCol)
 			{
-				float fallValue = curCol.bounds.size.y + 0.7f;
-				owner.SetAnimFloat("FallAsleep", fallValue);
-				owner.SetAnimBool("Crawl", true);
-				owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),
-					updateAction: () => owner.SetAnimFloat("SpeedY", 0f, 0.3f));
-				ChangeState(Zombie.State.AnimWait);
+				ChangeState(Zombie.State.Wait);
+				photonView.RPC(nameof(owner.FallAsleepRPC), RpcTarget.AllViaServer, curCol.bounds.size.y + 0.7f);
 				return true;
 			}
 		}
@@ -140,22 +139,22 @@ public class ZombieTrace : ZombieState
 		float sign = (angle >= 0f) ? 1f : -1f;
 		angle = Mathf.Abs(angle);
 
+		float turnDir;
 		if (angle < 60f)
 		{
 			return false;
 		}
 		else if (angle < 135f)
 		{
-			owner.SetAnimFloat("TurnDir", sign);
+			turnDir = sign;
 		}
 		else
 		{
-			owner.SetAnimFloat("TurnDir", 0f);
+			turnDir = 0f;
 		}
-		owner.SetAnimTrigger("Turn");
-		owner.AnimWaitStruct = new AnimWaitStruct("Turn", Zombie.State.Trace.ToString(), 
-			animStartAction: () => owner.SetAnimFloat("Shifter", shifter));
-		ChangeState(Zombie.State.AnimWait);
+
+		ChangeState(Zombie.State.Wait);
+		photonView.RPC(nameof(owner.TurnRPC), RpcTarget.AllViaServer, turnDir);
 		return true;
 	}
 }

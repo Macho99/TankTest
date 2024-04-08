@@ -1,5 +1,4 @@
-﻿using Fusion;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +8,7 @@ using UnityEngine;
 public enum ZombieBody { LeftHips, LeftKnee, RightHips, RightKnee,
 	Head, Pelvis, MiddleSpine, LeftArm, LeftElbow, RightArm, RightElbow, }
 
-public class ZombieHitBox : Hitbox
+public class ZombieHitBox : MonoBehaviour
 {
 	[SerializeField] ZombieBody bodyType;
 
@@ -19,7 +18,7 @@ public class ZombieHitBox : Hitbox
 
 	private void Awake()
 	{
-		owner = Root.GetComponent<Zombie>();
+		owner = GetComponentInParent<Zombie>();
 	}
 
 	public void ApplyDamage(Vector3 dir, float power, int damage)

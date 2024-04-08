@@ -1,36 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Fusion;
 using UnityEngine.UI;
 
-public class CamFire : NetworkBehaviour
+public class CamFire : MonoBehaviour
 {
 	[SerializeField] Image aimImg;
 
-	[Networked] NetworkButtons PrevButton { get; set; }
-
-	public override void Spawned()
+	public void Update()
 	{
-		Object.AssignInputAuthority(Runner.LocalPlayer);
-	}
-
-	public override void FixedUpdateNetwork()
-	{
-		if (GetInput(out TestInputData data) == false) return;
-
-		NetworkButtons pressed = data.buttons.GetPressed(PrevButton);
-		NetworkButtons released = data.buttons.GetReleased(PrevButton);
-
-		PrevButton = data.buttons;
-
-		if (pressed.IsSet(TestInputData.MOUSEBUTTON0))
+		if (Input.GetMouseButtonDown(0))
 		{
 			print("누름");
 			aimImg.color = Color.red;
 			Fire();
 		}
-		if (released.IsSet(TestInputData.MOUSEBUTTON0))
+		if (Input.GetMouseButtonUp(0))
 		{
 			print("뗌");
 			aimImg.color = Color.white;
@@ -39,18 +24,17 @@ public class CamFire : NetworkBehaviour
 
 	private void Fire()
 	{
-		if(Runner.LagCompensation.Raycast(transform.position, transform.forward, 100f, 
-			Object.InputAuthority, out var hit, LayerMask.GetMask("Monster"), HitOptions.IgnoreInputAuthority))
+		if(Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 100f, 
+			LayerMask.GetMask("Monster")))
 		{
-			if (hit.Hitbox == null)
+			ZombieHitBox zombieHit = hit.collider.GetComponent<ZombieHitBox>();
+			if (zombieHit == null)
 			{
+				Debug.LogError("좀비 HitBox가 없는 Monster Layer가 있습니다");
 				return;
 			}
 
-			if (hit.Hitbox is ZombieHitBox zombieHitBox)
-			{
-				zombieHitBox.ApplyDamage(-transform.forward, 1f, 1);
-			}
+			zombieHit.ApplyDamage(-transform.forward, 1f, 1);
 		}
 	}
 }

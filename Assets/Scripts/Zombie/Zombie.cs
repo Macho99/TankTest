@@ -1,4 +1,4 @@
-using Fusion;
+using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,9 +10,9 @@ using UnityEngine.AI;
 using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
-public class Zombie : NetworkBehaviour
+public class Zombie : MonoBehaviourPun
 {
-	public enum State { Idle, Wander, Trace, AnimWait, CrawlIdle, }
+	public enum State { Idle, Wander, Trace, AnimWait, Wait, CrawlIdle }
 	[SerializeField] float minIdleTime = 1f;
 	[SerializeField] float maxIdleTime = 10f;
 	[SerializeField] Transform skins;
@@ -20,7 +20,7 @@ public class Zombie : NetworkBehaviour
 	[SerializeField] TextMeshProUGUI curStateText;
 
 	NavMeshAgent agent;
-	NetworkStateMachine stateMachine;
+	StateMachine stateMachine;
 	Animator anim;
 
 	public float FallAsleepThreshold { get { return fallAsleepThreshold; } }
@@ -40,33 +40,17 @@ public class Zombie : NetworkBehaviour
 	public AnimWaitStruct? AnimWaitStruct { get; set; }
 	//	#endregion
 
-	public NetworkObject Target { get; private set; }
-	public float TraceSpeed { get; private set; }
-
-	[Networked] public int SkinIdx { get; private set; }
-	[Networked] public Vector3 Position { get; set; }
-	[Networked] public Quaternion Rotation { get; set; }
-	[Networked] public Vector3 RagdollVelocity { get; private set; }
-	[Networked] public ZombieBody HitBody { get; private set; }
-	[Networked] public int HitCnt { get; private set; }
-	//[Networked] public int CurHP { get; set; }
-
-	public int VisualHitCnt { get; set; }
+	public Transform Target { get; private set; }
+	public float MaxTraceSpeed { get; private set; }
+	public ZombieBody HitBody { get; private set; }
+	public Vector3 NetworkPosition { get; set; }
+	public float PositionRefreshDiff { get; private set; }
 
 	private void Awake()
 	{
 		FallAsleepMask = LayerMask.GetMask("FallAsleepObject");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
-		stateMachine = GetComponent<NetworkStateMachine>();
-
-		stateMachine.AddState(State.Idle, new ZombieIdle(this));
-		stateMachine.AddState(State.Trace, new ZombieTrace(this));
-		stateMachine.AddState(State.Wander, new ZombieWander(this));
-		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
-		stateMachine.AddState(State.CrawlIdle, new ZombieCrawlIdle(this));
-
-		stateMachine.InitState(State.Idle);
 
 		Rigidbody[] bodys = GetComponentsInChildren<Rigidbody>();
 		foreach(Rigidbody body in bodys)
@@ -76,6 +60,46 @@ public class Zombie : NetworkBehaviour
 			Collider col = body.GetComponent<Collider>();
 			col.isTrigger = true;
 		}
+
+		object[] data = photonView.InstantiationData;
+		if(data != null)
+		{
+			int idx = 0;
+			Random.InitState((int)data[idx++]);
+			int skinIdx = Random.Range(0, skins.childCount);
+
+			Agent.enabled = true;
+			int cnt = 0;
+			foreach (Transform child in skins)
+			{
+				if (cnt == skinIdx)
+					child.gameObject.SetActive(true);
+				else
+					child.gameObject.SetActive(false);
+				cnt++;
+			}
+
+			SetAnimFloat("IdleShifter", Random.Range(0, 3));
+			SetAnimFloat("WalkShifter", Random.Range(0, 5));
+			SetAnimFloat("RunShifter", Random.Range(0, 2));
+			SetAnimFloat("SprintShifter", Random.Range(0, 2));
+
+			MaxTraceSpeed = Random.Range(1, 4);
+			Target = PhotonNetwork.GetPhotonView((int)data[idx++]).transform;
+		}
+
+		stateMachine = GetComponent<StateMachine>();
+		if (stateMachine == null)
+			stateMachine = gameObject.AddComponent<StateMachine>();
+
+		stateMachine.AddState(State.Idle, new ZombieIdle(this));
+		stateMachine.AddState(State.Trace, new ZombieTrace(this));
+		stateMachine.AddState(State.Wander, new ZombieWander(this));
+		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
+		stateMachine.AddState(State.CrawlIdle, new ZombieCrawlIdle(this));
+		stateMachine.AddState(State.Wait, new ZombieWait(this));
+
+		stateMachine.InitState(State.Idle);
 	}
 
 	//private IEnumerator Start()
@@ -100,69 +124,49 @@ public class Zombie : NetworkBehaviour
 	//	}
 	//}
 
-	public override void Spawned()
-	{
-		Agent.enabled = true;
-		int cnt = 0;
-		foreach (Transform child in skins)
-		{
-			if (cnt == SkinIdx)
-				child.gameObject.SetActive(true);
-			else
-				child.gameObject.SetActive(false);
-			cnt++;
-		}
-	}
-
-	public override void FixedUpdateNetwork()
-	{
-		Position = transform.position;
-		Rotation = transform.rotation;
-
-	}
-
-	public override void Render()
+	public void Update()
 	{
 		StringBuilder sb = new StringBuilder();
-		//sb.AppendLine($"현재 상태: {stateMachine.curStateStr}");
+		sb.AppendLine($"현재 상태: {stateMachine.curStateStr}");
 		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
 		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
-		sb.AppendLine($"curPos : {transform.position}");
-		sb.AppendLine($"Pos: {Position}");
+		sb.AppendLine($"posDiff : {(NetworkPosition - transform.position).magnitude:##.#####}");
+
+		PositionRefreshDiff = Mathf.Lerp(0.01f, 0.5f, anim.GetFloat("SpeedY") * 0.3f);
 
 		curStateText.text = sb.ToString();
-		if (Object.IsProxy)
-		{
-			if((transform.position - Position).sqrMagnitude > 1f)
-			{
-				//debugCapsule.transform.position = transform.position;
-				//debugCapsule.SetActive(true);
-				Agent.enabled = false;
-				transform.position = Position;
-				Agent.enabled = true;
-			}
-			transform.rotation = Rotation;
+		////if (Object.IsProxy)
+		//{
+		//	if((transform.position - Position).sqrMagnitude > 1f)
+		//	{
+		//		//debugCapsule.transform.position = transform.position;
+		//		//debugCapsule.SetActive(true);
+		//		Agent.enabled = false;
+		//		transform.position = Position;
+		//		Agent.enabled = true;
+		//	}
+		//	transform.rotation = Rotation;
 
-			if(VisualHitCnt < HitCnt)
-			{
-				VisualHitCnt = HitCnt;
-				anim.SetFloat("HitBodyType", GetHitBodyFloat(HitBody));
-				anim.SetTrigger("Hit");
-			}
-		}
-		else
-		{
-			if (VisualHitCnt < HitCnt)
-			{
-				SetAnimFloat("HitBodyType", GetHitBodyFloat(HitBody));
-				SetAnimTrigger("Hit");
-				AnimWaitStruct = new AnimWaitStruct("StandHit", "Idle",
-					updateAction: () => SetAnimFloat("SpeedY", 0f, 0.1f));
-				stateMachine.ChangeState(Zombie.State.AnimWait);
+		//	if(VisualHitCnt < HitCnt)
+		//	{
+		//		VisualHitCnt = HitCnt;
+		//		anim.SetFloat("HitBodyType", GetHitBodyFloat(HitBody));
+		//		anim.SetTrigger("Hit");
+		//	}
+		//}
+		////else
+		//{
+		//	if (VisualHitCnt < HitCnt)
+		//	{
+		//		SetAnimFloat("HitBodyType", GetHitBodyFloat(HitBody));
+		//		SetAnimTrigger("Hit");
+		//		AnimWaitStruct = new AnimWaitStruct("StandHit", "Idle",
+		//			updateAction: () => SetAnimFloat("SpeedY", 0f, 0.1f));
+		//		stateMachine.ChangeState(Zombie.State.AnimWait);
 
-				VisualHitCnt = HitCnt;
-			}
-		}
+		//		VisualHitCnt = HitCnt;
+		//	}
+		//}
 	}
 
 	public float GetHitBodyFloat(ZombieBody zombieBody)
@@ -198,15 +202,6 @@ public class Zombie : NetworkBehaviour
 		return hitBodyType;
 	}
 
-	public void Init(NetworkObject target)
-	{
-		Target = target;
-		TraceSpeed = Random.Range(1, 4);
-
-		int skinCnt = skins.childCount;
-		SkinIdx = Random.Range(0, skinCnt);
-	}
-
 	public void SetAnimBool(string name, bool value)
 	{
 		anim.SetBool(name, value);
@@ -221,7 +216,7 @@ public class Zombie : NetworkBehaviour
 	{
 		if(deltaTime.HasValue == false)
 		{
-			deltaTime = Runner.DeltaTime;
+			deltaTime = Time.deltaTime;
 		}
 		anim.SetFloat(name, value, dampTime, deltaTime.Value);
 	}
@@ -234,11 +229,6 @@ public class Zombie : NetworkBehaviour
 	public bool IsAnimName(string name, int layer = 0)
 	{
 		return anim.GetCurrentAnimatorStateInfo(layer).IsName(name);
-	}
-	
-	public void SetDestination(Vector3 vec)
-	{
-		agent.SetDestination(vec);
 	}
 
 	private void OnDrawGizmos()
@@ -276,6 +266,48 @@ public class Zombie : NetworkBehaviour
 	public void ApplyDamage(ZombieBody bodyType, Vector3 dir, float power, int damage)
 	{
 		HitBody = bodyType;
-		HitCnt++;
+	}
+
+	[PunRPC]
+	public void SetTracePath(Vector3 startPos, Vector3 endPos)
+	{
+		NavMeshPath path = new();
+		NavMesh.CalculatePath(startPos, endPos, NavMesh.AllAreas, path);
+		agent.path = path;
+	}
+
+	public void CallChangeState(State nextState)
+	{
+		stateMachine.ChangeState(State.Wait);
+		photonView.RPC(nameof(ChangeStateRPC), RpcTarget.AllViaServer, nextState, transform.position, transform.rotation);
+	}
+
+	[PunRPC]
+	public void ChangeStateRPC(State nextState, Vector3 position, Quaternion rotation)
+	{
+		agent.enabled = false;
+		transform.position = position;
+		transform.rotation = rotation;
+		agent.enabled = true;
+		stateMachine.ChangeState(nextState);
+	}
+
+	[PunRPC]
+	public void FallAsleepRPC(float fallAsleepValue)
+	{
+		SetAnimFloat("FallAsleep", fallAsleepValue);
+		SetAnimBool("Crawl", true);
+		AnimWaitStruct = new AnimWaitStruct("Fall", State.CrawlIdle.ToString(),
+			updateAction: () => SetAnimFloat("SpeedY", 0f, 0.3f));
+		stateMachine.ChangeState(State.AnimWait);
+	}
+
+	[PunRPC]
+	public void TurnRPC(float turnDir)
+	{
+		SetAnimFloat("TurnDir", turnDir);
+		SetAnimTrigger("Turn");
+		AnimWaitStruct = new AnimWaitStruct("Turn", State.Trace.ToString());
+		stateMachine.ChangeState(State.AnimWait);
 	}
 }

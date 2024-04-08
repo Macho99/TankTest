@@ -14,7 +14,6 @@ public class ZombieIdle : ZombieState
 	public override void Enter()
 	{
 		elapsed = 0f;
-		shifter = Random.Range(0, 3);
 		idleTime = Random.Range(owner.MinIdleTime, owner.MaxIdleTime);
 	}
 
@@ -30,22 +29,23 @@ public class ZombieIdle : ZombieState
 
 	public override void Transition()
 	{
+		if (photonView.IsMine == false) return;
+
 		if (owner.Target != null)
 		{
-			ChangeState(Zombie.State.Trace);
+			owner.CallChangeState(Zombie.State.Trace);
 			return;
 		}
 
 		if(elapsed > idleTime)
 		{
-			ChangeState(Zombie.State.Wander);
+			owner.CallChangeState(Zombie.State.Wander);
 			return;
 		}
 	}
 
-	public override void FixedUpdateNetwork()
+	public override void Update()
 	{
-		owner.SetAnimFloat("Shifter", shifter, 0.1f);
-		elapsed += owner.Runner.DeltaTime;
+		elapsed += Time.deltaTime;
 	}
 }

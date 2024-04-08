@@ -30,7 +30,7 @@ public class ZombieCrawlIdle : ZombieState
 
 	}
 
-	public override void FixedUpdateNetwork()
+	public override void Update()
 	{
 
 	}

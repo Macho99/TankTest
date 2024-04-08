@@ -1,10 +1,11 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 
-public class CamMover : MonoBehaviour
+public class CamMover : MonoBehaviourPun
 {
 	[SerializeField] float moveSpeed = 4f;
 	[SerializeField] float lookSpeed = 5f;
@@ -25,6 +26,8 @@ public class CamMover : MonoBehaviour
 
 	private void Update()
 	{
+		if (photonView.IsMine == false) return;
+
 		transform.Translate(new Vector3(moveInput.x, 0f, moveInput.y) * moveSpeed * Time.deltaTime, Space.Self);
 		yAngle -= lookInput.y * Time.deltaTime * lookSpeed;
 		xAngle += lookInput.x * Time.deltaTime * lookSpeed;
