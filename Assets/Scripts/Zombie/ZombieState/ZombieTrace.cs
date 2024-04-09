@@ -77,11 +77,15 @@ public class ZombieTrace : ZombieState
 			speedX = animDir.x * speed;
 			speedY = animDir.z * speed;
 		}
-		else if (owner.Agent.pathPending == false && owner.RemainDist < 1f)
+
+		if (owner.HasPath && owner.RemainDist < 1f)
 		{
-			shifter = Random.Range(0, 5);
-			owner.Agent.ResetPath();
-			ChangeState(Zombie.State.Idle);
+			owner.Runner.Despawn(owner.Object);
+			ChangeState(Zombie.State.Wait);
+			return;
+			//shifter = Random.Range(0, 5);
+			//owner.Agent.ResetPath();
+			//ChangeState(Zombie.State.Idle);
 		}
 
 		owner.SetAnimFloat("SpeedX", speedX, 0.2f);

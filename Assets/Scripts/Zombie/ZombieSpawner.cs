@@ -26,7 +26,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	private void OnEnable()
 	{
-		StartGame(GameMode.AutoHostOrClient);
+		//StartGame(GameMode.AutoHostOrClient);
 	}
 
 	private void Update()

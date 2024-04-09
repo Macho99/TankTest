@@ -1722,6 +1722,8 @@ MonoBehaviour:
   _Position: {x: 0, y: 0, z: 0}
   _Rotation: {x: 0, y: 0, z: 0, w: 0}
   _RagdollVelocity: {x: 0, y: 0, z: 0}
+  _HitBody: 0
+  _HitCnt: 0
 --- !u!114 &5639476792328849030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1812,11 +1814,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Animator: {fileID: 9023249132752941117}
-  TotalWords: 6
+  TotalWords: 7
   ApplyTiming: 2
   SyncSettings: 15
   StateHashes: 0000000046980c4f14c2736679ba12802be06da93270625b602a1d72c6de2875449164f09f065eb81b25885740139c6a5a82a680
-  TriggerHashes: 0000000079ba1280
+  TriggerHashes: 0000000079ba1280a1609f62
 --- !u!114 &1835357077659790036
 MonoBehaviour:
   m_ObjectHideFlags: 0

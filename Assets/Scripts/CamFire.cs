@@ -52,5 +52,9 @@ public class CamFire : NetworkBehaviour
 				zombieHitBox.ApplyDamage(-transform.forward, 1f, 1);
 			}
 		}
+		else
+		{
+			print("¾È¸ÂÀ½");
+		}
 	}
 }

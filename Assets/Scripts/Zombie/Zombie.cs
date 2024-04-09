@@ -12,7 +12,7 @@ using Random = UnityEngine.Random;
 
 public class Zombie : NetworkBehaviour
 {
-	public enum State { Idle, Wander, Trace, AnimWait, CrawlIdle, }
+	public enum State { Idle, Wander, Trace, AnimWait, Wait, CrawlIdle, }
 	[SerializeField] float minIdleTime = 1f;
 	[SerializeField] float maxIdleTime = 10f;
 	[SerializeField] Transform skins;
@@ -65,17 +65,18 @@ public class Zombie : NetworkBehaviour
 		stateMachine.AddState(State.Wander, new ZombieWander(this));
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
 		stateMachine.AddState(State.CrawlIdle, new ZombieCrawlIdle(this));
+		stateMachine.AddState(State.Wait, new ZombieWait(this));
 
 		stateMachine.InitState(State.Idle);
 
-		Rigidbody[] bodys = GetComponentsInChildren<Rigidbody>();
-		foreach(Rigidbody body in bodys)
-		{
-			body.isKinematic = true;
-			body.detectCollisions = false;
-			Collider col = body.GetComponent<Collider>();
-			col.isTrigger = true;
-		}
+		//Rigidbody[] bodys = GetComponentsInChildren<Rigidbody>();
+		//foreach(Rigidbody body in bodys)
+		//{
+		//	body.isKinematic = true;
+		//	body.detectCollisions = false;
+		//	Collider col = body.GetComponent<Collider>();
+		//	col.isTrigger = true;
+		//}
 	}
 
 	//private IEnumerator Start()
