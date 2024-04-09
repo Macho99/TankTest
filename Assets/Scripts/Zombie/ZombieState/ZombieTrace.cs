@@ -57,7 +57,7 @@ public class ZombieTrace : ZombieState
 
 	public override void Transition()
 	{
-		if (owner.photonView.IsMine == false) return;
+		if (photonView.IsMine == false) return;
 
 		if (CheckFallAsleep() == true)
 		{
@@ -73,6 +73,8 @@ public class ZombieTrace : ZombieState
 
 	public override void Update()
 	{
+		if (photonView.IsMine == false) return;
+
 		float speedX = 0f;
 		float speedY = 0f;
 
