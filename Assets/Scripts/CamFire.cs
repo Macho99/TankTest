@@ -12,7 +12,10 @@ public class CamFire : NetworkBehaviour
 
 	public override void Spawned()
 	{
-		Object.AssignInputAuthority(Runner.LocalPlayer);
+		if (Runner.IsServer)
+		{
+			Object.AssignInputAuthority(Runner.LocalPlayer);
+		}
 	}
 
 	public override void FixedUpdateNetwork()
@@ -40,7 +43,7 @@ public class CamFire : NetworkBehaviour
 	private void Fire()
 	{
 		if(Runner.LagCompensation.Raycast(transform.position, transform.forward, 100f, 
-			Object.InputAuthority, out var hit, LayerMask.GetMask("Monster"), HitOptions.IgnoreInputAuthority))
+			Object.InputAuthority, out var hit))
 		{
 			if (hit.Hitbox == null)
 			{

@@ -1,34 +1,26 @@
+using Fusion;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 
-public class CamMover : MonoBehaviour
+public class CamMover : NetworkBehaviour
 {
 	[SerializeField] float moveSpeed = 4f;
 	[SerializeField] float lookSpeed = 5f;
-	Vector2 moveInput;
-	Vector2 lookInput;
-	float yAngle;
-	float xAngle;
+	[Networked] float yAngle { get; set; }
+	[Networked]float xAngle { get; set; }
 	
-	private void OnLook(InputValue value)
+	public override void FixedUpdateNetwork()
 	{
-		lookInput = value.Get<Vector2>();
-	}
-
-	private void OnMove(InputValue value)
-	{
-		moveInput = value.Get<Vector2>();
-	}
-
-	private void Update()
-	{
-		transform.Translate(new Vector3(moveInput.x, 0f, moveInput.y) * moveSpeed * Time.deltaTime, Space.Self);
-		yAngle -= lookInput.y * Time.deltaTime * lookSpeed;
-		xAngle += lookInput.x * Time.deltaTime * lookSpeed;
-		yAngle = Mathf.Clamp(yAngle, -80f, 80f);
-		transform.rotation = Quaternion.Euler(yAngle, xAngle, 0f);
+		if(GetInput(out TestInputData input))
+		{
+			transform.Translate(new Vector3(input.moveVec.x, 0f, input.moveVec.y) * moveSpeed * Runner.DeltaTime, Space.Self);
+			yAngle -= input.lookVec.y * Runner.DeltaTime * lookSpeed;
+			xAngle += input.lookVec.x * Runner.DeltaTime * lookSpeed;
+			yAngle = Mathf.Clamp(yAngle, -80f, 80f);
+			transform.rotation = Quaternion.Euler(yAngle, xAngle, 0f);
+		}
 	}
 }

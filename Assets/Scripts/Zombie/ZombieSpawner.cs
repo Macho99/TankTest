@@ -6,32 +6,26 @@ using Fusion.Sockets;
 using UnityEngine.SceneManagement;
 using UnityEngine.AI;
 using TMPro;
-
-public struct TestInputData : INetworkInput
-{
-	public const byte MOUSEBUTTON0 = 1;
-
-	public NetworkButtons buttons;
-}
+using UnityEngine.InputSystem;
+using Photon.Realtime;
+using Fusion.Addons.SimpleKCC;
 
 public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
-	[SerializeField] NetworkObject zombiePrefab;
+	[SerializeField] NetworkPrefabRef playerPrefab;
+	[SerializeField] NetworkPrefabRef zombiePrefab;
 	[SerializeField] NetworkObject target;
 	[SerializeField] TextMeshProUGUI connectInfoText;
+	[SerializeField] NetworkPrefabRef testInputPrefab;
+	[SerializeField] float spawnInterval = 2f;
 
 	private NetworkRunner runner;
 	private TickTimer timer;
-	private bool mouseButton;
+	private bool isFirst = true;
 
 	private void OnEnable()
 	{
-		//StartGame(GameMode.AutoHostOrClient);
-	}
-
-	private void Update()
-	{
-		mouseButton = mouseButton | Input.GetMouseButton(0);
+		StartGame(GameMode.AutoHostOrClient);
 	}
 
 	async void StartGame(GameMode mode)
@@ -39,6 +33,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 		// Create the Fusion runner and let it know that we will be providing user input
 		runner = gameObject.AddComponent<NetworkRunner>();
 		runner.ProvideInput = true;
+		gameObject.AddComponent<HitboxManager>();
 
 		// Create the NetworkSceneInfo from the current scene
 		var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
@@ -57,9 +52,10 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 			SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
 		});
 
-		if (Runner.IsServer)
+		if (runner.IsServer)
 		{
 			connectInfoText.text = "호스트로 연결됨";
+			runner.Spawn(testInputPrefab, inputAuthority: runner.LocalPlayer);
 		}
 		else
 		{
@@ -72,9 +68,14 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 		if (Runner.IsClient == true) return;
 		if (timer.ExpiredOrNotRunning(Runner) == false) return;
 
-		timer = TickTimer.CreateFromSeconds(Runner, 2f);
-		runner.Spawn(zombiePrefab,
-			onBeforeSpawned: BeforeSpawned);
+		timer = TickTimer.CreateFromSeconds(Runner, spawnInterval);
+
+		if (isFirst == true)
+		{
+			isFirst = false;
+			return;
+		}
+		runner.Spawn(zombiePrefab, onBeforeSpawned: BeforeSpawned);
 	}
 
 	private void BeforeSpawned(NetworkRunner runner, NetworkObject netObj)
@@ -99,7 +100,11 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
 	{
-
+		runner.Spawn(playerPrefab, transform.position, inputAuthority: player, 
+			onBeforeSpawned: (runner, netObj) =>
+			{
+				//netObj.GetComponent<SimpleKCC>().(transform.position);
+			});
 	}
 
 	public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
@@ -109,12 +114,6 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	public void OnInput(NetworkRunner runner, NetworkInput input)
 	{
-		var data = new TestInputData();
-
-		data.buttons.Set(TestInputData.MOUSEBUTTON0, mouseButton);
-		mouseButton = false;
-
-		input.Set(data);
 	}
 
 	public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)

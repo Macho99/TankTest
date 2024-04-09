@@ -13,17 +13,19 @@ public class ZombieHitBox : Hitbox
 {
 	[SerializeField] ZombieBody bodyType;
 
-	Zombie owner;
+	private Zombie owner;
+	public Zombie Owner { get
+		{
+			if(owner == null)
+				owner = Root.GetComponent<Zombie>();
+			return owner;
+		}
+	}
 
 	public ZombieBody BodyType { get { return bodyType; } }
 
-	private void Awake()
-	{
-		owner = Root.GetComponent<Zombie>();
-	}
-
 	public void ApplyDamage(Vector3 dir, float power, int damage)
 	{
-		owner.ApplyDamage(bodyType, dir, power, damage);
+		Owner.ApplyDamage(bodyType, dir, power, damage);
 	}
 }

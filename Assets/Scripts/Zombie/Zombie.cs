@@ -69,14 +69,14 @@ public class Zombie : NetworkBehaviour
 
 		stateMachine.InitState(State.Idle);
 
-		//Rigidbody[] bodys = GetComponentsInChildren<Rigidbody>();
-		//foreach(Rigidbody body in bodys)
-		//{
-		//	body.isKinematic = true;
-		//	body.detectCollisions = false;
-		//	Collider col = body.GetComponent<Collider>();
-		//	col.isTrigger = true;
-		//}
+		Rigidbody[] bodys = GetComponentsInChildren<Rigidbody>();
+		foreach (Rigidbody body in bodys)
+		{
+			body.isKinematic = true;
+			body.detectCollisions = false;
+			Collider col = body.GetComponent<Collider>();
+			col.isTrigger = true;
+		}
 	}
 
 	//private IEnumerator Start()
@@ -113,6 +113,20 @@ public class Zombie : NetworkBehaviour
 				child.gameObject.SetActive(false);
 			cnt++;
 		}
+
+		//HitboxRoot hitboxRoot = GetComponent<HitboxRoot>();
+		//foreach(Hitbox hitbox in hitboxRoot.Hitboxes)
+		//{
+		//	hitbox.gameObject.SetActive(true);
+		//}
+
+		//Hitbox[] hits = GetComponentsInChildren<Hitbox>();
+		//print(hits.Length);
+		//foreach (Hitbox hit in hits)
+		//{
+		//	print(hit.name);
+		//	hit.gameObject.SetActive(true);
+		//}
 	}
 
 	public override void FixedUpdateNetwork()

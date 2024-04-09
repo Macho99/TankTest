@@ -14,8 +14,8 @@ public class ZombieIdle : ZombieState
 	public override void Enter()
 	{
 		elapsed = 0f;
-		shifter = Random.Range(0, 3);
-		idleTime = Random.Range(owner.MinIdleTime, owner.MaxIdleTime);
+		//shifter = Random.Range(0, 3);
+		//idleTime = Random.Range(owner.MinIdleTime, owner.MaxIdleTime);
 	}
 
 	public override void Exit()
