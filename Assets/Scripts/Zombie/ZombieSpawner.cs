@@ -7,16 +7,14 @@ using UnityEngine.SceneManagement;
 using UnityEngine.AI;
 using TMPro;
 using UnityEngine.InputSystem;
-using Photon.Realtime;
-using Fusion.Addons.SimpleKCC;
 
 public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
+	[SerializeField] bool spawn;
 	[SerializeField] NetworkPrefabRef playerPrefab;
 	[SerializeField] NetworkPrefabRef zombiePrefab;
 	[SerializeField] NetworkObject target;
 	[SerializeField] TextMeshProUGUI connectInfoText;
-	[SerializeField] NetworkPrefabRef testInputPrefab;
 	[SerializeField] float spawnInterval = 2f;
 
 	private NetworkRunner runner;
@@ -55,7 +53,6 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 		if (runner.IsServer)
 		{
 			connectInfoText.text = "호스트로 연결됨";
-			runner.Spawn(testInputPrefab, inputAuthority: runner.LocalPlayer);
 		}
 		else
 		{
@@ -67,6 +64,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 	{
 		if (Runner.IsClient == true) return;
 		if (timer.ExpiredOrNotRunning(Runner) == false) return;
+		if(spawn == false) return;
 
 		timer = TickTimer.CreateFromSeconds(Runner, spawnInterval);
 
@@ -100,11 +98,9 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
 	{
-		runner.Spawn(playerPrefab, transform.position, inputAuthority: player, 
-			onBeforeSpawned: (runner, netObj) =>
-			{
-				//netObj.GetComponent<SimpleKCC>().(transform.position);
-			});
+		if (runner.IsServer == false) return;
+
+		runner.Spawn(playerPrefab, inputAuthority: player);
 	}
 
 	public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)

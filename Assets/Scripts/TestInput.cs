@@ -1,3 +1,4 @@
+using ExitGames.Client.Photon.StructWrapping;
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,9 +6,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Windows;
 
+public enum Buttons { Fire, Jump }
+
 public struct TestInputData : INetworkInput
 {
-	public const byte MOUSEBUTTON0 = 1;
 
 	public Vector2 moveVec;
 	public Vector2 lookVec;
@@ -18,9 +20,8 @@ public struct TestInputData : INetworkInput
 [DefaultExecutionOrder(-10)]
 public class TestInput : NetworkBehaviour, IBeforeUpdate
 {
-	[SerializeField] float lookSpeed = 30f;
-
 	private TestInputData accumInput;
+	private Vector2 accumLookVec = new();
 
 	public override void Spawned()
 	{
@@ -38,6 +39,15 @@ public class TestInput : NetworkBehaviour, IBeforeUpdate
 	public void OnInput(NetworkRunner runner, NetworkInput input)
 	{
 		input.Set(accumInput);
+	}
+
+	private void Update()
+	{
+		var mouse = Mouse.current;
+		if (mouse != null)
+		{
+			accumLookVec += mouse.delta.ReadValue();
+		}
 	}
 
 	public void BeforeUpdate()
@@ -68,12 +78,9 @@ public class TestInput : NetworkBehaviour, IBeforeUpdate
 		var mouse = Mouse.current;
 		if (mouse != null)
 		{
-			Vector2 mouseDelta = mouse.delta.ReadValue();
-
-			var lookRotationDelta = new Vector2(mouseDelta.x, mouseDelta.y);
-			lookRotationDelta *= lookSpeed / 60f;
-			accumInput.lookVec = lookRotationDelta;
-			accumInput.buttons.Set(TestInputData.MOUSEBUTTON0, mouse.leftButton.isPressed);
+			accumInput.lookVec = accumLookVec;
+			accumLookVec = new();
+			accumInput.buttons.Set(Buttons.Fire, mouse.leftButton.isPressed);
 		}
 
 		if (keyboard != null)
@@ -84,6 +91,8 @@ public class TestInput : NetworkBehaviour, IBeforeUpdate
 			if (keyboard.sKey.isPressed) { moveDirection += Vector2.down; }
 			if (keyboard.aKey.isPressed) { moveDirection += Vector2.left; }
 			if (keyboard.dKey.isPressed) { moveDirection += Vector2.right; }
+
+			accumInput.buttons.Set(Buttons.Jump, keyboard.spaceKey.isPressed);
 
 			accumInput.moveVec = moveDirection.normalized;
 		}

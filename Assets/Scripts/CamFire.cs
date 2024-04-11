@@ -27,13 +27,13 @@ public class CamFire : NetworkBehaviour
 
 		PrevButton = data.buttons;
 
-		if (pressed.IsSet(TestInputData.MOUSEBUTTON0))
+		if (pressed.IsSet(Buttons.Fire))
 		{
 			print("´©¸§");
 			aimImg.color = Color.red;
 			Fire();
 		}
-		if (released.IsSet(TestInputData.MOUSEBUTTON0))
+		if (released.IsSet(Buttons.Fire))
 		{
 			print("¶À");
 			aimImg.color = Color.white;
