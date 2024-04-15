@@ -62,9 +62,8 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	public override void FixedUpdateNetwork()
 	{
-		if (Runner.IsClient == true) return;
-		if (timer.ExpiredOrNotRunning(Runner) == false) return;
 		if(spawn == false) return;
+		if (timer.ExpiredOrNotRunning(Runner) == false) return;
 
 		timer = TickTimer.CreateFromSeconds(Runner, spawnInterval);
 
@@ -100,7 +99,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 	{
 		if (runner.IsServer == false) return;
 
-		runner.Spawn(playerPrefab, inputAuthority: player);
+		runner.Spawn(playerPrefab, transform.position, inputAuthority: player);
 	}
 
 	public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)

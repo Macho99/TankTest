@@ -1,28 +1,35 @@
 using Cinemachine;
 using Fusion;
 using Fusion.Addons.SimpleKCC;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TestPlayer : NetworkBehaviour
 {
+	[SerializeField] Canvas playerCanvas;
+	[SerializeField] Image aimImg;
 	[SerializeField] Vector3 rendererOffset;
 	[SerializeField] float jumpForce = 5f;
 	[SerializeField] float gravity = -15f;
 	[SerializeField] float lookSpeed = 10f;
 	[SerializeField] float moveSpeed = 5f;
 
+	Transform camRoot;
 	TextMeshProUGUI debugText;
-	float yAngle;
-	[Networked] float xAngle { get; set; }
+	SimpleKCC kcc;
+
+	[Networked] public NetworkButtons PrevButton { get; private set; }
+	[Networked] public float YAngle { get; private set; }
+	[Networked] public float XAngle { get; private set; }
 	new MeshRenderer renderer;
 	//float yVel;
 	
-	SimpleKCC kcc;
 
 	public bool IsGround { get; private set; }
 
@@ -35,6 +42,7 @@ public class TestPlayer : NetworkBehaviour
 		kcc = GetComponent<SimpleKCC>();
 		renderer = GetComponentInChildren<MeshRenderer>();
 		debugText = GetComponentInChildren<TextMeshProUGUI>();
+		camRoot = GetComponentInChildren<CinemachineVirtualCamera>().transform.parent;
 	}
 
 	public override void Spawned()
@@ -42,7 +50,8 @@ public class TestPlayer : NetworkBehaviour
 		kcc.enabled = true;
 		if (Object.HasInputAuthority == false)
 		{
-			GetComponentInChildren<CinemachineVirtualCamera>().gameObject.SetActive(false);
+			camRoot.gameObject.SetActive(false);
+			playerCanvas.gameObject.SetActive(false);
 		}
 	}
 
@@ -50,16 +59,22 @@ public class TestPlayer : NetworkBehaviour
 	{
 		if (GetInput(out TestInputData input) == false) return;
 
-		//IsGround = CheckGround();
-		//if(IsGround && yVel < 0f)
-		//{
-		//	yVel = -2f;
-		//}
-		//else
-		//{
-		//	yVel += gravity * Runner.DeltaTime;
-		//}
+		Move(input);
+		CheckFire(input);
+	}
 
+	public override void Render()
+	{
+		//StringBuilder sb = new();
+		////sb.AppendLine($"pos: {Position}");
+		////sb.AppendLine($"rot: {Rotation.eulerAngles}");
+		//sb.AppendLine($"xAngle: {xAngle.ToString("F1")}");
+
+		//debugText.text = sb.ToString();
+	}
+
+	private void Move(TestInputData input)
+	{
 		float jump = 0f;
 		//print(kcc.IsGrounded);
 		if (input.buttons.IsSet(Buttons.Jump) && kcc.IsGrounded)
@@ -67,74 +82,48 @@ public class TestPlayer : NetworkBehaviour
 			jump = jumpForce;
 		}
 
-		//transform.position = Position;
-		//transform.rotation = Rotation;
-		//Vector3 delta = -transform.position;
-
-		//transform.Translate(new Vector3(input.moveVec.x, 0f, input.moveVec.y) * moveSpeed * Runner.DeltaTime, Space.Self);
-		yAngle -= input.lookVec.y * Runner.DeltaTime * lookSpeed;
-		xAngle += input.lookVec.x * Runner.DeltaTime * lookSpeed;
-		xAngle = Mathf.Repeat(xAngle, 360f);
-		yAngle = Mathf.Clamp(yAngle, -80f, 80f);
-		kcc.SetLookRotation(Quaternion.Euler(0f, xAngle, 0f));
-		//transform.rotation = Quaternion.Euler(0f, xAngle, 0f);
+		YAngle -= input.lookVec.y * Runner.DeltaTime * lookSpeed;
+		XAngle += input.lookVec.x * Runner.DeltaTime * lookSpeed;
+		XAngle = Mathf.Repeat(XAngle, 360f);
+		YAngle = Mathf.Clamp(YAngle, -80f, 80f);
+		camRoot.localRotation = Quaternion.Euler(YAngle, 0f, 0f);
+		kcc.SetLookRotation(Quaternion.Euler(0f, XAngle, 0f));
 		kcc.Move(moveSpeed * transform.TransformDirection(new Vector3(input.moveVec.x, 0f, input.moveVec.y)), jump);
-		//cc.Move(Runner.DeltaTime * moveSpeed * transform.TransformDirection(new Vector3(input.moveVec.x, yVel, input.moveVec.y)));
-
-		//delta += transform.position;
-		//Velocity = transform.position - Position;
-		//Position += delta;
-		//Rotation = transform.rotation;
 	}
 
-	float lastTickTime;
-	int lastTick;
 
-	public override void Render()
+	private void CheckFire(TestInputData input)
 	{
-		StringBuilder sb = new();
-		//sb.AppendLine($"pos: {Position}");
-		//sb.AppendLine($"rot: {Rotation.eulerAngles}");
-		sb.AppendLine($"xAngle: {xAngle.ToString("F1")}");
+		NetworkButtons pressed = input.buttons.GetPressed(PrevButton);
+		NetworkButtons released = input.buttons.GetReleased(PrevButton);
 
-		debugText.text = sb.ToString();
+		PrevButton = input.buttons;
 
-		//////////////////////////////////////////////////////////////
-
-		//Vector3 pos = Position;
-
-		//if (Object.IsProxy)
-		//{
-		//	transform.position = pos;
-		//}
-
-		//if (Runner.Tick != lastTick)
-		//{
-		//	lastTick = Runner.Tick;
-		//	lastTickTime = Time.time;
-		//}
-		//else
-		//{
-		//	pos += Velocity * (Time.time - lastTickTime);
-		//}
-		//renderer.transform.position = pos + rendererOffset;
+		if (pressed.IsSet(Buttons.Fire))
+		{
+			aimImg.color = Color.red;
+			Fire();
+		}
+		if (released.IsSet(Buttons.Fire))
+		{
+			aimImg.color = Color.white;
+		}
 	}
 
-	//private bool CheckGround()
-	//{
-	//	float checkDist = 0.1f;
-	//	Vector3 pos = transform.position;
-	//	pos.y += cc.radius - checkDist;
-	//	return Physics.CheckSphere(pos, cc.radius, LayerMask.GetMask("Default"));
-	//}
+	private void Fire()
+	{
+		if (Runner.LagCompensation.Raycast(camRoot.position, camRoot.forward,
+			100f, Runner.LocalPlayer, out var hit, options: HitOptions.IgnoreInputAuthority))
+		{
+			if (hit.Hitbox == null)
+			{
+				return;
+			}
 
-	//private void OnDrawGizmos()
-	//{
-	//	if(cc == null) return;
-	//	Gizmos.color = IsGround ? Color.green : Color.red;
-	//	float checkDist = 0.1f;
-	//	Vector3 pos = transform.position;
-	//	pos.y += cc.radius - checkDist;
-	//	Gizmos.DrawWireSphere(pos, cc.radius);
-	//}
+			if (hit.Hitbox is ZombieHitBox zombieHitBox)
+			{
+				zombieHitBox.ApplyDamage(transform.forward * 300f, 1);
+			}
+		}
+	}
 }

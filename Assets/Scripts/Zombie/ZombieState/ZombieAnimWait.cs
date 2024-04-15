@@ -22,12 +22,12 @@ public class ZombieAnimWait : ZombieState
 		animEntered = false;
 		waitStruct = owner.AnimWaitStruct.Value;
 		waitStruct.startAction?.Invoke();
+		owner.AnimWaitStruct = null;
 	}
 
 	public override void Exit()
 	{
 		waitStruct.animEndAction?.Invoke();
-		owner.AnimWaitStruct = null;
 	}
 
 	public override void SetUp()

@@ -35,7 +35,7 @@ public class ZombieTrace : ZombieState
 	{
 		while (true)
 		{
-			owner.SetDestination(owner.Target.transform.position);
+			owner.Agent.SetDestination(owner.Target.transform.position);
 			yield return new WaitForSeconds(0.5f);
 		}
 	}
