@@ -64,21 +64,21 @@ public class ZombieTrace : ZombieState
 
 		float speedX = 0f;
 		float speedY = 0f;
-		if (owner.HasPath)
+		if (owner.Agent.hasPath)
 		{
-			Vector3 lookDir = (owner.SteeringTarget - owner.transform.position);
+			Vector3 lookDir = (owner.Agent.steeringTarget - owner.transform.position);
 			lookDir.y = 0f;
 			lookDir.Normalize();
 			owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
 				Quaternion.LookRotation(lookDir), rotateSpeed * owner.Runner.DeltaTime);
-			Vector3 moveDir = owner.DesiredDir;
+			Vector3 moveDir = owner.Agent.desiredVelocity.normalized;
 			Vector3 animDir = owner.transform.InverseTransformDirection(moveDir);
 
 			speedX = animDir.x * speed;
 			speedY = animDir.z * speed;
 		}
 
-		if (owner.HasPath && owner.RemainDist < 1f)
+		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
 		{
 			owner.Runner.Despawn(owner.Object);
 			ChangeState(Zombie.State.Wait);

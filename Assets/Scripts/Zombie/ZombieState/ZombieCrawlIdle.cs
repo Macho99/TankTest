@@ -38,7 +38,7 @@ public class ZombieCrawlIdle : ZombieState
 	private void StandUp()
 	{
 		owner.SetAnimBool("Crawl", false);
-		owner.AnimWaitStruct = new AnimWaitStruct("StandUp", owner.DecisionState().ToString());
+		owner.AnimWaitStruct = new AnimWaitStruct("StandUp", owner.DecideState().ToString());
 		ChangeState(Zombie.State.AnimWait);
 	}
 }

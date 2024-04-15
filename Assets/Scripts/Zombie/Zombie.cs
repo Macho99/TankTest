@@ -10,6 +10,11 @@ using UnityEngine.AI;
 using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
+public struct BoneTransform
+{
+	public Vector3 localPosition;
+	public Quaternion localRotation;
+}
 
 public class Zombie : NetworkBehaviour
 {
@@ -26,7 +31,6 @@ public class Zombie : NetworkBehaviour
 	[SerializeField] Transform skins;
 	[SerializeField] float fallAsleepThreshold = 0.2f;
 	[SerializeField] TextMeshProUGUI curStateText;
-	[SerializeField] Transform hips;
 
 	NavMeshAgent agent;
 	NetworkStateMachine stateMachine;
@@ -36,16 +40,15 @@ public class Zombie : NetworkBehaviour
 
 	BodyPart[] bodyParts = new BodyPart[(int) ZombieBody.Size];
 
+	public Transform[] Bones { get; private set; }
+	public BoneTransform[] RagdollBoneTransforms { get; private set; }
+	public static BoneTransform[] FaceUpBoneTransforms { get; private set; }
+	public static BoneTransform[] FaceDownBoneTranforms { get; private set; }
 	public BodyPart[] BodyParts { get { return bodyParts; } }
-	public Transform Hips { get { return hips; } }
+	public Transform Hips { get; private set; }
 	public Animator Anim { get { return anim; } }
 	public float FallAsleepThreshold { get { return fallAsleepThreshold; } }
 	public NavMeshAgent Agent { get { return agent; } }
-	public bool Aggresive { get; set; }
-	public bool HasPath { get { return agent.hasPath; } }
-	public float RemainDist { get { return agent.remainingDistance; } }
-	public Vector3 SteeringTarget { get { return agent.steeringTarget; } }
-	public Vector3 DesiredDir { get { return agent.desiredVelocity.normalized; } }
 	public LayerMask FallAsleepMask { get; set; }
 	//	#region Variable For Specific State
 	// Idle State
@@ -66,13 +69,22 @@ public class Zombie : NetworkBehaviour
 	[Networked] public ZombieBody RagdollBody { get; private set; }
 	[Networked] public Vector3 RagdollVelocity { get; private set; }
 
-	public int VisualHitCnt { get; set; }
+	public Vector3 LastFootPos { get; set; }
 
 	private void Awake()
 	{
 		FallAsleepMask = LayerMask.GetMask("FallAsleepObject");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
+
+		Hips = anim.GetBoneTransform(HumanBodyBones.Hips);
+		Bones = Hips.GetComponentsInChildren<Transform>();
+		RagdollBoneTransforms = new BoneTransform[Bones.Length];
+		if(FaceDownBoneTranforms == null)
+		{
+			InitFaceBoneTransforms();
+		}
+
 		stateMachine = GetComponent<NetworkStateMachine>();
 
 		stateMachine.AddState(State.Idle, new ZombieIdle(this));
@@ -88,6 +100,45 @@ public class Zombie : NetworkBehaviour
 
 		SetBodyParts();
 		SetRbKinematic(false);
+	}
+
+	public void CopyBoneTransforms(BoneTransform[] boneTransforms)
+	{
+		for (int i = 0; i < Bones.Length; i++)
+		{
+			boneTransforms[i] = new BoneTransform
+			{
+				localPosition = Bones[i].localPosition,
+				localRotation = Bones[i].localRotation
+			};
+		}
+	}
+
+	private void InitFaceBoneTransforms()
+	{
+		FaceUpBoneTransforms = new BoneTransform[Bones.Length];
+		FaceDownBoneTranforms = new BoneTransform[Bones.Length];
+
+		SampleFaceBoneTransforms("FaceUp", FaceUpBoneTransforms);
+		SampleFaceBoneTransforms("FaceDown", FaceDownBoneTranforms);
+	}
+
+	private void SampleFaceBoneTransforms(string clipName, BoneTransform[] boneTransforms)
+	{
+		Vector3 prevPosition = transform.position;
+		Quaternion prevRotation = transform.rotation;
+
+		foreach(AnimationClip clip in anim.runtimeAnimatorController.animationClips)
+		{
+			if(clip.name == clipName)
+			{
+				clip.SampleAnimation(gameObject, 0f);
+				CopyBoneTransforms(boneTransforms);
+			}
+		}
+
+		transform.position = prevPosition;
+		transform.rotation = prevRotation;
 	}
 
 	private void SetBodyParts()
@@ -112,28 +163,6 @@ public class Zombie : NetworkBehaviour
 			bodyPart.col.isTrigger = !value;
 		}
 	}
-
-	//private IEnumerator Start()
-	//{
-	//	yield return new WaitForSec	onds(1f);
-
-	//	anim.enabled = false;
-	//	Agent.enabled = false;
-	//	Rigidbody[] bodys = GetComponentsInChildren<Rigidbody>();
-	//	bool pushed = false;
-	//	foreach (Rigidbody body in bodys)
-	//	{
-	//		body.isKinematic = false;
-	//		body.detectCollisions = true;
-	//		Collider col = body.GetComponent<Collider>();
-	//		col.isTrigger = false;
-	//		if(pushed == false)
-	//		{
-	//			body.AddForce((-transform.forward + transform.up * 0.3f) * 400f, ForceMode.Impulse);
-	//			pushed = true;
-	//		}
-	//	}
-	//}
 
 	public override void Spawned()
 	{
@@ -199,9 +228,7 @@ public class Zombie : NetworkBehaviour
 	{
 		if (IsRagdoll == true)
 		{
-			anim.enabled = false;
-			SetRbKinematic(true);
-			bodyParts[(int)RagdollBody].rb.AddForce(RagdollVelocity, ForceMode.Impulse);
+			stateMachine.ChangeState(State.RagdollEnter);
 		}
 		else
 		{
@@ -286,8 +313,13 @@ public class Zombie : NetworkBehaviour
 	//	Gizmos.DrawSphere(transform.position + Vector3.up * 0.3f + transform.forward * 0.1f, 0.05f);
 	//}
 
-	public State DecisionState()
+	public State DecideState()
 	{
+		if (Object.IsProxy)
+		{
+			return State.Idle;
+		}
+
 		if(anim.GetBool("Crawl") == true)
 		{
 			if(Target == null)
@@ -341,6 +373,7 @@ public class Zombie : NetworkBehaviour
 
 	private void OnDrawGizmos()
 	{
-		
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawSphere(LastFootPos, 0.1f);
 	}
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 public class ZombieRagdollEnter : ZombieState
 {
@@ -17,6 +18,10 @@ public class ZombieRagdollEnter : ZombieState
 	{
 		elapsed = 0f;
 		exitTime = 2f;
+
+		owner.Anim.enabled = false;
+		owner.SetRbKinematic(true);
+		owner.BodyParts[(int)owner.RagdollBody].rb.AddForce(owner.RagdollVelocity, ForceMode.Impulse);
 	}
 
 	public override void Exit()

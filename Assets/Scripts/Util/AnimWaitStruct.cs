@@ -9,7 +9,7 @@ public struct AnimWaitStruct
 	public Action animStartAction;
 	public Action animEndAction;
 
-	public AnimWaitStruct(string animName, string nextState, Action startAction = null,
+	public AnimWaitStruct(string animName, string nextState = null, Action startAction = null,
 		Action updateAction = null, Action animStartAction = null, Action animEndAction = null)
 	{
 		this.animName = animName;

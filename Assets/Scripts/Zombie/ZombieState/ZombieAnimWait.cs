@@ -41,7 +41,14 @@ public class ZombieAnimWait : ZombieState
 		{
 			if(owner.IsAnimName(waitStruct.animName) == false)
 			{
-				ChangeState(waitStruct.nextState);
+				if(waitStruct.nextState == null)
+				{
+					ChangeState(owner.DecideState());
+				}
+				else
+				{
+					ChangeState(waitStruct.nextState);
+				}
 			}
 		}
 	}
