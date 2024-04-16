@@ -23,7 +23,6 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	private void OnEnable()
 	{
-		Time.timeScale = 0.01f;
 		StartGame(GameMode.AutoHostOrClient);
 	}
 
@@ -46,12 +45,12 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 		await runner.StartGame(new StartGameArgs()
 		{
 			GameMode = mode,
-			SessionName = "TestRoom",
+			SessionName = $"TestRoom",
 			Scene = scene,
 			SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
 		});
 
-		if (runner.IsServer)
+		if (Runner.IsServer)
 		{
 			connectInfoText.text = "호스트로 연결됨";
 		}
@@ -63,6 +62,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	public override void FixedUpdateNetwork()
 	{
+		if (Runner.IsServer == false) return;
 		if(spawn == false) return;
 		if (timer.ExpiredOrNotRunning(Runner) == false) return;
 
@@ -71,17 +71,22 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 		if (isFirst == true)
 		{
 			isFirst = false;
+
+			for(int i = 0; i < 10; i++)
+			{
+				runner.Spawn(zombiePrefab, onBeforeSpawned: BeforeSpawned);
+			}
 			return;
 		}
-		runner.Spawn(zombiePrefab, onBeforeSpawned: BeforeSpawned);
 	}
 
 	private void BeforeSpawned(NetworkRunner runner, NetworkObject netObj)
 	{
 		Vector3 pos = Random.insideUnitSphere * 10f;
 		pos.y = 0f;
-		Zombie zombie = netObj.GetComponent<Zombie>();
-		zombie.Init(target);
+		Zombie zombie = netObj.GetComponent<Zombie>(); 
+		zombie.transform.rotation = Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value));
+		//zombie.Init(target);
 		zombie.Position = transform.position + pos;
 		zombie.transform.position = transform.position + pos;
 	}
@@ -99,7 +104,6 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 	public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
 	{
 		if (runner.IsServer == false) return;
-
 		runner.Spawn(playerPrefab, transform.position, inputAuthority: player);
 	}
 

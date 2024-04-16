@@ -36,8 +36,8 @@ public class ZombieHitBox : Hitbox
 			}
 		} }
 
-	public void ApplyDamage(Vector3 velocity, int damage)
+	public void ApplyDamage(Transform source, Vector3 velocity, int damage)
 	{
-		Owner.ApplyDamage(this, velocity, damage);
+		Owner.ApplyDamage(source, this, velocity, damage);
 	}
 }

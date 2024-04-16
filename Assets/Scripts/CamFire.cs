@@ -52,7 +52,7 @@ public class CamFire : NetworkBehaviour
 
 			if (hit.Hitbox is ZombieHitBox zombieHitBox)
 			{
-				zombieHitBox.ApplyDamage(-transform.forward, 1);
+				zombieHitBox.ApplyDamage(null, -transform.forward, 1);
 			}
 		}
 		else

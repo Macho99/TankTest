@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class ZombieRagdollExit : ZombieState
 {
-	const float resetBoneTime = 0.8f;
+	const float resetBoneTime = 0.5f;
 	float elapsed;
 	BoneTransform[] faceBoneTransforms;
+	string animName;
 
 	public ZombieRagdollExit(Zombie owner) : base(owner)
 	{
@@ -20,20 +21,41 @@ public class ZombieRagdollExit : ZombieState
 		owner.Agent.enabled = false;
 
 		float sign;
-		if (owner.Hips.up.y > 0f)
+		if (owner.CurRagdollState == RagdollState.FaceUpStand)
 		{
 			sign = -1f;
 			owner.SetAnimFloat("TurnDir", 1f);
-			faceBoneTransforms = Zombie.BoneTransDict["FaceUp".GetHashCode()];
+			faceBoneTransforms = Zombie.BoneTransDict["FaceUpStand".GetHashCode()];
+			animName = "RagdollToStand";
 		}
-		else
+		else if(owner.CurRagdollState == RagdollState.FaceDownStand)
 		{
 			sign = 1f;
 			owner.SetAnimFloat("TurnDir", 0f);
-			faceBoneTransforms = Zombie.BoneTransDict["FaceDown".GetHashCode()];
+			faceBoneTransforms = Zombie.BoneTransDict["FaceDownStand".GetHashCode()];
+			animName = "RagdollToStand";
 		}
-		owner.Anim.Play("RagdollToAnim", 0, 0f);
+		else if(owner.CurRagdollState == RagdollState.FaceUpCrawl)
+		{
+			sign = 1f;
+			owner.SetAnimFloat("TurnDir", 1f);
+			faceBoneTransforms = Zombie.BoneTransDict["FaceUpCrawl".GetHashCode()];
+			animName = "RagdollToCrawl";
+		}
+		else if(owner.CurRagdollState == RagdollState.FaceDownCrawl)
+		{
+			sign = 1f;
+			owner.SetAnimFloat("TurnDir", 0f);
+			faceBoneTransforms = Zombie.BoneTransDict["FaceDownCrawl".GetHashCode()];
+			animName = "RagdollToCrawl";
+		}
+		else
+		{
+			Debug.LogError($"{owner.CurRagdollState}를 확인하세요");
+			return;
+		}
 
+		owner.Anim.Play(animName, 0, 0f);
 		AlignRotationToHips(sign);
 		AlignPositionToHips();
 		owner.Agent.enabled = true;
@@ -100,6 +122,9 @@ public class ZombieRagdollExit : ZombieState
 		ratio = Mathf.Clamp01(ratio);
 		ratio = BezierBlend(ratio);
 
+		owner.transform.position = Vector3.Lerp(owner.transform.position, owner.Position, ratio);
+		owner.transform.rotation = Quaternion.Lerp(owner.transform.rotation, owner.Rotation, ratio);
+
 		for (int i = 0; i < owner.Bones.Length; i++)
 		{
 			owner.Bones[i].localPosition = Vector3.Lerp(
@@ -115,7 +140,8 @@ public class ZombieRagdollExit : ZombieState
 
 		if(elapsed > resetBoneTime)
 		{
-			owner.AnimWaitStruct = new AnimWaitStruct("RagdollToAnim");
+			owner.AnimWaitStruct = new AnimWaitStruct(animName, 
+				animEndAction: () => owner.CurRagdollState = RagdollState.Animate);
 			ChangeState(Zombie.State.AnimWait);
 			return;
 		}

@@ -122,7 +122,7 @@ public class TestPlayer : NetworkBehaviour
 
 			if (hit.Hitbox is ZombieHitBox zombieHitBox)
 			{
-				zombieHitBox.ApplyDamage(transform.forward * 150f, 1);
+				zombieHitBox.ApplyDamage(transform, transform.forward * 30f, 1);
 			}
 		}
 	}

@@ -16,6 +16,8 @@ public struct BoneTransform
 	public Quaternion localRotation;
 }
 
+public enum RagdollState { Animate, Ragdoll, FaceUpStand, FaceDownStand, FaceUpCrawl, FaceDownCrawl };
+
 public class Zombie : NetworkBehaviour
 {
 	public struct BodyPart
@@ -26,8 +28,7 @@ public class Zombie : NetworkBehaviour
 	}
 
 	public enum State { Idle, Wander, Trace, AnimWait, Wait, CrawlIdle, RagdollEnter, RagdollExit }
-	[SerializeField] float minIdleTime = 1f;
-	[SerializeField] float maxIdleTime = 10f;
+
 	[SerializeField] Transform skins;
 	[SerializeField] float fallAsleepThreshold = 0.2f;
 	[SerializeField] TextMeshProUGUI curStateText;
@@ -38,39 +39,37 @@ public class Zombie : NetworkBehaviour
 	Rigidbody[] rbs;
 	Collider[] cols;
 
-	BodyPart[] bodyParts = new BodyPart[(int) ZombieBody.Size];
+	BodyPart[] bodyHitParts = new BodyPart[(int) ZombieBody.Size];
 
 	public Transform[] Bones { get; private set; }
 	public BoneTransform[] RagdollBoneTransforms { get; private set; }
 	public static Dictionary<int, BoneTransform[]> BoneTransDict { get; private set; }
 	//public static BoneTransform[] FaceUpBoneTransforms { get; private set; }
 	//public static BoneTransform[] FaceDownBoneTranforms { get; private set; }
-	public BodyPart[] BodyParts { get { return bodyParts; } }
+	public BodyPart[] BodyHitParts { get { return bodyHitParts; } }
 	public Transform Hips { get; private set; }
 	public Animator Anim { get { return anim; } }
 	public float FallAsleepThreshold { get { return fallAsleepThreshold; } }
 	public NavMeshAgent Agent { get { return agent; } }
 	public LayerMask FallAsleepMask { get; set; }
 	//	#region Variable For Specific State
-	// Idle State
-	public float MinIdleTime { get { return minIdleTime; } }
-	public float MaxIdleTime { get { return maxIdleTime; } }
 
 	// AnimWait State
 	public AnimWaitStruct? AnimWaitStruct { get; set; }
 	//	#endregion
 
-	public NetworkObject Target { get; private set; }
+	public Transform Target { get; private set; }
 	public float TraceSpeed { get; private set; }
+	public int SkinIdx { get; private set; }
+	public int CurLegHp { get; private set; } = -1;
+	public int CurHp { get; private set; } = 300;
 
-	[Networked] public int SkinIdx { get; private set; }
 	[Networked] public Vector3 Position { get; set; }
 	[Networked] public Quaternion Rotation { get; set; }
-	[Networked, OnChangedRender(nameof(RagdollChanged))] public NetworkBool IsRagdoll { get; set; }
+	[Networked, OnChangedRender(nameof(RagdollChanged))] public RagdollState CurRagdollState { get; set; }
+	[Networked, OnChangedRender(nameof(RagdollStart))] public int RagdollCnt { get; set; }
 	[Networked] public ZombieBody RagdollBody { get; private set; }
 	[Networked] public Vector3 RagdollVelocity { get; private set; }
-
-	public Vector3 LastFootPos { get; set; }
 
 	private void Awake()
 	{
@@ -100,7 +99,7 @@ public class Zombie : NetworkBehaviour
 		stateMachine.InitState(State.Idle);
 
 		SetBodyParts();
-		//SetRbKinematic(true);
+		SetRbKinematic(true);
 	}
 
 	public void CopyBoneTransforms(BoneTransform[] boneTransforms)
@@ -134,24 +133,6 @@ public class Zombie : NetworkBehaviour
 		transform.rotation = prevRotation;
 	}
 
-	//private void SampleFaceBoneTransforms(string clipName, BoneTransform[] boneTransforms)
-	//{
-	//	Vector3 prevPosition = transform.position;
-	//	Quaternion prevRotation = transform.rotation;
-
-	//	foreach(AnimationClip clip in anim.runtimeAnimatorController.animationClips)
-	//	{
-	//		if(clip.name == clipName)
-	//		{
-	//			clip.SampleAnimation(gameObject, 0f);
-	//			CopyBoneTransforms(boneTransforms);
-	//		}
-	//	}
-
-	//	transform.position = prevPosition;
-	//	transform.rotation = prevRotation;
-	//}
-
 	private void SetBodyParts()
 	{
 		ZombieHitBox[] hitBoxes = GetComponentsInChildren<ZombieHitBox>();
@@ -161,13 +142,13 @@ public class Zombie : NetworkBehaviour
 			bodyPart.zombieHitBox = hitBox;
 			bodyPart.rb = hitBox.GetComponent<Rigidbody>();
 			bodyPart.col = hitBox.GetComponent<Collider>();
-			bodyParts[(int)hitBox.BodyType] = bodyPart;
+			bodyHitParts[(int)hitBox.BodyType] = bodyPart;
 		}
 	}
 
 	public void SetRbKinematic(bool value)
 	{
-		foreach(BodyPart bodyPart in bodyParts)
+		foreach(BodyPart bodyPart in bodyHitParts)
 		{
 			bodyPart.rb.isKinematic = value;
 			bodyPart.rb.detectCollisions = !value;
@@ -177,6 +158,17 @@ public class Zombie : NetworkBehaviour
 
 	public override void Spawned()
 	{
+		Random.InitState((int)Object.Id.Raw * Runner.SessionInfo.Name.GetHashCode());
+		TraceSpeed = Random.Range(1, 4);
+
+		anim.SetFloat("IdleShifter", Random.Range(0, 3));
+		anim.SetFloat("WalkShifter", Random.Range(0, 5));
+		anim.SetFloat("RunShifter", Random.Range(0, 2));
+		anim.SetFloat("SprintShifter", Random.Range(0, 2));
+
+		int skinCnt = skins.childCount;
+		SkinIdx = Random.Range(0, skinCnt);
+
 		Agent.enabled = true;
 		int cnt = 0;
 		foreach (Transform child in skins)
@@ -187,20 +179,6 @@ public class Zombie : NetworkBehaviour
 				child.gameObject.SetActive(false);
 			cnt++;
 		}
-
-		//HitboxRoot hitboxRoot = GetComponent<HitboxRoot>();
-		//foreach(Hitbox hitbox in hitboxRoot.Hitboxes)
-		//{
-		//	hitbox.gameObject.SetActive(true);
-		//}
-
-		//Hitbox[] hits = GetComponentsInChildren<Hitbox>();
-		//print(hits.Length);
-		//foreach (Hitbox hit in hits)
-		//{
-		//	print(hit.name);
-		//	hit.gameObject.SetActive(true);
-		//}
 	}
 
 	public override void FixedUpdateNetwork()
@@ -213,16 +191,17 @@ public class Zombie : NetworkBehaviour
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.AppendLine($"현재 상태: {stateMachine.curStateStr}");
+		sb.AppendLine($"CurRagdollState: {CurRagdollState}");
 		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
 		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
-		sb.AppendLine($"curPos : {transform.position}");
-		sb.AppendLine($"Pos: {Position}");
 		sb.AppendLine($"PosDiff: {(transform.position - Position).sqrMagnitude.ToString("F4")}");
 
 		curStateText.text = sb.ToString();
 
 		if (Object.IsProxy)
 		{
+			if (CurRagdollState != RagdollState.Animate && CurRagdollState != RagdollState.Ragdoll) return;
+
 			if ((transform.position - Position).sqrMagnitude > Mathf.Lerp(0.01f, 1f, anim.GetFloat("SpeedY") * 0.2f))
 			{
 				//debugCapsule.transform.position = transform.position;
@@ -235,15 +214,21 @@ public class Zombie : NetworkBehaviour
 		}
 	}
 
+	public void RagdollStart()
+	{
+		stateMachine.ChangeState(State.RagdollEnter);
+	}
+
 	public void RagdollChanged()
 	{
-		if (IsRagdoll == true)
+		switch (CurRagdollState)
 		{
-			stateMachine.ChangeState(State.RagdollEnter);
-		}
-		else
-		{
-			stateMachine.ChangeState(State.RagdollExit);
+			case RagdollState.FaceDownStand:
+			case RagdollState.FaceUpStand:
+			case RagdollState.FaceDownCrawl:
+			case RagdollState.FaceUpCrawl:
+				stateMachine.ChangeState(State.RagdollExit);
+				break;
 		}
 	}
 
@@ -280,15 +265,6 @@ public class Zombie : NetworkBehaviour
 		return hitBodyType;
 	}
 
-	public void Init(NetworkObject target)
-	{
-		Target = target;
-		TraceSpeed = Random.Range(1, 4);
-
-		int skinCnt = skins.childCount;
-		SkinIdx = Random.Range(0, skinCnt);
-	}
-
 	public void SetAnimBool(string name, bool value)
 	{
 		anim.SetBool(name, value);
@@ -318,60 +294,53 @@ public class Zombie : NetworkBehaviour
 		return anim.GetCurrentAnimatorStateInfo(layer).IsName(name);
 	}
 
-	//private void OnDrawGizmos()
-	//{
-	//	Gizmos.color = Color.yellow;
-	//	Gizmos.DrawSphere(transform.position + Vector3.up * 0.3f + transform.forward * 0.1f, 0.05f);
-	//}
-
 	public State DecideState()
 	{
 		if (Object.IsProxy)
-		{
 			return State.Idle;
-		}
 
 		if(anim.GetBool("Crawl") == true)
 		{
 			if(Target == null)
-			{
 				return State.CrawlIdle;
-			}
 			else
-			{
 				return State.CrawlIdle;
-				//공격으로 전환
-			}
+			//공격으로 전환
 		}
 
 
 		if(Target != null)
-		{
 			return State.Trace;
-		}
 		else
-		{
 			return State.Idle;
-		}
 	}
 
-	public void ApplyDamage(ZombieHitBox zombieHitBox, Vector3 velocity, int damage)
+	public void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, Vector3 velocity, int damage)
 	{
 		if (Object.IsProxy) return;
 
+		Target = source;
 		float hitBodyFloat = GetHitBodyFloat(zombieHitBox.BodyType);
 
-		//상체에 맞으면
-		if(hitBodyFloat < 2.9f)
+		//이미 래그돌 중이면
+		if(CurRagdollState != RagdollState.Animate)
 		{
-			if(true)//Vector3.Dot(velocity, transform.forward) > 0)
+			StartRagdoll(velocity, zombieHitBox.BodyType);
+			return;
+		}
+
+        //상체에 맞으면
+        if (hitBodyFloat < 2.9f)
+		{
+			if(Vector3.Dot(velocity, transform.forward) > 0)
 			{
-				RagdollVelocity = velocity;
-				RagdollBody = zombieHitBox.BodyType;
-				IsRagdoll = true;
-				//stateMachine.ChangeState(State.RagdollEnter);
+				StartRagdoll(velocity, zombieHitBox.BodyType);
 				return;
 			}
+
+			Vector3 lookDir = -velocity;
+			lookDir.y = 0f;
+			transform.rotation = Quaternion.LookRotation(lookDir);
 		}
 
 		SetAnimFloat("HitBodyType", hitBodyFloat);
@@ -382,9 +351,11 @@ public class Zombie : NetworkBehaviour
 		stateMachine.ChangeState(State.AnimWait);
 	}
 
-	private void OnDrawGizmos()
+	private void StartRagdoll(Vector3 velocity, ZombieBody zombieBody)
 	{
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawSphere(LastFootPos, 0.1f);
+		RagdollVelocity = velocity;
+		RagdollBody = zombieBody;
+		CurRagdollState = RagdollState.Ragdoll;
+		RagdollCnt++;
 	}
 }

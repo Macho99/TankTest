@@ -10,7 +10,6 @@ using Random = UnityEngine.Random;
 
 public class ZombieTrace : ZombieState
 {
-	float shifter;
 	float speed;
 	float rotateSpeed;
 
@@ -35,7 +34,7 @@ public class ZombieTrace : ZombieState
 	{
 		while (true)
 		{
-			owner.Agent.SetDestination(owner.Target.transform.position);
+			owner.Agent.SetDestination(owner.Target.position);
 			yield return new WaitForSeconds(0.5f);
 		}
 	}
@@ -47,7 +46,6 @@ public class ZombieTrace : ZombieState
 
 	public override void SetUp()
 	{
-		shifter = Random.Range(0, 5);
 	}
 
 	public override void Transition()
@@ -90,7 +88,6 @@ public class ZombieTrace : ZombieState
 
 		owner.SetAnimFloat("SpeedX", speedX, 0.2f);
 		owner.SetAnimFloat("SpeedY", speedY, 0.2f);
-		owner.SetAnimFloat("Shifter", shifter, 0.2f);
 	}
 
 	private bool CheckFallAsleep()
@@ -157,8 +154,7 @@ public class ZombieTrace : ZombieState
 			owner.SetAnimFloat("TurnDir", 0f);
 		}
 		owner.SetAnimTrigger("Turn");
-		owner.AnimWaitStruct = new AnimWaitStruct("Turn", Zombie.State.Trace.ToString(), 
-			animStartAction: () => owner.SetAnimFloat("Shifter", shifter));
+		owner.AnimWaitStruct = new AnimWaitStruct("Turn", Zombie.State.Trace.ToString());
 		ChangeState(Zombie.State.AnimWait);
 		return true;
 	}
