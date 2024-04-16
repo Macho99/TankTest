@@ -16,7 +16,7 @@ public class ZombieRagdollExit : ZombieState
 	{
 		elapsed = 0f;
 
-		owner.SetRbKinematic(false);
+		owner.SetRbKinematic(true);
 		owner.Agent.enabled = false;
 
 		float sign;
@@ -24,13 +24,13 @@ public class ZombieRagdollExit : ZombieState
 		{
 			sign = -1f;
 			owner.SetAnimFloat("TurnDir", 1f);
-			faceBoneTransforms = Zombie.FaceUpBoneTransforms;
+			faceBoneTransforms = Zombie.BoneTransDict["FaceUp".GetHashCode()];
 		}
 		else
 		{
 			sign = 1f;
 			owner.SetAnimFloat("TurnDir", 0f);
-			faceBoneTransforms = Zombie.FaceDownBoneTranforms;
+			faceBoneTransforms = Zombie.BoneTransDict["FaceDown".GetHashCode()];
 		}
 		owner.Anim.Play("RagdollToAnim", 0, 0f);
 

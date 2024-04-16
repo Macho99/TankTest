@@ -42,8 +42,9 @@ public class Zombie : NetworkBehaviour
 
 	public Transform[] Bones { get; private set; }
 	public BoneTransform[] RagdollBoneTransforms { get; private set; }
-	public static BoneTransform[] FaceUpBoneTransforms { get; private set; }
-	public static BoneTransform[] FaceDownBoneTranforms { get; private set; }
+	public static Dictionary<int, BoneTransform[]> BoneTransDict { get; private set; }
+	//public static BoneTransform[] FaceUpBoneTransforms { get; private set; }
+	//public static BoneTransform[] FaceDownBoneTranforms { get; private set; }
 	public BodyPart[] BodyParts { get { return bodyParts; } }
 	public Transform Hips { get; private set; }
 	public Animator Anim { get { return anim; } }
@@ -80,9 +81,9 @@ public class Zombie : NetworkBehaviour
 		Hips = anim.GetBoneTransform(HumanBodyBones.Hips);
 		Bones = Hips.GetComponentsInChildren<Transform>();
 		RagdollBoneTransforms = new BoneTransform[Bones.Length];
-		if(FaceDownBoneTranforms == null)
+		if(BoneTransDict == null)
 		{
-			InitFaceBoneTransforms();
+			InitBoneTransDict();
 		}
 
 		stateMachine = GetComponent<NetworkStateMachine>();
@@ -99,7 +100,7 @@ public class Zombie : NetworkBehaviour
 		stateMachine.InitState(State.Idle);
 
 		SetBodyParts();
-		SetRbKinematic(false);
+		//SetRbKinematic(true);
 	}
 
 	public void CopyBoneTransforms(BoneTransform[] boneTransforms)
@@ -114,32 +115,42 @@ public class Zombie : NetworkBehaviour
 		}
 	}
 
-	private void InitFaceBoneTransforms()
-	{
-		FaceUpBoneTransforms = new BoneTransform[Bones.Length];
-		FaceDownBoneTranforms = new BoneTransform[Bones.Length];
-
-		SampleFaceBoneTransforms("FaceUp", FaceUpBoneTransforms);
-		SampleFaceBoneTransforms("FaceDown", FaceDownBoneTranforms);
-	}
-
-	private void SampleFaceBoneTransforms(string clipName, BoneTransform[] boneTransforms)
+	private void InitBoneTransDict()
 	{
 		Vector3 prevPosition = transform.position;
 		Quaternion prevRotation = transform.rotation;
 
-		foreach(AnimationClip clip in anim.runtimeAnimatorController.animationClips)
+		BoneTransDict = new();
+
+		foreach (AnimationClip clip in anim.runtimeAnimatorController.animationClips)
 		{
-			if(clip.name == clipName)
-			{
-				clip.SampleAnimation(gameObject, 0f);
-				CopyBoneTransforms(boneTransforms);
-			}
+			BoneTransform[] boneTransforms = new BoneTransform[Bones.Length];
+			clip.SampleAnimation(gameObject, 0f);
+			CopyBoneTransforms(boneTransforms);
+			BoneTransDict.Add(clip.name.GetHashCode(), boneTransforms);
 		}
 
 		transform.position = prevPosition;
 		transform.rotation = prevRotation;
 	}
+
+	//private void SampleFaceBoneTransforms(string clipName, BoneTransform[] boneTransforms)
+	//{
+	//	Vector3 prevPosition = transform.position;
+	//	Quaternion prevRotation = transform.rotation;
+
+	//	foreach(AnimationClip clip in anim.runtimeAnimatorController.animationClips)
+	//	{
+	//		if(clip.name == clipName)
+	//		{
+	//			clip.SampleAnimation(gameObject, 0f);
+	//			CopyBoneTransforms(boneTransforms);
+	//		}
+	//	}
+
+	//	transform.position = prevPosition;
+	//	transform.rotation = prevRotation;
+	//}
 
 	private void SetBodyParts()
 	{
@@ -158,9 +169,9 @@ public class Zombie : NetworkBehaviour
 	{
 		foreach(BodyPart bodyPart in bodyParts)
 		{
-			bodyPart.rb.isKinematic = !value;
-			bodyPart.rb.detectCollisions = value;
-			bodyPart.col.isTrigger = !value;
+			bodyPart.rb.isKinematic = value;
+			bodyPart.rb.detectCollisions = !value;
+			bodyPart.col.isTrigger = value;
 		}
 	}
 
@@ -358,7 +369,7 @@ public class Zombie : NetworkBehaviour
 				RagdollVelocity = velocity;
 				RagdollBody = zombieHitBox.BodyType;
 				IsRagdoll = true;
-				stateMachine.ChangeState(State.RagdollEnter);
+				//stateMachine.ChangeState(State.RagdollEnter);
 				return;
 			}
 		}

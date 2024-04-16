@@ -23,6 +23,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	private void OnEnable()
 	{
+		Time.timeScale = 0.01f;
 		StartGame(GameMode.AutoHostOrClient);
 	}
 

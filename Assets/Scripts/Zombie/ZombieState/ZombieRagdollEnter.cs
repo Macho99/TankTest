@@ -17,11 +17,17 @@ public class ZombieRagdollEnter : ZombieState
 	public override void Enter()
 	{
 		elapsed = 0f;
-		exitTime = 2f;
+		exitTime = 20f;
 
 		owner.Anim.enabled = false;
-		owner.SetRbKinematic(true);
-		owner.BodyParts[(int)owner.RagdollBody].rb.AddForce(owner.RagdollVelocity, ForceMode.Impulse);
+		BoneTransform[] boneTransforms = Zombie.BoneTransDict[owner.Anim.GetCurrentAnimatorClipInfo(0)[0].clip.name.GetHashCode()];
+		for (int i = 0; i < owner.Bones.Length; i++)
+		{
+			owner.Bones[i].localPosition = boneTransforms[i].localPosition;
+			owner.Bones[i].localRotation = boneTransforms[i].localRotation;
+		}
+		//owner.BodyParts[(int)owner.RagdollBody].rb.AddForce(owner.RagdollVelocity, ForceMode.Impulse);
+		owner.SetRbKinematic(false);
 	}
 
 	public override void Exit()
