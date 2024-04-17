@@ -27,7 +27,10 @@ public class ZombieCrawlIdle : ZombieState
 
 	public override void Transition()
 	{
-
+		if(owner.Target != null)
+		{
+			ChangeState(Zombie.State.CrawlTrace);
+		}
 	}
 
 	public override void FixedUpdateNetwork()
@@ -37,8 +40,11 @@ public class ZombieCrawlIdle : ZombieState
 
 	private void StandUp()
 	{
-		owner.SetAnimBool("Crawl", false);
-		owner.AnimWaitStruct = new AnimWaitStruct("StandUp", owner.DecideState().ToString());
-		ChangeState(Zombie.State.AnimWait);
+		if(owner.CurLegHp > 0)
+		{
+			owner.SetAnimBool("Crawl", false);
+			owner.AnimWaitStruct = new AnimWaitStruct("StandUp", owner.DecideState().ToString());
+			ChangeState(Zombie.State.AnimWait);
+		}
 	}
 }

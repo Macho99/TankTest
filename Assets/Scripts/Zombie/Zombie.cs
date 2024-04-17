@@ -1,4 +1,5 @@
 using Fusion;
+using Photon.Pun.Demo.PunBasics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,12 +28,15 @@ public class Zombie : NetworkBehaviour
 		public Collider col;
 	}
 
-	public enum State { Idle, Wander, Trace, AnimWait, Wait, CrawlIdle, RagdollEnter, RagdollExit }
+	public enum State { Idle, Wander, Trace, AnimWait, Wait, CrawlIdle, CrawlTrace, RagdollEnter, RagdollExit, Die }
 
 	[SerializeField] Transform skins;
 	[SerializeField] float fallAsleepThreshold = 0.2f;
 	[SerializeField] TextMeshProUGUI curStateText;
+	[SerializeField] float viewAngle = 60f;
+	[SerializeField] float playerLostTime = 5f;
 
+	SphereCollider playerDetecter;
 	NavMeshAgent agent;
 	NetworkStateMachine stateMachine;
 	Animator anim;
@@ -59,9 +63,17 @@ public class Zombie : NetworkBehaviour
 	//	#endregion
 
 	public Transform Target { get; private set; }
-	public float TraceSpeed { get; private set; }
+	private float maxSpeed;
+
+	public float TraceSpeed { get 
+		{ return Mathf.Max(maxSpeed * (((float) CurLegHp) / MaxLegHp), 1f); }
+	}
+
 	public int SkinIdx { get; private set; }
-	public int CurLegHp { get; private set; } = -1;
+	public Tick LastHitTick { get; private set; }
+	public Tick LastPlayerFindTick { get; private set; }
+	public int MaxLegHp { get; private set; } = 100;
+	public int CurLegHp { get; private set; }
 	public int CurHp { get; private set; } = 300;
 
 	[Networked] public Vector3 Position { get; set; }
@@ -73,9 +85,11 @@ public class Zombie : NetworkBehaviour
 
 	private void Awake()
 	{
+		CurLegHp = MaxLegHp;
 		FallAsleepMask = LayerMask.GetMask("FallAsleepObject");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
+		playerDetecter = GetComponent<SphereCollider>();
 
 		Hips = anim.GetBoneTransform(HumanBodyBones.Hips);
 		Bones = Hips.GetComponentsInChildren<Transform>();
@@ -92,9 +106,11 @@ public class Zombie : NetworkBehaviour
 		stateMachine.AddState(State.Wander, new ZombieWander(this));
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
 		stateMachine.AddState(State.CrawlIdle, new ZombieCrawlIdle(this));
+		stateMachine.AddState(State.CrawlTrace, new ZombieCrawlTrace(this));
 		stateMachine.AddState(State.Wait, new ZombieWait(this));
 		stateMachine.AddState(State.RagdollEnter, new ZombieRagdollEnter(this));
 		stateMachine.AddState(State.RagdollExit, new ZombieRagdollExit(this));
+		stateMachine.AddState(State.Die, new ZombieDie(this));
 
 		stateMachine.InitState(State.Idle);
 
@@ -159,7 +175,7 @@ public class Zombie : NetworkBehaviour
 	public override void Spawned()
 	{
 		Random.InitState((int)Object.Id.Raw * Runner.SessionInfo.Name.GetHashCode());
-		TraceSpeed = Random.Range(1, 4);
+		maxSpeed = Random.Range(1, 4);
 
 		anim.SetFloat("IdleShifter", Random.Range(0, 3));
 		anim.SetFloat("WalkShifter", Random.Range(0, 5));
@@ -185,22 +201,40 @@ public class Zombie : NetworkBehaviour
 	{
 		Position = transform.position;
 		Rotation = transform.rotation;
+
+		if (Target == null) return;
+
+		Vector3 playerDir = (Target.transform.position - transform.position).normalized;
+		if (Physics.Raycast(transform.position, playerDir, playerDetecter.radius * 1.5f))
+		{
+			LastPlayerFindTick = Runner.Tick;
+		}
+
+		if(LastPlayerFindTick + playerLostTime * Runner.TickRate < Runner.Tick)
+		{
+			Target = null;
+		}
 	}
 
+	string prevState;
 	public override void Render()
 	{
+		string curState = stateMachine.curStateStr;
 		StringBuilder sb = new StringBuilder();
-		sb.AppendLine($"현재 상태: {stateMachine.curStateStr}");
+		string printState = curState.Equals("AnimWait") ? $"{prevState} -> AnimWait" : curState;
+		sb.AppendLine($"현재 상태: {printState}");
 		sb.AppendLine($"CurRagdollState: {CurRagdollState}");
 		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
 		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
 		sb.AppendLine($"PosDiff: {(transform.position - Position).sqrMagnitude.ToString("F4")}");
+		if(curState.Equals("AnimWait") == false)
+			prevState = curState;
 
 		curStateText.text = sb.ToString();
 
 		if (Object.IsProxy)
 		{
-			if (CurRagdollState != RagdollState.Animate && CurRagdollState != RagdollState.Ragdoll) return;
+			if (CurRagdollState != RagdollState.Animate) return;
 
 			if ((transform.position - Position).sqrMagnitude > Mathf.Lerp(0.01f, 1f, anim.GetFloat("SpeedY") * 0.2f))
 			{
@@ -308,7 +342,6 @@ public class Zombie : NetworkBehaviour
 			//공격으로 전환
 		}
 
-
 		if(Target != null)
 			return State.Trace;
 		else
@@ -319,11 +352,28 @@ public class Zombie : NetworkBehaviour
 	{
 		if (Object.IsProxy) return;
 
+
+		SetAnimFloat("SpeedY", 0f);
 		Target = source;
+
+		CurHp -= damage;
+		if (CurHp <= 0)
+		{
+			CurHp = 0;
+			StartRagdoll(velocity, zombieHitBox.BodyType);
+		}
+
 		float hitBodyFloat = GetHitBodyFloat(zombieHitBox.BodyType);
 
-		//이미 래그돌 중이면
-		if(CurRagdollState != RagdollState.Animate)
+		//하체에 맞으면 하체 체력 감소
+		if (2.9f < hitBodyFloat)
+		{
+			CurLegHp -= damage;
+		}
+
+		//이미 래그돌 중이면 한번 더 래그돌
+		//또는 Crawl 상태면 래그돌
+		if(CurRagdollState != RagdollState.Animate || anim.GetBool("Crawl") == true)
 		{
 			StartRagdoll(velocity, zombieHitBox.BodyType);
 			return;
@@ -332,23 +382,52 @@ public class Zombie : NetworkBehaviour
         //상체에 맞으면
         if (hitBodyFloat < 2.9f)
 		{
+			//뒤쪽 상체에 맞으면 래그돌
 			if(Vector3.Dot(velocity, transform.forward) > 0)
 			{
 				StartRagdoll(velocity, zombieHitBox.BodyType);
 				return;
 			}
 
+			//정면 상체에 맞으면 맞은 쪽으로 회전
 			Vector3 lookDir = -velocity;
 			lookDir.y = 0f;
 			transform.rotation = Quaternion.LookRotation(lookDir);
 		}
 
-		SetAnimFloat("HitBodyType", hitBodyFloat);
-		SetAnimTrigger("Hit");
+		// 1초 이내에 다시 맞으면
+		if (LastHitTick + 1 * Runner.TickRate > Runner.Tick)
+		{
+			StartRagdoll(velocity, zombieHitBox.BodyType);
+			return;
+		}
 
-		AnimWaitStruct = new AnimWaitStruct("StandHit", "Idle",
-			updateAction: () => SetAnimFloat("SpeedY", 0f, 0.1f));
-		stateMachine.ChangeState(State.AnimWait);
+		LastHitTick = Runner.Tick;
+
+		//////////////////////////
+		// 밑으로 래그돌이 아닌 상태
+		//////////////////////////
+
+
+		//하체 체력이 충분하면 부위별 피격 애니메이션 재생
+		if (CurLegHp > 0)
+		{
+			SetAnimFloat("HitBodyType", hitBodyFloat);
+			SetAnimTrigger("Hit");
+
+			AnimWaitStruct = new AnimWaitStruct("StandHit", "Idle",
+				updateAction: () => SetAnimFloat("SpeedY", 0f, 0.1f));
+			stateMachine.ChangeState(State.AnimWait);
+		}
+		else
+		{
+			SetAnimBool("Crawl", true);
+			SetAnimFloat("FallAsleep", 0f);
+
+			AnimWaitStruct = new AnimWaitStruct("Fall", State.CrawlIdle.ToString(), 
+				updateAction: () => SetAnimFloat("SpeedY", 0f, 0.1f));
+			stateMachine.ChangeState(State.AnimWait);
+		}
 	}
 
 	private void StartRagdoll(Vector3 velocity, ZombieBody zombieBody)
@@ -357,5 +436,24 @@ public class Zombie : NetworkBehaviour
 		RagdollBody = zombieBody;
 		CurRagdollState = RagdollState.Ragdoll;
 		RagdollCnt++;
+	}
+
+	private void OnTriggerStay(Collider player)
+	{
+		print("감지");
+		if (Object == null) return;
+		if (Object.IsProxy) return;
+
+		if(Target == null)
+		{
+			Vector3 playerDir = (player.transform.position - transform.position).normalized;
+			if (Vector3.Dot(playerDir, transform.forward) > Mathf.Cos(viewAngle * Mathf.Deg2Rad))
+			{
+				if(Physics.Raycast(transform.position, playerDir, playerDetecter.radius))
+				{
+					Target = player.transform;
+				}
+			}
+		}
 	}
 }

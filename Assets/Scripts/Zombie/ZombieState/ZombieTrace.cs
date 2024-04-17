@@ -141,17 +141,13 @@ public class ZombieTrace : ZombieState
 		float sign = (angle >= 0f) ? 1f : -1f;
 		angle = Mathf.Abs(angle);
 
-		if (angle < 60f)
+        if (angle < 45f)
 		{
 			return false;
 		}
-		else if (angle < 135f)
-		{
-			owner.SetAnimFloat("TurnDir", sign);
-		}
 		else
 		{
-			owner.SetAnimFloat("TurnDir", 0f);
+			owner.SetAnimFloat("TurnDir", sign * (angle) / 90f);
 		}
 		owner.SetAnimTrigger("Turn");
 		owner.AnimWaitStruct = new AnimWaitStruct("Turn", Zombie.State.Trace.ToString());

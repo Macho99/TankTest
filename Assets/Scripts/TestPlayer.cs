@@ -17,7 +17,7 @@ public class TestPlayer : NetworkBehaviour
 	[SerializeField] Vector3 rendererOffset;
 	[SerializeField] float jumpForce = 5f;
 	[SerializeField] float gravity = -15f;
-	[SerializeField] float lookSpeed = 10f;
+	[SerializeField] float lookSpeed = 600f;
 	[SerializeField] float moveSpeed = 5f;
 
 	Transform camRoot;
@@ -29,7 +29,6 @@ public class TestPlayer : NetworkBehaviour
 	[Networked] public float XAngle { get; private set; }
 	new MeshRenderer renderer;
 	//float yVel;
-	
 
 	public bool IsGround { get; private set; }
 
@@ -91,7 +90,6 @@ public class TestPlayer : NetworkBehaviour
 		kcc.Move(moveSpeed * transform.TransformDirection(new Vector3(input.moveVec.x, 0f, input.moveVec.y)), jump);
 	}
 
-
 	private void CheckFire(TestInputData input)
 	{
 		NetworkButtons pressed = input.buttons.GetPressed(PrevButton);
@@ -122,7 +120,7 @@ public class TestPlayer : NetworkBehaviour
 
 			if (hit.Hitbox is ZombieHitBox zombieHitBox)
 			{
-				zombieHitBox.ApplyDamage(transform, transform.forward * 30f, 1);
+				zombieHitBox.ApplyDamage(transform, transform.forward * 30f, 40);
 			}
 		}
 	}

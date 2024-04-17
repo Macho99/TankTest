@@ -1,5 +1,6 @@
 using ExitGames.Client.Photon.StructWrapping;
 using Fusion;
+using Fusion.Addons.SimpleKCC;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,8 +21,8 @@ public struct TestInputData : INetworkInput
 [DefaultExecutionOrder(-10)]
 public class TestInput : NetworkBehaviour, IBeforeUpdate
 {
-	private TestInputData accumInput;
-	private Vector2 accumLookVec = new();
+	TestInputData accumInput;
+	Vector2Accumulator lookAccum = new Vector2Accumulator(0.02f, true);
 
 	public override void Spawned()
 	{
@@ -38,16 +39,8 @@ public class TestInput : NetworkBehaviour, IBeforeUpdate
 
 	public void OnInput(NetworkRunner runner, NetworkInput input)
 	{
+		accumInput.lookVec = lookAccum.ConsumeTickAligned(runner);
 		input.Set(accumInput);
-	}
-
-	private void Update()
-	{
-		var mouse = Mouse.current;
-		if (mouse != null)
-		{
-			accumLookVec += mouse.delta.ReadValue();
-		}
 	}
 
 	public void BeforeUpdate()
@@ -78,8 +71,8 @@ public class TestInput : NetworkBehaviour, IBeforeUpdate
 		var mouse = Mouse.current;
 		if (mouse != null)
 		{
-			accumInput.lookVec = accumLookVec;
-			accumLookVec = new();
+			Vector2 mouseDelta = mouse.delta.ReadValue();
+			lookAccum.Accumulate(mouseDelta);
 			accumInput.buttons.Set(Buttons.Fire, mouse.leftButton.isPressed);
 		}
 

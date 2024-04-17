@@ -82,12 +82,12 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	private void BeforeSpawned(NetworkRunner runner, NetworkObject netObj)
 	{
+		Random.InitState(runner.SessionInfo.Name.GetHashCode() * netObj.Id.Raw.GetHashCode());
+
 		Vector3 pos = Random.insideUnitSphere * 10f;
 		pos.y = 0f;
 		Zombie zombie = netObj.GetComponent<Zombie>(); 
 		zombie.transform.rotation = Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value));
-		//zombie.Init(target);
-		zombie.Position = transform.position + pos;
 		zombie.transform.position = transform.position + pos;
 	}
 

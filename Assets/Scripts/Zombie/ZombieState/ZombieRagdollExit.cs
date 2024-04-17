@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ZombieRagdollExit : ZombieState
 {
-	const float resetBoneTime = 0.5f;
+	const float resetBoneTime = 1.2f;
 	float elapsed;
 	BoneTransform[] faceBoneTransforms;
 	string animName;
@@ -38,6 +38,7 @@ public class ZombieRagdollExit : ZombieState
 		else if(owner.CurRagdollState == RagdollState.FaceUpCrawl)
 		{
 			sign = 1f;
+			owner.SetAnimBool("Crawl", true);
 			owner.SetAnimFloat("TurnDir", 1f);
 			faceBoneTransforms = Zombie.BoneTransDict["FaceUpCrawl".GetHashCode()];
 			animName = "RagdollToCrawl";
@@ -45,6 +46,7 @@ public class ZombieRagdollExit : ZombieState
 		else if(owner.CurRagdollState == RagdollState.FaceDownCrawl)
 		{
 			sign = 1f;
+			owner.SetAnimBool("Crawl", true);
 			owner.SetAnimFloat("TurnDir", 0f);
 			faceBoneTransforms = Zombie.BoneTransDict["FaceDownCrawl".GetHashCode()];
 			animName = "RagdollToCrawl";
@@ -120,19 +122,19 @@ public class ZombieRagdollExit : ZombieState
 
 		float ratio = elapsed / resetBoneTime;
 		ratio = Mathf.Clamp01(ratio);
-		ratio = BezierBlend(ratio);
+		ratio = CustumBlend(ratio);
 
 		owner.transform.position = Vector3.Lerp(owner.transform.position, owner.Position, ratio);
 		owner.transform.rotation = Quaternion.Lerp(owner.transform.rotation, owner.Rotation, ratio);
 
 		for (int i = 0; i < owner.Bones.Length; i++)
 		{
-			owner.Bones[i].localPosition = Vector3.Lerp(
+			owner.Bones[i].localPosition = Vector3.LerpUnclamped(
 				owner.RagdollBoneTransforms[i].localPosition,
 				faceBoneTransforms[i].localPosition,
 				ratio);
 
-			owner.Bones[i].localRotation = Quaternion.Lerp(
+			owner.Bones[i].localRotation = Quaternion.LerpUnclamped(
 				owner.RagdollBoneTransforms[i].localRotation,
 				faceBoneTransforms[i].localRotation,
 				ratio);
@@ -156,8 +158,36 @@ public class ZombieRagdollExit : ZombieState
 	{
 
 	}
-	private float BezierBlend(float t)
+	private float CustumBlend(float x)
 	{
-		return t * t * (3.0f - 2.0f * t);
+		//return t * t * (3.0f - 2.0f * t);
+		//return t * t * t;
+
+		return x < 0.5
+			? (1 - CustumBlend2(1 - 2 * x)) / 2
+			: (1 + CustumBlend2(2 * x - 1)) / 2;
+	}
+
+	private float CustumBlend2(float x)
+	{
+		const float n1 = 7.5625f;
+		const float d1 = 2.75f;
+
+		if (x < 1 / d1)
+		{
+			return n1 * x * x;
+		}
+		else if (x < 2 / d1)
+		{
+			return n1 * (x -= 1.5f / d1) * x + 0.75f;
+		}
+		else if (x < 2.5 / d1)
+		{
+			return n1 * (x -= 2.25f / d1) * x + 0.9375f;
+		}
+		else
+		{
+			return n1 * (x -= 2.625f / d1) * x + 0.984375f;
+		}
 	}
 }

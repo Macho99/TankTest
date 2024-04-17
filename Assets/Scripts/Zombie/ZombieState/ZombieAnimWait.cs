@@ -58,7 +58,6 @@ public class ZombieAnimWait : ZombieState
 		waitStruct.updateAction?.Invoke();
 		if(animEntered == true) { return; }
 
-
 		if(owner.IsAnimName(waitStruct.animName) == true)
 		{
 			animEntered = true;

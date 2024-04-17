@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ZombieRagdollEnter : ZombieState
 {
@@ -18,9 +19,10 @@ public class ZombieRagdollEnter : ZombieState
 
 	public override void Enter()
 	{
+		owner.Agent.enabled = false;
 		transition = false;
 		elapsed = 0f;
-		exitTime = 0.8f;
+		exitTime = 0.5f;
 
 		owner.transform.position = owner.Position;
 		owner.transform.rotation = owner.Rotation;
@@ -48,6 +50,31 @@ public class ZombieRagdollEnter : ZombieState
 			owner.CurRagdollState = RagdollState.Ragdoll;
 	}
 
+	public override void Render()
+	{
+		owner.Agent.enabled = false;
+
+		//if (owner.Object.IsProxy)
+		//{
+		//	if ((owner.transform.position - owner.Position).sqrMagnitude > 3f)
+		//	{
+		//		owner.transform.position = Vector3.Lerp(owner.transform.position, owner.Position, 0.1f);
+		//	}
+		//}
+
+		Vector3 prevHipPos = owner.Hips.position;
+		Vector3 newRootPos = prevHipPos;
+
+		if (Physics.Raycast(prevHipPos, Vector3.down, out RaycastHit hitInfo))
+		{
+			newRootPos = hitInfo.point;
+		}
+
+		owner.transform.position = newRootPos;
+
+		owner.Hips.position = prevHipPos;
+	}
+
 	public override void SetUp()
 	{
 
@@ -59,6 +86,12 @@ public class ZombieRagdollEnter : ZombieState
 
 		if(elapsed > exitTime)
 		{
+			if(owner.CurHp <= 0)
+			{
+				ChangeState(Zombie.State.Die);
+				return;
+			}
+
 			if (owner.Hips.up.y > 0f)
 			{
 				if (owner.CurLegHp > 0)
