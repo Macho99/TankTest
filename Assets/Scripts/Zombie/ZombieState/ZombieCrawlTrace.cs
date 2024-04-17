@@ -1,15 +1,19 @@
-﻿using System;
+﻿using Fusion;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class ZombieCrawlTrace : ZombieState
 {
 	float speed;
 	float rotateSpeed;
+
+	TickTimer destinationTimer;
 
 	public ZombieCrawlTrace(Zombie owner) : base(owner)
 	{
@@ -22,15 +26,6 @@ public class ZombieCrawlTrace : ZombieState
 		speed = 1f;
 		rotateSpeed = 60f * speed;
 		owner.SetAnimFloat("SpeedX", 0f);
-		StartCoroutine(CoSetDestination());
-	}
-	private IEnumerator CoSetDestination()
-	{
-		while (true)
-		{
-			owner.Agent.SetDestination(owner.Target.position);
-			yield return new WaitForSeconds(0.5f);
-		}
 	}
 
 	public override void Exit()
@@ -40,28 +35,32 @@ public class ZombieCrawlTrace : ZombieState
 
 	public override void FixedUpdateNetwork()
 	{
-		if(CheckTurn() == true) { return; }
+		if (destinationTimer.ExpiredOrNotRunning(owner.Runner))
+		{
+			destinationTimer = TickTimer.CreateFromSeconds(owner.Runner, 0.5f);
+			if (owner.Target != null)
+				owner.Agent.SetDestination(owner.Target.position);
+		}
+
+		if (CheckTurn() == true) { return; }
 
 		float speedY = 0f;
 		if (owner.Agent.hasPath)
 		{
 			Vector3 moveDir = owner.Agent.desiredVelocity;
+			if (moveDir.sqrMagnitude < 0.1f)
+			{
+				return;
+			}
 			moveDir.y = 0f;
 			moveDir.Normalize();
+
 			owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
 				Quaternion.LookRotation(moveDir), rotateSpeed * owner.Runner.DeltaTime);
 			Vector3 animDir = owner.transform.InverseTransformDirection(moveDir);
 
 			speedY = animDir.z * speed;
 		}
-
-		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
-		{
-			owner.Runner.Despawn(owner.Object);
-			ChangeState(Zombie.State.Wait);
-			return;
-		}
-
 		owner.SetAnimFloat("SpeedY", speedY, 0.2f);
 	}
 
@@ -72,12 +71,27 @@ public class ZombieCrawlTrace : ZombieState
 
 	public override void Transition()
 	{
-
+		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
+		{
+			if (owner.Target == null)
+			{
+				owner.Agent.ResetPath();
+				ChangeState(Zombie.State.CrawlIdle);
+				return;
+			}
+			else
+			{
+				//owner.Runner.Despawn(owner.Object);
+				//ChangeState(Zombie.State.Wait);
+				//return;
+			}
+		}
 	}
 
 	private bool CheckTurn()
 	{
-		Vector3 TurnDirection = (owner.Target.transform.position - owner.transform.position).normalized;
+		if (owner.Agent.hasPath == false) return false;
+		Vector3 TurnDirection = owner.Agent.desiredVelocity.normalized;
 
 		float angle = Vector3.SignedAngle(owner.transform.forward, TurnDirection, owner.transform.up);
 		float sign = (angle >= 0f) ? 1f : -1f;

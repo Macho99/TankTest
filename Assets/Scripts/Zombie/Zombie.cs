@@ -1,5 +1,4 @@
 using Fusion;
-using Photon.Pun.Demo.PunBasics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -35,8 +34,8 @@ public class Zombie : NetworkBehaviour
 	[SerializeField] TextMeshProUGUI curStateText;
 	[SerializeField] float viewAngle = 60f;
 	[SerializeField] float playerLostTime = 5f;
+	[SerializeField] SphereCollider playerDetecter;
 
-	SphereCollider playerDetecter;
 	NavMeshAgent agent;
 	NetworkStateMachine stateMachine;
 	Animator anim;
@@ -52,6 +51,7 @@ public class Zombie : NetworkBehaviour
 	//public static BoneTransform[] FaceDownBoneTranforms { get; private set; }
 	public BodyPart[] BodyHitParts { get { return bodyHitParts; } }
 	public Transform Hips { get; private set; }
+	public Transform Head { get; private set; }
 	public Animator Anim { get { return anim; } }
 	public float FallAsleepThreshold { get { return fallAsleepThreshold; } }
 	public NavMeshAgent Agent { get { return agent; } }
@@ -89,9 +89,9 @@ public class Zombie : NetworkBehaviour
 		FallAsleepMask = LayerMask.GetMask("FallAsleepObject");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
-		playerDetecter = GetComponent<SphereCollider>();
 
 		Hips = anim.GetBoneTransform(HumanBodyBones.Hips);
+		Head = anim.GetBoneTransform(HumanBodyBones.Head);
 		Bones = Hips.GetComponentsInChildren<Transform>();
 		RagdollBoneTransforms = new BoneTransform[Bones.Length];
 		if(BoneTransDict == null)
@@ -177,8 +177,8 @@ public class Zombie : NetworkBehaviour
 		Random.InitState((int)Object.Id.Raw * Runner.SessionInfo.Name.GetHashCode());
 		maxSpeed = Random.Range(1, 4);
 
-		anim.SetFloat("IdleShifter", Random.Range(0, 3));
 		anim.SetFloat("WalkShifter", Random.Range(0, 5));
+		anim.SetFloat("IdleShifter", Random.Range(0, 3));
 		anim.SetFloat("RunShifter", Random.Range(0, 2));
 		anim.SetFloat("SprintShifter", Random.Range(0, 2));
 
@@ -204,8 +204,8 @@ public class Zombie : NetworkBehaviour
 
 		if (Target == null) return;
 
-		Vector3 playerDir = (Target.transform.position - transform.position).normalized;
-		if (Physics.Raycast(transform.position, playerDir, playerDetecter.radius * 1.5f))
+		Vector3 toPlayerVec = ((Target.position + Vector3.up) - Head.position);
+		if (Physics.Raycast(Head.position, toPlayerVec.normalized, toPlayerVec.magnitude, LayerMask.GetMask("Default")) == false)
 		{
 			LastPlayerFindTick = Runner.Tick;
 		}
@@ -223,7 +223,8 @@ public class Zombie : NetworkBehaviour
 		StringBuilder sb = new StringBuilder();
 		string printState = curState.Equals("AnimWait") ? $"{prevState} -> AnimWait" : curState;
 		sb.AppendLine($"현재 상태: {printState}");
-		sb.AppendLine($"CurRagdollState: {CurRagdollState}");
+		sb.AppendLine($"LastPlayerFindTick: {LastPlayerFindTick}");
+		sb.AppendLine($"Target: {Target}");
 		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
 		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
 		sb.AppendLine($"PosDiff: {(transform.position - Position).sqrMagnitude.ToString("F4")}");
@@ -352,9 +353,9 @@ public class Zombie : NetworkBehaviour
 	{
 		if (Object.IsProxy) return;
 
-
 		SetAnimFloat("SpeedY", 0f);
 		Target = source;
+		LastPlayerFindTick = Runner.Tick;
 
 		CurHp -= damage;
 		if (CurHp <= 0)
@@ -438,20 +439,20 @@ public class Zombie : NetworkBehaviour
 		RagdollCnt++;
 	}
 
-	private void OnTriggerStay(Collider player)
+	Vector3 playerDir;
+	public void OnPlayerTriggerStay(Transform player)
 	{
-		print("감지");
 		if (Object == null) return;
 		if (Object.IsProxy) return;
 
-		if(Target == null)
+		if (Target == null)
 		{
-			Vector3 playerDir = (player.transform.position - transform.position).normalized;
-			if (Vector3.Dot(playerDir, transform.forward) > Mathf.Cos(viewAngle * Mathf.Deg2Rad))
+			playerDir = ((player.position + Vector3.up) - Head.position).normalized;
+			if (Vector3.Dot(playerDir, Head.forward) > Mathf.Cos(viewAngle * Mathf.Deg2Rad))
 			{
-				if(Physics.Raycast(transform.position, playerDir, playerDetecter.radius))
+				if(Physics.Raycast(Head.position, playerDir, playerDetecter.radius, LayerMask.GetMask("Player")))
 				{
-					Target = player.transform;
+					Target = player;
 				}
 			}
 		}

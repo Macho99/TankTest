@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fusion;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ public class ZombieTrace : ZombieState
 	float prevPosY;
 	Collider[] cols = new Collider[1];
 
+	TickTimer destinationTimer;
+
 	public ZombieTrace(Zombie owner) : base(owner)
 	{
 	}
@@ -27,17 +30,8 @@ public class ZombieTrace : ZombieState
 
 		speed = owner.TraceSpeed;
 		rotateSpeed = 60f * speed;
-		StartCoroutine(CoSetDestination());
 	}
 
-	private IEnumerator CoSetDestination()
-	{
-		while (true)
-		{
-			owner.Agent.SetDestination(owner.Target.position);
-			yield return new WaitForSeconds(0.5f);
-		}
-	}
 
 	public override void Exit()
 	{
@@ -50,7 +44,21 @@ public class ZombieTrace : ZombieState
 
 	public override void Transition()
 	{
-
+		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
+		{
+			if(owner.Target == null)
+			{
+				owner.Agent.ResetPath();
+				ChangeState(Zombie.State.Idle);
+				return;
+			}
+			else
+			{
+				owner.Runner.Despawn(owner.Object);
+				ChangeState(Zombie.State.Wait);
+				return;
+			}
+		}
 	}
 
 	public override void FixedUpdateNetwork()
@@ -58,6 +66,13 @@ public class ZombieTrace : ZombieState
 		if(CheckFallAsleep() == true)
 		{
 			return;
+		}
+
+		if (destinationTimer.ExpiredOrNotRunning(owner.Runner))
+		{
+			destinationTimer = TickTimer.CreateFromSeconds(owner.Runner, 0.5f);
+			if (owner.Target != null)
+				owner.Agent.SetDestination(owner.Target.position);
 		}
 
 		float speedX = 0f;
@@ -76,18 +91,8 @@ public class ZombieTrace : ZombieState
 			speedY = animDir.z * speed;
 		}
 
-		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
-		{
-			owner.Runner.Despawn(owner.Object);
-			ChangeState(Zombie.State.Wait);
-			return;
-			//shifter = Random.Range(0, 5);
-			//owner.Agent.ResetPath();
-			//ChangeState(Zombie.State.Idle);
-		}
-
 		owner.SetAnimFloat("SpeedX", speedX, 0.2f);
-		owner.SetAnimFloat("SpeedY", speedY, 0.2f);
+		owner.SetAnimFloat("SpeedY", speedY, 0.4f);
 	}
 
 	private bool CheckFallAsleep()
@@ -135,6 +140,8 @@ public class ZombieTrace : ZombieState
 
 	private bool CheckTurn()
 	{
+		if (owner.Target == null) return false;
+
 		Vector3 TurnDirection = (owner.Target.transform.position - owner.transform.position).normalized;
 
 		float angle = Vector3.SignedAngle(owner.transform.forward, TurnDirection, owner.transform.up);

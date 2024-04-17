@@ -13,12 +13,13 @@ public class ZombieIdle : ZombieState
 	public override void Enter()
 	{
 		elapsed = 0f;
-		idleTime = Random.Range(3f, 5f);
+		idleTime = Random.Range(4f, 30f);
 	}
 
 	public override void Exit()
 	{
-
+		owner.SetAnimFloat("SpeedX", 0f);
+		owner.SetAnimFloat("SpeedY", 0f);
 	}
 
 	public override void SetUp()
@@ -34,9 +35,20 @@ public class ZombieIdle : ZombieState
 			return;
 		}
 
-		if(elapsed > idleTime)
+		if (elapsed > idleTime)
 		{
-			ChangeState(Zombie.State.Wander);
+			owner.SetAnimTrigger("Search");
+			owner.AnimWaitStruct = new AnimWaitStruct("Search", "Idle",
+				updateAction: () =>
+				{
+					if(owner.Target != null)
+					{
+						owner.SetAnimTrigger("Exit");
+						ChangeState(Zombie.State.Trace);
+					}
+				});
+			ChangeState(Zombie.State.AnimWait);
+			//ChangeState(Zombie.State.Wander);
 			return;
 		}
 	}
@@ -44,5 +56,7 @@ public class ZombieIdle : ZombieState
 	public override void FixedUpdateNetwork()
 	{
 		elapsed += owner.Runner.DeltaTime;
+		owner.SetAnimFloat("SpeedX", 0f);
+		owner.SetAnimFloat("SpeedY", 0f, 1f);
 	}
 }

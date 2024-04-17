@@ -65,7 +65,7 @@ public class ZombieRagdollEnter : ZombieState
 		Vector3 prevHipPos = owner.Hips.position;
 		Vector3 newRootPos = prevHipPos;
 
-		if (Physics.Raycast(prevHipPos, Vector3.down, out RaycastHit hitInfo))
+		if (Physics.Raycast(prevHipPos, Vector3.down, out RaycastHit hitInfo, 5f, LayerMask.GetMask("Default")))
 		{
 			newRootPos = hitInfo.point;
 		}

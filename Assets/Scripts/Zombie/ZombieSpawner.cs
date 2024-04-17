@@ -11,6 +11,7 @@ using UnityEngine.InputSystem;
 public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
 	[SerializeField] bool spawn;
+	[SerializeField] Transform playerSpawnPoint;
 	[SerializeField] NetworkPrefabRef playerPrefab;
 	[SerializeField] NetworkPrefabRef zombiePrefab;
 	[SerializeField] NetworkObject target;
@@ -45,7 +46,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 		await runner.StartGame(new StartGameArgs()
 		{
 			GameMode = mode,
-			SessionName = $"TestRoom",
+			SessionName = $"TestRoom1",
 			Scene = scene,
 			SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
 		});
@@ -104,7 +105,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 	public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
 	{
 		if (runner.IsServer == false) return;
-		runner.Spawn(playerPrefab, transform.position, inputAuthority: player);
+		runner.Spawn(playerPrefab, playerSpawnPoint.position, inputAuthority: player);
 	}
 
 	public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
