@@ -23,6 +23,9 @@ public class ZombieAnimWait : ZombieState
 		waitStruct = owner.AnimWaitStruct.Value;
 		waitStruct.startAction?.Invoke();
 		owner.AnimWaitStruct = null;
+
+		owner.WaitName = waitStruct.animName;
+		owner.NextState = waitStruct.nextState;
 	}
 
 	public override void Exit()

@@ -187,6 +187,7 @@ public class Zombie : NetworkBehaviour
 			LastPlayerFindTick = Runner.Tick;
 			Target = overlapCols[0].transform;
 			CurTargetType = TargetType.Player;
+			agent.ResetPath();
 		}
 		playerFindTimer = TickTimer.CreateFromSeconds(Runner, 0.1f);
 	}
@@ -204,6 +205,7 @@ public class Zombie : NetworkBehaviour
 		if (result == 0)
 			return;
 
+		agent.ResetPath();
 		Target = overlapCols[0].transform;
 		CurTargetType = TargetType.Meat;
 	}
@@ -214,7 +216,7 @@ public class Zombie : NetworkBehaviour
 
 		if (destinationTimer.ExpiredOrNotRunning(Runner))
 		{
-			destinationTimer = TickTimer.CreateFromSeconds(Runner, 1f);
+			destinationTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
 			if (Target != null && agent.enabled == true)
 				agent.SetDestination(Target.position);
 		}
@@ -234,14 +236,16 @@ public class Zombie : NetworkBehaviour
 		}
 	}
 
+	public string WaitName { get; set; }
+	public string NextState { get; set; }
 	string prevState;
 	public override void Render()
 	{
 		string curState = stateMachine.curStateStr;
 		StringBuilder sb = new StringBuilder();
-		string printState = curState.Equals("AnimWait") ? $"{prevState} -> AnimWait" : curState;
+		string printState = curState.Equals("AnimWait") ? $"{prevState} -> AnimWait({WaitName}) -> {NextState}" : curState;
 		sb.AppendLine($"현재 상태: {printState}");
-		sb.AppendLine($"LastPlayerFindTick: {LastPlayerFindTick}");
+		sb.AppendLine($"마지막 타겟 발견시간: {((LastPlayerFindTick - Runner.Tick) / (float) Runner.TickRate).ToString("F1")}");
 		sb.AppendLine($"Target: {CurTargetType}");
 		sb.Append($"CurHP: ");
 		for (int i = 0; i < CurHp; i += 50)
@@ -252,7 +256,7 @@ public class Zombie : NetworkBehaviour
 		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
 		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
 		sb.AppendLine($"PosDiff: {(transform.position - Position).sqrMagnitude.ToString("F4")}");
-		if(curState.Equals("AnimWait") == false)
+		if (curState.Equals("AnimWait") == false)
 			prevState = curState;
 
 		curStateText.text = sb.ToString();
@@ -382,6 +386,7 @@ public class Zombie : NetworkBehaviour
 
 	private void StartRagdoll(Vector3 velocity, ZombieBody zombieBody)
 	{
+		LastPlayerFindTick = Runner.Tick + Runner.TickRate * 10;
 		RagdollVelocity = velocity;
 		RagdollBody = zombieBody;
 		CurRagdollState = RagdollState.Ragdoll;

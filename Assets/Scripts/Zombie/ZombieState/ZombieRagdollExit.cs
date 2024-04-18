@@ -8,6 +8,7 @@ public class ZombieRagdollExit : ZombieState
 	float elapsed;
 	BoneTransform[] faceBoneTransforms;
 	string animName;
+	Func<float, float> easeFunc;
 
 	public ZombieRagdollExit(Zombie owner) : base(owner)
 	{
@@ -24,16 +25,20 @@ public class ZombieRagdollExit : ZombieState
 		if (owner.CurRagdollState == RagdollState.FaceUpStand)
 		{
 			sign = -1f;
+			owner.SetAnimBool("Crawl", false);
 			owner.SetAnimFloat("TurnDir", 1f);
 			faceBoneTransforms = Zombie.BoneTransDict["FaceUpStand".GetHashCode()];
 			animName = "RagdollToStand";
+			easeFunc = EaseInOutBounce;
 		}
 		else if(owner.CurRagdollState == RagdollState.FaceDownStand)
 		{
 			sign = 1f;
+			owner.SetAnimBool("Crawl", false);
 			owner.SetAnimFloat("TurnDir", 0f);
 			faceBoneTransforms = Zombie.BoneTransDict["FaceDownStand".GetHashCode()];
 			animName = "RagdollToStand";
+			easeFunc = EaseInCubic;
 		}
 		else if(owner.CurRagdollState == RagdollState.FaceUpCrawl)
 		{
@@ -42,6 +47,7 @@ public class ZombieRagdollExit : ZombieState
 			owner.SetAnimFloat("TurnDir", 1f);
 			faceBoneTransforms = Zombie.BoneTransDict["FaceUpCrawl".GetHashCode()];
 			animName = "RagdollToCrawl";
+			easeFunc = EaseInOutBounce;
 		}
 		else if(owner.CurRagdollState == RagdollState.FaceDownCrawl)
 		{
@@ -50,6 +56,7 @@ public class ZombieRagdollExit : ZombieState
 			owner.SetAnimFloat("TurnDir", 0f);
 			faceBoneTransforms = Zombie.BoneTransDict["FaceDownCrawl".GetHashCode()];
 			animName = "RagdollToCrawl";
+			easeFunc = EaseInCubic;
 		}
 		else
 		{
@@ -122,7 +129,7 @@ public class ZombieRagdollExit : ZombieState
 
 		float ratio = elapsed / resetBoneTime;
 		ratio = Mathf.Clamp01(ratio);
-		ratio = CustumBlend(ratio);
+		ratio = easeFunc(ratio);
 
 		owner.transform.position = Vector3.Lerp(owner.transform.position, owner.Position, ratio);
 		owner.transform.rotation = Quaternion.Lerp(owner.transform.rotation, owner.Rotation, ratio);
@@ -158,17 +165,20 @@ public class ZombieRagdollExit : ZombieState
 	{
 
 	}
-	private float CustumBlend(float x)
-	{
-		//return t * t * (3.0f - 2.0f * t);
-		//return t * t * t;
 
-		return x < 0.5
-			? (1 - CustumBlend2(1 - 2 * x)) / 2
-			: (1 + CustumBlend2(2 * x - 1)) / 2;
+	private float EaseInCubic(float x)
+	{
+		return x * x * x;
 	}
 
-	private float CustumBlend2(float x)
+	private float EaseInOutBounce(float x)
+	{
+		return x < 0.5
+			? (1 - EaseOutBounce(1 - 2 * x)) / 2
+			: (1 + EaseOutBounce(2 * x - 1)) / 2;
+	}
+
+	private float EaseOutBounce(float x)
 	{
 		const float n1 = 7.5625f;
 		const float d1 = 2.75f;

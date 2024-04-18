@@ -34,7 +34,7 @@ public class ZombieTrace : ZombieState
 		if (CheckTransition() == true) return;
 
 		prevPosY = owner.transform.position.y;
-		if (CheckTurn() == true) { return; }
+		//if (CheckTurn() == true) { return; }
 	}
 
 
@@ -163,7 +163,7 @@ public class ZombieTrace : ZombieState
 		speed = owner.TraceSpeed;
 		if(owner.Target == null)
 		{
-			speed = Mathf.Clamp(speed, 0f, speed > 2.9f ? 2f : 1f);
+			speed = Mathf.Clamp(speed, 0f, 1f);
 		}
 		rotateSpeed = 60f * speed;
 
