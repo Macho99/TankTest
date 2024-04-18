@@ -13,6 +13,6 @@ public class PlayerDetecter : MonoBehaviour
 
 	private void OnTriggerStay(Collider other)
 	{
-		owner.OnPlayerTriggerStay(other.transform);
+		//owner.OnTargetTriggerStay(other.transform);
 	}
 }

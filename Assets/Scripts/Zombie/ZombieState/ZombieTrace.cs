@@ -15,6 +15,12 @@ public class ZombieTrace : ZombieState
 	float rotateSpeed;
 
 	float prevPosY;
+	float attackElapsed;
+	bool attacked;
+
+	float eatElapsed;
+	bool eatEnd;
+
 	Collider[] cols = new Collider[1];
 
 	TickTimer destinationTimer;
@@ -25,11 +31,10 @@ public class ZombieTrace : ZombieState
 
 	public override void Enter()
 	{
+		if (CheckTransition() == true) return;
+
 		prevPosY = owner.transform.position.y;
 		if (CheckTurn() == true) { return; }
-
-		speed = owner.TraceSpeed;
-		rotateSpeed = 60f * speed;
 	}
 
 
@@ -44,21 +49,108 @@ public class ZombieTrace : ZombieState
 
 	public override void Transition()
 	{
-		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
+		if(CheckTransition() == true)
 		{
-			if(owner.Target == null)
+			return;
+		}
+	}
+
+	private bool CheckTransition()
+	{
+		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1.5f)
+		{
+			if (owner.Target == null)
 			{
 				owner.Agent.ResetPath();
 				ChangeState(Zombie.State.Idle);
-				return;
+				return true;
 			}
-			else
+			else if(owner.CurTargetType == Zombie.TargetType.Meat)
 			{
-				owner.Runner.Despawn(owner.Object);
-				ChangeState(Zombie.State.Wait);
-				return;
+				if(owner.Agent.remainingDistance < 1f)
+				{
+					Eat();
+					return true;
+				}
+			}
+			else if ((owner.Target.position - owner.transform.position).sqrMagnitude < 1.5f * 1.5f)
+			{
+				Attack();
+				return true;
 			}
 		}
+		return false;
+	}
+
+	private void Eat()
+	{
+		eatEnd = false;
+		owner.Agent.ResetPath();
+		owner.SetAnimBool("Eat", true);
+		owner.AnimWaitStruct = new AnimWaitStruct("EatEnd", Zombie.State.Idle.ToString(),
+			updateAction: () =>
+			{
+				owner.SetAnimFloat("SpeedY", 0f, 0.2f);
+				eatElapsed += owner.Runner.DeltaTime;
+				if(eatElapsed > 2f && eatEnd == false)
+				{
+					eatElapsed = 0f;
+					owner.Heal(20);
+					if(owner.CurHp == owner.MaxHP)
+					{
+						eatEnd = true;
+						owner.Target = null;
+						owner.CurTargetType = Zombie.TargetType.None;
+						owner.SetAnimBool("Eat", false);
+						return;
+					}
+				}
+
+				if(owner.CurTargetType == Zombie.TargetType.Player)
+				{
+					eatEnd = true;
+					owner.SetAnimBool("Eat", false);
+					return;
+				}
+			},
+			animEndAction: () => owner.SetAnimBool("Eat", false)
+			);
+		ChangeState(Zombie.State.AnimWait);
+	}
+
+	private void Attack()
+	{
+		Vector3 AttackDirection = (owner.Target.position - owner.transform.position).normalized;
+
+		float angle = Vector3.SignedAngle(owner.transform.forward, AttackDirection, owner.transform.up);
+		float sign = (angle >= 0f) ? 1f : -1f;
+
+		angle = Mathf.Abs(angle);
+
+		if(sign < 0f && angle > 120f)
+		{
+			owner.SetAnimFloat("TurnDir", 2f);
+		}
+		else
+		{
+			owner.SetAnimFloat("TurnDir", sign * (angle) / 90f);
+		}
+
+		attacked = false;
+		attackElapsed = 0f;
+		owner.SetAnimFloat("AttackShifter", Random.Range(0, 3));
+		owner.SetAnimTrigger("Attack");
+		owner.AnimWaitStruct = new AnimWaitStruct("Attack", "Trace", 
+			updateAction: () => {
+				attackElapsed += owner.Runner.DeltaTime;
+				if(attackElapsed > 0.4f && attacked == false)
+				{
+					attacked = true;
+					owner.Attack(10);
+				}
+				owner.SetAnimFloat("SpeedY", 0f, 1f);
+			});
+		ChangeState(Zombie.State.AnimWait);
 	}
 
 	public override void FixedUpdateNetwork()
@@ -68,12 +160,12 @@ public class ZombieTrace : ZombieState
 			return;
 		}
 
-		if (destinationTimer.ExpiredOrNotRunning(owner.Runner))
+		speed = owner.TraceSpeed;
+		if(owner.Target == null)
 		{
-			destinationTimer = TickTimer.CreateFromSeconds(owner.Runner, 0.5f);
-			if (owner.Target != null)
-				owner.Agent.SetDestination(owner.Target.position);
+			speed = Mathf.Clamp(speed, 0f, speed > 2.9f ? 2f : 1f);
 		}
+		rotateSpeed = 60f * speed;
 
 		float speedX = 0f;
 		float speedY = 0f;
@@ -140,9 +232,7 @@ public class ZombieTrace : ZombieState
 
 	private bool CheckTurn()
 	{
-		if (owner.Target == null) return false;
-
-		Vector3 TurnDirection = (owner.Target.transform.position - owner.transform.position).normalized;
+		Vector3 TurnDirection = (owner.Agent.desiredVelocity).normalized;
 
 		float angle = Vector3.SignedAngle(owner.transform.forward, TurnDirection, owner.transform.up);
 		float sign = (angle >= 0f) ? 1f : -1f;

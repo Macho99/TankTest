@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class ZombieIdle : ZombieState
 {
+	float wanderThreshold = 0.3f;
+
 	float idleTime;
 	float elapsed;
 
@@ -13,7 +15,7 @@ public class ZombieIdle : ZombieState
 	public override void Enter()
 	{
 		elapsed = 0f;
-		idleTime = Random.Range(4f, 30f);
+		idleTime = Random.Range(4f, 10f);
 	}
 
 	public override void Exit()
@@ -29,7 +31,7 @@ public class ZombieIdle : ZombieState
 
 	public override void Transition()
 	{
-		if (owner.Target != null)
+		if (owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
 		{
 			ChangeState(Zombie.State.Trace);
 			return;
@@ -37,19 +39,22 @@ public class ZombieIdle : ZombieState
 
 		if (elapsed > idleTime)
 		{
-			owner.SetAnimTrigger("Search");
-			owner.AnimWaitStruct = new AnimWaitStruct("Search", "Idle",
-				updateAction: () =>
-				{
-					if(owner.Target != null)
-					{
-						owner.SetAnimTrigger("Exit");
-						ChangeState(Zombie.State.Trace);
-					}
-				});
-			ChangeState(Zombie.State.AnimWait);
-			//ChangeState(Zombie.State.Wander);
-			return;
+			elapsed = -10f;
+			float dice = Random.value;
+
+			if(dice > wanderThreshold)
+			{
+				Vector3 pos = owner.transform.position;
+				Vector3 randPos = pos + Random.insideUnitSphere * 20f;
+				randPos.y = pos.y;
+				owner.Agent.SetDestination(randPos);
+				return;
+			}
+			else
+			{
+				Search();
+				return;
+			}
 		}
 	}
 
@@ -58,5 +63,20 @@ public class ZombieIdle : ZombieState
 		elapsed += owner.Runner.DeltaTime;
 		owner.SetAnimFloat("SpeedX", 0f);
 		owner.SetAnimFloat("SpeedY", 0f, 1f);
+	}
+
+	private void Search()
+	{
+		owner.SetAnimTrigger("Search");
+		owner.AnimWaitStruct = new AnimWaitStruct("Search", "Idle",
+			updateAction: () =>
+			{
+				if (owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
+				{
+					owner.SetAnimTrigger("Exit");
+					ChangeState(Zombie.State.Trace);
+				}
+			});
+		ChangeState(Zombie.State.AnimWait);
 	}
 }

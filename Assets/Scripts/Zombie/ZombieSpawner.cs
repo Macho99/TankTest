@@ -73,7 +73,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 		{
 			isFirst = false;
 
-			for(int i = 0; i < 10; i++)
+			for(int i = 0; i < 50; i++)
 			{
 				runner.Spawn(zombiePrefab, onBeforeSpawned: BeforeSpawned);
 			}
@@ -85,7 +85,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 	{
 		Random.InitState(runner.SessionInfo.Name.GetHashCode() * netObj.Id.Raw.GetHashCode());
 
-		Vector3 pos = Random.insideUnitSphere * 10f;
+		Vector3 pos = Random.insideUnitSphere * 50f;
 		pos.y = 0f;
 		Zombie zombie = netObj.GetComponent<Zombie>(); 
 		zombie.transform.rotation = Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value));
@@ -105,7 +105,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 	public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
 	{
 		if (runner.IsServer == false) return;
-		runner.Spawn(playerPrefab, playerSpawnPoint.position, inputAuthority: player);
+		runner.Spawn(playerPrefab, playerSpawnPoint.position, playerSpawnPoint.rotation, inputAuthority: player);
 	}
 
 	public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)

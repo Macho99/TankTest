@@ -34,7 +34,7 @@ public class ZombieCrawlIdle : ZombieState
 
 	public override void Transition()
 	{
-		if(owner.Target != null)
+		if(owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
 		{
 			ChangeState(Zombie.State.CrawlTrace);
 			return;
@@ -46,7 +46,7 @@ public class ZombieCrawlIdle : ZombieState
 			owner.AnimWaitStruct = new AnimWaitStruct("CrawlSearch", "CrawlIdle",
 				updateAction: () =>
 				{
-					if (owner.Target != null)
+					if (owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
 					{
 						owner.SetAnimTrigger("Exit");
 						ChangeState(Zombie.State.CrawlTrace);
