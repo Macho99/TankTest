@@ -101,9 +101,9 @@ public class ZombieCrawlTrace : ZombieState
 				return;
 			}
 
-			Vector3 headPos = owner.Head.position;
-			headPos.y = owner.transform.position.y;
-			Vector3 targetHeadVec = owner.Target.position - headPos;
+			Vector3 eyePos = owner.Eyes.position;
+			eyePos.y = owner.transform.position.y;
+			Vector3 targetHeadVec = owner.Target.position - eyePos;
 
 			if (Vector3.Dot(targetHeadVec.normalized, owner.transform.forward) > Mathf.Cos(30f * Mathf.Deg2Rad))
 			{

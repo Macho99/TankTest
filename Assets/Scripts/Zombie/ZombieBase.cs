@@ -20,7 +20,8 @@ public abstract class ZombieBase : NetworkBehaviour
 
 	public enum TargetType { None, Meat, Player }
 
-	[SerializeField] protected float viewAngle = 60f;
+	[SerializeField] protected float viewAngle = 45f;
+	[SerializeField] protected float lookDist = 10f;
 	[SerializeField] protected float playerLostTime = 5f;
 	[SerializeField] protected GameObject headBloodVFX;
 	[SerializeField] protected GameObject bodyBloodVFX;
@@ -35,9 +36,13 @@ public abstract class ZombieBase : NetworkBehaviour
 
 	protected BodyPart[] bodyHitParts = new BodyPart[(int)ZombieBody.Size];
 
+	public string WaitName { get; set; }
+	public string NextState { get; set; }
+	protected string prevState;
+
 	public BodyPart[] BodyHitParts { get { return bodyHitParts; } }
 	public Transform Hips { get; private set; }
-	public Transform Head { get; private set; }
+	public Transform Eyes { get; private set; }
 	public Animator Anim { get { return anim; } }
 	public NavMeshAgent Agent { get { return agent; } }
 	public LayerMask PlayerMask { get; private set; }
@@ -55,6 +60,8 @@ public abstract class ZombieBase : NetworkBehaviour
 	[Networked] public Vector3 HitVelocity { get; private set; }
 	[Networked, OnChangedRender(nameof(PlayHitFX))] public int HitCnt { get; set; }
 
+	public abstract string DecideState();
+
 	protected virtual void Awake()
 	{
 		CurHp = MaxHP;
@@ -64,7 +71,7 @@ public abstract class ZombieBase : NetworkBehaviour
 		anim = GetComponent<Animator>();
 
 		Hips = anim.GetBoneTransform(HumanBodyBones.Hips);
-		Head = anim.GetBoneTransform(HumanBodyBones.Head);
+		Eyes = anim.GetBoneTransform(HumanBodyBones.LeftEye);
 
 		stateMachine = GetComponent<NetworkStateMachine>();
 
@@ -92,7 +99,7 @@ public abstract class ZombieBase : NetworkBehaviour
 		if (CurTargetType == TargetType.Player) return;
 		if (playerFindTimer.ExpiredOrNotRunning(Runner) == false) return;
 
-		int result = Physics.OverlapSphereNonAlloc(transform.position, 10f, overlapCols, PlayerMask);
+		int result = Physics.OverlapSphereNonAlloc(transform.position, lookDist, overlapCols, PlayerMask);
 
 		if (result == 0)
 		{
@@ -101,10 +108,12 @@ public abstract class ZombieBase : NetworkBehaviour
 		}
 
 		Transform findPlayer = overlapCols[0].transform;
-		Vector3 toPlayerVec = ((findPlayer.position + Vector3.up) - Head.position);
-		if (Vector3.Dot(toPlayerVec, Head.forward) > Mathf.Cos(viewAngle * Mathf.Deg2Rad))
+		Vector3 toPlayerVec = ((findPlayer.position + Vector3.up) - Eyes.position);
+		Vector3 toPlayerDir = toPlayerVec.normalized;
+		float length = toPlayerVec.magnitude;
+		if (Vector3.Dot(toPlayerDir, Eyes.forward) > Mathf.Cos(viewAngle * Mathf.Deg2Rad))
 		{
-			if (Physics.Raycast(Head.position, toPlayerVec.normalized, toPlayerVec.magnitude, LayerMask.GetMask("Default")) == false)
+			if (Physics.Raycast(Eyes.position, toPlayerDir, length, LayerMask.GetMask("Default")) == false)
 			{
 				LastPlayerFindTick = Runner.Tick;
 				Target = overlapCols[0].transform;
@@ -129,8 +138,8 @@ public abstract class ZombieBase : NetworkBehaviour
 
 		if (CurTargetType != TargetType.Player) return;
 
-		Vector3 toPlayerVec = ((Target.position + Vector3.up) - Head.position);
-		if (Physics.Raycast(Head.position, toPlayerVec.normalized, toPlayerVec.magnitude, LayerMask.GetMask("Default")) == false)
+		Vector3 toPlayerVec = ((Target.position + Vector3.up) - Eyes.position);
+		if (Physics.Raycast(Eyes.position, toPlayerVec.normalized, toPlayerVec.magnitude, LayerMask.GetMask("Default")) == false)
 		{
 			LastPlayerFindTick = Runner.Tick;
 		}

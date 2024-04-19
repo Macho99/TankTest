@@ -1713,19 +1713,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 624a113dda34927448849b2362e148f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skins: {fileID: 1713092269831648524}
-  fallAsleepThreshold: 0.3
-  curStateText: {fileID: 3990900717246760630}
   viewAngle: 45
   playerLostTime: 5
   headBloodVFX: {fileID: 2281759223855658892, guid: 5c48a4ba1a920cf409e160836fdfdcd2, type: 3}
   bodyBloodVFX: {fileID: 8428142431305946562, guid: 4eb841424a674594fb38c97285efa16a, type: 3}
   _Position: {x: 0, y: 0, z: 0}
   _Rotation: {x: 0, y: 0, z: 0, w: 0}
+  _HitBody: 0
+  _HitVelocity: {x: 0, y: 0, z: 0}
+  _HitCnt: 0
+  skins: {fileID: 1713092269831648524}
+  fallAsleepThreshold: 0.3
+  curStateText: {fileID: 3990900717246760630}
   _CurRagdollState: 0
   _RagdollCnt: 0
-  _RagdollBody: 0
-  _RagdollVelocity: {x: 0, y: 0, z: 0}
 --- !u!114 &5639476792328849030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1819,7 +1820,7 @@ MonoBehaviour:
   TotalWords: 11
   ApplyTiming: 2
   SyncSettings: 15
-  StateHashes: 000000002c3de128c25f295d40139c6a5a82a6809f065eb81b258857c6de2875449164f03270625b602a1d7279ba12802be06da946980c4f14c2736658d4b1f8b6b6798d803811296bfb99d491de5cb3d2706fb06acf9475cf8b73ca0d286c404e865f43f639a486537d4339f096b721ea078dcb9c728c6418515a8b09ffa8694a519b6a16d3b21d0c4288f7
+  StateHashes: 000000002c3de128c25f295d40139c6a5a82a6809f065eb81b258857c6de2875449164f03270625b602a1d7279ba12802be06da946980c4f14c2736658d4b1f8b6b6798d803811296bfb99d491de5cb3d2706fb06acf9475cf8b73ca0d286c404e865f43f639a486537d4339f096b721ea078dcb9c728c6418515a8b09ffa8694a519b6a16d3b21d0c4288f7e3e0cf5161af83d4
   TriggerHashes: 0000000079ba1280a1609f62d3b51fbb91de5cb3302b3b340d286c40
 --- !u!114 &1835357077659790036
 MonoBehaviour:

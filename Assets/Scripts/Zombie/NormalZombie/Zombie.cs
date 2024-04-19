@@ -68,7 +68,10 @@ public class Zombie : ZombieBase
 		stateMachine.AddState(State.RagdollExit, new ZombieRagdollExit(this));
 		stateMachine.AddState(State.Die, new ZombieDie(this));
 
-		stateMachine.InitState(State.Idle);
+		SetAnimBool("Crawl", true);
+		AnimWaitStruct = new AnimWaitStruct("Spawn", State.CrawlIdle.ToString());
+
+		stateMachine.InitState(State.AnimWait);
 	}
 
 	public override void Spawned()
@@ -122,9 +125,6 @@ public class Zombie : ZombieBase
 		CurTargetType = TargetType.Meat;
 	}
 
-	public string WaitName { get; set; }
-	public string NextState { get; set; }
-	string prevState;
 
 	public override void Render()
 	{
@@ -248,24 +248,17 @@ public class Zombie : ZombieBase
 
 	#endregion
 
-	public State DecideState()
+	public override string DecideState()
 	{
 		if (Object.IsProxy)
-			return State.Idle;
+			return State.Idle.ToString();
 
 		if(anim.GetBool("Crawl") == true)
 		{
-			if(Target == null)
-				return State.CrawlIdle;
-			else
-				return State.CrawlIdle;
-			//공격으로 전환
+			return State.CrawlIdle.ToString();
 		}
 
-		if(Target != null)
-			return State.Trace;
-		else
-			return State.Idle;
+		return State.Idle.ToString();
 	}
 
 	public override void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, Vector3 velocity, int damage)
