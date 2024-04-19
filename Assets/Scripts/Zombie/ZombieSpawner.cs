@@ -14,7 +14,6 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 	[SerializeField] Transform playerSpawnPoint;
 	[SerializeField] NetworkPrefabRef playerPrefab;
 	[SerializeField] NetworkPrefabRef zombiePrefab;
-	[SerializeField] NetworkObject target;
 	[SerializeField] TextMeshProUGUI connectInfoText;
 	[SerializeField] float spawnInterval = 2f;
 
