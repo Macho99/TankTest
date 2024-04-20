@@ -18,11 +18,14 @@ public class Zombie : ZombieBase
 	[SerializeField] Transform skins;
 	[SerializeField] float fallAsleepThreshold = 0.2f;
 	[SerializeField] TextMeshProUGUI curStateText;
+	[SerializeField] Transform ragdollHips;
 
 	TickTimer meatFindTimer;
 
+	public Transform RagdollHips { get { return ragdollHips; } }
 	public Transform[] Bones { get; private set; }
-	public BoneTransform[] RagdollBoneTransforms { get; private set; }
+	public Transform[] RagdollBones { get; private set; }
+	//public BoneTransform[] RagdollBoneTransforms { get; private set; }
 	public static Dictionary<int, BoneTransform[]> BoneTransDict { get; private set; }
 	//public static BoneTransform[] FaceUpBoneTransforms { get; private set; }
 	//public static BoneTransform[] FaceDownBoneTranforms { get; private set; }
@@ -52,7 +55,8 @@ public class Zombie : ZombieBase
 		FallAsleepMask = LayerMask.GetMask("FallAsleepObject");
 
 		Bones = Hips.GetComponentsInChildren<Transform>();
-		RagdollBoneTransforms = new BoneTransform[Bones.Length];
+		RagdollBones = ragdollHips.GetComponentsInChildren<Transform>();
+
 		if(BoneTransDict == null)
 		{
 			InitBoneTransDict();
@@ -68,10 +72,12 @@ public class Zombie : ZombieBase
 		stateMachine.AddState(State.RagdollExit, new ZombieRagdollExit(this));
 		stateMachine.AddState(State.Die, new ZombieDie(this));
 
-		SetAnimBool("Crawl", true);
 		AnimWaitStruct = new AnimWaitStruct("Spawn", State.CrawlIdle.ToString());
 
 		stateMachine.InitState(State.AnimWait);
+
+		SetBodyParts();
+		EnableRagdoll(false);
 	}
 
 	public override void Spawned()
@@ -97,6 +103,12 @@ public class Zombie : ZombieBase
 			else
 				child.gameObject.SetActive(false);
 			cnt++;
+		}
+
+		if (HasStateAuthority)
+		{
+			//SetAnimTrigger("Spawn");
+			//SetAnimBool("Crawl", true);
 		}
 	}
 
@@ -125,6 +137,40 @@ public class Zombie : ZombieBase
 		CurTargetType = TargetType.Meat;
 	}
 
+	private void SetBodyParts()
+	{
+		ZombieHitBox[] hitBoxes = GetComponentsInChildren<ZombieHitBox>();
+		foreach (ZombieHitBox hitBox in hitBoxes)
+		{
+			BodyPart bodyPart = new BodyPart();
+			bodyPart.zombieHitBox = hitBox;
+			bodyPart.rb = hitBox.RB;
+			bodyPart.col = hitBox.GetComponent<Collider>();
+			bodyHitParts[(int)hitBox.BodyType] = bodyPart;
+		}
+	}
+
+	public void EnableRagdoll(bool value)
+	{
+		if(value == false)
+		{
+			foreach (BodyPart bodyPart in bodyHitParts)
+			{
+				bodyPart.rb.velocity = Vector3.zero;
+				bodyPart.rb.angularVelocity = Vector3.zero;
+			}
+		}
+		else if(value == true)
+		{
+			for (int i = 0; i < RagdollBones.Length; i++)
+			{
+				RagdollBones[i].localPosition = Bones[i].localPosition;
+				RagdollBones[i].localRotation = Bones[i].localRotation;
+			}
+		}
+
+		ragdollHips.gameObject.SetActive(value);
+	}
 
 	public override void Render()
 	{

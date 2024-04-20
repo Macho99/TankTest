@@ -19,6 +19,7 @@ public class TestPlayer : NetworkBehaviour
 	[SerializeField] float gravity = -15f;
 	[SerializeField] float lookSpeed = 600f;
 	[SerializeField] float moveSpeed = 5f;
+	[SerializeField] int damage = 40;
 
 	Transform camRoot;
 	TextMeshProUGUI debugText;
@@ -110,18 +111,23 @@ public class TestPlayer : NetworkBehaviour
 
 	private void Fire()
 	{
-		if (Runner.LagCompensation.Raycast(camRoot.position, camRoot.forward,
-			100f, Runner.LocalPlayer, out var hit, options: HitOptions.IgnoreInputAuthority))
+		if(Physics.Raycast(camRoot.position, camRoot.forward, out RaycastHit hitInfo, 100f, LayerMask.GetMask("Monster"), QueryTriggerInteraction.Collide))
 		{
-			if (hit.Hitbox == null)
-			{
-				return;
-			}
-
-			if (hit.Hitbox is ZombieHitBox zombieHitBox)
-			{
-				zombieHitBox.ApplyDamage(transform, transform.forward * 30f, 40);
-			}
+			hitInfo.collider.GetComponent<ZombieHitBox>().ApplyDamage(transform, camRoot.forward * 30f, damage);
 		}
+
+		//if (Runner.LagCompensation.Raycast(camRoot.position, camRoot.forward,
+		//	100f, Runner.LocalPlayer, out var hit, options: HitOptions.IgnoreInputAuthority))
+		//{
+		//	if (hit.Hitbox == null)
+		//	{
+		//		return;
+		//	}
+
+		//	if (hit.Hitbox is ZombieHitBox zombieHitBox)
+		//	{
+		//		zombieHitBox.ApplyDamage(transform, transform.forward * 30f, 40);
+		//	}
+		//}
 	}
 }

@@ -11,33 +11,23 @@ public enum ZombieBody { LeftHips, LeftKnee, RightHips, RightKnee,
 	Size,
 }
 
-public class ZombieHitBox : Hitbox
+public class ZombieHitBox : MonoBehaviour
 {
 	[SerializeField] ZombieBody bodyType;
+	[SerializeField] Rigidbody rb;
 
 	public ZombieBody BodyType { get { return bodyType; } }
+	public Rigidbody RB { get { return rb; } }
 
 	private Zombie owner;
-	private Rigidbody rb;
-	public Zombie Owner { get
-		{
-			if(owner == null)
-				owner = Root.GetComponent<Zombie>();
-			return owner;
-		}
+
+	private void Awake()
+	{
+		owner = GetComponentInParent<Zombie>();
 	}
 
-	public Rigidbody Rigidbody { get
-		{
-			{
-				if (rb == null)
-					rb = GetComponent<Rigidbody>();
-				return rb;
-			}
-		} }
-
-	public void ApplyDamage(Transform source, Vector3 velocity, int damage)
+	public virtual void ApplyDamage(Transform source, Vector3 velocity, int damage)
 	{
-		Owner.ApplyDamage(source, this, velocity, damage);
+		owner.ApplyDamage(source, this, velocity, damage);
 	}
 }

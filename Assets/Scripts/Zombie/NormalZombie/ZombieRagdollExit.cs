@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ZombieRagdollExit : ZombieState
 {
-	const float resetBoneTime = 1.2f;
+	const float resetBoneTime = 1f;
 	float elapsed;
 	BoneTransform[] faceBoneTransforms;
 	string animName;
@@ -18,7 +18,6 @@ public class ZombieRagdollExit : ZombieState
 	{
 		elapsed = 0f;
 
-		owner.SetRbKinematic(true);
 		owner.Agent.enabled = false;
 
 		float sign;
@@ -29,7 +28,7 @@ public class ZombieRagdollExit : ZombieState
 			owner.SetAnimFloat("TurnDir", 1f);
 			faceBoneTransforms = Zombie.BoneTransDict["FaceUpStand".GetHashCode()];
 			animName = "RagdollToStand";
-			easeFunc = EaseInOutBounce;
+			easeFunc = EaseInCubic;
 		}
 		else if(owner.CurRagdollState == RagdollState.FaceDownStand)
 		{
@@ -47,7 +46,7 @@ public class ZombieRagdollExit : ZombieState
 			owner.SetAnimFloat("TurnDir", 1f);
 			faceBoneTransforms = Zombie.BoneTransDict["FaceUpCrawl".GetHashCode()];
 			animName = "RagdollToCrawl";
-			easeFunc = EaseInOutBounce;
+			easeFunc = EaseInCubic;
 		}
 		else if(owner.CurRagdollState == RagdollState.FaceDownCrawl)
 		{
@@ -78,8 +77,6 @@ public class ZombieRagdollExit : ZombieState
 		//owner.transform.position = (leftFootPos + rightFootPos) * 0.5f;
 		//owner.LastFootPos = owner.transform.position;
 		//owner.Hips.localPosition = hipPos;
-
-		owner.CopyBoneTransforms(owner.RagdollBoneTransforms);
 	}
 
 	private void AlignRotationToHips(float sign)
@@ -93,7 +90,9 @@ public class ZombieRagdollExit : ZombieState
 		owner.transform.rotation = Quaternion.LookRotation(hipDir * sign);
 
 		owner.Hips.position = prevHipPos;
+		owner.RagdollHips.position = prevHipPos;
 		owner.Hips.rotation = prevHipRot;
+		owner.RagdollHips.rotation = prevHipRot;
 	}
 
 	private void AlignPositionToHips()
@@ -105,17 +104,19 @@ public class ZombieRagdollExit : ZombieState
 		offset.y = 0f;
 		offset = owner.transform.rotation * offset;
 
-		if (Physics.Raycast(prevHipPos, Vector3.down, out RaycastHit hitInfo))
+		if (Physics.Raycast(prevHipPos, Vector3.down, out RaycastHit hitInfo, 10f, LayerMask.GetMask("Default")))
 		{
 			newRootPos = hitInfo.point;
 		}
 		owner.transform.position = newRootPos - offset;
 		
 		owner.Hips.position = prevHipPos;
+		owner.RagdollHips.position = prevHipPos;
 	}
 
 	public override void Exit()
 	{
+		owner.EnableRagdoll(false);
 		owner.Anim.enabled = true;
 	}
 
@@ -137,12 +138,12 @@ public class ZombieRagdollExit : ZombieState
 		for (int i = 0; i < owner.Bones.Length; i++)
 		{
 			owner.Bones[i].localPosition = Vector3.LerpUnclamped(
-				owner.RagdollBoneTransforms[i].localPosition,
+				owner.RagdollBones[i].localPosition,
 				faceBoneTransforms[i].localPosition,
 				ratio);
 
 			owner.Bones[i].localRotation = Quaternion.LerpUnclamped(
-				owner.RagdollBoneTransforms[i].localRotation,
+				owner.RagdollBones[i].localRotation,
 				faceBoneTransforms[i].localRotation,
 				ratio);
 		}
@@ -168,7 +169,8 @@ public class ZombieRagdollExit : ZombieState
 
 	private float EaseInCubic(float x)
 	{
-		return x * x * x;
+		//return x * x * x;
+		return x;
 	}
 
 	private float EaseInOutBounce(float x)

@@ -21,7 +21,7 @@ public class ZombieRagdollEnter : ZombieState
 		owner.Agent.enabled = false;
 		transition = false;
 		elapsed = 0f;
-		exitTime = 0.5f;
+		exitTime = 0.3f;
 
 		owner.transform.position = owner.Position;
 		owner.transform.rotation = owner.Rotation;
@@ -33,7 +33,7 @@ public class ZombieRagdollEnter : ZombieState
 		//	owner.Bones[i].localPosition = boneTransforms[i].localPosition;
 		//	owner.Bones[i].localRotation = boneTransforms[i].localRotation;
 		//}
-		owner.SetRbKinematic(false);
+		owner.EnableRagdoll(true);
 		Rigidbody rb = owner.BodyHitParts[(int)owner.HitBody].rb;
 		rb.AddForce(owner.HitVelocity * rb.mass, ForceMode.Impulse);
 	}
@@ -55,6 +55,12 @@ public class ZombieRagdollEnter : ZombieState
 	{
 		owner.Agent.enabled = false;
 
+		for(int i = 0; i < owner.Bones.Length; i++)
+		{
+			owner.Bones[i].localPosition = owner.RagdollBones[i].localPosition;
+			owner.Bones[i].localRotation = owner.RagdollBones[i].localRotation;
+		}
+
 		//if (owner.Object.IsProxy)
 		//{
 		//	if ((owner.transform.position - owner.Position).sqrMagnitude > 3f)
@@ -74,6 +80,7 @@ public class ZombieRagdollEnter : ZombieState
 		owner.transform.position = newRootPos;
 
 		owner.Hips.position = prevHipPos;
+		owner.RagdollHips.position = prevHipPos;
 	}
 
 	public override void SetUp()

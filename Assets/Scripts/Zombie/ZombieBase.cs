@@ -74,14 +74,10 @@ public abstract class ZombieBase : NetworkBehaviour
 		Eyes = anim.GetBoneTransform(HumanBodyBones.LeftEye);
 
 		stateMachine = GetComponent<NetworkStateMachine>();
-
-		SetBodyParts();
-		SetRbKinematic(true);
 	}
 
 	public override void Spawned()
 	{
-		base.Spawned();
 		Agent.enabled = true;
 	}
 
@@ -164,31 +160,6 @@ public abstract class ZombieBase : NetworkBehaviour
 				Agent.enabled = true;
 			}
 			transform.rotation = Rotation;
-		}
-	}
-
-	private void SetBodyParts()
-	{
-		ZombieHitBox[] hitBoxes = GetComponentsInChildren<ZombieHitBox>();
-		foreach (ZombieHitBox hitBox in hitBoxes)
-		{
-			BodyPart bodyPart = new BodyPart();
-			bodyPart.zombieHitBox = hitBox;
-			bodyPart.rb = hitBox.GetComponent<Rigidbody>();
-			bodyPart.col = hitBox.GetComponent<Collider>();
-			bodyHitParts[(int)hitBox.BodyType] = bodyPart;
-		}
-	}
-
-	public void SetRbKinematic(bool value)
-	{
-		foreach (BodyPart bodyPart in bodyHitParts)
-		{
-			if (bodyPart.rb == null)
-				return;
-			bodyPart.rb.isKinematic = value;
-			bodyPart.rb.detectCollisions = !value;
-			bodyPart.col.isTrigger = value;
 		}
 	}
 
