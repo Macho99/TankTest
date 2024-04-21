@@ -151,7 +151,7 @@ public class ZombieRagdollExit : ZombieState
 		if(elapsed > resetBoneTime)
 		{
 			owner.AnimWaitStruct = new AnimWaitStruct(animName, 
-				animEndAction: () => owner.CurRagdollState = RagdollState.Animate);
+				exitAction: () => owner.CurRagdollState = RagdollState.Animate);
 			ChangeState(Zombie.State.AnimWait);
 			return;
 		}

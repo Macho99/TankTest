@@ -74,6 +74,21 @@ public abstract class ZombieBase : NetworkBehaviour
 		Eyes = anim.GetBoneTransform(HumanBodyBones.LeftEye);
 
 		stateMachine = GetComponent<NetworkStateMachine>();
+
+		SetBodyParts();
+	}
+
+	private void SetBodyParts()
+	{
+		ZombieHitBox[] hitBoxes = GetComponentsInChildren<ZombieHitBox>();
+		foreach (ZombieHitBox hitBox in hitBoxes)
+		{
+			BodyPart bodyPart = new BodyPart();
+			bodyPart.zombieHitBox = hitBox;
+			bodyPart.rb = hitBox.RB;
+			bodyPart.col = hitBox.GetComponent<Collider>();
+			bodyHitParts[(int)hitBox.BodyType] = bodyPart;
+		}
 	}
 
 	public override void Spawned()
@@ -166,8 +181,7 @@ public abstract class ZombieBase : NetworkBehaviour
 	protected void PlayHitFX()
 	{
 		GameObject vfx = HitBody == ZombieBody.Head ? headBloodVFX : bodyBloodVFX;
-		Instantiate(vfx, bodyHitParts[(int)HitBody].zombieHitBox.transform.position,
-			Quaternion.LookRotation(-HitVelocity));
+		Instantiate(vfx, bodyHitParts[(int)HitBody].col.bounds.center, Quaternion.LookRotation(-HitVelocity));
 	}
 
 	public virtual void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, Vector3 velocity, int damage)
@@ -177,6 +191,10 @@ public abstract class ZombieBase : NetworkBehaviour
 		HitCnt++;
 
 		if (Object.IsProxy) return;
+
+		Target = source;
+		CurTargetType = TargetType.Player;
+		LastPlayerFindTick = Runner.Tick;
 
 		CurHp -= damage;
 		if (CurHp <= 0)

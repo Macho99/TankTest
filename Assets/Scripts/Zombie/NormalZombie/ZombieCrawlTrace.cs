@@ -211,7 +211,7 @@ public class ZombieCrawlTrace : ZombieState
 					return;
 				}
 			},
-			animEndAction: () => owner.SetAnimBool("Eat", false)
+			exitAction: () => owner.SetAnimBool("Eat", false)
 			);
 		ChangeState(Zombie.State.AnimWait);
 	}

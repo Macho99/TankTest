@@ -113,13 +113,18 @@ public class ZombieTrace : ZombieState
 					return;
 				}
 			},
-			animEndAction: () => owner.SetAnimBool("Eat", false)
+			exitAction: () => owner.SetAnimBool("Eat", false)
 			);
 		ChangeState(Zombie.State.AnimWait);
 	}
 
 	private void Attack()
 	{
+		if(owner.Anim.GetFloat("IdleShifter") > 1.5f)
+		{
+			owner.Anim.SetFloat("IdleShifter", Random.Range(0f, 1f));
+		}
+
 		Vector3 AttackDirection = (owner.Target.position - owner.transform.position).normalized;
 
 		float angle = Vector3.SignedAngle(owner.transform.forward, AttackDirection, owner.transform.up);

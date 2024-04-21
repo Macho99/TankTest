@@ -16,7 +16,10 @@ public class BruteTrace : BruteZombieState
 
 	public override void Enter()
 	{
-
+		if (CheckTransition() == true)
+		{
+			return;
+		}
 	}
 
 	public override void Exit()
@@ -26,6 +29,8 @@ public class BruteTrace : BruteZombieState
 
 	public override void FixedUpdateNetwork()
 	{
+		owner.LookTarget();
+
 		float speedX = 0f;
 		float speedY = 0f;
 		if (owner.Agent.hasPath)
@@ -53,6 +58,28 @@ public class BruteTrace : BruteZombieState
 
 	public override void Transition()
 	{
+		if(CheckTransition() == true)
+		{
+			return;
+		}
+	}
 
+	private bool CheckTransition()
+	{
+		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1.5f)
+		{
+			if (owner.Target == null)
+			{
+				owner.Agent.ResetPath();
+				ChangeState(BruteZombie.State.Idle);
+				return true;
+			}
+			else if ((owner.Target.position - owner.transform.position).sqrMagnitude < 1.5f * 1.5f)
+			{
+				//Attack();
+				return true;
+			}
+		}
+		return false;
 	}
 }

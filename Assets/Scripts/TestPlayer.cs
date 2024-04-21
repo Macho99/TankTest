@@ -48,10 +48,14 @@ public class TestPlayer : NetworkBehaviour
 	public override void Spawned()
 	{
 		kcc.enabled = true;
-		if (Object.HasInputAuthority == false)
+		if (HasInputAuthority == false)	
 		{
 			camRoot.gameObject.SetActive(false);
 			playerCanvas.gameObject.SetActive(false);
+		}
+		else
+		{
+			XAngle = Vector3.Angle(Vector3.forward, transform.forward);
 		}
 	}
 

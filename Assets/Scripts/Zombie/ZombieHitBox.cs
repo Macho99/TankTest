@@ -19,11 +19,11 @@ public class ZombieHitBox : MonoBehaviour
 	public ZombieBody BodyType { get { return bodyType; } }
 	public Rigidbody RB { get { return rb; } }
 
-	private Zombie owner;
+	private ZombieBase owner;
 
 	private void Awake()
 	{
-		owner = GetComponentInParent<Zombie>();
+		owner = GetComponentInParent<ZombieBase>();
 	}
 
 	public virtual void ApplyDamage(Transform source, Vector3 velocity, int damage)

@@ -19,6 +19,7 @@ public class BruteIdle : BruteZombieState
 
 	public override void Enter()
 	{
+		owner.LookTarget();
 		elapsed = 0f;
 		idleTime = Random.Range(4f, 10f);
 	}
@@ -36,7 +37,7 @@ public class BruteIdle : BruteZombieState
 
 	public override void Transition()
 	{
-		if (owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
+		if (owner.Agent.hasPath && owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
 		{
 			ChangeState(BruteZombie.State.Trace);
 			return;
@@ -57,7 +58,7 @@ public class BruteIdle : BruteZombieState
 			}
 			else
 			{
-				//ChangeState(BruteZombie.State.Search);
+				ChangeState(BruteZombie.State.Search);
 				return;
 			}
 		}

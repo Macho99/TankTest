@@ -5,6 +5,7 @@ public class ZombieIdle : ZombieState
 {
 	float wanderThreshold = 0.3f;
 
+	float idleShifter;
 	float idleTime;
 	float elapsed;
 
@@ -15,6 +16,7 @@ public class ZombieIdle : ZombieState
 	public override void Enter()
 	{
 		elapsed = 0f;
+		idleShifter = Random.Range(0f, 2f);
 		idleTime = Random.Range(4f, 10f);
 	}
 
@@ -31,7 +33,7 @@ public class ZombieIdle : ZombieState
 
 	public override void Transition()
 	{
-		if (owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
+		if (owner.Agent.hasPath &&  owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
 		{
 			ChangeState(Zombie.State.Trace);
 			return;
@@ -61,8 +63,12 @@ public class ZombieIdle : ZombieState
 	public override void FixedUpdateNetwork()
 	{
 		elapsed += owner.Runner.DeltaTime;
-		owner.SetAnimFloat("SpeedX", 0f);
-		owner.SetAnimFloat("SpeedY", 0f, 1f);
+		if(elapsed < 2f)
+		{
+			owner.SetAnimFloat("SpeedX", 0f, 1f);
+			owner.SetAnimFloat("SpeedY", 0f, 1f);
+			owner.SetAnimFloat("IdleShifter", idleShifter, 0.2f);
+		}
 	}
 
 	private void Search()

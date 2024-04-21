@@ -32,7 +32,7 @@ public class ZombieAnimWait : NetworkBaseState
 
 	public override void Exit()
 	{
-		waitStruct.animEndAction?.Invoke();
+		waitStruct.exitAction?.Invoke();
 	}
 
 	public override void SetUp()

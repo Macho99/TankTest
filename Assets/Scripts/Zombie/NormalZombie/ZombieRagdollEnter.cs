@@ -23,8 +23,11 @@ public class ZombieRagdollEnter : ZombieState
 		elapsed = 0f;
 		exitTime = 0.3f;
 
-		owner.transform.position = owner.Position;
-		owner.transform.rotation = owner.Rotation;
+		if(owner.CurHp > 0)
+		{
+			owner.transform.position = owner.Position;
+			owner.transform.rotation = owner.Rotation;
+		}
 
 		owner.Anim.enabled = false;
 		//BoneTransform[] boneTransforms = Zombie.BoneTransDict[owner.Anim.GetCurrentAnimatorClipInfo(0)[0].clip.name.GetHashCode()];
@@ -60,14 +63,6 @@ public class ZombieRagdollEnter : ZombieState
 			owner.Bones[i].localPosition = owner.RagdollBones[i].localPosition;
 			owner.Bones[i].localRotation = owner.RagdollBones[i].localRotation;
 		}
-
-		//if (owner.Object.IsProxy)
-		//{
-		//	if ((owner.transform.position - owner.Position).sqrMagnitude > 3f)
-		//	{
-		//		owner.transform.position = Vector3.Lerp(owner.transform.position, owner.Position, 0.1f);
-		//	}
-		//}
 
 		Vector3 prevHipPos = owner.Hips.position;
 		Vector3 newRootPos = prevHipPos;

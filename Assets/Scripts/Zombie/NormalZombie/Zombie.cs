@@ -72,11 +72,6 @@ public class Zombie : ZombieBase
 		stateMachine.AddState(State.RagdollExit, new ZombieRagdollExit(this));
 		stateMachine.AddState(State.Die, new ZombieDie(this));
 
-		AnimWaitStruct = new AnimWaitStruct("Spawn", State.CrawlIdle.ToString());
-
-		stateMachine.InitState(State.AnimWait);
-
-		SetBodyParts();
 		EnableRagdoll(false);
 	}
 
@@ -88,7 +83,7 @@ public class Zombie : ZombieBase
 		maxSpeed = Random.Range(1, 4);
 
 		anim.SetFloat("WalkShifter", Random.Range(0, 5));
-		anim.SetFloat("IdleShifter", Random.Range(0, 3));
+		anim.SetFloat("IdleShifter", Random.Range(0f, 2f));
 		anim.SetFloat("RunShifter", Random.Range(0, 2));
 		anim.SetFloat("SprintShifter", Random.Range(0, 2));
 
@@ -107,8 +102,14 @@ public class Zombie : ZombieBase
 
 		if (HasStateAuthority)
 		{
-			//SetAnimTrigger("Spawn");
-			//SetAnimBool("Crawl", true);
+			AnimWaitStruct = new AnimWaitStruct("Spawn", State.CrawlIdle.ToString());
+			stateMachine.InitState(State.AnimWait);
+			SetAnimTrigger("Spawn");
+			SetAnimBool("Crawl", true);
+		}
+		else
+		{
+			stateMachine.InitState(State.Idle);
 		}
 	}
 
@@ -135,19 +136,6 @@ public class Zombie : ZombieBase
 		agent.ResetPath();
 		Target = overlapCols[0].transform;
 		CurTargetType = TargetType.Meat;
-	}
-
-	private void SetBodyParts()
-	{
-		ZombieHitBox[] hitBoxes = GetComponentsInChildren<ZombieHitBox>();
-		foreach (ZombieHitBox hitBox in hitBoxes)
-		{
-			BodyPart bodyPart = new BodyPart();
-			bodyPart.zombieHitBox = hitBox;
-			bodyPart.rb = hitBox.RB;
-			bodyPart.col = hitBox.GetComponent<Collider>();
-			bodyHitParts[(int)hitBox.BodyType] = bodyPart;
-		}
 	}
 
 	public void EnableRagdoll(bool value)
@@ -311,10 +299,6 @@ public class Zombie : ZombieBase
 	{
 		base.ApplyDamage(source, zombieHitBox, velocity, damage);
 		if (Object.IsProxy) return;
-
-		Target = source;
-		CurTargetType = TargetType.Player;
-		LastPlayerFindTick = Runner.Tick;
 
 		if (CurHp <= 0)
 		{
