@@ -6,14 +6,13 @@ using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
-    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling }
+    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass }
     private NetworkStateMachine stateMachine;
     public PlayerLocomotion movement { get; private set; }
     public Animator animator { get; private set; }
     private CapsuleCollider myCollider;
+
     [Networked] public float FallingTime { get; set; }
-    [Networked] public float prevGravityDirection { get; private set; }
-    [Networked] public float currentGravityDirection { get; private set; }
     private void Awake()
     {
         myCollider = GetComponentInChildren<CapsuleCollider>();
@@ -42,11 +41,11 @@ public class PlayerController : NetworkBehaviour
     public void Falling()
     {
 
+
         if (!movement.IsGround() && movement.Kcc.RealVelocity.y < 0f)
         {
             FallingTime += Runner.DeltaTime;
 
-            Debug.Log(FallingTime.ToString("F1"));
             if (FallingTime >= 0.8f)
             {
 
@@ -72,6 +71,26 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
+        return false;
+    }
+    public bool RaycastObject()
+    {
+        Ray ray = new Ray();
+
+        ray.origin = transform.position + transform.forward * movement.Kcc.Settings.Radius + Vector3.up * 0.3f;
+        ray.direction = transform.forward;
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 1f))
+        {
+            if (hit.collider.TryGetComponent(out IClimbPassable climbObject))
+            {
+                if (climbObject.CanClimbPassCheck(transform.position, movement.Kcc.Settings.Height))
+                {
+                    return true;
+                }
+            }
+        }
+        Debug.DrawRay(ray.origin, ray.direction * 1f, Color.red, 0.5f);
         return false;
     }
 

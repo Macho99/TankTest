@@ -12,7 +12,7 @@ public class PlayerCrouchLocomotionState : PlayerState
 
     public override void Enter()
     {
-        owner.movement.ChangeMoveType(PlayerLocomotion.MovementType.Crouch);
+    
     }
 
     public override void Exit()
@@ -56,6 +56,7 @@ public class PlayerCrouchLocomotionState : PlayerState
     {
         if (isCrouchToIdleEnd)
         {
+            owner.movement.ChangeMoveType(PlayerLocomotion.MovementType.Stand);
             ChangeState(PlayerController.PlayerState.StandLocomotion);
             return;
         }

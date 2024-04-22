@@ -41,7 +41,7 @@ public class PlayerLocomotion : NetworkBehaviour
         animator = GetComponent<Animator>();
         simpleKCC = GetComponent<SimpleKCC>();
         camController = GetComponentInChildren<BasicCamController>();
-        jumpForce = 8f;
+        jumpForce = 10f;
         rotateXSpeed = 30f;
         moves = new PlayerMove[(int)MovementType.Size];
         moves[(int)MovementType.Stand] = new PlayerStandMove(1.8f, 4f, 2f);

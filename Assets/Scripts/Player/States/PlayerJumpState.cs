@@ -24,12 +24,16 @@ public class PlayerJumpState : PlayerState
 
     public override void FixedUpdateNetwork()
     {
+
+        
         if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("Jump"))
         {
             if (!isJumpingStart)
             {
                 if (!owner.RaycastGroundCheck())
+                {
                     isJumpingStart = true;
+                }
             }
         }
 
@@ -40,16 +44,19 @@ public class PlayerJumpState : PlayerState
     {
         if (isJumpingStart)
         {
-
-            if (owner.movement.IsGround())
+            if (owner.FallingTime <= 3f)
             {
-                if (owner.FallingTime <= 3f)
+
+
+                if (owner.movement.IsGround())
                 {
+
                     owner.FallingTime = 0f;
                     ChangeState(PlayerController.PlayerState.StandLocomotion);
+                    Debug.Log("exit");
+                    return;
                 }
 
-                return;
             }
 
 
