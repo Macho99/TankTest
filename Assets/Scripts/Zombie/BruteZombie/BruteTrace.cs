@@ -10,6 +10,9 @@ public class BruteTrace : BruteZombieState
 	const float speed = 1f;
 	const float rotateSpeed = 60f;
 
+	int enterHitCnt;
+	bool defence;
+
 	public BruteTrace(BruteZombie owner) : base(owner)
 	{
 	}
@@ -20,6 +23,8 @@ public class BruteTrace : BruteZombieState
 		{
 			return;
 		}
+		enterHitCnt = owner.HitCnt;
+		defence = false;
 	}
 
 	public override void Exit()
@@ -29,6 +34,8 @@ public class BruteTrace : BruteZombieState
 
 	public override void FixedUpdateNetwork()
 	{
+		CheckDefence();
+
 		owner.LookTarget();
 
 		float speedX = 0f;
@@ -49,6 +56,16 @@ public class BruteTrace : BruteZombieState
 
 		owner.SetAnimFloat("SpeedX", speedX, 1f);
 		owner.SetAnimFloat("SpeedY", speedY, 1f);
+	}
+
+
+	private void CheckDefence()
+	{
+		if(defence == false && enterHitCnt != owner.HitCnt)
+		{
+			defence = true;
+			owner.SetAnimInt("Defence", 1);
+		}
 	}
 
 	public override void SetUp()

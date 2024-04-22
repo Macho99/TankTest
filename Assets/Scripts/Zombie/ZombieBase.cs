@@ -2,6 +2,7 @@
 using UnityEngine;
 using Fusion;
 using UnityEngine.AI;
+using System;
 
 public struct BoneTransform
 {
@@ -181,7 +182,8 @@ public abstract class ZombieBase : NetworkBehaviour
 	protected void PlayHitFX()
 	{
 		GameObject vfx = HitBody == ZombieBody.Head ? headBloodVFX : bodyBloodVFX;
-		Instantiate(vfx, bodyHitParts[(int)HitBody].col.bounds.center, Quaternion.LookRotation(-HitVelocity));
+		GameManager.Resource.Instantiate(vfx, bodyHitParts[(int)HitBody].col.bounds.center, 
+			Quaternion.LookRotation(-HitVelocity), true);
 	}
 
 	public virtual void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, Vector3 velocity, int damage)
@@ -231,6 +233,11 @@ public abstract class ZombieBase : NetworkBehaviour
 	public void SetAnimTrigger(string name)
 	{
 		anim.SetTrigger(name);
+	}
+
+	public void SetAnimInt(string name, int value)
+	{
+		anim.SetInteger(name, value);
 	}
 
 	public bool IsAnimName(string name, int layer = 0)
