@@ -55,7 +55,7 @@ public class TankDrive : TankMoveState
 
 	public override void FixedUpdateNetwork()
 	{
-		float y = owner.RawMoveInput.y;
+		float y = owner.MoveInput.y;
 		owner.SetEngineRpmWithWheel();
 		if(y > -0.1f)
 		{
@@ -72,7 +72,7 @@ public class TankDrive : TankMoveState
 					owner.BrakeMultiplier = 0f;
 				}
 			}
-			else if(owner.RawMoveInput.sqrMagnitude < 0.1f)
+			else if(owner.MoveInput.sqrMagnitude < 0.1f)
 			{
 				owner.TorqueMultiplier = 0f;
 				owner.BrakeMultiplier = 0.1f;

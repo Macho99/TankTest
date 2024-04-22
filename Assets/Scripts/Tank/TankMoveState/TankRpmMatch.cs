@@ -46,12 +46,12 @@ public class TankRpmMatch : TankMoveState
 
 	public override void FixedUpdateNetwork()
 	{
-		Vector2 moveInput = owner.RawMoveInput;
+		Vector2 moveInput = owner.MoveInput;
 		//전진 입력 없고, 좌우 입력 없으면 rpm 낮추기
 		if(moveInput.y < 0.1f && Mathf.Approximately(moveInput.x, 0f) == true)
 		{
 			owner.TorqueMultiplier = 0f;
-			rpm -= Time.deltaTime * owner.RpmMatchSpeed * 3f;
+			rpm -= owner.Runner.DeltaTime * owner.RpmMatchSpeed * 3f;
 			owner.SetEngineRpmWithoutWheel(rpm);
 		}
 		else
@@ -67,7 +67,7 @@ public class TankRpmMatch : TankMoveState
 
 			if (rpm < owner.MaxTorqueRpm)
 			{
-				rpm += Time.deltaTime * owner.RpmMatchSpeed;
+				rpm += owner.Runner.DeltaTime * owner.RpmMatchSpeed;
 				owner.SetEngineRpmWithoutWheel(rpm);
 			}
 		}

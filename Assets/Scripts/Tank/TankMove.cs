@@ -4,8 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Windows;
+using Fusion;
+using Cinemachine;
+using Fusion.Addons.Physics;
 
-public class TankMove : MonoBehaviour
+public class TankMove : NetworkBehaviour
 {
 	public enum State { Park, RpmMatch, Drive, ReverseRpmMatch, Reverse, GearShift, }
 
@@ -23,6 +26,7 @@ public class TankMove : MonoBehaviour
 	[SerializeField] float maxReverseSpeed = -15f;
 	[SerializeField] float minRotateRpmDiff = 100f;
 	[SerializeField] float maxRotateRpmDiff = 300f;
+	[SerializeField] float torqueMultiplier = 2.5f;
 
 	[SerializeField] Transform[] leftWheelTrans;
 	[SerializeField] Transform[] rightWheelTrans;
@@ -42,44 +46,48 @@ public class TankMove : MonoBehaviour
 
 	Rigidbody rb;
 
-	float rawLeftRpm;
-	float rawRightRpm;
-	float leftRpm;
-	float rightRpm;
 
-	Vector2 rawMoveInput;
-	Vector2 lerpedMoveInput;
+	Vector2 moveInput;
+	//Vector2 lerpedMoveInput;
 	int wheelNum;
 
-	float curMotorTorque;
 	NetworkStateMachine stateMachine;
+	NetworkRigidbody3D netRb;
 	
 	public int Direction { get; private set; }
-	public bool Reverse { get; set; }
-	public float TorqueMultiplier { get; set; }
 	public float MaxTorqueRpm { get; private set; }
 	public float RpmMatchSpeed { get { return rpmMatchSpeed; } }
-	public int CurGear { get; set; }
 	public float[] GearChangeSpeeds { get { return gearChangeSpeeds; } }
 	public float CurGearRatio { get { return gears[CurGear]; } }
 	public float MinEngineRpm { get { return minEngineRpm; } }
 	public float MaxEngineRpm { get { return maxEngineRpm; } }
-	public float BrakeMultiplier { get; set; }
-	public float Velocity { get; private set; }
-	public float AbsWheelRpm { get; set; }
 	public float EngineRpm { get; set; }
 	public float MaxSpeed {  get { return maxSpeed; } }
 	public float MaxReverseSpeed { get { return maxReverseSpeed; } }
-	public Vector2 RawMoveInput { get { return rawMoveInput; } }
-	public Vector2 LerpedMoveInput { get { return lerpedMoveInput; } }
+	public Vector2 MoveInput { get { return moveInput; } }
 	public WheelCollider[] LeftWheelCols { get { return leftWheelCols; } }
 	public WheelCollider[] RightWheelCols { get { return rightWheelCols; } }
 	public Transform[] LeftWheelTrans { get { return leftWheelTrans; } }
 	public Transform[] RightWheelTrans { get { return rightWheelTrans; } }
 
+
+	[Networked, HideInInspector] public float TorqueMultiplier { get; set; }
+	[Networked, HideInInspector] public float BrakeMultiplier { get; set; }
+	[Networked, HideInInspector] public int CurGear { get; set; }
+	[Networked, HideInInspector] public float LeftRpm { get; private set; }
+	[Networked, HideInInspector] public float RightRpm { get; private set; }
+	[Networked, HideInInspector] public float RawLeftRpm { get; private set; }
+	[Networked, HideInInspector] public float RawRightRpm { get; private set; }
+	[Networked, HideInInspector] public float AbsWheelRpm { get; set; }
+	[Networked, HideInInspector] public float Velocity { get; private set; }
+	[Networked, HideInInspector] public float CurMotorTorque { get; private set; }
+	[Networked, HideInInspector] public NetworkBool Reverse { get; set; }
+
 	private void Awake()
 	{
-		stateMachine = gameObject.AddComponent<NetworkStateMachine>();
+		netRb = GetComponent<NetworkRigidbody3D>();
+
+		stateMachine = GetComponent<NetworkStateMachine>();
 		stateMachine.AddState(State.Park, new TankPark(this));
 		stateMachine.AddState(State.RpmMatch, new TankRpmMatch(this));
 		stateMachine.AddState(State.Drive, new TankDrive(this));
@@ -97,24 +105,40 @@ public class TankMove : MonoBehaviour
 		wheelNum = leftWheelTrans.Length;
 	}
 
+	public override void Spawned()
+	{
+		if(Object.HasInputAuthority == false)
+		{
+			transform.parent.GetComponentInChildren<Canvas>().gameObject.SetActive(false);
+		}
+		leftTrack.gameObject.SetActive(true);
+		rightTrack.gameObject.SetActive(true);
+	}
+
 	public void SetDashBoardGear(string gearStr)
 	{
 		dashBoard.SetGearUI(gearStr);
 	}
 
-	private void Update()
+	public override void Render()
 	{
-		lerpedMoveInput = Vector2.Lerp(lerpedMoveInput, rawMoveInput, Time.deltaTime * inputSensitivity);
+		//lerpedMoveInput = Vector2.Lerp(lerpedMoveInput, rawMoveInput, Runner.DeltaTime * inputSensitivity);
 
-		AbsWheelRpm = CalculateWheelRPM(out float velocity);
-
-		dashBoard.SetRPMAndVelUI(EngineRpm, velocity);
-		this.Velocity = velocity;
+		dashBoard.SetRPMAndVelUI(EngineRpm, Velocity);
 		SyncWheelRenderer();
 	}
 
-	private void FixedUpdate()
+	public override void FixedUpdateNetwork()
 	{
+		if(GetInput(out TestInputData input) == false) return;
+		//if(input.buttons.IsSet(Buttons.Respawn))
+		//{
+		//	netRb.Teleport(GameObject.FindGameObjectWithTag("Respawn").transform.position);
+		//}
+		moveInput = input.moveVec;
+
+		AbsWheelRpm = CalculateWheelRPM(out float velocity);
+		this.Velocity = velocity;
 		CalcTorque();
 		SetWheelTorque();
 		Steering();
@@ -186,21 +210,21 @@ public class TankMove : MonoBehaviour
 		measuredRightRpm /= wheelNum - 2;
 		#endregion
 
-		rawLeftRpm = measuredLeftRpm;
-		rawRightRpm = measuredRightRpm;
+		RawLeftRpm = measuredLeftRpm;
+		RawRightRpm = measuredRightRpm;
 
-		leftRpm = Mathf.Lerp(leftRpm, measuredLeftRpm, Time.deltaTime * 2f);
-		rightRpm = Mathf.Lerp(rightRpm, measuredRightRpm, Time.deltaTime * 2f);
+		LeftRpm = Mathf.Lerp(LeftRpm, measuredLeftRpm, Runner.DeltaTime * 2f);
+		RightRpm = Mathf.Lerp(RightRpm, measuredRightRpm, Runner.DeltaTime * 2f);
 
-		leftTrack.Velocity = rawLeftRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
-		rightTrack.Velocity = rawRightRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
+		//leftTrack.Velocity = RawLeftRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
+		//rightTrack.Velocity = RawRightRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
 
-		float leftVelocity = leftRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
-		float rightVelocity = rightRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
+		float leftVelocity = LeftRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
+		float rightVelocity = RightRpm * 60f * 2 * radios * Mathf.PI * 0.001f;
 
 		velocity = (leftVelocity + rightVelocity) * 0.5f;
 		Direction = velocity > -0.01f ? 1 : -1;
-		return (Mathf.Abs(leftRpm) + Mathf.Abs(rightRpm)) * 0.5f;
+		return (Mathf.Abs(LeftRpm) + Mathf.Abs(RightRpm)) * 0.5f;
 	}
 
 	public void SetWheelTorque()
@@ -213,14 +237,14 @@ public class TankMove : MonoBehaviour
 
 		for(int i = 1; i< wheelNum - 1; i++) 
 		{
-			leftWheelCols[i].motorTorque = curMotorTorque * TorqueMultiplier;
-			rightWheelCols[i].motorTorque = curMotorTorque * TorqueMultiplier;
+			leftWheelCols[i].motorTorque = CurMotorTorque * TorqueMultiplier;
+			rightWheelCols[i].motorTorque = CurMotorTorque * TorqueMultiplier;
 		}
 	}
 
 	private void Steering()
 	{
-		float xInput = lerpedMoveInput.x;
+		float xInput = moveInput.x;
 		FrictionAdjust(xInput);
 
 		float rotateRpmDiff = Mathf.Lerp(minRotateRpmDiff, maxRotateRpmDiff, 30f - Mathf.Abs(Velocity));
@@ -229,19 +253,19 @@ public class TankMove : MonoBehaviour
 			float leftTargetRpm = AbsWheelRpm + xInput * rotateRpmDiff;
 			float rightTargetRpm = AbsWheelRpm - xInput * rotateRpmDiff;
 
-			if (Mathf.Abs(leftTargetRpm - leftRpm) > 10)
+			if (Mathf.Abs(leftTargetRpm - LeftRpm) > 10)
 			{
 				for (int i = 1; i < wheelNum - 1; i++)
 				{
-					leftWheelCols[i].motorTorque += leftTargetRpm < leftRpm ? -2000f : 2000f;
+					leftWheelCols[i].motorTorque += leftTargetRpm < LeftRpm ? -2000f : 2000f;
 				}
 			}
 
-			if (Mathf.Abs(rightTargetRpm - rightRpm) > 10)
+			if (Mathf.Abs(rightTargetRpm - RightRpm) > 10)
 			{
 				for (int i = 1; i < wheelNum - 1; i++)
 				{
-					rightWheelCols[i].motorTorque += rightTargetRpm < rightRpm ? -2000f : 2000f;
+					rightWheelCols[i].motorTorque += rightTargetRpm < RightRpm ? -2000f : 2000f;
 				}
 			}
 		}
@@ -250,19 +274,19 @@ public class TankMove : MonoBehaviour
 			float leftTargetRpm = -AbsWheelRpm + xInput * rotateRpmDiff;
 			float rightTargetRpm = -AbsWheelRpm - xInput * rotateRpmDiff;
 
-			if (Mathf.Abs(leftTargetRpm - leftRpm) > 10)
+			if (Mathf.Abs(leftTargetRpm - LeftRpm) > 10)
 			{
 				for (int i = 1; i < wheelNum - 1; i++)
 				{
-					leftWheelCols[i].motorTorque += leftTargetRpm < leftRpm ? 2000f : -2000f;
+					leftWheelCols[i].motorTorque += leftTargetRpm < LeftRpm ? 2000f : -2000f;
 				}
 			}
 
-			if (Mathf.Abs(rightTargetRpm - rightRpm) > 10)
+			if (Mathf.Abs(rightTargetRpm - RightRpm) > 10)
 			{
 				for (int i = 1; i < wheelNum - 1; i++)
 				{
-					rightWheelCols[i].motorTorque += rightTargetRpm < rightRpm ? 2000f : -2000f;
+					rightWheelCols[i].motorTorque += rightTargetRpm < RightRpm ? 2000f : -2000f;
 				}
 			}
 		}
@@ -294,9 +318,9 @@ public class TankMove : MonoBehaviour
 		float torque = torquePerRpm.Evaluate((EngineRpm - minEngineRpm) / maxEngineRpm);
 		torque *= gears[CurGear];
 		torque /= wheelNum - 2;
-		torque *= 2.5f;
+		torque *= torqueMultiplier;
 
-		curMotorTorque = torque;
+		CurMotorTorque = torque;
 	}
 
 	public void SetEngineRpmWithWheel()
@@ -315,13 +339,13 @@ public class TankMove : MonoBehaviour
 
 	private void SyncWheelRenderer()
 	{
-		float leftRps = rawLeftRpm / 60f;
-		float rightRps = rawRightRpm / 60f;
+		float leftRps = RawLeftRpm / 60f;
+		float rightRps = RawRightRpm / 60f;
 
 		for (int i = 0; i < wheelNum; i++)
 		{
-			leftWheelTrans[i].Rotate(360f * leftRps * Time.deltaTime, 0f, 0f);
-			rightWheelTrans[i].Rotate(360f * rightRps * Time.deltaTime, 0f, 0f);
+			leftWheelTrans[i].Rotate(360f * leftRps * Runner.DeltaTime, 0f, 0f);
+			rightWheelTrans[i].Rotate(360f * rightRps * Runner.DeltaTime, 0f, 0f);
 		}
 
 		for (int i = 1; i < wheelNum - 1; i++)
@@ -337,21 +361,6 @@ public class TankMove : MonoBehaviour
 			localPos = rightWheelTrans[i].localPosition;
 			localPos.y += trackYOffset;
 			rightWheelTrans[i].localPosition = localPos;
-		}
-	}
-
-	private void OnMove(InputValue value)
-	{
-		rawMoveInput = value.Get<Vector2>();
-	}
-
-	private void OnFire(InputValue value)
-	{
-		bool pressed = value.Get<float>() > 0.9f;
-
-		if(pressed)
-		{
-			rb.AddForceAtPosition(transform.up * power, transform.position + transform.forward * 2f + transform.up, ForceMode.Impulse);
 		}
 	}
 }

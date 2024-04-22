@@ -30,13 +30,13 @@ public class TankPark : TankMoveState
 
 	public override void Transition()
 	{
-		float y = owner.RawMoveInput.y;
+		float y = owner.MoveInput.y;
 		if(y < -0.1f)
 		{
 			owner.Reverse = true;
 			ChangeState(TankMove.State.ReverseRpmMatch);
 		}
-		else if (owner.RawMoveInput.sqrMagnitude > 0.1f)
+		else if (owner.MoveInput.sqrMagnitude > 0.1f)
 		{
 			ChangeState(TankMove.State.RpmMatch);
 		}

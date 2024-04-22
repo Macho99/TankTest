@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fusion;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,8 +43,9 @@ public class TankGearShift : TankMoveState
 
 	public override void FixedUpdateNetwork()
 	{
-		elapsed += Time.deltaTime;
+		elapsed += owner.Runner.DeltaTime;
 		float targetRpm = owner.CurGearRatio * owner.AbsWheelRpm;
+		// TODO : 스무스 댐프 바꾸기
 		rpm = Mathf.SmoothDamp(rpm, targetRpm, ref velocity, 0.05f);
 
 		owner.SetEngineRpmWithoutWheel(rpm);

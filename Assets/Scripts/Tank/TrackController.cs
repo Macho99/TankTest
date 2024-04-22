@@ -23,34 +23,42 @@ public class TrackController : MonoBehaviour
 	[SerializeField] float maxUnderDiff = 0.3f;
 	[SerializeField] int trackNum = 78;
 	[SerializeField] float controlMagMultiplier = 0.32f;
-	public float Velocity { get; set; }
+	public float Velocity { get; private set; }
 
-	TankMove tank;
+	TankMove tankMove;
 	Transform[] tracks;
 	WheelCollider[] wheelCols;
 	Transform[] wheelTrans;
 	float baseUnderLength;
 	BezierSpline spline;
 	float curTrackOffset;
+	Rigidbody rb;
+	float radius;
 
 	private void Awake()
 	{
-		tank = GetComponentInParent<TankMove>();
+		rb = GetComponentInParent<Rigidbody>();
+		tankMove = GetComponentInParent<TankMove>();
 		if (trackType == TrackType.Left)
 		{
-			wheelCols = tank.LeftWheelCols;
-			wheelTrans = tank.LeftWheelTrans;
+			wheelCols = tankMove.LeftWheelCols;
+			wheelTrans = tankMove.LeftWheelTrans;
 		}
 		else//(trackType == TrackType.Right)
 		{
-			wheelCols = tank.RightWheelCols;
-			wheelTrans = tank.RightWheelTrans;
+			wheelCols = tankMove.RightWheelCols;
+			wheelTrans = tankMove.RightWheelTrans;
 		}
-
+		radius = wheelCols[1].radius;
 		spline = GetComponent<BezierSpline>();
 		//points = new Vector3[spline.ControlPointCount];
 		//vertexs = new Vector3[spline.CurveCount];
 		vertexLengths = new float[spline.CurveCount];
+
+	}
+
+	private void Start()
+	{
 		Update();
 
 		baseUnderLength = GetLength(backIdx, frontIdx, 20);
@@ -59,12 +67,14 @@ public class TrackController : MonoBehaviour
 		CreateTracks();
 	}
 
-
 	private void Update()
 	{
 		//if (Time.time < nextUpdateTime) return;
 
 		//nextUpdateTime = Time.time + updateInterval;
+		float rpm = trackType == TrackType.Left ? tankMove.RawLeftRpm : tankMove.RawRightRpm;
+
+		Velocity = rpm * 60f * 2 * radius * Mathf.PI * 0.001f;
 
 		int vertexIdx = frontIdx - 1;
 		for (int i = 1; i < wheelCols.Length - 1; i++)
@@ -123,8 +133,9 @@ public class TrackController : MonoBehaviour
 	{
 		if (tracks == null) return;
 
-		//if (Mathf.Approximately(speed, 0f) == true) return;
-		curTrackOffset -= Velocity * 1000 / 3600 / totalLength * Time.deltaTime ;
+		if (rb.velocity.sqrMagnitude < 1f && Mathf.Approximately(Velocity, 0f) == true) return;
+
+		curTrackOffset -= Velocity * 1000 / 3600 / totalLength * Time.deltaTime;
 
 		float distRatioStep = 1f / tracks.Length;
 		for (int i = 0; i < tracks.Length; i++)
@@ -149,9 +160,9 @@ public class TrackController : MonoBehaviour
 		float curDist = distRatio * totalLength;
 		int i;
 
-		for(i = 0; i < vertexLengths.Length; i++)
+		for (i = 0; i < vertexLengths.Length; i++)
 		{
-			if(curDist - vertexLengths[i] < 0f)
+			if (curDist - vertexLengths[i] < 0f)
 			{
 				break;
 			}
@@ -162,7 +173,7 @@ public class TrackController : MonoBehaviour
 		}
 
 		// 예외상황일경우 한바퀴 더 돌리기(트랙 길이는 유동적)
-		if(i == vertexLengths.Length)
+		if (i == vertexLengths.Length)
 		{
 			for (i = 0; i < vertexLengths.Length; i++)
 			{
@@ -186,7 +197,7 @@ public class TrackController : MonoBehaviour
 	private void RefreshLengths(int segmentPerCurve)
 	{
 		float totalLength = 0f;
-		for(int startIdx = 0; startIdx < spline.CurveCount; startIdx++)
+		for (int startIdx = 0; startIdx < spline.CurveCount; startIdx++)
 		{
 			int endIdx = startIdx + 1;
 
