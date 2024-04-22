@@ -14,8 +14,10 @@ public class BruteZombie : ZombieBase
 	[SerializeField] Rig lookRig;
 	[SerializeField] float lookSpeed = 1.5f;
 
-	public enum State { Idle, Trace, Search, AnimWait, }
+	public Action OnShieldBreak;
+	public enum State { Idle, Trace, DefenceTrace, BerserkTrace, Search, AnimWait, }
 
+	public int ShieldCnt { get; set; } = 2;
 	[Networked] public float LookWeight { get; set; }
 	[Networked] public Vector3 LookPos { get; set; }
 
@@ -26,6 +28,7 @@ public class BruteZombie : ZombieBase
 		stateMachine.AddState(State.Idle, new BruteIdle(this));
 		stateMachine.AddState(State.Trace, new BruteTrace(this));
 		stateMachine.AddState(State.Search, new BruteSearch(this));
+		stateMachine.AddState(State.DefenceTrace, new BruteDefenceTrace(this));
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
 
 		stateMachine.InitState(State.Idle);
@@ -61,9 +64,10 @@ public class BruteZombie : ZombieBase
 		}
 	}
 
-	public override void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, Vector3 velocity, int damage)
+	public override void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
+		Vector3 velocity, int damage, bool playHitVFX = true)
 	{
-		base.ApplyDamage(source, zombieHitBox, velocity, damage);
+		base.ApplyDamage(source, zombieHitBox, velocity, damage, playHitVFX);
 
 		Vector3 angleVelocity = velocity;
 		angleVelocity.y = 0f;
@@ -139,6 +143,9 @@ public class BruteZombie : ZombieBase
 				SetAnimFloat("ActionShifter", 1f);
 			}
 			SetAnimTrigger("Hit");
+			State nextState = ShieldCnt > 0 ? State.DefenceTrace : State.BerserkTrace;
+			AnimWaitStruct = new AnimWaitStruct("Hit", nextState.ToString(),
+				updateAction: Decelerate);
 		}
 	}
 
@@ -154,8 +161,7 @@ public class BruteZombie : ZombieBase
 		AnimWaitStruct = new AnimWaitStruct("StunEnd", "Idle",
 		updateAction: () =>
 		{
-				SetAnimFloat("SpeedX", 0f, 0.5f);
-				SetAnimFloat("SpeedY", 0f, 0.5f);
+				Decelerate(0.5f);
 				if (exitTriggered == false && durationTimer.ExpiredOrNotRunning(Runner))
 				{
 					exitTriggered = true;
@@ -164,5 +170,10 @@ public class BruteZombie : ZombieBase
 			},
 			exitAction: () => isStun = false);
 		stateMachine.ChangeState(State.AnimWait);
+	}
+
+	public void ShieldBreak()
+	{
+		OnShieldBreak?.Invoke();
 	}
 }

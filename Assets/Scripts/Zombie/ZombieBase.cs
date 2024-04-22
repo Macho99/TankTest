@@ -3,6 +3,7 @@ using UnityEngine;
 using Fusion;
 using UnityEngine.AI;
 using System;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public struct BoneTransform
 {
@@ -36,6 +37,8 @@ public abstract class ZombieBase : NetworkBehaviour
 	protected Collider[] overlapCols = new Collider[5];
 
 	protected BodyPart[] bodyHitParts = new BodyPart[(int)ZombieBody.Size];
+
+	public Action OnHit;
 
 	public string WaitName { get; set; }
 	public string NextState { get; set; }
@@ -186,11 +189,17 @@ public abstract class ZombieBase : NetworkBehaviour
 			Quaternion.LookRotation(-HitVelocity), true);
 	}
 
-	public virtual void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, Vector3 velocity, int damage)
+	public virtual void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
+		Vector3 velocity, int damage, bool playHitVFX = true)
 	{
+		OnHit?.Invoke();
+
 		HitVelocity = velocity;
 		HitBody = zombieHitBox.BodyType;
-		HitCnt++;
+		if(playHitVFX)
+		{
+			HitCnt++;
+		}
 
 		if (Object.IsProxy) return;
 
@@ -203,6 +212,27 @@ public abstract class ZombieBase : NetworkBehaviour
 		{
 			CurHp = 0;
 		}
+	}
+
+	public void Trace(float speed, float rotateSpeed, float dampX, float dampY)
+	{
+		float speedX = 0f;
+		float speedY = 0f;
+		if (agent.hasPath)
+		{
+			Vector3 lookDir = (agent.steeringTarget - transform.position);
+			lookDir.y = 0f;
+			lookDir.Normalize();
+			transform.rotation = Quaternion.RotateTowards(transform.rotation,
+				Quaternion.LookRotation(lookDir), rotateSpeed * Runner.DeltaTime);
+			Vector3 moveDir = agent.desiredVelocity.normalized;
+			Vector3 animDir = transform.InverseTransformDirection(moveDir);
+
+			speedX = animDir.x * speed;
+			speedY = animDir.z * speed;
+		}
+		SetAnimFloat("SpeedX", speedX, dampX);
+		SetAnimFloat("SpeedY", speedY, dampY);
 	}
 
 	public virtual void Heal(int amount, bool healLeg = true)
@@ -243,5 +273,22 @@ public abstract class ZombieBase : NetworkBehaviour
 	public bool IsAnimName(string name, int layer = 0)
 	{
 		return anim.GetCurrentAnimatorStateInfo(layer).IsName(name);
+	}
+	
+	public void Decelerate()
+	{
+		SetAnimFloat("SpeedX", 0f, 0.5f, Runner.DeltaTime);
+		SetAnimFloat("SpeedY", 0f, 0.5f, Runner.DeltaTime);
+	}
+
+	public void Decelerate(float dampTime = 0.5f, float? deltaTime = null)
+	{
+		if(deltaTime.HasValue == false)
+		{
+			deltaTime = Runner.DeltaTime;
+		}
+
+		SetAnimFloat("SpeedX", 0f, dampTime, deltaTime);
+		SetAnimFloat("SpeedY", 0f, dampTime, deltaTime);
 	}
 }

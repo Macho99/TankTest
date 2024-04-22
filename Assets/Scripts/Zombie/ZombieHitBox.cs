@@ -19,7 +19,7 @@ public class ZombieHitBox : MonoBehaviour
 	public ZombieBody BodyType { get { return bodyType; } }
 	public Rigidbody RB { get { return rb; } }
 
-	private ZombieBase owner;
+	protected ZombieBase owner;
 
 	protected virtual void Awake()
 	{

@@ -65,8 +65,7 @@ public class ZombieIdle : ZombieState
 		elapsed += owner.Runner.DeltaTime;
 		if(elapsed < 2f)
 		{
-			owner.SetAnimFloat("SpeedX", 0f, 1f);
-			owner.SetAnimFloat("SpeedY", 0f, 1f);
+			owner.Decelerate(1f);
 			owner.SetAnimFloat("IdleShifter", idleShifter, 0.2f);
 		}
 	}

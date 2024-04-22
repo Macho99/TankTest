@@ -10,62 +10,33 @@ public class BruteTrace : BruteZombieState
 	const float speed = 1f;
 	const float rotateSpeed = 60f;
 
-	int enterHitCnt;
-	bool defence;
-
 	public BruteTrace(BruteZombie owner) : base(owner)
 	{
 	}
 
 	public override void Enter()
 	{
+		owner.OnHit += ChangeToDefence;
 		if (CheckTransition() == true)
 		{
 			return;
 		}
-		enterHitCnt = owner.HitCnt;
-		defence = false;
 	}
 
 	public override void Exit()
 	{
+		owner.OnHit -= ChangeToDefence;
+	}
 
+	private void ChangeToDefence()
+	{
+		ChangeState(BruteZombie.State.DefenceTrace);
 	}
 
 	public override void FixedUpdateNetwork()
 	{
-		CheckDefence();
-
 		owner.LookTarget();
-
-		float speedX = 0f;
-		float speedY = 0f;
-		if (owner.Agent.hasPath)
-		{
-			Vector3 lookDir = (owner.Agent.steeringTarget - owner.transform.position);
-			lookDir.y = 0f;
-			lookDir.Normalize();
-			owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
-				Quaternion.LookRotation(lookDir), rotateSpeed * owner.Runner.DeltaTime);
-			Vector3 moveDir = owner.Agent.desiredVelocity.normalized;
-			Vector3 animDir = owner.transform.InverseTransformDirection(moveDir);
-
-			speedX = animDir.x * speed;
-			speedY = animDir.z * speed;
-		}
-
-		owner.SetAnimFloat("SpeedX", speedX, 1f);
-		owner.SetAnimFloat("SpeedY", speedY, 1f);
-	}
-
-
-	private void CheckDefence()
-	{
-		if(defence == false && enterHitCnt != owner.HitCnt)
-		{
-			defence = true;
-			owner.SetAnimInt("Defence", 1);
-		}
+		owner.Trace(speed, rotateSpeed, 0.5f, 1f);
 	}
 
 	public override void SetUp()

@@ -50,8 +50,7 @@ public class ZombieRagdollEnter : ZombieState
 		elapsed += owner.Runner.DeltaTime;
 		if(transition == false)
 			owner.CurRagdollState = RagdollState.Ragdoll;
-		owner.SetAnimFloat("SpeedX", 0f, 1f);
-		owner.SetAnimFloat("SpeedY", 0f, 1f);
+		owner.Decelerate(1f);
 	}
 
 	public override void Render()

@@ -44,7 +44,7 @@ public class ZombieAnimWait : NetworkBaseState
 	{
 		if (animEntered == true)
 		{
-			if(owner.IsAnimName(waitStruct.animName) == false)
+			if(owner.IsAnimName(waitStruct.animName, waitStruct.layer) == false)
 			{
 				if(waitStruct.nextState == null)
 				{
@@ -63,7 +63,7 @@ public class ZombieAnimWait : NetworkBaseState
 		waitStruct.updateAction?.Invoke();
 		if(animEntered == true) { return; }
 
-		if(owner.IsAnimName(waitStruct.animName) == true)
+		if(owner.IsAnimName(waitStruct.animName, waitStruct.layer) == true)
 		{
 			animEntered = true;
 			waitStruct.animStartAction?.Invoke();

@@ -153,8 +153,7 @@ public class ZombieTrace : ZombieState
 					attacked = true;
 					owner.Attack(10);
 				}
-				owner.SetAnimFloat("SpeedX", 0f, 1f);
-				owner.SetAnimFloat("SpeedY", 0f, 1f);
+				owner.Decelerate(1f);
 			});
 		ChangeState(Zombie.State.AnimWait);
 	}
@@ -173,24 +172,7 @@ public class ZombieTrace : ZombieState
 		}
 		rotateSpeed = 60f * speed;
 
-		float speedX = 0f;
-		float speedY = 0f;
-		if (owner.Agent.hasPath)
-		{
-			Vector3 lookDir = (owner.Agent.steeringTarget - owner.transform.position);
-			lookDir.y = 0f;
-			lookDir.Normalize();
-			owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
-				Quaternion.LookRotation(lookDir), rotateSpeed * owner.Runner.DeltaTime);
-			Vector3 moveDir = owner.Agent.desiredVelocity.normalized;
-			Vector3 animDir = owner.transform.InverseTransformDirection(moveDir);
-
-			speedX = animDir.x * speed;
-			speedY = animDir.z * speed;
-		}
-
-		owner.SetAnimFloat("SpeedX", speedX, 0.2f);
-		owner.SetAnimFloat("SpeedY", speedY, 0.4f);
+		owner.Trace(speed, rotateSpeed, 0.2f, 0.4f);
 	}
 
 	private bool CheckFallAsleep()

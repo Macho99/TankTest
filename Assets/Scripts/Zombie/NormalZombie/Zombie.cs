@@ -7,6 +7,7 @@ using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
 public enum RagdollState { Animate, Ragdoll, FaceUpStand, FaceDownStand, FaceUpCrawl, FaceDownCrawl };
@@ -142,8 +143,10 @@ public class Zombie : ZombieBase
 	{
 		if(value == false)
 		{
-			foreach (BodyPart bodyPart in bodyHitParts)
+			//실드를 제외한 BodyHitParts
+			for (int i = 0; i < bodyHitParts.Length - 1; i++)
 			{
+				BodyPart bodyPart = bodyHitParts[i];
 				bodyPart.rb.velocity = Vector3.zero;
 				bodyPart.rb.angularVelocity = Vector3.zero;
 			}
@@ -295,9 +298,10 @@ public class Zombie : ZombieBase
 		return State.Idle.ToString();
 	}
 
-	public override void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, Vector3 velocity, int damage)
+	public override void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
+		Vector3 velocity, int damage, bool playHitVFX = true)
 	{
-		base.ApplyDamage(source, zombieHitBox, velocity, damage);
+		base.ApplyDamage(source, zombieHitBox, velocity, damage, playHitVFX);
 		if (Object.IsProxy) return;
 
 		if (CurHp <= 0)
@@ -358,11 +362,7 @@ public class Zombie : ZombieBase
 			SetAnimTrigger("Hit");
 
 			AnimWaitStruct = new AnimWaitStruct("StandHit", "Idle",
-				updateAction: () =>
-				{
-					SetAnimFloat("SpeedX", 0f, 1f);
-					SetAnimFloat("SpeedY", 0f, 1f);
-				});
+				updateAction: Decelerate);
 			stateMachine.ChangeState(State.AnimWait);
 		}
 		else
@@ -371,11 +371,7 @@ public class Zombie : ZombieBase
 			SetAnimFloat("FallAsleep", 0f);
 
 			AnimWaitStruct = new AnimWaitStruct("Fall", State.CrawlIdle.ToString(),
-				updateAction: () =>
-				{
-					SetAnimFloat("SpeedX", 0f, 1f);
-					SetAnimFloat("SpeedY", 0f, 1f);
-				});
+				updateAction: Decelerate);
 			stateMachine.ChangeState(State.AnimWait);
 		}
 	}
