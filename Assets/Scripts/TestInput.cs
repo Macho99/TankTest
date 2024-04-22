@@ -1,4 +1,3 @@
-using ExitGames.Client.Photon.StructWrapping;
 using Fusion;
 using Fusion.Addons.SimpleKCC;
 using System.Collections;
