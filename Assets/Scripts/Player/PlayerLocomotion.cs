@@ -37,10 +37,10 @@ public class PlayerLocomotion : NetworkBehaviour
 
     private void Awake()
     {
-        myCollider = GetComponentInChildren<CapsuleCollider>();
+        myCollider =GetComponentInChildren<CapsuleCollider>();
         animator = GetComponent<Animator>();
         simpleKCC = GetComponent<SimpleKCC>();
-        camController = GetComponentInChildren<BasicCamController>();
+        camController = transform.Find("ThirdCameraRoot").GetComponent<BasicCamController>();
         jumpForce = 8f;
         rotateXSpeed = 30f;
         moves = new PlayerMove[(int)MovementType.Size];
@@ -68,7 +68,7 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public void Move()
     {
-      
+
         simpleKCC.Move(moveDirection * moveSpeed, jumpVelocity);
         if (simpleKCC.HasJumped)
         {
