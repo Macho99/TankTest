@@ -53,7 +53,7 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         NetworkInputData data = new NetworkInputData();
         data.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
-        data.mouseDelta = Mouse.current.delta.ReadValue();
+        data.mouseDelta = Mouse.current.delta.value;
         data.buttons.Set(NetworkInputData.ButtonType.Run, playerControls.Player.Run.inProgress);
         data.buttons.Set(NetworkInputData.ButtonType.Jump, playerControls.Player.Jump.inProgress);
         data.buttons.Set(NetworkInputData.ButtonType.Crouch, playerControls.Player.Crouch.inProgress);
