@@ -2124,6 +2124,7 @@ GameObject:
   - component: {fileID: 8153018902636825378}
   - component: {fileID: 6532355758036490155}
   - component: {fileID: 7170961923084623732}
+  - component: {fileID: 8917626570078342183}
   m_Layer: 0
   m_Name: TestPlayer Variant
   m_TagString: Player
@@ -2192,6 +2193,7 @@ MonoBehaviour:
   - {fileID: 8153018902636825378}
   - {fileID: 6532355758036490155}
   - {fileID: 7170961923084623732}
+  - {fileID: 8917626570078342183}
   - {fileID: 8115262581418149381}
   - {fileID: 1482071995721117982}
 --- !u!54 &6892593541999628907
@@ -2319,6 +2321,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   curStateStr: 
+--- !u!114 &8917626570078342183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3800616907373568407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 313358dc40fd70143b2521da1a53f879, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3820486920683660366
 GameObject:
   m_ObjectHideFlags: 0
@@ -8004,6 +8018,10 @@ PrefabInstance:
     - target: {fileID: 6317337647102774269, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
       propertyPath: m_Name
       value: ThirdCameraRoot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6317337647102774269, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6393749149681573187, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
       propertyPath: Flags

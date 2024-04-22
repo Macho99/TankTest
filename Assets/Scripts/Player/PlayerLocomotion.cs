@@ -37,10 +37,10 @@ public class PlayerLocomotion : NetworkBehaviour
 
     private void Awake()
     {
-        myCollider =GetComponentInChildren<CapsuleCollider>();
+        myCollider = GetComponentInChildren<CapsuleCollider>();
         animator = GetComponent<Animator>();
         simpleKCC = GetComponent<SimpleKCC>();
-        camController = transform.Find("ThirdCameraRoot").GetComponent<BasicCamController>();
+        camController = GetComponentInChildren<BasicCamController>();
         jumpForce = 8f;
         rotateXSpeed = 30f;
         moves = new PlayerMove[(int)MovementType.Size];
@@ -50,9 +50,9 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public override void Spawned()
     {
-        if (Object.InputAuthority == Runner.LocalPlayer)
+        if (Object.InputAuthority != Runner.LocalPlayer)
         {
-            camController.gameObject.SetActive(true);
+            camController.gameObject.SetActive(false);
         }
         moveSpeed = 0f;
         simpleKCC.SetGravity(Physics.gravity.y * 1f);
@@ -142,7 +142,7 @@ public class PlayerLocomotion : NetworkBehaviour
             }
             else
             {
-                return true; 
+                return true;
 
             }
         }

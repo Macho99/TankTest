@@ -33,7 +33,6 @@ public class PlayerStandLocomotionState : PlayerState
     {
 
     }
-
     public override void Transition()
     {
         if (owner.GetInput(out NetworkInputData input))
