@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 public enum ZombieBody { LeftHips, LeftKnee, RightHips, RightKnee,
-	Head, Pelvis, MiddleSpine, LeftArm, LeftElbow, RightArm, RightElbow, Shield,
+	Head, Pelvis, MiddleSpine, LeftArm, LeftElbow, RightArm, RightElbow,
 	Size,
 }
 
-public class ZombieHitBox : MonoBehaviour
+public class ZombieHitBox : MonoBehaviour, IHittable
 {
 	[SerializeField] protected ZombieBody bodyType;
 	[SerializeField] protected Rigidbody rb;

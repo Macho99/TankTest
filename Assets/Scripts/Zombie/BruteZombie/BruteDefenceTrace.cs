@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static UnityEngine.Rendering.DebugUI;
 
 public class BruteDefenceTrace : BruteZombieState
 {
@@ -19,19 +20,26 @@ public class BruteDefenceTrace : BruteZombieState
 
 	public override void Enter()
 	{
+		owner.Shield.SetEnable(true);
 		owner.SetAnimInt("Defence", 1);
 		owner.OnHit += ResetTimer;
-		owner.OnShieldBreak += ShieldBreak;
+		owner.OnStun += StunCallback;
 		ResetTimer();
 	}
 
 	public override void Exit()
 	{
+		owner.Shield.SetEnable(false);
 		owner.OnHit -= ResetTimer;
-		owner.OnShieldBreak -= ShieldBreak;
+		owner.OnStun -= StunCallback;
 	}
 
-	private void ResetTimer()
+	private void StunCallback()
+	{
+		owner.SetAnimTrigger("DefenceExit");
+	}
+
+	public void ResetTimer()
 	{
 		defenceTimer = TickTimer.CreateFromSeconds(owner.Runner, defenceTime);
 	}
@@ -44,7 +52,7 @@ public class BruteDefenceTrace : BruteZombieState
 
 	public override void SetUp()
 	{
-
+		owner.Shield.Init(this);
 	}
 
 	public override void Transition()
@@ -55,7 +63,7 @@ public class BruteDefenceTrace : BruteZombieState
 			return;
 		}
 
-		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 3f)
+		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 5f)
 		{
 			ChangeToTrace();
 			return;
@@ -74,16 +82,27 @@ public class BruteDefenceTrace : BruteZombieState
 		ChangeState(BruteZombie.State.AnimWait);
 	}
 
-	private void ShieldBreak()
+	public void ShieldBreak()
 	{
-		owner.SetAnimInt("Defence", 2);
-		owner.AnimWaitStruct = new AnimWaitStruct("DefenceBreak", BruteZombie.State.Trace.ToString(), 1,
-			updateAction: () =>
-			{
-				owner.SetAnimFloat("SpeedX", 0f, 0.5f);
-				owner.SetAnimFloat("SpeedY", 0f, 0.5f);
-			},
-			exitAction: () => owner.SetAnimInt("Defence", 0));
-		ChangeState(BruteZombie.State.AnimWait);
+		owner.ShieldCnt--;
+		if(owner.ShieldCnt == 0)
+		{
+			owner.BerserkMode();
+		}
+        else
+		{
+			owner.SetAnimInt("Defence", 2);
+			owner.AnimWaitStruct = new AnimWaitStruct("DefenceBreak", BruteZombie.State.Trace.ToString(), 1,
+				updateAction: owner.Decelerate,
+				exitAction: () => owner.SetAnimInt("Defence", 0));
+			ChangeState(BruteZombie.State.AnimWait);
+		}
+	}
+
+	public void Knockback()
+	{
+		owner.SetAnimFloat("ActionShifter", -1);
+		owner.SetAnimTrigger("Hit");
+		ChangeState(BruteZombie.State.DefenceKnockback);
 	}
 }

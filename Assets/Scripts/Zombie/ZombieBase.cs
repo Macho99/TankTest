@@ -4,6 +4,8 @@ using Fusion;
 using UnityEngine.AI;
 using System;
 using static UnityEngine.UI.GridLayoutGroup;
+using System.Text;
+using TMPro;
 
 public struct BoneTransform
 {
@@ -13,6 +15,8 @@ public struct BoneTransform
 
 public abstract class ZombieBase : NetworkBehaviour
 {
+	[SerializeField] TextMeshProUGUI curStateText;
+
 	public struct BodyPart
 	{
 		public ZombieHitBox zombieHitBox;
@@ -38,7 +42,6 @@ public abstract class ZombieBase : NetworkBehaviour
 
 	protected BodyPart[] bodyHitParts = new BodyPart[(int)ZombieBody.Size];
 
-	public Action OnHit;
 
 	public string WaitName { get; set; }
 	public string NextState { get; set; }
@@ -168,6 +171,26 @@ public abstract class ZombieBase : NetworkBehaviour
 
 	public override void Render()
 	{
+		string curState = stateMachine.curStateStr;
+		StringBuilder sb = new StringBuilder();
+		string printState = curState.Equals("AnimWait") ? $"{prevState} -> AnimWait({WaitName}) -> {NextState}" : curState;
+		sb.AppendLine($"현재 상태: {printState}");
+		sb.AppendLine($"마지막 타겟 발견시간: {((LastPlayerFindTick - Runner.Tick) / (float)Runner.TickRate).ToString("F1")}");
+		sb.AppendLine($"Target: {CurTargetType}");
+		sb.Append($"CurHP: ");
+		for (int i = 0; i < CurHp; i += 50)
+		{
+			sb.Append("■");
+		}
+		sb.Append('\n');
+		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
+		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
+		sb.AppendLine($"PosDiff: {(transform.position - Position).sqrMagnitude.ToString("F4")}");
+		if (curState.Equals("AnimWait") == false)
+			prevState = curState;
+
+		curStateText.text = sb.ToString();
+
 		if (Object.IsProxy)
 		{
 			if ((transform.position - Position).sqrMagnitude > Mathf.Lerp(0.01f, 1f, anim.GetFloat("SpeedY") * 0.2f))
@@ -192,8 +215,6 @@ public abstract class ZombieBase : NetworkBehaviour
 	public virtual void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
 		Vector3 velocity, int damage, bool playHitVFX = true)
 	{
-		OnHit?.Invoke();
-
 		HitVelocity = velocity;
 		HitBody = zombieHitBox.BodyType;
 		if(playHitVFX)

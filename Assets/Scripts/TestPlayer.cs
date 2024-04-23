@@ -117,7 +117,7 @@ public class TestPlayer : NetworkBehaviour
 	{
 		if(Physics.Raycast(camRoot.position, camRoot.forward, out RaycastHit hitInfo, 100f, LayerMask.GetMask("Monster"), QueryTriggerInteraction.Collide))
 		{
-			hitInfo.collider.GetComponent<ZombieHitBox>().ApplyDamage(transform, camRoot.forward * 30f, damage);
+			hitInfo.collider.GetComponent<IHittable>().ApplyDamage(transform, camRoot.forward * 30f, damage);
 		}
 
 		//if (Runner.LagCompensation.Raycast(camRoot.position, camRoot.forward,

@@ -7,6 +7,7 @@ public class ZombieAnimWait : NetworkBaseState
 	ZombieBase owner;
 	AnimWaitStruct waitStruct;
 	bool animEntered;
+	bool startAnimEntered;
 
 	public ZombieAnimWait(ZombieBase owner)
 	{
@@ -21,11 +22,13 @@ public class ZombieAnimWait : NetworkBaseState
 			return;
 		}
 
+		startAnimEntered = false;
 		animEntered = false;
 		waitStruct = owner.AnimWaitStruct.Value;
 		waitStruct.startAction?.Invoke();
 		owner.AnimWaitStruct = null;
 
+		//Debug
 		owner.WaitName = waitStruct.animName;
 		owner.NextState = waitStruct.nextState;
 	}
@@ -63,7 +66,15 @@ public class ZombieAnimWait : NetworkBaseState
 		waitStruct.updateAction?.Invoke();
 		if(animEntered == true) { return; }
 
-		if(owner.IsAnimName(waitStruct.animName, waitStruct.layer) == true)
+		if(startAnimEntered == false)
+		{
+			if(owner.IsAnimName(waitStruct.startAnimName, waitStruct.layer) == true)
+			{
+				startAnimEntered = true;
+			}
+		}
+
+		if(startAnimEntered == true && owner.IsAnimName(waitStruct.animName, waitStruct.layer) == true)
 		{
 			animEntered = true;
 			waitStruct.animStartAction?.Invoke();

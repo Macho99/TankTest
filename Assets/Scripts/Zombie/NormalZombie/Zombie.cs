@@ -18,7 +18,6 @@ public class Zombie : ZombieBase
 
 	[SerializeField] Transform skins;
 	[SerializeField] float fallAsleepThreshold = 0.2f;
-	[SerializeField] TextMeshProUGUI curStateText;
 	[SerializeField] Transform ragdollHips;
 
 	TickTimer meatFindTimer;
@@ -143,8 +142,7 @@ public class Zombie : ZombieBase
 	{
 		if(value == false)
 		{
-			//실드를 제외한 BodyHitParts
-			for (int i = 0; i < bodyHitParts.Length - 1; i++)
+			for (int i = 0; i < bodyHitParts.Length; i++)
 			{
 				BodyPart bodyPart = bodyHitParts[i];
 				bodyPart.rb.velocity = Vector3.zero;
@@ -165,27 +163,6 @@ public class Zombie : ZombieBase
 
 	public override void Render()
 	{
-		string curState = stateMachine.curStateStr;
-		StringBuilder sb = new StringBuilder();
-		string printState = curState.Equals("AnimWait") ? $"{prevState} -> AnimWait({WaitName}) -> {NextState}" : curState;
-		sb.AppendLine($"현재 상태: {printState}");
-		sb.AppendLine($"마지막 타겟 발견시간: {((LastPlayerFindTick - Runner.Tick) / (float) Runner.TickRate).ToString("F1")}");
-		sb.AppendLine($"Target: {CurTargetType}");
-		sb.Append($"CurHP: ");
-		for (int i = 0; i < CurHp; i += 50)
-		{
-			sb.Append("■");
-		}
-		sb.Append('\n');
-		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
-		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
-		sb.AppendLine($"PosDiff: {(transform.position - Position).sqrMagnitude.ToString("F4")}");
-		if (curState.Equals("AnimWait") == false)
-			prevState = curState;
-
-		curStateText.text = sb.ToString();
-
-
 		if (CurRagdollState != RagdollState.Animate) return;
 
 		base.Render();

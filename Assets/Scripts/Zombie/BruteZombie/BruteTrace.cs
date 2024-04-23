@@ -30,6 +30,7 @@ public class BruteTrace : BruteZombieState
 
 	private void ChangeToDefence()
 	{
+		owner.Shield.ResetHp();
 		ChangeState(BruteZombie.State.DefenceTrace);
 	}
 

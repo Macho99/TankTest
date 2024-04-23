@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -13,22 +14,31 @@ public class BruteZombie : ZombieBase
 	[SerializeField] Transform lookTarget;
 	[SerializeField] Rig lookRig;
 	[SerializeField] float lookSpeed = 1.5f;
+	[SerializeField] Transform shieldHolder;
 
-	public Action OnShieldBreak;
-	public enum State { Idle, Trace, DefenceTrace, BerserkTrace, Search, AnimWait, }
+	public enum State { Idle, Trace, DefenceTrace, DefenceKnockback, Stun, BerserkTrace, Search, AnimWait, }
 
+	public Action OnHit;
+	public Action OnStun;
+
+	public BruteShield Shield { get; private set; }
 	public int ShieldCnt { get; set; } = 2;
+
+	[Networked, OnChangedRender(nameof(BerserkRender))] public NetworkBool Berserk { get; set; }
 	[Networked] public float LookWeight { get; set; }
 	[Networked] public Vector3 LookPos { get; set; }
 
 	protected override void Awake()
 	{
 		base.Awake();
+		Shield = shieldHolder.GetComponentInChildren<BruteShield>();
 
 		stateMachine.AddState(State.Idle, new BruteIdle(this));
 		stateMachine.AddState(State.Trace, new BruteTrace(this));
 		stateMachine.AddState(State.Search, new BruteSearch(this));
 		stateMachine.AddState(State.DefenceTrace, new BruteDefenceTrace(this));
+		stateMachine.AddState(State.DefenceKnockback, new BruteDefenceKnockback(this));
+		stateMachine.AddState(State.BerserkTrace, new BruteBerserkTrace(this));
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
 
 		stateMachine.InitState(State.Idle);
@@ -45,6 +55,11 @@ public class BruteZombie : ZombieBase
 		
 		lookRig.weight = Mathf.Lerp(lookRig.weight, LookWeight, Runner.DeltaTime * lookSpeed);
 		lookTarget.position = Vector3.Lerp(lookTarget.position, LookPos, Runner.DeltaTime * lookSpeed);
+	}
+
+	private void BerserkRender()
+	{
+
 	}
 
 	public override string DecideState()
@@ -107,7 +122,7 @@ public class BruteZombie : ZombieBase
 			//뒤쪽에서 맞았으면 잠깐 스턴
 			if(absAngle < 90f)
 			{
-				Stun(0.5f);
+				Stun(2f);
 				return;
 			}
 
@@ -142,11 +157,31 @@ public class BruteZombie : ZombieBase
 			{
 				SetAnimFloat("ActionShifter", 1f);
 			}
+
 			SetAnimTrigger("Hit");
-			State nextState = ShieldCnt > 0 ? State.DefenceTrace : State.BerserkTrace;
-			AnimWaitStruct = new AnimWaitStruct("Hit", nextState.ToString(),
-				updateAction: Decelerate);
+			if (Shield.Enabled == true)
+			{
+				stateMachine.ChangeState(State.DefenceKnockback);
+			}
+			else
+			{
+				State nextState;
+				if(ShieldCnt > 0)
+				{
+					nextState = State.DefenceTrace;
+				}
+				else
+				{
+					nextState = State.BerserkTrace;
+				}
+				Shield.ResetHp();
+				AnimWaitStruct = new AnimWaitStruct("Hit", nextState.ToString(),
+					updateAction: Decelerate);
+				stateMachine.ChangeState(State.AnimWait);
+			}
 		}
+
+		OnHit?.Invoke();
 	}
 
 	bool isStun;
@@ -154,13 +189,23 @@ public class BruteZombie : ZombieBase
 	TickTimer durationTimer;
 	public void Stun(float duration)
 	{
+		OnStun?.Invoke();
+		if (isStun == true && exitTriggered == false)
+		{
+			float? nullableRemainTime = durationTimer.RemainingTime(Runner);
+			float remainTime = nullableRemainTime.HasValue ? nullableRemainTime.Value : 0f;
+			durationTimer = TickTimer.CreateFromSeconds(Runner, remainTime + duration);
+			return;
+		}
+
 		isStun = true;
 		exitTriggered = false;
 		durationTimer = TickTimer.CreateFromSeconds(Runner, duration);
 		SetAnimTrigger("Stun");
-		AnimWaitStruct = new AnimWaitStruct("StunEnd", "Idle",
-		updateAction: () =>
-		{
+		AnimWaitStruct = new AnimWaitStruct("StunEnd", "Idle", startAnimName: "StunStart",
+			startAction: () => LookWeight = 0f,
+			updateAction: () =>
+			{
 				Decelerate(0.5f);
 				if (exitTriggered == false && durationTimer.ExpiredOrNotRunning(Runner))
 				{
@@ -168,12 +213,18 @@ public class BruteZombie : ZombieBase
 					SetAnimTrigger("Exit");
 				}
 			},
-			exitAction: () => isStun = false);
+			exitAction: () => { isStun = false; LookWeight = 1f; });
 		stateMachine.ChangeState(State.AnimWait);
 	}
 
-	public void ShieldBreak()
+	public void BerserkMode()
 	{
-		OnShieldBreak?.Invoke();
+		SetAnimTrigger("DefenceExit");
+		SetAnimTrigger("Down");
+		Shield.Break();
+		LookWeight = 0f;
+		Berserk = true;
+		AnimWaitStruct = new AnimWaitStruct("Rise", State.BerserkTrace.ToString(),
+			updateAction: Decelerate, exitAction: () => LookWeight = 1f);
 	}
 }
