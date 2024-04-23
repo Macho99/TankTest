@@ -233,14 +233,6 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
-	//TODO: BossUI
-	public void ShowBossUI()
-	{
-        bossCanvas = GameManager.Resource.Instantiate<Canvas>("UI/Canvas");
-        bossCanvas.gameObject.name = "BossCanvas";
-        bossCanvas.sortingOrder = 100;
-    }
-
 	public void HideSceneUI(bool hide, float wait = 0f)
 	{
 		_ = StartCoroutine(CoHide(hide, wait));

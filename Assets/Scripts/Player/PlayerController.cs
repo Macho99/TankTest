@@ -46,6 +46,21 @@ public class PlayerController : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
+        if (InputListner.pressButton.IsSet(NetworkInputData.ButtonType.MouseLock))
+        {
+            if (Cursor.visible == true)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+        }
+
         Falling();
         movement.Move();
 

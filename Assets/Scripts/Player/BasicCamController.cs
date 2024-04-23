@@ -1,3 +1,4 @@
+using Cinemachine;
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,6 +19,13 @@ public class BasicCamController : NetworkBehaviour
         rotateYSpeed = 15f;
         Debug.Log("Awake");
     }
+    public override void Spawned()
+    {
+        if (Object.InputAuthority != Runner.LocalPlayer)
+        {
+            transform.GetComponentInChildren<CinemachineVirtualCamera>().enabled = false;
+        }
+    }
     public float RotateX(NetworkInputData input)
     {
         float mouseDeltaY = input.mouseDelta.y * rotateYSpeed * Runner.DeltaTime;
@@ -34,7 +42,7 @@ public class BasicCamController : NetworkBehaviour
         {
             rotX = Mathf.Clamp(rotX, 335f, 361f);
         }
-             
+
 
         return rotX;
     }

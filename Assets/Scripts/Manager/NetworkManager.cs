@@ -323,7 +323,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 }
 public struct NetworkInputData : INetworkInput
 {
-    public enum ButtonType { Run,Jump,Crouch}
+    public enum ButtonType { Run,Jump,Crouch,MouseLock}
     public NetworkButtons buttons;
     public Vector2 inputDirection;
     public Vector2 mouseDelta;

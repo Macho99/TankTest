@@ -53,11 +53,7 @@ public class PlayerLocomotion : NetworkBehaviour
     {
 
         CamerRotX = camController.FollowTarget.eulerAngles.x;
-        if (Object.InputAuthority != Runner.LocalPlayer)
-        {
-            camController.gameObject.SetActive(false);
-        }
-
+     
         moveSpeed = 0f;
         simpleKCC.SetGravity(Physics.gravity.y * 1f);
         fallingTime = 0f;
