@@ -7,18 +7,23 @@ using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
     public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass }
+
+    public GameObject debugUIPrefab;
     private NetworkStateMachine stateMachine;
     public PlayerLocomotion movement { get; private set; }
     public Animator animator { get; private set; }
     private CapsuleCollider myCollider;
-
+    public PlayerInputListner InputListner { get; private set; }
     [Networked] public float FallingTime { get; set; }
+
+
     private void Awake()
     {
         myCollider = GetComponentInChildren<CapsuleCollider>();
         animator = GetComponent<Animator>();
         stateMachine = GetComponent<NetworkStateMachine>();
         movement = GetComponent<PlayerLocomotion>();
+        InputListner = GetComponent<PlayerInputListner>();
         stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
         stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
         stateMachine.AddState(PlayerState.Jump, new PlayerJumpState(this));
@@ -30,6 +35,13 @@ public class PlayerController : NetworkBehaviour
     public override void Spawned()
     {
         FallingTime = 0f;
+        name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
+
+        if (Object.InputAuthority == Runner.LocalPlayer)
+        {
+            GameObject canvas = Instantiate(debugUIPrefab);
+            canvas.GetComponentInChildren<HostClientDebugUI>().SetPlayerInfo(HasStateAuthority == true ? "Host" : "Client");
+        }
     }
 
     public override void FixedUpdateNetwork()
@@ -73,7 +85,7 @@ public class PlayerController : NetworkBehaviour
 
         return false;
     }
-    public bool RaycastObject()
+    public bool RaycastObject(out RaycastHit hitInfo)
     {
         Ray ray = new Ray();
 
@@ -84,13 +96,15 @@ public class PlayerController : NetworkBehaviour
         {
             if (hit.collider.TryGetComponent(out IClimbPassable climbObject))
             {
-                if (climbObject.CanClimbPassCheck(transform.position, movement.Kcc.Settings.Height))
+                if (climbObject.CanClimbPassCheck(hit, transform.position, movement.Kcc.Settings.Height))
                 {
+                    hitInfo = hit;
                     return true;
                 }
             }
         }
         Debug.DrawRay(ray.origin, ray.direction * 1f, Color.red, 0.5f);
+        hitInfo = default;
         return false;
     }
 

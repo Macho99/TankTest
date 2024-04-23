@@ -2,6 +2,7 @@ using Fusion;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class BasicCamController : NetworkBehaviour
 {
@@ -9,12 +10,15 @@ public class BasicCamController : NetworkBehaviour
 
     private float rotateYSpeed;
 
+
+    public Transform FollowTarget { get => followTarget; }
     private void Awake()
     {
         followTarget = transform.Find("FollowTarget").transform;
         rotateYSpeed = 15f;
+        Debug.Log("Awake");
     }
-    public void RotateX(NetworkInputData input)
+    public float RotateX(NetworkInputData input)
     {
         float mouseDeltaY = input.mouseDelta.y * rotateYSpeed * Runner.DeltaTime;
 
@@ -30,12 +34,9 @@ public class BasicCamController : NetworkBehaviour
         {
             rotX = Mathf.Clamp(rotX, 335f, 361f);
         }
+             
 
-
-        followTarget.transform.localRotation = Quaternion.Euler(rotX, 0, 0);
-
-
-
+        return rotX;
     }
 
 }

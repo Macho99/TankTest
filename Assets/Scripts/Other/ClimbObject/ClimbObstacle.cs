@@ -13,15 +13,16 @@ public class ClimbObstacle : ClimbObject, IClimbPassable
         climbCollider = GetComponent<BoxCollider>();
         sizeY = climbCollider.size.y;
         offsetY = 0.1f;
+        type = ClimbType.Obstacle;
     }
 
 
-    public bool CanClimbPassCheck(Vector3 position, float height)
+    public bool CanClimbPassCheck(RaycastHit hitinfo,Vector3 position, float colliderHeight)
     {
         //위에 플레이어가 통과할만한 공간이 있는지
         Vector3 origin = transform.position + climbCollider.center + Vector3.up * climbCollider.size.y / 2;
-        Debug.DrawRay(origin, Vector3.up * height, Color.blue, 0.5f);
-        if (Physics.Raycast(origin, Vector3.up, out RaycastHit hit, height))
+        Debug.DrawRay(origin, Vector3.up * colliderHeight, Color.blue, 0.5f);
+        if (Physics.Raycast(origin, Vector3.up, out RaycastHit hit, colliderHeight))
         {
             Debug.Log(hit.collider.gameObject);
 
@@ -35,6 +36,8 @@ public class ClimbObstacle : ClimbObject, IClimbPassable
         {
             return false;
         }
+
+
                
         return true;
     }

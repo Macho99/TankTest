@@ -44,7 +44,6 @@ public class PlayerCrouchLocomotionState : PlayerState
         }
         else if (isCrouchToIdleStart)
         {
-            Debug.Log(owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime);
             if (owner.animator.GetCurrentAnimatorStateInfo(0).IsName("CrouchToIdle") && owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.95f && isCrouchToIdleEnd == false)
             {
                 isCrouchToIdleEnd = true;

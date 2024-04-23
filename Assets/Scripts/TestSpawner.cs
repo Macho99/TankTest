@@ -24,6 +24,7 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
             GameMode = GameMode.AutoHostOrClient,
 
         });
+        runner.AddCallbacks(this);
     }
     void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)
     {
@@ -54,9 +55,9 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         NetworkInputData data = new NetworkInputData();
         data.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
         data.mouseDelta = playerControls.Player.MouseDelta.ReadValue<Vector2>();
-        data.buttons.Set(NetworkInputData.ButtonType.Run, playerControls.Player.Run.inProgress);
-        data.buttons.Set(NetworkInputData.ButtonType.Jump, playerControls.Player.Jump.inProgress);
-        data.buttons.Set(NetworkInputData.ButtonType.Crouch, playerControls.Player.Crouch.inProgress);
+        data.buttons.Set(NetworkInputData.ButtonType.Run, playerControls.Player.Run.IsPressed());
+        data.buttons.Set(NetworkInputData.ButtonType.Jump, playerControls.Player.Jump.IsPressed());
+        data.buttons.Set(NetworkInputData.ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
 
         input.Set(data);
     }

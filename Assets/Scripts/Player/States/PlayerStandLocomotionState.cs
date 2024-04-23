@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows;
 
 public class PlayerStandLocomotionState : PlayerState
 {
@@ -21,11 +22,9 @@ public class PlayerStandLocomotionState : PlayerState
 
     public override void FixedUpdateNetwork()
     {
-        if (owner.GetInput(out NetworkInputData input))
-        {
-            owner.movement.Rotate(input);
-            owner.movement.SetMove(input);
-        }
+
+        owner.movement.Rotate(owner.InputListner.currentInput);
+        owner.movement.SetMove(owner.InputListner.currentInput);
 
     }
 
@@ -35,30 +34,26 @@ public class PlayerStandLocomotionState : PlayerState
     }
     public override void Transition()
     {
-        if (owner.GetInput(out NetworkInputData input))
+
+        if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Jump) && owner.movement.IsGround())
         {
-            if (input.buttons.IsSet(NetworkInputData.ButtonType.Jump) && owner.movement.IsGround())
+
+            //점프상태로 전환
+            ChangeState(PlayerController.PlayerState.Jump);
+            return;
+
+
+        }
+        else if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Crouch) && owner.movement.IsGround())
+        {
+            if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Crouch))
             {
-                if (owner.RaycastObject())
-                {
-                    
-                }
-
-
-                ////점프상태로 전환
-                //ChangeState(PlayerController.PlayerState.Jump);
+                owner.movement.ChangeMoveType(PlayerLocomotion.MovementType.Crouch);
+                ChangeState(PlayerController.PlayerState.CrouchLocomotion);
                 return;
             }
-            else if (input.buttons.IsSet(NetworkInputData.ButtonType.Crouch) && owner.movement.IsGround())
-            {
-                if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Crouch))
-                {
-                    owner.movement.ChangeMoveType(PlayerLocomotion.MovementType.Crouch);
-                    ChangeState(PlayerController.PlayerState.CrouchLocomotion);
-                    return;
-                }
-            }
         }
+
 
     }
 

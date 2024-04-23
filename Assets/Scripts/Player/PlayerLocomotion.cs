@@ -23,6 +23,7 @@ public class PlayerLocomotion : NetworkBehaviour
     [Networked] public Vector2 inputDirection { get; private set; }
     [Networked] public float jumpVelocity { get; private set; }
     [Networked] public Vector3 moveDirection { get; private set; }
+    [Networked] public float CamerRotX { get; set; }
 
     private PlayerMove[] moves;
     public bool IsGround()
@@ -50,16 +51,20 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public override void Spawned()
     {
+
+        CamerRotX = camController.FollowTarget.eulerAngles.x;
         if (Object.InputAuthority != Runner.LocalPlayer)
         {
             camController.gameObject.SetActive(false);
         }
+
         moveSpeed = 0f;
         simpleKCC.SetGravity(Physics.gravity.y * 1f);
         fallingTime = 0f;
     }
     public override void Render()
     {
+        camController.FollowTarget.localRotation = Quaternion.Euler(CamerRotX, 0f, 0f);
         animator.SetFloat("InputDirX", inputDirection.x, 0.05f, Time.deltaTime);
         animator.SetFloat("InputDirZ", inputDirection.y, 0.05f, Time.deltaTime);
         animator.SetFloat("MoveSpeed", moves[(int)movementType].MoveSpeed);
@@ -91,7 +96,9 @@ public class PlayerLocomotion : NetworkBehaviour
     {
         float rotY = input.mouseDelta.x * rotateXSpeed * Runner.DeltaTime;
         simpleKCC.AddLookRotation(new Vector2(0f, rotY));
-        camController.RotateX(input);
+        CamerRotX = camController.RotateX(input);
+
+
     }
     public void StopMove()
     {

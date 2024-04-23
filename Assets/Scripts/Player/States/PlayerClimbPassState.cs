@@ -8,6 +8,16 @@ public class PlayerClimbPassState : PlayerState
     {
     }
 
+    public void ChangeState(RaycastHit hitInfo)
+    {
+
+        Vector3 newposition = hitInfo.point + hitInfo.normal;
+        Vector3 direction = (newposition - owner.transform.position).normalized;
+
+
+        ChangeState(PlayerController.PlayerState.ClimbPass);
+        return;
+    }
     public override void Enter()
     {
 
