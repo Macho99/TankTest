@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BruteShield : MonoBehaviour, IHittable
 {
@@ -13,6 +14,8 @@ public class BruteShield : MonoBehaviour, IHittable
 	Rigidbody rb;
 	Collider col;
 	BruteDefenceTrace owner;
+	Vector3 lastVel;
+	Vector3 lastPoint;
 
 	public bool Enabled { get; private set; }
 	public int CurShieldHp { get; set; }
@@ -41,20 +44,26 @@ public class BruteShield : MonoBehaviour, IHittable
 
 	public void Break()
 	{
+		Enabled = false;
 		transform.parent = null;
 		col.isTrigger = false;
+		col.enabled = true;
 		rb.useGravity = true;
 		rb.isKinematic = false;
+		rb.AddForceAtPosition(lastVel, lastPoint, ForceMode.Impulse);
 	}
 
-	public void ApplyDamage(Transform source, Vector3 velocity, int damage)
+	public void ApplyDamage(Transform source, Vector3 point, Vector3 velocity, int damage)
 	{
+		if(Enabled == false) { return; }
 		if(owner == null)
 		{
 			Debug.LogError("Enable false 상태인데 ApplyDamage 시도");
 			return;
 		}
 
+		lastPoint = point;
+		lastVel = velocity;
 		CurShieldHp -= damage;
 		print(CurShieldHp);
 		if (CurShieldHp > 0)
@@ -68,7 +77,6 @@ public class BruteShield : MonoBehaviour, IHittable
 		else
 		{
 			owner.ShieldBreak();
-			print("쉴드 부사짐");
 		}
 	}
 }

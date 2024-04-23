@@ -74,10 +74,15 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 			for(int i = 0; i < 10; i++)
 			{
-				runner.Spawn(zombiePrefab, onBeforeSpawned: BeforeSpawned);
+				SpawnZombie();
 			}
 			return;
 		}
+	}
+
+	public void SpawnZombie()
+	{
+		runner.Spawn(zombiePrefab, onBeforeSpawned: BeforeSpawned);
 	}
 
 	private void BeforeSpawned(NetworkRunner runner, NetworkObject netObj)

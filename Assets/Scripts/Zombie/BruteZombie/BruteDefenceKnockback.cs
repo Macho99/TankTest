@@ -22,13 +22,13 @@ public class BruteDefenceKnockback : BruteZombieState
 	public override void Enter()
 	{
 		animEntered = false;
-		owner.Shield.SetEnable(true);
+		owner.Shield?.SetEnable(true);
 		owner.OnStun += StunCallback;
 	}
 
 	public override void Exit()
 	{
-		owner.Shield.SetEnable(false);
+		owner.Shield?.SetEnable(false);
 		owner.OnStun -= StunCallback;
 	}
 

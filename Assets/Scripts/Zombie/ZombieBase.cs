@@ -31,6 +31,7 @@ public abstract class ZombieBase : NetworkBehaviour
 	[SerializeField] protected float playerLostTime = 5f;
 	[SerializeField] protected GameObject headBloodVFX;
 	[SerializeField] protected GameObject bodyBloodVFX;
+	[SerializeField] protected int maxHp = 400;
 
 	private TickTimer destinationTimer;
 	private TickTimer playerFindTimer;
@@ -59,11 +60,12 @@ public abstract class ZombieBase : NetworkBehaviour
 	public Transform Target { get; set; }
 	public Tick LastPlayerFindTick { get; protected set; }
 	public int CurHp { get; protected set; }
-	public int MaxHP { get; protected set; } = 300;
+	public int MaxHP { get { return maxHp; } }
 
 	[Networked] public Vector3 Position { get; private set; }
 	[Networked] public Quaternion Rotation { get; private set; }
 	[Networked] public ZombieBody HitBody { get; private set; }
+	[Networked] public Vector3 HitPoint { get; private set; }
 	[Networked] public Vector3 HitVelocity { get; private set; }
 	[Networked, OnChangedRender(nameof(PlayHitFX))] public int HitCnt { get; set; }
 
@@ -177,12 +179,7 @@ public abstract class ZombieBase : NetworkBehaviour
 		sb.AppendLine($"현재 상태: {printState}");
 		sb.AppendLine($"마지막 타겟 발견시간: {((LastPlayerFindTick - Runner.Tick) / (float)Runner.TickRate).ToString("F1")}");
 		sb.AppendLine($"Target: {CurTargetType}");
-		sb.Append($"CurHP: ");
-		for (int i = 0; i < CurHp; i += 50)
-		{
-			sb.Append("■");
-		}
-		sb.Append('\n');
+		sb.AppendLine($"CurHP: {CurHp}");
 		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
 		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
 		sb.AppendLine($"PosDiff: {(transform.position - Position).sqrMagnitude.ToString("F4")}");
@@ -208,15 +205,16 @@ public abstract class ZombieBase : NetworkBehaviour
 	protected void PlayHitFX()
 	{
 		GameObject vfx = HitBody == ZombieBody.Head ? headBloodVFX : bodyBloodVFX;
-		GameManager.Resource.Instantiate(vfx, bodyHitParts[(int)HitBody].col.bounds.center, 
+		GameManager.Resource.Instantiate(vfx, HitPoint, 
 			Quaternion.LookRotation(-HitVelocity), true);
 	}
 
 	public virtual void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
-		Vector3 velocity, int damage, bool playHitVFX = true)
+		Vector3 point, Vector3 velocity, int damage, bool playHitVFX = true)
 	{
 		HitVelocity = velocity;
 		HitBody = zombieHitBox.BodyType;
+		HitPoint = point;
 		if(playHitVFX)
 		{
 			HitCnt++;

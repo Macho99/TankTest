@@ -15,16 +15,23 @@ public class BruteZombie : ZombieBase
 	[SerializeField] Rig lookRig;
 	[SerializeField] float lookSpeed = 1.5f;
 	[SerializeField] Transform shieldHolder;
+	[SerializeField] float attackDist = 3f;
 
-	public enum State { Idle, Trace, DefenceTrace, DefenceKnockback, Stun, BerserkTrace, Search, AnimWait, }
+	public enum AttackType { Back = -1, LeftFoot, RightFoot, Smash, DoubleSmash, TwoHandSmash, GroundAttack, 
+		Jump, Dash, TwoHandGround, ThrowStone };
+	public enum State { Idle, Trace, DefenceTrace, DefenceKnockback, Stun, Search, AnimWait, }
 
-	public Action OnHit;
-	public Action OnStun;
+	public event Action OnHit;
+	public event Action OnStun;
 
+	public TickTimer SpecialAttackTimer { get; set; }
+
+	public float AttackDist { get { return attackDist; } }
 	public BruteShield Shield { get; private set; }
 	public int ShieldCnt { get; set; } = 2;
+	TickTimer berserkRiseTimer;
 
-	[Networked, OnChangedRender(nameof(BerserkRender))] public NetworkBool Berserk { get; set; }
+	[Networked, OnChangedRender(nameof(BerserkRender))] public NetworkBool IsBerserk { get; set; }
 	[Networked] public float LookWeight { get; set; }
 	[Networked] public Vector3 LookPos { get; set; }
 
@@ -38,7 +45,6 @@ public class BruteZombie : ZombieBase
 		stateMachine.AddState(State.Search, new BruteSearch(this));
 		stateMachine.AddState(State.DefenceTrace, new BruteDefenceTrace(this));
 		stateMachine.AddState(State.DefenceKnockback, new BruteDefenceKnockback(this));
-		stateMachine.AddState(State.BerserkTrace, new BruteBerserkTrace(this));
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
 
 		stateMachine.InitState(State.Idle);
@@ -80,9 +86,15 @@ public class BruteZombie : ZombieBase
 	}
 
 	public override void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
-		Vector3 velocity, int damage, bool playHitVFX = true)
+		Vector3 point, Vector3 velocity, int damage, bool playHitVFX = true)
 	{
-		base.ApplyDamage(source, zombieHitBox, velocity, damage, playHitVFX);
+		base.ApplyDamage(source, zombieHitBox, point, velocity, damage, playHitVFX);
+
+		if(IsBerserk == false && CurHp < maxHp / 2)
+		{
+			ChangeToBerserk();
+			return;
+		}
 
 		Vector3 angleVelocity = velocity;
 		angleVelocity.y = 0f;
@@ -159,25 +171,28 @@ public class BruteZombie : ZombieBase
 			}
 
 			SetAnimTrigger("Hit");
-			if (Shield.Enabled == true)
+			if(IsBerserk == false)
 			{
-				stateMachine.ChangeState(State.DefenceKnockback);
-			}
-			else
-			{
-				State nextState;
-				if(ShieldCnt > 0)
+				if (Shield.Enabled == true)
 				{
-					nextState = State.DefenceTrace;
+					stateMachine.ChangeState(State.DefenceKnockback);
 				}
 				else
 				{
-					nextState = State.BerserkTrace;
+					State nextState;
+					if (ShieldCnt > 0)
+					{
+						nextState = State.DefenceTrace;
+					}
+					else
+					{
+						nextState = State.Trace;
+					}
+					Shield.ResetHp();
+					AnimWaitStruct = new AnimWaitStruct("Hit", nextState.ToString(),
+						updateAction: Decelerate);
+					stateMachine.ChangeState(State.AnimWait);
 				}
-				Shield.ResetHp();
-				AnimWaitStruct = new AnimWaitStruct("Hit", nextState.ToString(),
-					updateAction: Decelerate);
-				stateMachine.ChangeState(State.AnimWait);
 			}
 		}
 
@@ -217,14 +232,28 @@ public class BruteZombie : ZombieBase
 		stateMachine.ChangeState(State.AnimWait);
 	}
 
-	public void BerserkMode()
+	public void ChangeToBerserk()
 	{
+		SetAnimInt("Defence", 0);
+		SetAnimFloat("AnimSpeed", 1.5f);
 		SetAnimTrigger("DefenceExit");
 		SetAnimTrigger("Down");
 		Shield.Break();
+		Shield = null;
 		LookWeight = 0f;
-		Berserk = true;
-		AnimWaitStruct = new AnimWaitStruct("Rise", State.BerserkTrace.ToString(),
-			updateAction: Decelerate, exitAction: () => LookWeight = 1f);
+		berserkRiseTimer = TickTimer.CreateFromSeconds(Runner, 2f);
+		AnimWaitStruct = new AnimWaitStruct("Roar", State.Trace.ToString(),
+			startAction: () => IsBerserk = true,
+			updateAction: () => 
+			{
+				Decelerate();
+				if (berserkRiseTimer.Expired(Runner))
+				{
+					berserkRiseTimer = TickTimer.None;
+					SetAnimTrigger("Exit");
+				}
+			}, 
+			exitAction: () => LookWeight = 1f);
+		stateMachine.ChangeState(State.AnimWait);
 	}
 }

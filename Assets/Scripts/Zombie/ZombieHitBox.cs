@@ -26,8 +26,8 @@ public class ZombieHitBox : MonoBehaviour, IHittable
 		owner = GetComponentInParent<ZombieBase>();
 	}
 
-	public virtual void ApplyDamage(Transform source, Vector3 velocity, int damage)
+	public virtual void ApplyDamage(Transform source, Vector3 point, Vector3 velocity, int damage)
 	{
-		owner.ApplyDamage(source, this, velocity, damage);
+		owner.ApplyDamage(source, this, point, velocity, damage);
 	}
 }

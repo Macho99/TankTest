@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public class BruteBerserkTrace : BruteZombieState
+public class BruteRoar : BruteZombieState
 {
-	public BruteBerserkTrace(BruteZombie owner) : base(owner)
+	public BruteRoar(BruteZombie owner) : base(owner)
 	{
 	}
 

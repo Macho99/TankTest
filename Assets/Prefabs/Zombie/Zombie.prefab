@@ -2069,7 +2069,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3385181414670090290
 Transform:
   m_ObjectHideFlags: 0
@@ -2101,19 +2101,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 624a113dda34927448849b2362e148f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  curStateText: {fileID: 3990900717246760630}
   viewAngle: 30
   lookDist: 10
   playerLostTime: 5
   headBloodVFX: {fileID: 2281759223855658892, guid: 5c48a4ba1a920cf409e160836fdfdcd2, type: 3}
   bodyBloodVFX: {fileID: 8428142431305946562, guid: 4eb841424a674594fb38c97285efa16a, type: 3}
+  maxHp: 400
   _Position: {x: 0, y: 0, z: 0}
   _Rotation: {x: 0, y: 0, z: 0, w: 0}
   _HitBody: 0
+  _HitPoint: {x: 0, y: 0, z: 0}
   _HitVelocity: {x: 0, y: 0, z: 0}
   _HitCnt: 0
   skins: {fileID: 1713092269831648524}
   fallAsleepThreshold: 0.3
-  curStateText: {fileID: 3990900717246760630}
   ragdollHips: {fileID: 5618920568069490109}
   _CurRagdollState: 0
   _RagdollCnt: 0

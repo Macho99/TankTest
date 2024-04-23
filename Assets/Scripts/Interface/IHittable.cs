@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 using UnityEngine;
 public interface IHittable
 {
-	public void ApplyDamage(Transform source, Vector3 velocity, int damage);
+	public void ApplyDamage(Transform source, Vector3 point, Vector3 velocity, int damage);
 }

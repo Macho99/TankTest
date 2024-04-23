@@ -276,9 +276,9 @@ public class Zombie : ZombieBase
 	}
 
 	public override void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
-		Vector3 velocity, int damage, bool playHitVFX = true)
+		Vector3 point, Vector3 velocity, int damage, bool playHitVFX = true)
 	{
-		base.ApplyDamage(source, zombieHitBox, velocity, damage, playHitVFX);
+		base.ApplyDamage(source, zombieHitBox, point, velocity, damage, playHitVFX);
 		if (Object.IsProxy) return;
 
 		if (CurHp <= 0)

@@ -20,7 +20,7 @@ public class BruteDefenceTrace : BruteZombieState
 
 	public override void Enter()
 	{
-		owner.Shield.SetEnable(true);
+		owner.Shield?.SetEnable(true);
 		owner.SetAnimInt("Defence", 1);
 		owner.OnHit += ResetTimer;
 		owner.OnStun += StunCallback;
@@ -29,7 +29,7 @@ public class BruteDefenceTrace : BruteZombieState
 
 	public override void Exit()
 	{
-		owner.Shield.SetEnable(false);
+		owner.Shield?.SetEnable(false);
 		owner.OnHit -= ResetTimer;
 		owner.OnStun -= StunCallback;
 	}
@@ -87,7 +87,7 @@ public class BruteDefenceTrace : BruteZombieState
 		owner.ShieldCnt--;
 		if(owner.ShieldCnt == 0)
 		{
-			owner.BerserkMode();
+			owner.ChangeToBerserk();
 		}
         else
 		{

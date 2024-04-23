@@ -13,8 +13,7 @@ public class ZombieCrawlTrace : ZombieState
 	float speed;
 	float rotateSpeed;
 
-	bool attacked;
-	float attackElapsed;
+	TickTimer attackTimer;
 
 	bool eatEnd;
 	float eatElapsed;
@@ -135,16 +134,14 @@ public class ZombieCrawlTrace : ZombieState
 
 	private void Attack(int attackShifter)
 	{
-		attacked = false;
-		attackElapsed = 0f;
+		attackTimer = TickTimer.CreateFromSeconds(owner.Runner, 0.18f);
 		owner.SetAnimFloat("AttackShifter", attackShifter);
 		owner.SetAnimTrigger("Attack");
 		owner.AnimWaitStruct = new AnimWaitStruct("CrawlAttack", "CrawlTrace",
 			updateAction: () => {
-				attackElapsed += owner.Runner.DeltaTime;
-				if (attackElapsed > 0.18f && attacked == false)
+				if (attackTimer.Expired(owner.Runner))
 				{
-					attacked = true;
+					attackTimer = TickTimer.None;
 					owner.Attack(3 * (attackShifter + 1));
 				}
 				owner.SetAnimFloat("SpeedY", 0f, 1f);
