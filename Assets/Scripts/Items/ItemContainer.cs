@@ -6,7 +6,7 @@ using UnityEngine;
 public class ItemContainer : InteractObject
 {
     public enum ContainerState { Open, Close }
-    private Item[] itemArray;
+    private ItemData[] itemArray;
     [SerializeField] private float openAngleValue;
     private float closeAngleValue;
     [SerializeField] private Transform openObject;

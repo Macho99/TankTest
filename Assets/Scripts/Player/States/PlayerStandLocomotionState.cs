@@ -26,6 +26,7 @@ public class PlayerStandLocomotionState : PlayerState
         owner.movement.Rotate(owner.InputListner.currentInput);
         owner.movement.SetMove(owner.InputListner.currentInput);
 
+
     }
 
     public override void SetUp()
@@ -52,6 +53,15 @@ public class PlayerStandLocomotionState : PlayerState
                 ChangeState(PlayerController.PlayerState.CrouchLocomotion);
                 return;
             }
+        }
+        else if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Interact))
+        {
+            if (owner.interact.IsDetect)
+            {
+                ChangeState(PlayerController.PlayerState.Interact);
+                return;
+            }
+
         }
 
 

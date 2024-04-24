@@ -17,7 +17,6 @@ public class BasicCamController : NetworkBehaviour
     {
         followTarget = transform.Find("FollowTarget").transform;
         rotateYSpeed = 15f;
-        Debug.Log("Awake");
     }
     public override void Spawned()
     {

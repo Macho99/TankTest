@@ -9,12 +9,23 @@ public class PlayerInteract : NetworkBehaviour
     private float distance;
     [SerializeField] private Transform raycastTr;
     public Action<InteractObject> action;
-    public Action<InteractInfo> onDetect;
+    public Action<bool, InteractInfo> onDetect;
+    private InteractInfo interactInfo;
     private bool isDetect;
+
+    private InteractBehavior[] interactBehavior;
+
+    public InteractInfo InteractInfo { get { return interactInfo; } }
+    public bool IsDetect { get { return isDetect; } }
     private void Awake()
     {
         distance = 3f;
-        isDetect = false;
+    }
+    public override void Spawned()
+    {
+        if (Object.InputAuthority == Runner.LocalPlayer)
+            SetupLocalPlayerUI();
+
     }
     public override void FixedUpdateNetwork()
     {
@@ -30,20 +41,51 @@ public class PlayerInteract : NetworkBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, distance))
         {
-            if (hit.collider.TryGetComponent(out IDetectable detectObject))
+            if (hit.collider.TryGetComponent(out InteractObject detectObject))
             {
+
                 detectObject.Detect(out InteractInfo interactInfo);
-                onDetect?.Invoke(interactInfo);
-                isDetect = true;
+                if (!this.interactInfo.Equals(interactInfo))
+                {
+                    this.interactInfo = interactInfo;
+                    isDetect = true;
+                    onDetect?.Invoke(isDetect, interactInfo);
+                }
+
+            }
+            else
+            {
+                interactInfo = default;
+                isDetect = false;
+                onDetect?.Invoke(isDetect, default);
             }
         }
         else
         {
-            onDetect?.Invoke(default);
+            interactInfo = default;
             isDetect = false;
-
+            onDetect?.Invoke(isDetect, default);
+            Debug.Log("¾ø");
         }
 
         Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
+    }
+
+    public bool TryInteract()
+    {
+        if (interactInfo.Equals(default))
+            return false;
+
+
+
+
+        return true;
+
+    }
+    private void SetupLocalPlayerUI()
+    {
+        AimUI aimUI = GameManager.UI.ShowSceneUI<AimUI>("UI/PlayerUI/AimUI");
+        onDetect += aimUI.ReadInteractInfo;
+
     }
 }

@@ -28,6 +28,7 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
     }
     void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)
     {
+        
     }
 
     void INetworkRunnerCallbacks.OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
@@ -58,6 +59,7 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         data.buttons.Set(NetworkInputData.ButtonType.Run, playerControls.Player.Run.IsPressed());
         data.buttons.Set(NetworkInputData.ButtonType.Jump, playerControls.Player.Jump.IsPressed());
         data.buttons.Set(NetworkInputData.ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
+        data.buttons.Set(NetworkInputData.ButtonType.Interact, playerControls.Player.Interact.IsPressed());
         data.buttons.Set(NetworkInputData.ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
 
         input.Set(data);

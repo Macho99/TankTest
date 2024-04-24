@@ -6,12 +6,13 @@ using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
-    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass }
+    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass,Interact }
 
     public GameObject debugUIPrefab;
     private NetworkStateMachine stateMachine;
-    public PlayerLocomotion movement { get; private set; }
     public Animator animator { get; private set; }
+    public PlayerLocomotion movement { get; private set; }
+    public PlayerInteract interact { get; private set; }
     private CapsuleCollider myCollider;
     public PlayerInputListner InputListner { get; private set; }
     [Networked] public float FallingTime { get; set; }
@@ -24,11 +25,13 @@ public class PlayerController : NetworkBehaviour
         stateMachine = GetComponent<NetworkStateMachine>();
         movement = GetComponent<PlayerLocomotion>();
         InputListner = GetComponent<PlayerInputListner>();
+        interact = GetComponent<PlayerInteract>();
         stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
         stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
         stateMachine.AddState(PlayerState.Jump, new PlayerJumpState(this));
         stateMachine.AddState(PlayerState.Land, new PlayerLandState(this));
         stateMachine.AddState(PlayerState.Falling, new PlayerFallingState(this));
+        stateMachine.AddState(PlayerState.Interact, new PlayerInteractState(this));
 
         stateMachine.InitState(PlayerState.StandLocomotion);
     }
@@ -41,6 +44,7 @@ public class PlayerController : NetworkBehaviour
         {
             GameObject canvas = Instantiate(debugUIPrefab);
             canvas.GetComponentInChildren<HostClientDebugUI>().SetPlayerInfo(HasStateAuthority == true ? "Host" : "Client");
+
         }
     }
 
