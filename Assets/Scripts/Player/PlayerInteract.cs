@@ -15,7 +15,7 @@ public class PlayerInteract : NetworkBehaviour
 
     private InteractBehavior[] interactBehavior;
 
-    public InteractInfo InteractInfo { get { return interactInfo; } }
+    public InteractInfo InteractInfo { get { return interactInfo; } set => interactInfo = value; }
     public bool IsDetect { get { return isDetect; } }
     private void Awake()
     {
@@ -65,7 +65,6 @@ public class PlayerInteract : NetworkBehaviour
             interactInfo = default;
             isDetect = false;
             onDetect?.Invoke(isDetect, default);
-            Debug.Log("¾ø");
         }
 
         Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
@@ -76,9 +75,18 @@ public class PlayerInteract : NetworkBehaviour
         if (interactInfo.Equals(default))
             return false;
 
+        Ray ray = new Ray();
+        ray.origin = raycastTr.position;
+        ray.direction = raycastTr.transform.forward;
 
+        if (Physics.Raycast(ray, out RaycastHit hit, distance))
+        {
+            if (hit.collider.TryGetComponent(out InteractObject detectObject))
+            {
+                detectObject.Interact(this.GetComponent<PlayerController>(),out InteractObject interactObject);            
 
-
+            }
+        }
         return true;
 
     }

@@ -20,7 +20,6 @@ public class AimUI : SceneUI
     {
         if (isDetect == false)
         {
-            Debug.Log("¾øÀ½");
             detectRoot.SetActive(false);
             return;
         }

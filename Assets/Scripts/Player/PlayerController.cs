@@ -6,10 +6,10 @@ using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
-    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass,Interact }
+    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass, Interact }
 
     public GameObject debugUIPrefab;
-    private NetworkStateMachine stateMachine;
+    public NetworkStateMachine stateMachine { get; private set; }
     public Animator animator { get; private set; }
     public PlayerLocomotion movement { get; private set; }
     public PlayerInteract interact { get; private set; }

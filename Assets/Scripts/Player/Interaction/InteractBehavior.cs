@@ -5,6 +5,11 @@ using UnityEngine;
 public abstract class InteractBehavior
 {
 
+    public InteractBehavior(InteractType interactType)
+    {
+
+    }
+    protected InteractType interactType;
     public abstract bool InteractStart();
 
     public abstract void InteractLoop();

@@ -56,10 +56,10 @@ public class PlayerStandLocomotionState : PlayerState
         }
         else if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Interact))
         {
+
             if (owner.interact.IsDetect)
             {
-                ChangeState(PlayerController.PlayerState.Interact);
-                return;
+                owner.interact.TryInteract();
             }
 
         }

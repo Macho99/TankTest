@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -15,20 +16,34 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         playerControls = new PlayerControls();
         playerControls.Enable();
+
+
+        // Create the NetworkSceneInfo from the current scene
+        var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
+        var sceneInfo = new NetworkSceneInfo();
+        if (scene.IsValid)
+        {
+            sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
+        }
         if (runner == null)
         {
             runner = gameObject.AddComponent<NetworkRunner>();
+            runner.ProvideInput = true;
+
         }
         await runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
+            Scene = scene,
+            SceneManager = runner.GetComponent<NetworkSceneManagerDefault>(),
+            ObjectProvider = runner.GetComponent<INetworkObjectProvider>()
 
         });
         runner.AddCallbacks(this);
     }
     void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)
     {
-        
+
     }
 
     void INetworkRunnerCallbacks.OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
