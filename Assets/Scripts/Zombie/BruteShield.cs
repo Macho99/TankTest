@@ -51,6 +51,7 @@ public class BruteShield : MonoBehaviour, IHittable
 		rb.useGravity = true;
 		rb.isKinematic = false;
 		rb.AddForceAtPosition(lastVel, lastPoint, ForceMode.Impulse);
+		Destroy(gameObject, 5f);
 	}
 
 	public void ApplyDamage(Transform source, Vector3 point, Vector3 velocity, int damage)

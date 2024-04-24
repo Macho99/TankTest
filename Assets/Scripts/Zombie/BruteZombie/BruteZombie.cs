@@ -16,10 +16,25 @@ public class BruteZombie : ZombieBase
 	[SerializeField] Rig lookRig;
 	[SerializeField] float lookSpeed = 1.5f;
 	[SerializeField] Transform shieldHolder;
-	[SerializeField] float attackDist = 3f;
+	[SerializeField] float normalAttackDist = 3f;
+	[SerializeField] float dashDist = 15f;
 	[SerializeField] float minHeight = 1f;
 	[SerializeField] float maxHeight = 5f;
-	[SerializeField] float jumpHeightDivider = 8f;
+	[SerializeField] float minJumpDist = 10f;
+	[SerializeField] float maxJumpDist = 20f;
+	[SerializeField] float minStoneDist = 15f;
+	[SerializeField] float maxStoneDist = 30f;
+	[SerializeField] float stoneSpeed = 5f;
+	[SerializeField] Rigidbody stonePrefab;
+	[SerializeField] bool drawGizmos = true;
+
+	public float DashDist { get { return dashDist; } }
+	public float MinJumpDist { get { return minJumpDist; } }
+	public float MaxJumpDist { get { return maxJumpDist; } }
+	public float MinStoneDist { get { return minStoneDist; } }
+	public float MaxStoneDist { get { return maxStoneDist; } }
+	public float StoneSpeed { get { return stoneSpeed; } }
+	public Rigidbody StonePrefab { get { return stonePrefab; } }
 
 	public enum AttackType { Back = -1, LeftFoot, RightFoot, Smash, DoubleSmash, TwoHandSmash, GroundAttack, 
 		Jump, Dash, TwoHandGround, ThrowStone };
@@ -30,7 +45,7 @@ public class BruteZombie : ZombieBase
 
 	public TickTimer SpecialAttackTimer { get; set; }
 
-	public float NormalAttackDist { get { return attackDist; } }
+	public float NormalAttackDist { get { return normalAttackDist; } }
 	public BruteShield Shield { get; private set; }
 	public int ShieldCnt { get; set; } = 2;
 	TickTimer berserkRiseTimer;
@@ -59,6 +74,16 @@ public class BruteZombie : ZombieBase
 		stateMachine.InitState(State.Idle);
 	}
 
+	public override void Spawned()
+	{
+		base.Spawned();
+		if (IsBerserk)
+		{
+			Destroy(Shield.gameObject);
+			Shield = null;
+		}
+	}
+
 	public override void FixedUpdateNetwork()
 	{
 		base.FixedUpdateNetwork();
@@ -74,7 +99,9 @@ public class BruteZombie : ZombieBase
 
 	private void BerserkRender()
 	{
-
+		Shield.Break();
+		ShieldCnt = 0;
+		Shield = null;
 	}
 
 	public override string DecideState()
@@ -244,9 +271,6 @@ public class BruteZombie : ZombieBase
 		SetAnimFloat("AnimSpeed", 1.5f);
 		SetAnimTrigger("DefenceExit");
 		SetAnimTrigger("Down");
-		Shield.Break();
-		ShieldCnt = 0;
-		Shield = null;
 		LookWeight = 0f;
 		berserkRiseTimer = TickTimer.CreateFromSeconds(Runner, 2f);
 		AnimWaitStruct = new AnimWaitStruct("Rise", State.Roar.ToString(),
@@ -266,11 +290,84 @@ public class BruteZombie : ZombieBase
 
 	public float GetJumpHeight(float dist)
 	{
-		return Mathf.Lerp(minHeight, maxHeight, dist / jumpHeightDivider);
+		return Mathf.Lerp(minHeight, maxHeight, (dist - minJumpDist) / (maxJumpDist - minJumpDist));
 	}
 
 	private void JumpAttack()
 	{
 		stateMachine.ChangeState(State.Jump);
+	}
+
+	public Vector3[] LastAirLines { get; set; }
+	private void OnDrawGizmos()
+	{
+		if(drawGizmos == false) return;
+
+		Gizmos.DrawWireSphere(transform.position, lookDist);
+
+		//근거리 공격
+		Gizmos.DrawWireSphere(transform.position, normalAttackDist);
+		Vector3 offset = Vector3.up;
+
+		//돌진 공격
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawLine(transform.position + offset, 
+			transform.position + Quaternion.Euler(0f, -5f, 0f) * transform.forward * dashDist + offset);
+		Gizmos.DrawLine(transform.position + offset, 
+			transform.position + Quaternion.Euler(0f, 5f, 0f) * transform.forward * dashDist + offset);
+
+		Vector3 targetDir;
+		if (Target == null)
+		{
+			targetDir = transform.forward;
+		}
+		else
+		{
+			Gizmos.color = Color.blue;
+			targetDir = Target.position - transform.position;
+
+			Vector3 jumpLineOffset = Vector3.up * 2f;
+			Vector3 startPos = transform.position + jumpLineOffset;
+			Vector3 endPos = Target.position + jumpLineOffset;
+			float jumpHeight = GetJumpHeight((startPos - endPos).magnitude);
+
+			Vector3 curPos = startPos;
+			Vector3 nextPos;
+			int segment = 4;
+
+			float ratio;
+			for (int i = 1; i <= segment; i++)
+			{
+				ratio = (float) i / segment;
+				nextPos = Vector3.Lerp(startPos, endPos, ratio);
+				nextPos.y += jumpHeight * Mathf.Sin(ratio * 180f * Mathf.Deg2Rad);
+
+				Gizmos.DrawLine(curPos, nextPos);
+
+				curPos = nextPos;
+			}
+		}
+		targetDir.y = 0f;
+		targetDir.Normalize();
+
+		//점프 공격 거리
+		offset += Vector3.up * 0.5f;
+		Gizmos.color = Color.blue;
+		Gizmos.DrawLine(transform.position + offset + targetDir * minJumpDist,
+			transform.position + offset + targetDir * maxJumpDist);
+
+
+		//돌 던지기 공격 거리
+		offset += Vector3.up * 0.5f;
+		Gizmos.color = Color.green;
+		Gizmos.DrawLine(transform.position + offset + targetDir * minStoneDist,
+			transform.position + offset + targetDir * maxStoneDist);
+
+		Gizmos.color = Color.cyan;
+		//마지막 공중 공격 경로
+		if (LastAirLines != null)
+		{
+			Gizmos.DrawLineList(LastAirLines);
+		}
 	}
 }

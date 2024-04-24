@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
@@ -12,6 +13,8 @@ public class BruteTrace : BruteZombieState
 {
 	const float speed = 1f;
 	const float rotateSpeed = 60f;
+
+	Vector3 stoneVelocity;
 
 	public BruteTrace(BruteZombie owner) : base(owner)
 	{
@@ -106,28 +109,32 @@ public class BruteTrace : BruteZombieState
 				//특수 근접공격
 				if(dist < attackDist && angle < 60f)
 				{
-					Attack(BruteZombie.AttackType.TwoHandGround, 10f);
+					Attack(BruteZombie.AttackType.TwoHandGround, 5f);
 					return true;
 				}
 				//돌진 공격
-				else if(dist < attackDist * 5f && angle < 5f)
+				if(dist < owner.DashDist && angle < 5f)
 				{
-					Attack(BruteZombie.AttackType.Dash, 20f);
+					Attack(BruteZombie.AttackType.Dash, 5f);
 					return true;
 				}
 				//점프 공격
-				else if(attackDist * 5f < dist && dist < attackDist * 10f)
+				if(owner.MinJumpDist < dist && dist < owner.MaxJumpDist)
 				{
 					if(CheckJump(dist) == true)
 					{
-						Attack(BruteZombie.AttackType.Jump, 20f);
+						Attack(BruteZombie.AttackType.Jump, 5f);
 						return true;
 					}
 				}
 				//돌 던지기 공격
-				else if (dist < attackDist * 20f)
+				if (owner.MinStoneDist < dist && dist < owner.MaxStoneDist)
 				{
-
+					if(CheckStone(dist) == true)
+					{
+						Attack(BruteZombie.AttackType.ThrowStone, 5f);
+						return true;
+					}
 				}
 			}
 		}
@@ -167,10 +174,6 @@ public class BruteTrace : BruteZombieState
 			owner.JumpCnt++;
 			return;
 		}
-		else if (type == BruteZombie.AttackType.ThrowStone)
-		{
-
-		}
 
 		owner.SetAnimFloat("ActionShifter", (int)type);
 		owner.SetAnimTrigger("Attack");
@@ -178,6 +181,16 @@ public class BruteTrace : BruteZombieState
 			startAction: () => owner.LookWeight = 0f,
 			updateAction: owner.Decelerate, 
 			exitAction: () => owner.LookWeight = 1f);
+
+
+		if (type == BruteZombie.AttackType.ThrowStone)
+		{
+			animWait.startAction += () =>
+			{
+				Rigidbody stoneRb = GameObject.Instantiate(owner.StonePrefab, owner.transform.position + Vector3.up * 10f, owner.transform.rotation);
+				stoneRb.velocity = stoneVelocity;
+			};
+		}
 
 		owner.AnimWaitStruct = animWait;
 		ChangeState(BruteZombie.State.AnimWait);
@@ -193,6 +206,8 @@ public class BruteTrace : BruteZombieState
 		Vector3 curPos = startPos;
 		Vector3 nextPos;
 		int segment = 4;
+
+		List<Vector3> posList = new List<Vector3>();
 		float ratio;
 		for (int i = 1; i <= segment; i++) 
 		{
@@ -202,14 +217,55 @@ public class BruteTrace : BruteZombieState
 			Vector3 velocity = nextPos - curPos;
 			Vector3 dir = velocity.normalized;
 			float mag = velocity.magnitude;
-			if(Physics.Raycast(curPos, dir, mag, LayerMask.GetMask("Default")) == true)
+
+			posList.Add(curPos);
+			posList.Add(nextPos);
+
+			if (Physics.Raycast(curPos, dir, mag, LayerMask.GetMask("Default")) == true)
 			{
+				owner.LastAirLines = posList.ToArray();
 				return false;
 			}
-			Debug.DrawLine(curPos, nextPos);
 			curPos = nextPos;
 		}
 
+		owner.LastAirLines = posList.ToArray();
+		return true;
+	}
+
+	private bool CheckStone(float dist)
+	{
+		float arriveTime = dist / owner.StoneSpeed;
+		Vector3 targetPos = owner.Agent.pathEndPosition;
+		Vector3 ownerPosition = owner.transform.position;
+		stoneVelocity = (targetPos - ownerPosition) / arriveTime;
+		stoneVelocity.y = (targetPos.y - ownerPosition.y) / arriveTime
+			+ (arriveTime * Physics.gravity.y) * 0.5f;
+
+		int segment = 4;
+		Vector3 curPos = ownerPosition;
+		Vector3 nextPos;
+		List<Vector3> posList = new List<Vector3>();
+		for (int i = 1; i <= segment; i++)
+		{
+			float ratio = (float)i / segment; 
+			nextPos = ownerPosition + stoneVelocity * ratio * arriveTime;
+
+			Vector3 rayVel = nextPos - curPos;
+			Vector3 dir = rayVel.normalized;
+			float mag = rayVel.magnitude;
+
+			posList.Add(curPos);
+			posList.Add(nextPos);
+
+			if (Physics.Raycast(curPos, dir, mag, LayerMask.GetMask("Default")) == true)
+			{
+				owner.LastAirLines = posList.ToArray();
+				return false;
+			}
+			curPos = nextPos;
+		}
+		owner.LastAirLines = posList.ToArray();
 		return true;
 	}
 }

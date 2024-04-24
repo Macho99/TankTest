@@ -53,7 +53,7 @@ public class BruteJump : BruteZombieState
 	{
 		owner.Decelerate();
 		owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
-			Quaternion.LookRotation(lookDir), 30f * owner.Runner.DeltaTime);
+			Quaternion.LookRotation(lookDir), 120f * owner.Runner.DeltaTime);
 	}
 
 	public override void Render()
