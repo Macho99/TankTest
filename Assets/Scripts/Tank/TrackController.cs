@@ -133,9 +133,9 @@ public class TrackController : MonoBehaviour
 	{
 		if (tracks == null) return;
 
-		if (rb.velocity.sqrMagnitude < 1f && Mathf.Approximately(Velocity, 0f) == true) return;
+		if (rb.velocity.sqrMagnitude < 0.01f && Mathf.Approximately(Velocity, 0f) == true) return;
 
-		curTrackOffset -= Velocity * 1000 / 3600 / totalLength * Time.deltaTime;
+		curTrackOffset -= Velocity * 1000f / 3600f / totalLength * Time.deltaTime;
 
 		float distRatioStep = 1f / tracks.Length;
 		for (int i = 0; i < tracks.Length; i++)

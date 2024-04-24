@@ -67,7 +67,7 @@ public class Zombie : ZombieBase
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
 		stateMachine.AddState(State.CrawlIdle, new ZombieCrawlIdle(this));
 		stateMachine.AddState(State.CrawlTrace, new ZombieCrawlTrace(this));
-		stateMachine.AddState(State.Wait, new ZombieWait(this));
+		stateMachine.AddState(State.Wait, new ZombieWait());
 		stateMachine.AddState(State.RagdollEnter, new ZombieRagdollEnter(this));
 		stateMachine.AddState(State.RagdollExit, new ZombieRagdollExit(this));
 		stateMachine.AddState(State.Die, new ZombieDie(this));
@@ -87,6 +87,7 @@ public class Zombie : ZombieBase
 		anim.SetFloat("RunShifter", Random.Range(0, 2));
 		anim.SetFloat("SprintShifter", Random.Range(0, 2));
 
+		skins.gameObject.SetActive(true);
 		int skinCnt = skins.childCount;
 		SkinIdx = Random.Range(0, skinCnt);
 
@@ -163,8 +164,6 @@ public class Zombie : ZombieBase
 
 	public override void Render()
 	{
-		if (CurRagdollState != RagdollState.Animate) return;
-
 		base.Render();
 	}
 

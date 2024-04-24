@@ -18,6 +18,9 @@ public class ZombieRagdollEnter : ZombieState
 
 	public override void Enter()
 	{
+		owner.CurRagdollState = RagdollState.Ragdoll;
+
+		owner.SyncTransfrom = false;
 		owner.Agent.enabled = false;
 		transition = false;
 		elapsed = 0f;
@@ -48,8 +51,6 @@ public class ZombieRagdollEnter : ZombieState
 	public override void FixedUpdateNetwork()
 	{
 		elapsed += owner.Runner.DeltaTime;
-		if(transition == false)
-			owner.CurRagdollState = RagdollState.Ragdoll;
 		owner.Decelerate(1f);
 	}
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using static UnityEngine.UI.GridLayoutGroup;
@@ -16,17 +17,20 @@ public class BruteZombie : ZombieBase
 	[SerializeField] float lookSpeed = 1.5f;
 	[SerializeField] Transform shieldHolder;
 	[SerializeField] float attackDist = 3f;
+	[SerializeField] float minHeight = 1f;
+	[SerializeField] float maxHeight = 5f;
+	[SerializeField] float jumpHeightDivider = 8f;
 
 	public enum AttackType { Back = -1, LeftFoot, RightFoot, Smash, DoubleSmash, TwoHandSmash, GroundAttack, 
 		Jump, Dash, TwoHandGround, ThrowStone };
-	public enum State { Idle, Trace, DefenceTrace, DefenceKnockback, Stun, Search, AnimWait, }
+	public enum State { Idle, Trace, DefenceTrace, DefenceKnockback, Stun, Search, Roar, Jump, AnimWait, Wait, }
 
 	public event Action OnHit;
 	public event Action OnStun;
 
 	public TickTimer SpecialAttackTimer { get; set; }
 
-	public float AttackDist { get { return attackDist; } }
+	public float NormalAttackDist { get { return attackDist; } }
 	public BruteShield Shield { get; private set; }
 	public int ShieldCnt { get; set; } = 2;
 	TickTimer berserkRiseTimer;
@@ -34,6 +38,8 @@ public class BruteZombie : ZombieBase
 	[Networked, OnChangedRender(nameof(BerserkRender))] public NetworkBool IsBerserk { get; set; }
 	[Networked] public float LookWeight { get; set; }
 	[Networked] public Vector3 LookPos { get; set; }
+	[Networked, OnChangedRender(nameof(JumpAttack))] public int JumpCnt { get; set; }
+	[Networked] public Vector3 JumpEndPos { get; set; }
 
 	protected override void Awake()
 	{
@@ -45,7 +51,10 @@ public class BruteZombie : ZombieBase
 		stateMachine.AddState(State.Search, new BruteSearch(this));
 		stateMachine.AddState(State.DefenceTrace, new BruteDefenceTrace(this));
 		stateMachine.AddState(State.DefenceKnockback, new BruteDefenceKnockback(this));
+		stateMachine.AddState(State.Roar, new BruteRoar(this));
+		stateMachine.AddState(State.Jump, new BruteJump(this));
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
+		stateMachine.AddState(State.Wait, new ZombieWait());
 
 		stateMachine.InitState(State.Idle);
 	}
@@ -171,28 +180,25 @@ public class BruteZombie : ZombieBase
 			}
 
 			SetAnimTrigger("Hit");
-			if(IsBerserk == false)
+			if (IsBerserk == false && Shield.Enabled == true)
 			{
-				if (Shield.Enabled == true)
+				stateMachine.ChangeState(State.DefenceKnockback);
+			}
+			else
+			{
+				State nextState;
+				if (ShieldCnt > 0)
 				{
-					stateMachine.ChangeState(State.DefenceKnockback);
+					Shield.ResetHp();
+					nextState = State.DefenceTrace;
 				}
 				else
 				{
-					State nextState;
-					if (ShieldCnt > 0)
-					{
-						nextState = State.DefenceTrace;
-					}
-					else
-					{
-						nextState = State.Trace;
-					}
-					Shield.ResetHp();
-					AnimWaitStruct = new AnimWaitStruct("Hit", nextState.ToString(),
-						updateAction: Decelerate);
-					stateMachine.ChangeState(State.AnimWait);
+					nextState = State.Trace;
 				}
+				AnimWaitStruct = new AnimWaitStruct("Hit", nextState.ToString(),
+					updateAction: Decelerate);
+				stateMachine.ChangeState(State.AnimWait);
 			}
 		}
 
@@ -239,10 +245,11 @@ public class BruteZombie : ZombieBase
 		SetAnimTrigger("DefenceExit");
 		SetAnimTrigger("Down");
 		Shield.Break();
+		ShieldCnt = 0;
 		Shield = null;
 		LookWeight = 0f;
 		berserkRiseTimer = TickTimer.CreateFromSeconds(Runner, 2f);
-		AnimWaitStruct = new AnimWaitStruct("Roar", State.Trace.ToString(),
+		AnimWaitStruct = new AnimWaitStruct("Rise", State.Roar.ToString(),
 			startAction: () => IsBerserk = true,
 			updateAction: () => 
 			{
@@ -255,5 +262,15 @@ public class BruteZombie : ZombieBase
 			}, 
 			exitAction: () => LookWeight = 1f);
 		stateMachine.ChangeState(State.AnimWait);
+	}
+
+	public float GetJumpHeight(float dist)
+	{
+		return Mathf.Lerp(minHeight, maxHeight, dist / jumpHeightDivider);
+	}
+
+	private void JumpAttack()
+	{
+		stateMachine.ChangeState(State.Jump);
 	}
 }

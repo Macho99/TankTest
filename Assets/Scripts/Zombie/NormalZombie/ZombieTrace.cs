@@ -57,23 +57,26 @@ public class ZombieTrace : ZombieState
 
 	private bool CheckTransition()
 	{
-		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1.5f)
+		if(owner.Target == null)
 		{
-			if (owner.Target == null)
+			if (owner.Agent.hasPath && owner.Agent.remainingDistance < 2f)
 			{
 				owner.Agent.ResetPath();
 				ChangeState(Zombie.State.Idle);
 				return true;
 			}
-			else if(owner.CurTargetType == Zombie.TargetType.Meat)
+		}
+		else if(owner.CurTargetType == Zombie.TargetType.Meat)
+		{
+			if(owner.Agent.hasPath && owner.Agent.remainingDistance < 0.5f)
 			{
-				if(owner.Agent.remainingDistance < 1f)
-				{
-					Eat();
-					return true;
-				}
+				Eat();
+				return true;
 			}
-			else if ((owner.Target.position - owner.transform.position).sqrMagnitude < 1.5f * 1.5f)
+		}
+		else if(owner.CurTargetType == ZombieBase.TargetType.Player)
+		{
+			if((owner.Target.position - owner.transform.position).sqrMagnitude < 1.5f * 1.5f)
 			{
 				Attack();
 				return true;

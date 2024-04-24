@@ -20,6 +20,7 @@ public class TestPlayer : NetworkBehaviour
 	[SerializeField] float lookSpeed = 600f;
 	[SerializeField] float moveSpeed = 5f;
 	[SerializeField] int damage = 40;
+	[SerializeField] float knockbackPower = 30f;
 
 	Transform camRoot;
 	TextMeshProUGUI debugText;
@@ -117,7 +118,8 @@ public class TestPlayer : NetworkBehaviour
 	{
 		if(Physics.Raycast(camRoot.position, camRoot.forward, out RaycastHit hitInfo, 100f, LayerMask.GetMask("Monster"), QueryTriggerInteraction.Collide))
 		{
-			hitInfo.collider.GetComponent<IHittable>().ApplyDamage(transform, hitInfo.point, camRoot.forward * 300f, damage);
+			hitInfo.collider.GetComponent<IHittable>().ApplyDamage(transform, 
+				hitInfo.point, camRoot.forward * knockbackPower, damage);
 		}
 
 		//if (Runner.LagCompensation.Raycast(camRoot.position, camRoot.forward,

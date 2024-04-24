@@ -6,6 +6,7 @@ using System;
 using static UnityEngine.UI.GridLayoutGroup;
 using System.Text;
 using TMPro;
+using Unity.AI.Navigation;
 
 public struct BoneTransform
 {
@@ -34,7 +35,7 @@ public abstract class ZombieBase : NetworkBehaviour
 	[SerializeField] protected int maxHp = 400;
 
 	private TickTimer destinationTimer;
-	private TickTimer playerFindTimer;
+	public TickTimer PlayerFindTimer { get; set; }
 
 	protected NavMeshAgent agent;
 	protected NetworkStateMachine stateMachine;
@@ -61,6 +62,7 @@ public abstract class ZombieBase : NetworkBehaviour
 	public Tick LastPlayerFindTick { get; protected set; }
 	public int CurHp { get; protected set; }
 	public int MaxHP { get { return maxHp; } }
+	public bool SyncTransfrom { get; set; } = true;
 
 	[Networked] public Vector3 Position { get; private set; }
 	[Networked] public Quaternion Rotation { get; private set; }
@@ -117,13 +119,13 @@ public abstract class ZombieBase : NetworkBehaviour
 	private void FindPlayer()
 	{
 		if (CurTargetType == TargetType.Player) return;
-		if (playerFindTimer.ExpiredOrNotRunning(Runner) == false) return;
+		if (PlayerFindTimer.ExpiredOrNotRunning(Runner) == false) return;
 
 		int result = Physics.OverlapSphereNonAlloc(transform.position, lookDist, overlapCols, PlayerMask);
 
 		if (result == 0)
 		{
-			playerFindTimer = TickTimer.CreateFromSeconds(Runner, 1f);
+			PlayerFindTimer = TickTimer.CreateFromSeconds(Runner, 1f);
 			return;
 		}
 
@@ -142,7 +144,7 @@ public abstract class ZombieBase : NetworkBehaviour
 			}
 		}
 
-		playerFindTimer = TickTimer.CreateFromSeconds(Runner, 0.1f);
+		PlayerFindTimer = TickTimer.CreateFromSeconds(Runner, 0.1f);
 	}
 
 	private void TargetManage()
@@ -153,7 +155,9 @@ public abstract class ZombieBase : NetworkBehaviour
 		{
 			destinationTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
 			if (Target != null && agent.enabled == true)
+			{
 				agent.SetDestination(Target.position);
+			}
 		}
 
 		if (CurTargetType != TargetType.Player) return;
@@ -188,12 +192,10 @@ public abstract class ZombieBase : NetworkBehaviour
 
 		curStateText.text = sb.ToString();
 
-		if (Object.IsProxy)
+		if (Object.IsProxy && SyncTransfrom == true)
 		{
 			if ((transform.position - Position).sqrMagnitude > Mathf.Lerp(0.01f, 1f, anim.GetFloat("SpeedY") * 0.2f))
 			{
-				//debugCapsule.transform.position = transform.position;
-				//debugCapsule.SetActive(true);
 				Agent.enabled = false;
 				transform.position = Position;
 				Agent.enabled = true;
@@ -292,6 +294,11 @@ public abstract class ZombieBase : NetworkBehaviour
 	public bool IsAnimName(string name, int layer = 0)
 	{
 		return anim.GetCurrentAnimatorStateInfo(layer).IsName(name);
+	}
+
+	public float GetAnimNormalTime(int layer = 0)
+	{
+		return anim.GetCurrentAnimatorStateInfo(layer).normalizedTime;
 	}
 	
 	public void Decelerate()
