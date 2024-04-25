@@ -66,7 +66,7 @@ public class BruteJump : BruteZombieState
 
 		if(animEntered == true && owner.IsAnimName("Attack") == false)
 		{
-			ChangeState(BruteZombie.State.Idle);
+			ChangeState(BruteZombie.State.Trace);
 		}
 	}
 

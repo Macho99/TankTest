@@ -6,11 +6,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Windows;
 
-public enum Buttons { Fire, Jump }
+public enum Buttons { Fire, Jump, Interact }
 
 public struct TestInputData : INetworkInput
 {
-
 	public Vector2 moveVec;
 	public Vector2 lookVec;
 	public NetworkButtons buttons;
@@ -44,9 +43,6 @@ public class TestInput : NetworkBehaviour, IBeforeUpdate
 
 	public void BeforeUpdate()
 	{
-		if (Object.HasInputAuthority == false)
-			return;
-
 		// Enter key is used for locking/unlocking cursor in game view.
 		var keyboard = Keyboard.current;
 		if (keyboard != null && (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame))
@@ -85,6 +81,7 @@ public class TestInput : NetworkBehaviour, IBeforeUpdate
 			if (keyboard.dKey.isPressed) { moveDirection += Vector2.right; }
 
 			accumInput.buttons.Set(Buttons.Jump, keyboard.spaceKey.isPressed);
+			accumInput.buttons.Set(Buttons.Interact, keyboard.fKey.isPressed);
 
 			accumInput.moveVec = moveDirection.normalized;
 		}

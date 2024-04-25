@@ -108,32 +108,41 @@ public class TestPlayer : NetworkBehaviour
 			aimImg.color = Color.red;
 			Fire();
 		}
+		if (pressed.IsSet(Buttons.Interact))
+		{
+			CheckTank();
+		}
 		if (released.IsSet(Buttons.Fire))
 		{
 			aimImg.color = Color.white;
 		}
 	}
 
+	private void CheckTank()
+	{
+		if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, 
+			out RaycastHit hitInfo, LayerMask.GetMask("Vehicle")) == true)
+		{
+			hitInfo.collider.GetComponentInParent<Tank>().GetOn(this);
+		}
+	}
+
 	private void Fire()
 	{
-		if(Physics.Raycast(camRoot.position, camRoot.forward, out RaycastHit hitInfo, 100f, LayerMask.GetMask("Monster"), QueryTriggerInteraction.Collide))
+		if (Physics.Raycast(camRoot.position, camRoot.forward, out RaycastHit hitInfo, 100f, LayerMask.GetMask("Monster"), QueryTriggerInteraction.Collide))
 		{
-			hitInfo.collider.GetComponent<IHittable>().ApplyDamage(transform, 
+			hitInfo.collider.GetComponent<IHittable>().ApplyDamage(transform,
 				hitInfo.point, camRoot.forward * knockbackPower, damage);
 		}
+	}
 
-		//if (Runner.LagCompensation.Raycast(camRoot.position, camRoot.forward,
-		//	100f, Runner.LocalPlayer, out var hit, options: HitOptions.IgnoreInputAuthority))
-		//{
-		//	if (hit.Hitbox == null)
-		//	{
-		//		return;
-		//	}
+	public void KCCEnable(bool value)
+	{
+		kcc.SetActive(value);
+	}
 
-		//	if (hit.Hitbox is ZombieHitBox zombieHitBox)
-		//	{
-		//		zombieHitBox.ApplyDamage(transform, transform.forward * 30f, 40);
-		//	}
-		//}
+	public void Teleport(Vector3 position)
+	{
+		kcc.SetPosition(position);
 	}
 }

@@ -104,35 +104,51 @@ public class BruteTrace : BruteZombieState
 		if (owner.IsBerserk)
 		{
 			//특수 공격 쿨타임 되면
-			if (owner.SpecialAttackTimer.ExpiredOrNotRunning(owner.Runner))
+			if (owner.TwoHandGroundTimer.ExpiredOrNotRunning(owner.Runner))
 			{
 				//특수 근접공격
-				if(dist < attackDist && angle < 60f)
+				if (dist < attackDist && angle < 60f)
 				{
-					Attack(BruteZombie.AttackType.TwoHandGround, 5f);
+					Attack(BruteZombie.AttackType.TwoHandGround);
+					owner.TwoHandGroundTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.TwoHandGroundCooltime);
 					return true;
 				}
-				//돌진 공격
-				if(dist < owner.DashDist && angle < 5f)
+			}
+			if (owner.DashTimer.ExpiredOrNotRunning(owner.Runner))
+			{
+				if(CheckDash(targetDir, dist) == true)
 				{
-					Attack(BruteZombie.AttackType.Dash, 5f);
-					return true;
-				}
-				//점프 공격
-				if(owner.MinJumpDist < dist && dist < owner.MaxJumpDist)
-				{
-					if(CheckJump(dist) == true)
+					//돌진 공격
+					if (dist < owner.DashDist && angle < 5f)
 					{
-						Attack(BruteZombie.AttackType.Jump, 5f);
+						Attack(BruteZombie.AttackType.Dash);
+						owner.DashTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.DashCooltime);
 						return true;
 					}
 				}
+			}
+			if (owner.JumpTimer.ExpiredOrNotRunning(owner.Runner))
+			{
+				//점프 공격
+				if (owner.MinJumpDist < dist && dist < owner.MaxJumpDist)
+				{
+					if (CheckJump(dist) == true)
+					{
+						Attack(BruteZombie.AttackType.Jump);
+						owner.JumpTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.JumpCooltime);
+						return true;
+					}
+				}
+			}
+			if (owner.StoneTimer.ExpiredOrNotRunning(owner.Runner))
+			{
 				//돌 던지기 공격
 				if (owner.MinStoneDist < dist && dist < owner.MaxStoneDist)
 				{
-					if(CheckStone(dist) == true)
+					if (CheckStone(dist) == true)
 					{
-						Attack(BruteZombie.AttackType.ThrowStone, 5f);
+						Attack(BruteZombie.AttackType.ThrowStone);
+						owner.StoneTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.StoneCooltime);
 						return true;
 					}
 				}
@@ -160,13 +176,11 @@ public class BruteTrace : BruteZombieState
 		return false;
 	}
 
-	private void Attack(BruteZombie.AttackType type, float specialAttackCooltime = -1f)
+	Vector3 lookDir;
+	TickTimer stoneCreateTimer;
+	TickTimer stoneThrowTimer;
+	private void Attack(BruteZombie.AttackType type)
 	{
-		if (specialAttackCooltime > 0f)
-		{
-			owner.SpecialAttackTimer = TickTimer.CreateFromSeconds(owner.Runner, specialAttackCooltime);
-		}
-
 		if (type == BruteZombie.AttackType.Jump)
 		{
 			owner.JumpEndPos = owner.Agent.pathEndPosition;
@@ -182,13 +196,51 @@ public class BruteTrace : BruteZombieState
 			updateAction: owner.Decelerate, 
 			exitAction: () => owner.LookWeight = 1f);
 
-
 		if (type == BruteZombie.AttackType.ThrowStone)
 		{
+			lookDir = owner.Target.position - owner.transform.position;
+			lookDir.y = 0f;
+			lookDir.Normalize();
 			animWait.startAction += () =>
 			{
-				Rigidbody stoneRb = GameObject.Instantiate(owner.StonePrefab, owner.transform.position + Vector3.up * 10f, owner.transform.rotation);
-				stoneRb.velocity = stoneVelocity;
+				stoneCreateTimer = TickTimer.CreateFromSeconds(owner.Runner, 1.2f);
+				stoneThrowTimer = TickTimer.CreateFromSeconds(owner.Runner, 4.7f);
+			};
+			animWait.updateAction += () =>
+			{
+				owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
+					Quaternion.LookRotation(lookDir), 120f * owner.Runner.DeltaTime);
+
+				if (stoneCreateTimer.Expired(owner.Runner))
+				{
+					owner.StoneActive = true;
+					stoneCreateTimer = TickTimer.None;
+				}
+
+				if (stoneThrowTimer.Expired(owner.Runner))
+				{
+					owner.StoneActive = false;
+					stoneThrowTimer = TickTimer.None;
+					owner.Runner.Spawn(owner.StonePrefab, owner.StoneHolder.position, owner.StoneHolder.rotation,
+						onBeforeSpawned: (runner, obj) =>
+						{
+							obj.GetComponent<BruteStone>().Init(stoneVelocity);
+						});
+				}
+			};
+			animWait.exitAction += () =>
+			{
+				if (stoneThrowTimer.IsRunning)
+				{
+					owner.Runner.Spawn(owner.StonePrefab, owner.StoneHolder.position, owner.StoneHolder.rotation,
+						onBeforeSpawned: (runner, obj) =>
+						{
+							obj.GetComponent<BruteStone>().Init(-owner.transform.forward);
+						});
+				}
+				stoneCreateTimer = TickTimer.None;
+				stoneThrowTimer = TickTimer.None;
+				owner.StoneActive = false;
 			};
 		}
 
@@ -223,33 +275,42 @@ public class BruteTrace : BruteZombieState
 
 			if (Physics.Raycast(curPos, dir, mag, LayerMask.GetMask("Default")) == true)
 			{
-				owner.LastAirLines = posList.ToArray();
+				owner.LastJumpLines = posList.ToArray();
 				return false;
 			}
 			curPos = nextPos;
 		}
 
-		owner.LastAirLines = posList.ToArray();
+		owner.LastJumpLines = posList.ToArray();
 		return true;
+	}
+
+	private bool CheckDash(Vector3 targetDir, float dist)
+	{
+		Vector3 offset = Vector3.up;
+		return Physics.Raycast(owner.transform.position + offset,
+			targetDir, dist, LayerMask.GetMask("Default")) == false;
 	}
 
 	private bool CheckStone(float dist)
 	{
 		float arriveTime = dist / owner.StoneSpeed;
 		Vector3 targetPos = owner.Agent.pathEndPosition;
-		Vector3 ownerPosition = owner.transform.position;
+		Vector3 ownerPosition = owner.transform.position + Vector3.up * 3f;
 		stoneVelocity = (targetPos - ownerPosition) / arriveTime;
 		stoneVelocity.y = (targetPos.y - ownerPosition.y) / arriveTime
-			+ (arriveTime * Physics.gravity.y) * 0.5f;
+			+ (arriveTime * -Physics.gravity.y) * 0.5f;
 
 		int segment = 4;
 		Vector3 curPos = ownerPosition;
 		Vector3 nextPos;
+
 		List<Vector3> posList = new List<Vector3>();
 		for (int i = 1; i <= segment; i++)
 		{
-			float ratio = (float)i / segment; 
-			nextPos = ownerPosition + stoneVelocity * ratio * arriveTime;
+			float ratio = (float)i / segment;
+			float time = ratio * arriveTime;
+			nextPos = ownerPosition + (stoneVelocity + (Physics.gravity * time * 0.5f)) * time;
 
 			Vector3 rayVel = nextPos - curPos;
 			Vector3 dir = rayVel.normalized;
@@ -258,14 +319,25 @@ public class BruteTrace : BruteZombieState
 			posList.Add(curPos);
 			posList.Add(nextPos);
 
-			if (Physics.Raycast(curPos, dir, mag, LayerMask.GetMask("Default")) == true)
+			if(i != segment)
 			{
-				owner.LastAirLines = posList.ToArray();
-				return false;
+				if (Physics.SphereCast(curPos, 1.5f, dir, out RaycastHit hit, mag, LayerMask.GetMask("Default")) == true)
+				{
+					owner.LastStoneLines = posList.ToArray();
+					return false;
+				}
+			}
+			else
+			{
+				if(Physics.Raycast(curPos, dir, mag, LayerMask.GetMask("Default")) == true)
+				{
+					owner.LastStoneLines = posList.ToArray();
+					return false;
+				}
 			}
 			curPos = nextPos;
 		}
-		owner.LastAirLines = posList.ToArray();
+		owner.LastStoneLines = posList.ToArray();
 		return true;
 	}
 }

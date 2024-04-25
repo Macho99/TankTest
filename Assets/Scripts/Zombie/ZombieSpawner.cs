@@ -7,8 +7,11 @@ using UnityEngine.SceneManagement;
 using UnityEngine.AI;
 using TMPro;
 using UnityEngine.InputSystem;
+using Fusion.Addons.SimpleKCC;
 
-public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
+
+[DefaultExecutionOrder(-10)]
+public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks, IBeforeUpdate
 {
 	[SerializeField] bool spawn;
 	[SerializeField] Transform playerSpawnPoint;
@@ -16,6 +19,9 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 	[SerializeField] NetworkPrefabRef zombiePrefab;
 	[SerializeField] TextMeshProUGUI connectInfoText;
 	[SerializeField] float spawnInterval = 2f;
+
+	TestInputData accumInput;
+	Vector2Accumulator lookAccum = new Vector2Accumulator(0.02f, true);
 
 	private NetworkRunner runner;
 	private TickTimer timer;
@@ -58,6 +64,10 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 		{
 			connectInfoText.text = "클라이언트로 연결됨";
 		}
+
+
+		Cursor.lockState = CursorLockMode.Locked;
+		Cursor.visible = false;
 	}
 
 	public override void FixedUpdateNetwork()
@@ -121,8 +131,56 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks
 
 	}
 
+	public void BeforeUpdate()
+	{
+		// Enter key is used for locking/unlocking cursor in game view.
+		var keyboard = Keyboard.current;
+		if (keyboard != null && (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame))
+		{
+			if (Cursor.lockState == CursorLockMode.Locked)
+			{
+				Cursor.lockState = CursorLockMode.None;
+				Cursor.visible = true;
+			}
+			else
+			{
+				Cursor.lockState = CursorLockMode.Locked;
+				Cursor.visible = false;
+			}
+		}
+
+		// Accumulate input only if the cursor is locked.
+		if (Cursor.lockState != CursorLockMode.Locked)
+			return;
+
+		var mouse = Mouse.current;
+		if (mouse != null)
+		{
+			Vector2 mouseDelta = mouse.delta.ReadValue();
+			lookAccum.Accumulate(mouseDelta);
+			accumInput.buttons.Set(Buttons.Fire, mouse.leftButton.isPressed);
+		}
+
+		if (keyboard != null)
+		{
+			Vector2 moveDirection = Vector2.zero;
+
+			if (keyboard.wKey.isPressed) { moveDirection += Vector2.up; }
+			if (keyboard.sKey.isPressed) { moveDirection += Vector2.down; }
+			if (keyboard.aKey.isPressed) { moveDirection += Vector2.left; }
+			if (keyboard.dKey.isPressed) { moveDirection += Vector2.right; }
+
+			accumInput.buttons.Set(Buttons.Jump, keyboard.spaceKey.isPressed);
+			accumInput.buttons.Set(Buttons.Interact, keyboard.fKey.isPressed);
+
+			accumInput.moveVec = moveDirection.normalized;
+		}
+	}
+
 	public void OnInput(NetworkRunner runner, NetworkInput input)
 	{
+		accumInput.lookVec = lookAccum.ConsumeTickAligned(runner);
+		input.Set(accumInput);
 	}
 
 	public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)

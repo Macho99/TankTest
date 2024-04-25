@@ -5,10 +5,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using static UnityEngine.UI.GridLayoutGroup;
 
 public class BruteZombie : ZombieBase
 {
@@ -16,25 +14,40 @@ public class BruteZombie : ZombieBase
 	[SerializeField] Rig lookRig;
 	[SerializeField] float lookSpeed = 1.5f;
 	[SerializeField] Transform shieldHolder;
+	[SerializeField] Transform stoneHolder;
 	[SerializeField] float normalAttackDist = 3f;
+	[SerializeField] float twoHandGroundCooltime = 10f;
+	[SerializeField] float dashCooltime = 20f;
 	[SerializeField] float dashDist = 15f;
-	[SerializeField] float minHeight = 1f;
+	[SerializeField] float jumpCooltime = 40f;
+	[SerializeField] float minHeight = 0f;
 	[SerializeField] float maxHeight = 5f;
 	[SerializeField] float minJumpDist = 10f;
 	[SerializeField] float maxJumpDist = 20f;
+	[SerializeField] float stoneCooltime = 20f;
 	[SerializeField] float minStoneDist = 15f;
 	[SerializeField] float maxStoneDist = 30f;
-	[SerializeField] float stoneSpeed = 5f;
-	[SerializeField] Rigidbody stonePrefab;
-	[SerializeField] bool drawGizmos = true;
+	[SerializeField] float stoneSpeed = 40f;
+	[SerializeField] NetworkPrefabRef stonePrefab;
 
+	[Header("Gizmos")]
+	[SerializeField] bool drawGizmos = true;
+	[SerializeField] bool drawDashGizmos = true;
+	[SerializeField] bool drawJumpGizmos = true;
+	[SerializeField] bool drawStoneGizmos = true;
+
+	public float TwoHandGroundCooltime { get { return twoHandGroundCooltime; } }
+	public float DashCooltime { get { return dashCooltime; } }
 	public float DashDist { get { return dashDist; } }
+	public float JumpCooltime { get { return jumpCooltime; } }
 	public float MinJumpDist { get { return minJumpDist; } }
 	public float MaxJumpDist { get { return maxJumpDist; } }
+	public float StoneCooltime { get { return stoneCooltime; } }
 	public float MinStoneDist { get { return minStoneDist; } }
 	public float MaxStoneDist { get { return maxStoneDist; } }
 	public float StoneSpeed { get { return stoneSpeed; } }
-	public Rigidbody StonePrefab { get { return stonePrefab; } }
+	public NetworkPrefabRef StonePrefab { get { return stonePrefab; } }
+	public Transform StoneHolder { get { return stoneHolder; } }
 
 	public enum AttackType { Back = -1, LeftFoot, RightFoot, Smash, DoubleSmash, TwoHandSmash, GroundAttack, 
 		Jump, Dash, TwoHandGround, ThrowStone };
@@ -43,13 +56,17 @@ public class BruteZombie : ZombieBase
 	public event Action OnHit;
 	public event Action OnStun;
 
-	public TickTimer SpecialAttackTimer { get; set; }
+	public TickTimer TwoHandGroundTimer { get; set; }
+	public TickTimer DashTimer { get; set; }
+	public TickTimer JumpTimer { get; set; }
+	public TickTimer StoneTimer { get; set; }
 
 	public float NormalAttackDist { get { return normalAttackDist; } }
 	public BruteShield Shield { get; private set; }
 	public int ShieldCnt { get; set; } = 2;
 	TickTimer berserkRiseTimer;
 
+	[Networked, OnChangedRender(nameof(StoneRender))] public NetworkBool StoneActive { get; set; }
 	[Networked, OnChangedRender(nameof(BerserkRender))] public NetworkBool IsBerserk { get; set; }
 	[Networked] public float LookWeight { get; set; }
 	[Networked] public Vector3 LookPos { get; set; }
@@ -298,7 +315,13 @@ public class BruteZombie : ZombieBase
 		stateMachine.ChangeState(State.Jump);
 	}
 
-	public Vector3[] LastAirLines { get; set; }
+	private void StoneRender()
+	{
+		StoneHolder.gameObject.SetActive(StoneActive);
+	}
+
+	public Vector3[] LastJumpLines { get; set; }
+	public Vector3[] LastStoneLines { get; set; }
 	private void OnDrawGizmos()
 	{
 		if(drawGizmos == false) return;
@@ -309,12 +332,15 @@ public class BruteZombie : ZombieBase
 		Gizmos.DrawWireSphere(transform.position, normalAttackDist);
 		Vector3 offset = Vector3.up;
 
-		//돌진 공격
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawLine(transform.position + offset, 
-			transform.position + Quaternion.Euler(0f, -5f, 0f) * transform.forward * dashDist + offset);
-		Gizmos.DrawLine(transform.position + offset, 
-			transform.position + Quaternion.Euler(0f, 5f, 0f) * transform.forward * dashDist + offset);
+		if(drawDashGizmos == true)
+		{
+			//돌진 공격
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawLine(transform.position + offset,
+				transform.position + Quaternion.Euler(0f, -5f, 0f) * transform.forward * dashDist + offset);
+			Gizmos.DrawLine(transform.position + offset,
+				transform.position + Quaternion.Euler(0f, 5f, 0f) * transform.forward * dashDist + offset);
+		}
 
 		Vector3 targetDir;
 		if (Target == null)
@@ -323,51 +349,97 @@ public class BruteZombie : ZombieBase
 		}
 		else
 		{
-			Gizmos.color = Color.blue;
 			targetDir = Target.position - transform.position;
+			if (drawJumpGizmos == true){
+				Gizmos.color = Color.blue;
 
-			Vector3 jumpLineOffset = Vector3.up * 2f;
-			Vector3 startPos = transform.position + jumpLineOffset;
-			Vector3 endPos = Target.position + jumpLineOffset;
-			float jumpHeight = GetJumpHeight((startPos - endPos).magnitude);
+				Vector3 jumpLineOffset = Vector3.up * 2f;
+				Vector3 startPos = transform.position + jumpLineOffset;
+				Vector3 endPos = Target.position + jumpLineOffset;
+				float jumpHeight = GetJumpHeight((startPos - endPos).magnitude);
 
-			Vector3 curPos = startPos;
-			Vector3 nextPos;
-			int segment = 4;
+				Vector3 curPos = startPos;
+				Vector3 nextPos;
+				int segment = 4;
 
-			float ratio;
-			for (int i = 1; i <= segment; i++)
-			{
-				ratio = (float) i / segment;
-				nextPos = Vector3.Lerp(startPos, endPos, ratio);
-				nextPos.y += jumpHeight * Mathf.Sin(ratio * 180f * Mathf.Deg2Rad);
+				float ratio;
+				for (int i = 1; i <= segment; i++)
+				{
+					ratio = (float)i / segment;
+					nextPos = Vector3.Lerp(startPos, endPos, ratio);
+					nextPos.y += jumpHeight * Mathf.Sin(ratio * 180f * Mathf.Deg2Rad);
 
-				Gizmos.DrawLine(curPos, nextPos);
+					Gizmos.DrawLine(curPos, nextPos);
 
-				curPos = nextPos;
+					curPos = nextPos;
+				}
+			}
+
+			if(drawStoneGizmos == true){
+				Gizmos.color = Color.gray;
+				Vector3 targetPos = Target.position;
+				Vector3 ownerPosition = transform.position + Vector3.up * 3f;
+				float arriveTime = (targetPos - ownerPosition).magnitude / StoneSpeed;
+				Vector3 stoneVelocity = (targetPos - ownerPosition) / arriveTime;
+				stoneVelocity.y = (targetPos.y - ownerPosition.y) / arriveTime
+					+ (arriveTime * -Physics.gravity.y) * 0.5f;
+
+				int segment = 4;
+				Vector3 curPos = ownerPosition;
+				Vector3 nextPos;
+
+				List<Vector3> posList = new List<Vector3>();
+				for (int i = 1; i <= segment; i++)
+				{
+					float ratio = (float)i / segment;
+					float time = ratio * arriveTime;
+					nextPos = ownerPosition + (stoneVelocity + (Physics.gravity * time * 0.5f)) * time;
+
+					posList.Add(curPos);
+					posList.Add(nextPos);
+					Gizmos.DrawWireSphere(curPos, 1.5f);
+					Gizmos.DrawLine(curPos, nextPos);
+
+					curPos = nextPos;
+				}
 			}
 		}
 		targetDir.y = 0f;
 		targetDir.Normalize();
 
-		//점프 공격 거리
-		offset += Vector3.up * 0.5f;
-		Gizmos.color = Color.blue;
-		Gizmos.DrawLine(transform.position + offset + targetDir * minJumpDist,
-			transform.position + offset + targetDir * maxJumpDist);
-
-
-		//돌 던지기 공격 거리
-		offset += Vector3.up * 0.5f;
-		Gizmos.color = Color.green;
-		Gizmos.DrawLine(transform.position + offset + targetDir * minStoneDist,
-			transform.position + offset + targetDir * maxStoneDist);
-
-		Gizmos.color = Color.cyan;
-		//마지막 공중 공격 경로
-		if (LastAirLines != null)
+		if (drawJumpGizmos)
 		{
-			Gizmos.DrawLineList(LastAirLines);
+			//점프 공격 거리
+			offset += Vector3.up * 0.5f;
+			Gizmos.color = Color.blue;
+			Gizmos.DrawLine(transform.position + offset + targetDir * minJumpDist,
+				transform.position + offset + targetDir * maxJumpDist);
+
+			Gizmos.color = Color.cyan;
+			if (LastJumpLines != null)
+			{
+				Gizmos.DrawLineList(LastJumpLines);
+			}
+		}
+
+
+		if (drawStoneGizmos)
+		{
+			//돌 던지기 공격 거리
+			Gizmos.color = Color.green;
+			offset += Vector3.up * 0.5f;
+			Gizmos.DrawLine(transform.position + offset + targetDir * minStoneDist,
+				transform.position + offset + targetDir * maxStoneDist);
+
+			Gizmos.color = Color.magenta;
+			if (LastStoneLines != null)
+			{
+				Gizmos.DrawLineList(LastStoneLines);
+				for (int i = 0; i < LastStoneLines.Length; i += 2)
+				{
+					Gizmos.DrawWireSphere(LastStoneLines[i], 1.5f);
+				}
+			}
 		}
 	}
 }

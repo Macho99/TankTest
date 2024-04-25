@@ -130,12 +130,18 @@ public class TankMove : NetworkBehaviour
 
 	public override void FixedUpdateNetwork()
 	{
-		if(GetInput(out TestInputData input) == false) return;
+		if(GetInput(out TestInputData input) == true)
+		{
+			moveInput = input.moveVec;
+		}
+		else
+		{
+			moveInput = Vector2.zero;
+		}
 		//if(input.buttons.IsSet(Buttons.Respawn))
 		//{
 		//	netRb.Teleport(GameObject.FindGameObjectWithTag("Respawn").transform.position);
 		//}
-		moveInput = input.moveVec;
 
 		AbsWheelRpm = CalculateWheelRPM(out float velocity);
 		this.Velocity = velocity;
