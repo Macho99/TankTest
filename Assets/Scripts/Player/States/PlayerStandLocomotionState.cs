@@ -35,6 +35,7 @@ public class PlayerStandLocomotionState : PlayerState
     }
     public override void Transition()
     {
+    
 
         if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Jump) && owner.movement.IsGround())
         {
@@ -54,15 +55,19 @@ public class PlayerStandLocomotionState : PlayerState
                 return;
             }
         }
-        else if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Interact))
+
+        if (owner.GetInput(out NetworkInputData input))
         {
-
-            if (owner.interact.IsDetect)
+            if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Interact))
             {
-                owner.interact.TryInteract();
-            }
+                if (owner.interact.IsDetect)
+                {
+                    owner.interact.TryInteract();
+                }
 
+            }
         }
+
 
 
     }

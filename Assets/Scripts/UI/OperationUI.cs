@@ -25,9 +25,9 @@ public class OperationUI : InGameUI
         progressRT.Rotate(new Vector3(0f, 0f, rotateSpeed * Time.deltaTime));
         percentTMP.text = $"{percent}%";
     }
-    public override void CloseUI()
-    {
-        this.gameObject.SetActive(false);
-    }
+    //public override void CloseUI()
+    //{
+    //    this.gameObject.SetActive(false);
+    //}
 
 }

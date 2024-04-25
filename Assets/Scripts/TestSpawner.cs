@@ -3,6 +3,7 @@ using Fusion.Sockets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -14,8 +15,12 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
     private PlayerControls playerControls;
     private async void Awake()
     {
-        playerControls = new PlayerControls();
-        playerControls.Enable();
+        if (playerControls == null)
+        {
+            playerControls = new PlayerControls();
+            playerControls.Enable();
+
+        }
 
 
         // Create the NetworkSceneInfo from the current scene
@@ -28,9 +33,10 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if (runner == null)
         {
             runner = gameObject.AddComponent<NetworkRunner>();
-            runner.ProvideInput = true;
+           
 
         }
+        runner.ProvideInput = true;
         await runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
@@ -76,6 +82,7 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         data.buttons.Set(NetworkInputData.ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
         data.buttons.Set(NetworkInputData.ButtonType.Interact, playerControls.Player.Interact.IsPressed());
         data.buttons.Set(NetworkInputData.ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
+        data.buttons.Set(NetworkInputData.ButtonType.DebugText, playerControls.Player.DebugText.IsPressed());
 
         input.Set(data);
     }
@@ -107,9 +114,11 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if (!runner.IsServer)
             return;
 
+
         if (runner.TryGetPlayerObject(player, out NetworkObject playerObject))
         {
-            runner.Despawn(playerObject);
+            if (playerObject != null)
+                runner.Despawn(playerObject);
         }
 
     }

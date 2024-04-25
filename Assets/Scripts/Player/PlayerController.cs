@@ -15,8 +15,8 @@ public class PlayerController : NetworkBehaviour
     public PlayerInteract interact { get; private set; }
     private CapsuleCollider myCollider;
     public PlayerInputListner InputListner { get; private set; }
+    private HostClientDebugUI debugUI;
     [Networked] public float FallingTime { get; set; }
-
 
     private void Awake()
     {
@@ -42,8 +42,8 @@ public class PlayerController : NetworkBehaviour
 
         if (Object.InputAuthority == Runner.LocalPlayer)
         {
-            GameObject canvas = Instantiate(debugUIPrefab);
-            canvas.GetComponentInChildren<HostClientDebugUI>().SetPlayerInfo(HasStateAuthority == true ? "Host" : "Client");
+            debugUI = GameManager.UI.ShowSceneUI<HostClientDebugUI>("UI/PlayerUI/DebugUI");
+            debugUI.SetPlayerInfo(HasStateAuthority == true ? "Host" : "Client");
 
         }
     }
@@ -65,8 +65,15 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
+
+
         Falling();
         movement.Move();
+
+        if(InputListner.pressButton.IsSet(NetworkInputData.ButtonType.DebugText))
+        {
+            ClearDebugText();
+        }
 
     }
     public void Falling()
@@ -102,6 +109,8 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
+
+
         return false;
     }
     public bool RaycastObject(out RaycastHit hitInfo)
@@ -125,6 +134,17 @@ public class PlayerController : NetworkBehaviour
         Debug.DrawRay(ray.origin, ray.direction * 1f, Color.red, 0.5f);
         hitInfo = default;
         return false;
+    }
+    public void AddDebugText(string text)
+    {
+        if (HasInputAuthority)
+            debugUI.AddDebugText(text);
+    }
+    public void ClearDebugText()
+    {
+        if (HasInputAuthority)
+            debugUI.ClearAllText();
+
     }
 
 }

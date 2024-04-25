@@ -13,8 +13,8 @@ public class PlayerInteract : NetworkBehaviour
     private InteractInfo interactInfo;
     private bool isDetect;
 
-    private InteractBehavior[] interactBehavior;
-
+    private InteractBehavior[] interactBehaviors;
+    private InteractObject interactObject;
     public InteractInfo InteractInfo { get { return interactInfo; } set => interactInfo = value; }
     public bool IsDetect { get { return isDetect; } }
     private void Awake()
@@ -30,6 +30,12 @@ public class PlayerInteract : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
         RaycastDetect();
+        if (Object.InputAuthority == Runner.LocalPlayer)
+        {           
+            if (interactObject != null)
+                ((InteractTree)interactObject).Progress();
+
+        }
     }
 
 
@@ -83,8 +89,8 @@ public class PlayerInteract : NetworkBehaviour
         {
             if (hit.collider.TryGetComponent(out InteractObject detectObject))
             {
-                detectObject.Interact(this.GetComponent<PlayerController>(),out InteractObject interactObject);            
-
+                detectObject.Interact(this.GetComponent<PlayerController>(), out InteractObject interactObject);
+                this.interactObject = interactObject;
             }
         }
         return true;

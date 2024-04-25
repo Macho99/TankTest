@@ -5,8 +5,9 @@ using UnityEngine;
 public class TreeCutInteraction : InteractBehavior
 {
 
-    public TreeCutInteraction() : base(InteractType.TreeCut)
+    public TreeCutInteraction(Animator animator) : base(animator, InteractType.TreeCut)
     {
+
 
     }
 

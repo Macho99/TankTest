@@ -4,12 +4,13 @@ using UnityEngine;
 
 public abstract class InteractBehavior
 {
-
-    public InteractBehavior(InteractType interactType)
-    {
-
-    }
+    protected Animator animator;
     protected InteractType interactType;
+    public InteractBehavior(Animator animator,InteractType interactType)
+    {
+        this.animator = animator;
+        this.interactType = interactType;   
+    }
     public abstract bool InteractStart();
 
     public abstract void InteractLoop();

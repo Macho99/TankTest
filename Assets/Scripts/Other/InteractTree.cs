@@ -12,7 +12,7 @@ public class InteractTree : InteractObject
     [Networked] private TickTimer currentTick { get; set; }
     [Networked] private TickTimer currentCooldown { get; set; }
     private OperationUI operationUI;
-    private bool isUsed;
+    private float currentTIme;
 
     private void Awake()
     {
@@ -22,34 +22,31 @@ public class InteractTree : InteractObject
     private void Start()
     {
 
-     
+
     }
     public override void Spawned()
     {
-        operationUI = GameManager.UI.ShowInGameUI<OperationUI>("UI/PlayerUI/OperationUI");
-        operationUI.SetTarget(this.transform);
-        operationUI.SetOffset(new Vector3(0f, 200f, 0f));
+
+    }
+    public override void Render()
+    {
+
+
     }
     public override void FixedUpdateNetwork()
     {
-        if (currentTick.IsRunning)
-        {
-            float percent = (farmingTime - (float)currentTick.RemainingTime(Runner)) / farmingTime;
-            float truncatedPercent = Mathf.Floor(percent * 100f);
-            operationUI.SetProgress(truncatedPercent);
-        }
 
-        if (isUsed)
+        if (currentTick.IsRunning)
         {
             if (!currentTick.Expired(Runner))
                 return;
 
-            isUsed = false;
             currentTick = TickTimer.None;
-            operationUI.CloseUI();
+            operationUI?.CloseUI();
+            operationUI = null;
 
         }
-     
+
 
 
     }
@@ -60,22 +57,43 @@ public class InteractTree : InteractObject
 
     public override void Interact(PlayerController player, out InteractObject interactObject)
     {
-        if (IsFarming() || IsCooldown() || isUsed)
+        if (IsFarming())
         {
             interactObject = null;
             return;
         }
 
-        Debug.Log("use");
 
-        isUsed = true;
+
         // player.stateMachine.ChangeState(PlayerController.PlayerState.Interact);
+
+        if (player.HasInputAuthority)
+        {
+            if (operationUI == null)
+            {
+                operationUI = GameManager.UI.ShowInGameUI<OperationUI>("UI/PlayerUI/OperationUI");
+                operationUI.SetTarget(this.transform);
+                operationUI.SetOffset(new Vector3(0f, 200f, 0f));
+                player.AddDebugText("uiopen");
+            }     
+        }
         currentTick = TickTimer.CreateFromSeconds(Runner, farmingTime);
 
         interactObject = this;
 
     }
 
+    public void Progress()
+    {
+        if (currentTick.IsRunning)
+        {
+            float percent = (farmingTime - (float)currentTick.RemainingTime(Runner)) / farmingTime;
+            float test = Mathf.Floor(percent * 100f);
+
+            if (operationUI != null)
+                operationUI.SetProgress(test);
+        }
+    }
     public bool IsFarming()
     {
         return currentTick.IsRunning;
@@ -87,7 +105,6 @@ public class InteractTree : InteractObject
 
     public override void Stop()
     {
-        isUsed = false;
         currentTick = TickTimer.None;
         operationUI.CloseUI();
     }
