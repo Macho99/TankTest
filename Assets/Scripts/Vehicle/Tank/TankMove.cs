@@ -12,7 +12,7 @@ public class TankMove : VehicleBehaviour
 {
 	public enum State { Park, RpmMatch, Drive, ReverseRpmMatch, Reverse, GearShift, }
 
-	[SerializeField] DashBoard dashBoard;
+	[SerializeField] DashBoard dashBoardPrefab;
 	[SerializeField] AnimationCurve torquePerRpm;
 	[SerializeField] float brakeTorque = 2000f;
 	[SerializeField] float trackYOffset = 0.2f;
@@ -45,7 +45,7 @@ public class TankMove : VehicleBehaviour
 	[SerializeField] float rightTorque;
 
 	Rigidbody rb;
-
+	DashBoard dashBoard;
 
 	Vector2 moveInput;
 	//Vector2 lerpedMoveInput;
@@ -119,7 +119,7 @@ public class TankMove : VehicleBehaviour
 
 	public void SetDashBoardGear(string gearStr)
 	{
-		dashBoard.SetGearUI(gearStr);
+		dashBoard?.SetGearUI(gearStr);
 	}
 
 	public override void Render()
@@ -127,7 +127,7 @@ public class TankMove : VehicleBehaviour
 		base.Render();
 		//lerpedMoveInput = Vector2.Lerp(lerpedMoveInput, rawMoveInput, Runner.DeltaTime * inputSensitivity);
 
-		dashBoard.SetRPMAndVelUI(EngineRpm, Velocity);
+		dashBoard?.SetRPMAndVelUI(EngineRpm, Velocity);
 		SyncWheelRenderer();
 	}
 
@@ -371,6 +371,21 @@ public class TankMove : VehicleBehaviour
 			localPos = rightWheelTrans[i].localPosition;
 			localPos.y += trackYOffset;
 			rightWheelTrans[i].localPosition = localPos;
+		}
+	}
+
+	protected override void OnAssign(TestPlayer player)
+	{
+		if(player.HasInputAuthority && Runner.IsForward)
+			dashBoard = GameManager.UI.ShowSceneUI(dashBoardPrefab);
+	}
+
+	protected override void OnGetOff()
+	{
+		if (HasInputAuthority && Runner.IsForward)
+		{
+			GameManager.UI.CloseSceneUI(dashBoard);
+			dashBoard = null;
 		}
 	}
 }

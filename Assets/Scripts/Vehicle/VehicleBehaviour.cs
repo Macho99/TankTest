@@ -24,13 +24,17 @@ public class VehicleBehaviour : NetworkBehaviour
 
 	public void Assign(TestPlayer player)
 	{
+		OnAssign(player);
 		if (HasStateAuthority)
 		{
 			Object.AssignInputAuthority(player.Object.InputAuthority);
 			player.Object.RemoveInputAuthority();
 		}
 		this.player = player;
+
 	}
+
+	protected virtual void OnAssign(TestPlayer player) { }
 
 	public override void FixedUpdateNetwork()
 	{
@@ -56,6 +60,7 @@ public class VehicleBehaviour : NetworkBehaviour
 
 	private void GetOff()
 	{
+		OnGetOff();
 		if (HasStateAuthority)
 		{
 			player.Object.AssignInputAuthority(Object.InputAuthority);
@@ -64,6 +69,8 @@ public class VehicleBehaviour : NetworkBehaviour
 
 		boarder.GetOff(player);
 	}
+
+	protected virtual void OnGetOff() { }
 
 	private void RotateCam(TestInputData input)
 	{

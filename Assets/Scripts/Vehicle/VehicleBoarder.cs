@@ -11,7 +11,6 @@ using UnityEngine;
 public class VehicleBoarder : NetworkBehaviour
 {
 	[SerializeField] Transform cam;
-	[SerializeField] Transform moveCanvas;
 	[SerializeField] Transform seatTrans;
 	[SerializeField] TextMeshProUGUI debugText;
 	[SerializeField] Transform[] getOnObjectTrans;
@@ -78,7 +77,6 @@ public class VehicleBoarder : NetworkBehaviour
 		if (localPlayer == player)
 		{
 			cam.gameObject.SetActive(true);
-			moveCanvas.gameObject.SetActive(true);
 		}
 		player.Teleport(seatTrans.position);
 		player.CollisionEnable(false);
@@ -92,7 +90,6 @@ public class VehicleBoarder : NetworkBehaviour
 		if (localPlayer == player)
         {
 			cam.gameObject.SetActive(false);
-			moveCanvas.gameObject.SetActive(false);
 		}
 		player.CollisionEnable(true);
 		player.transform.parent = null;
