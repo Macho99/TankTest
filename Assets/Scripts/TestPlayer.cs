@@ -22,6 +22,7 @@ public class TestPlayer : NetworkBehaviour
 	[SerializeField] int damage = 40;
 	[SerializeField] float knockbackPower = 30f;
 
+	Collider col;
 	Transform camRoot;
 	TextMeshProUGUI debugText;
 	SimpleKCC kcc;
@@ -48,6 +49,7 @@ public class TestPlayer : NetworkBehaviour
 
 	public override void Spawned()
 	{
+		col = GetComponentInChildren<Collider>();
 		kcc.enabled = true;
 		if (HasInputAuthority == false)	
 		{
@@ -120,10 +122,16 @@ public class TestPlayer : NetworkBehaviour
 
 	private void CheckTank()
 	{
-		if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, 
-			out RaycastHit hitInfo, LayerMask.GetMask("Vehicle")) == true)
+		if(Physics.Raycast(camRoot.position, camRoot.forward, 
+			out RaycastHit hitInfo, 10f, LayerMask.GetMask("Vehicle")) == true)
 		{
-			hitInfo.collider.GetComponentInParent<Tank>().GetOn(this);
+			VehicleBoarder tank = hitInfo.collider.GetComponentInParent<VehicleBoarder>();
+			if(tank == null)
+			{
+				print(hitInfo.collider.name);
+				return;
+			}
+			tank.GetOn(this);
 		}
 	}
 
@@ -136,7 +144,12 @@ public class TestPlayer : NetworkBehaviour
 		}
 	}
 
-	public void KCCEnable(bool value)
+	public void CollisionEnable(bool value)
+	{
+		col.enabled = value;
+	}
+
+	public void KCCActive(bool value)
 	{
 		kcc.SetActive(value);
 	}
