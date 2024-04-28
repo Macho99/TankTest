@@ -33,5 +33,20 @@ public class PlayerStandMove : PlayerMove
         return lookForward * inputDirection.y + lookRight * inputDirection.x;
     }
 
+    public override Vector3 SetMove(Transform transform, Vector3 direction)
+    {
+        if (direction == Vector3.zero)
+        {
+            moveSpeed = 0f;
+            return Vector3.zero;
+        }
+        else
+            moveSpeed = runSpeed;
 
+        Vector3 lookRight = new Vector3(transform.right.x, 0f, transform.right.z);
+        Vector3 lookForward = new Vector3(transform.forward.x, 0f, transform.forward.z);
+
+
+        return direction;
+    }
 }

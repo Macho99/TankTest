@@ -5,31 +5,40 @@ using UnityEngine;
 public class PlayerInteractState : PlayerState
 {
 
+    InteractBehavior interactBehavior;
+
     public PlayerInteractState(PlayerController owner) : base(owner)
     {
     }
 
-    public void Init(int interactIndex)
-    {
-
-    }
     public override void Enter()
     {
-        owner.animator.SetFloat("InteractType", (float)owner.interact.InteractInfo.interactType);
+        interactBehavior = owner.interact.GetInteractBehavior();
+        interactBehavior.endInteract = StopInteract;
 
+        interactBehavior.InteractStart();
     }
 
     public override void Exit()
     {
-
+        interactBehavior.InteractEnd();
+        interactBehavior = null;
     }
 
     public override void FixedUpdateNetwork()
     {
+        interactBehavior.InteractLoop();
     }
 
     public override void Transition()
     {
-    }
 
+
+    }
+    private void StopInteract()
+    {
+        ChangeState(PlayerController.PlayerState.StandLocomotion);
+        Debug.Log("change");
+        return;
+    }
 }

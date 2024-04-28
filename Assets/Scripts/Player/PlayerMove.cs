@@ -17,6 +17,7 @@ public abstract class PlayerMove
     public float Height { get { return height; } }
     public float MoveSpeed { get => moveSpeed; }
     public abstract Vector3 SetMove(Transform transform, NetworkInputData input);
+    public abstract Vector3 SetMove(Transform transform, Vector3 direciton);
 
     public virtual void StopMove()
     {

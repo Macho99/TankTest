@@ -35,7 +35,7 @@ public class PlayerStandLocomotionState : PlayerState
     }
     public override void Transition()
     {
-    
+
 
         if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Jump) && owner.movement.IsGround())
         {
@@ -62,7 +62,13 @@ public class PlayerStandLocomotionState : PlayerState
             {
                 if (owner.interact.IsDetect)
                 {
-                    owner.interact.TryInteract();
+
+                    if (owner.interact.TryInteract())
+                    {
+                        ChangeState(PlayerController.PlayerState.Interact);
+                        return;
+
+                    }
                 }
 
             }

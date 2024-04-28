@@ -3,6 +3,7 @@ using Fusion.Addons.SimpleKCC;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows;
 
 public class PlayerLocomotion : NetworkBehaviour
 {
@@ -53,7 +54,7 @@ public class PlayerLocomotion : NetworkBehaviour
     {
 
         CamerRotX = camController.FollowTarget.eulerAngles.x;
-     
+
         moveSpeed = 0f;
         simpleKCC.SetGravity(Physics.gravity.y * 1f);
         fallingTime = 0f;
@@ -86,15 +87,25 @@ public class PlayerLocomotion : NetworkBehaviour
 
         moveDirection = moves[(int)movementType].SetMove(transform, input);
         moveSpeed = moves[(int)movementType].MoveSpeed;
-
     }
+    public void SetMove(Vector3 Direction)
+    {
+
+        moveDirection = moves[(int)movementType].SetMove(transform, Direction);
+        moveSpeed = moves[(int)movementType].MoveSpeed;
+    }
+
+
     public void Rotate(NetworkInputData input)
     {
         float rotY = input.mouseDelta.x * rotateXSpeed * Runner.DeltaTime;
         simpleKCC.AddLookRotation(new Vector2(0f, rotY));
         CamerRotX = camController.RotateX(input);
-
-
+    }
+    public void Rotate(Vector3 direction)
+    {
+        Quaternion newForward = Quaternion.RotateTowards(Quaternion.Euler(transform.forward), Quaternion.Euler(direction), Runner.DeltaTime);
+        transform.rotation = newForward;
     }
     public void StopMove()
     {

@@ -15,6 +15,7 @@ public class PlayerController : NetworkBehaviour
     public PlayerInteract interact { get; private set; }
     private CapsuleCollider myCollider;
     public PlayerInputListner InputListner { get; private set; }
+    public PlayerRigManager rigManager { get; private set; }
     private HostClientDebugUI debugUI;
     [Networked] public float FallingTime { get; set; }
 
@@ -26,6 +27,7 @@ public class PlayerController : NetworkBehaviour
         movement = GetComponent<PlayerLocomotion>();
         InputListner = GetComponent<PlayerInputListner>();
         interact = GetComponent<PlayerInteract>();
+        rigManager = GetComponent<PlayerRigManager>();
         stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
         stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
         stateMachine.AddState(PlayerState.Jump, new PlayerJumpState(this));
@@ -69,8 +71,9 @@ public class PlayerController : NetworkBehaviour
 
         Falling();
         movement.Move();
+     
 
-        if(InputListner.pressButton.IsSet(NetworkInputData.ButtonType.DebugText))
+        if (InputListner.pressButton.IsSet(NetworkInputData.ButtonType.DebugText))
         {
             ClearDebugText();
         }

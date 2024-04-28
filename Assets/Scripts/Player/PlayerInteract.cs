@@ -15,11 +15,19 @@ public class PlayerInteract : NetworkBehaviour
 
     private InteractBehavior[] interactBehaviors;
     private InteractObject interactObject;
+    private bool isInteracting;
+
+    public InteractObject InteractObject { get { return interactObject; } set { interactObject = value; } }
+
     public InteractInfo InteractInfo { get { return interactInfo; } set => interactInfo = value; }
     public bool IsDetect { get { return isDetect; } }
     private void Awake()
     {
         distance = 3f;
+        interactBehaviors = new InteractBehavior[(int)InteractType.Size];
+        PlayerController controller = GetComponent<PlayerController>();
+        interactBehaviors[(int)InteractType.TreeCut] = new TreeCutInteraction(controller);
+        isInteracting = false;
     }
     public override void Spawned()
     {
@@ -30,17 +38,17 @@ public class PlayerInteract : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
         RaycastDetect();
-        if (Object.InputAuthority == Runner.LocalPlayer)
-        {           
-            if (interactObject != null)
-                ((InteractTree)interactObject).Progress();
 
-        }
     }
-
-
     public void RaycastDetect()
     {
+        if (!CanInteract())
+        {
+            isDetect = false;
+            onDetect?.Invoke(isDetect, default);
+            return;
+        }
+
         Ray ray = new Ray();
         ray.origin = raycastTr.position;
         ray.direction = raycastTr.transform.forward;
@@ -81,6 +89,9 @@ public class PlayerInteract : NetworkBehaviour
         if (interactInfo.Equals(default))
             return false;
 
+        if (!CanInteract())
+            return false;
+
         Ray ray = new Ray();
         ray.origin = raycastTr.position;
         ray.direction = raycastTr.transform.forward;
@@ -89,10 +100,14 @@ public class PlayerInteract : NetworkBehaviour
         {
             if (hit.collider.TryGetComponent(out InteractObject detectObject))
             {
-                detectObject.Interact(this.GetComponent<PlayerController>(), out InteractObject interactObject);
-                this.interactObject = interactObject;
+                if (detectObject.Interact(this.GetComponent<PlayerController>(), out InteractObject interactObject))
+                    this.interactObject = interactObject;
+                else
+                    return false;
+
             }
         }
+
         return true;
 
     }
@@ -101,5 +116,24 @@ public class PlayerInteract : NetworkBehaviour
         AimUI aimUI = GameManager.UI.ShowSceneUI<AimUI>("UI/PlayerUI/AimUI");
         onDetect += aimUI.ReadInteractInfo;
 
+    }
+
+    public InteractBehavior GetInteractBehavior()
+    {
+        if (interactInfo.interactType == InteractType.None)
+            return null;
+
+
+        return interactBehaviors[(int)interactInfo.interactType];
+    }
+    public bool CanInteract()
+    {
+        if (interactObject != null)
+            return false;
+        if (isInteracting)
+            return false;
+
+
+        return true;
     }
 }
