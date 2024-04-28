@@ -38,7 +38,6 @@ public class PlayerInteractState : PlayerState
     private void StopInteract()
     {
         ChangeState(PlayerController.PlayerState.StandLocomotion);
-        Debug.Log("change");
         return;
     }
 }

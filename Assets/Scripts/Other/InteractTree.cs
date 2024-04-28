@@ -1,4 +1,5 @@
 using Fusion;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,10 +8,11 @@ public class InteractTree : InteractObject
 {
     private float farmingCooldown;
 
-    private ItemData item;
+
 
     [Networked] private TickTimer currentCooldown { get; set; }
     private float currentTIme;
+
 
     private void Awake()
     {
@@ -29,6 +31,7 @@ public class InteractTree : InteractObject
         {
             isUsed = false;
         }
+
     }
     public override void Render()
     {
@@ -36,15 +39,17 @@ public class InteractTree : InteractObject
     }
     public override void FixedUpdateNetwork()
     {
+        Debug.Log("complete");
 
         if (currentProgress.IsRunning)
         {
             if (!currentProgress.Expired(Runner))
                 return;
-
-
-            Stop();
-
+            else
+            {
+                base.Complete();
+                Stop();
+            }
         }
     }
     public override void Detect(out InteractInfo interactInfo)
@@ -57,23 +62,19 @@ public class InteractTree : InteractObject
         if (isUsed == true)
         {
             interactObject = null;
+            Debug.Log("empty");
             return false;
         }
 
 
-        interactObject = this;
+
         isUsed = true;
+        interactObject = this;
 
         return true;
     }
 
-    //public void Progress()
-    //{
-    //    currentProgress = TickTimer.CreateFromSeconds(Runner, targetTime);
-    //    state = InteractState.Progress;
 
-
-    //}
     public bool IsFarming()
     {
         return currentProgress.IsRunning;
@@ -90,4 +91,15 @@ public class InteractTree : InteractObject
         state = InteractState.End;
     }
 
+    public override void Result()
+    {
+        Stop();
+
+
+
+
+        // 아이템 보상 예정
+        return;
+
+    }
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class PlayerInteract : NetworkBehaviour
 {
@@ -11,32 +12,47 @@ public class PlayerInteract : NetworkBehaviour
     public Action<InteractObject> action;
     public Action<bool, InteractInfo> onDetect;
     private InteractInfo interactInfo;
-    private bool isDetect;
+    [Networked] public NetworkBool IsDetect { get; set; }
 
     private InteractBehavior[] interactBehaviors;
     private InteractObject interactObject;
-    private bool isInteracting;
+    [SerializeField] private ToolItem[] toolItems;
+    [SerializeField] private Transform leftHandPivot;
+    [SerializeField] private Transform toolItemPivot;
+    [SerializeField] private MultiParentConstraint leftParent;
 
+
+    public void ActiveToolItem(ToolItemType toolType, bool isActive)
+    {
+
+        toolItems[(int)toolType].ActiveToolItem(isActive);
+
+    }
     public InteractObject InteractObject { get { return interactObject; } set { interactObject = value; } }
 
     public InteractInfo InteractInfo { get { return interactInfo; } set => interactInfo = value; }
-    public bool IsDetect { get { return isDetect; } }
+
     private void Awake()
     {
         distance = 3f;
         interactBehaviors = new InteractBehavior[(int)InteractType.Size];
         PlayerController controller = GetComponent<PlayerController>();
         interactBehaviors[(int)InteractType.TreeCut] = new TreeCutInteraction(controller);
-        isInteracting = false;
+        //toolItems = new ToolItem[(int)ToolItemType.Size];
     }
     public override void Spawned()
     {
-        if (Object.InputAuthority == Runner.LocalPlayer)
+        if (HasInputAuthority)
+        {
             SetupLocalPlayerUI();
+        }
 
+      
     }
+
     public override void FixedUpdateNetwork()
     {
+
         RaycastDetect();
 
     }
@@ -44,8 +60,8 @@ public class PlayerInteract : NetworkBehaviour
     {
         if (!CanInteract())
         {
-            isDetect = false;
-            onDetect?.Invoke(isDetect, default);
+            IsDetect = false;
+            onDetect?.Invoke(IsDetect, default);
             return;
         }
 
@@ -62,23 +78,23 @@ public class PlayerInteract : NetworkBehaviour
                 if (!this.interactInfo.Equals(interactInfo))
                 {
                     this.interactInfo = interactInfo;
-                    isDetect = true;
-                    onDetect?.Invoke(isDetect, interactInfo);
+                    IsDetect = true;
+                    onDetect?.Invoke(IsDetect, interactInfo);
                 }
-
             }
             else
             {
+
                 interactInfo = default;
-                isDetect = false;
-                onDetect?.Invoke(isDetect, default);
+                IsDetect = false;
+                onDetect?.Invoke(IsDetect, default);
             }
         }
         else
         {
             interactInfo = default;
-            isDetect = false;
-            onDetect?.Invoke(isDetect, default);
+            IsDetect = false;
+            onDetect?.Invoke(IsDetect, default);
         }
 
         Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
@@ -130,10 +146,14 @@ public class PlayerInteract : NetworkBehaviour
     {
         if (interactObject != null)
             return false;
-        if (isInteracting)
-            return false;
-
 
         return true;
     }
+    public void StopInteract()
+    {
+        interactObject = null;
+        interactInfo = default;
+    }
+
+
 }

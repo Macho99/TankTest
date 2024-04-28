@@ -105,6 +105,9 @@ public class PlayerLocomotion : NetworkBehaviour
     public void Rotate(Vector3 direction)
     {
         Quaternion newForward = Quaternion.RotateTowards(Quaternion.Euler(transform.forward), Quaternion.Euler(direction), Runner.DeltaTime);
+
+        //simpleKCC.AddLookRotation(new Vector2(0f,));
+
         transform.rotation = newForward;
     }
     public void StopMove()

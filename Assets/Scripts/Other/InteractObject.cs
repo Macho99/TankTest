@@ -23,8 +23,11 @@ public abstract class InteractObject : NetworkBehaviour
     protected float targetTime;
     public enum InteractState { None, Progress, End }
 
+    [SerializeField] protected MaterialItem materialItemPrefab;
+
     protected InteractState state;
-    [Networked] protected NetworkBool isUsed { get; set; }
+    public event Action<MaterialItem> onComplete;
+    [Networked] public NetworkBool isUsed { get; set; }
     public abstract void Detect(out InteractInfo interactInfo);
 
     public abstract bool Interact(PlayerController player, out InteractObject interactObject);
@@ -33,7 +36,6 @@ public abstract class InteractObject : NetworkBehaviour
     {
         state = InteractState.Progress;
         currentProgress = TickTimer.CreateFromSeconds(Runner, targetTime);
-        Debug.Log("asdasd");
     }
 
     public float Progress()
@@ -47,6 +49,16 @@ public abstract class InteractObject : NetworkBehaviour
     }
     public InteractState GetState()
     {
+
+
+
         return state;
     }
+    public virtual void Complete()
+    {
+        MaterialItem item = Instantiate(materialItemPrefab, Vector3.zero, Quaternion.identity);
+        onComplete?.Invoke(item);
+
+    }
+    public abstract void Result();
 }

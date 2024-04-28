@@ -8,7 +8,6 @@ public class PlayerController : NetworkBehaviour
 {
     public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass, Interact }
 
-    public GameObject debugUIPrefab;
     public NetworkStateMachine stateMachine { get; private set; }
     public Animator animator { get; private set; }
     public PlayerLocomotion movement { get; private set; }
@@ -16,7 +15,10 @@ public class PlayerController : NetworkBehaviour
     private CapsuleCollider myCollider;
     public PlayerInputListner InputListner { get; private set; }
     public PlayerRigManager rigManager { get; private set; }
-    private HostClientDebugUI debugUI;
+    public Inventory Inventory { get; private set; }
+    private LocalPlayerDebugUI LocaldebugUI;
+
+    [SerializeField] private PlayerIngameDebugUI IngamedebugUI;
     [Networked] public float FallingTime { get; set; }
 
     private void Awake()
@@ -28,6 +30,7 @@ public class PlayerController : NetworkBehaviour
         InputListner = GetComponent<PlayerInputListner>();
         interact = GetComponent<PlayerInteract>();
         rigManager = GetComponent<PlayerRigManager>();
+        Inventory = GetComponentInChildren<Inventory>();
         stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
         stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
         stateMachine.AddState(PlayerState.Jump, new PlayerJumpState(this));
@@ -36,18 +39,23 @@ public class PlayerController : NetworkBehaviour
         stateMachine.AddState(PlayerState.Interact, new PlayerInteractState(this));
 
         stateMachine.InitState(PlayerState.StandLocomotion);
+
     }
     public override void Spawned()
     {
         FallingTime = 0f;
         name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
 
-        if (Object.InputAuthority == Runner.LocalPlayer)
-        {
-            debugUI = GameManager.UI.ShowSceneUI<HostClientDebugUI>("UI/PlayerUI/DebugUI");
-            debugUI.SetPlayerInfo(HasStateAuthority == true ? "Host" : "Client");
 
-        }
+        IngamedebugUI.SetPlayerType($"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})");
+
+
+        //debugUI = GameManager.UI.ShowInGameUI<LocalPlayerDebugUI>("UI/PlayerUI/DebugUI");
+        //debugUI.SetPlayerInfo(HasStateAuthority == true ? "Host" : "Client");
+        //debugUI.SetTarget(this.transform);
+        //debugUI.SetOffset(new Vector3(0f, 800f, 0f));
+
+
     }
 
     public override void FixedUpdateNetwork()
@@ -71,13 +79,17 @@ public class PlayerController : NetworkBehaviour
 
         Falling();
         movement.Move();
-     
+
 
         if (InputListner.pressButton.IsSet(NetworkInputData.ButtonType.DebugText))
         {
             ClearDebugText();
         }
 
+    }
+    public override void Render()
+    {
+        AddDebugText("State", stateMachine.curStateStr);
     }
     public void Falling()
     {
@@ -138,15 +150,13 @@ public class PlayerController : NetworkBehaviour
         hitInfo = default;
         return false;
     }
-    public void AddDebugText(string text)
+    public void AddDebugText(string title, string text)
     {
-        if (HasInputAuthority)
-            debugUI.AddDebugText(text);
+        IngamedebugUI.AddDebugText(title, text);
     }
     public void ClearDebugText()
     {
-        if (HasInputAuthority)
-            debugUI.ClearAllText();
+        IngamedebugUI.AllClearDubugText();
 
     }
 
