@@ -11,7 +11,7 @@ public class TankAttack : VehicleBehaviour
 	[SerializeField] Transform firePoint;
 	[SerializeField] float turrentRotSpeed = 40f;
 	[SerializeField] float barrelRotSpeed = 20f;
-	[SerializeField] float depressionAngle = -10f;
+	[SerializeField] AnimationCurve depressionCurve;
 	[SerializeField] float elevationAngle = 25f;
 	[SerializeField] GameObject fireVFX;
 	[SerializeField] GameObject hitVFX;
@@ -106,6 +106,7 @@ public class TankAttack : VehicleBehaviour
 
 	private void RotateBarrel(Vector3 camForward)
 	{
+		float depressionAngle = depressionCurve.Evaluate(Mathf.PingPong(TurretAngle, 180f) / 180f);
 		Vector3 barrelCamForward = camForward - Vector3.Dot(turretTrans.right, camForward) * turretTrans.right;
 		float barrelAngle = Vector3.SignedAngle(turretTrans.forward, barrelCamForward, turretTrans.right);
 		barrelAngle = Mathf.Clamp(barrelAngle, -elevationAngle, -depressionAngle);
