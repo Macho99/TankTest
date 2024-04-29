@@ -43,7 +43,7 @@ public class PlayerLocomotion : NetworkBehaviour
         animator = GetComponent<Animator>();
         simpleKCC = GetComponent<SimpleKCC>();
         camController = GetComponentInChildren<BasicCamController>();
-        jumpForce = 10f;
+        jumpForce = 15f;
         rotateXSpeed = 30f;
         moves = new PlayerMove[(int)MovementType.Size];
         moves[(int)MovementType.Stand] = new PlayerStandMove(1.8f, 4f, 2f);
@@ -56,8 +56,16 @@ public class PlayerLocomotion : NetworkBehaviour
         CamerRotX = camController.FollowTarget.eulerAngles.x;
 
         moveSpeed = 0f;
-        simpleKCC.SetGravity(Physics.gravity.y * 1f);
+        simpleKCC.SetGravity(Physics.gravity.y * 2f);
         fallingTime = 0f;
+    }
+    public override void FixedUpdateNetwork()
+    {
+        if (IsGround())
+            fallingTime = 0f;
+
+        if (!IsGround())
+            Debug.Log(Kcc.RealVelocity.y.ToString("F1"));
     }
     public override void Render()
     {

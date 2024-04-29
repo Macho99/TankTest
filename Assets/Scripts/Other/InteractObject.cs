@@ -46,7 +46,6 @@ public abstract class InteractObject : NetworkBehaviour
             interactInfo = default;
             return false;
         }
-        Debug.Log(interactState);
         interactInfo = this.info;
         return true;
 
