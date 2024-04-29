@@ -9,28 +9,37 @@ using UnityEngine;
 
 public class ShatterObstacle : BreakableObstacle
 {
-	[SerializeField] DemolitionType demolitionType = DemolitionType.Runtime;
+	[SerializeField] RayfireRigid rayfireRb;
+	DemolitionType demolitionType = DemolitionType.AwakePrefragment;
 
 	protected override void Break()
 	{
 		base.Break();
-		RayfireRigid rayfire = new GameObject(gameObject.name).AddComponent<RayfireRigid>();
-		rayfire.AddComponent<MeshFilter>().mesh = meshFilter.sharedMesh;
-		rayfire.AddComponent<MeshRenderer>().material = meshRenderer.sharedMaterial;
-		meshRenderer.enabled = false;
 		foreach(MeshCollider col in meshCols)
 		{
 			col.enabled = false;
 		}
-		rayfire.transform.position = transform.position;
-		rayfire.transform.rotation = transform.rotation;
-		rayfire.transform.localScale = transform.localScale;
-		rayfire.demolitionType = demolitionType;
-		rayfire.meshDemolition.totalAmount = 2;
-		rayfire.limitations.col = false;
-		rayfire.materials.iMat = GameManager.Resource.Load<Material>("Material/ShatterInerMat");
-		rayfire.fading.fadeType = FadeType.ScaleDown;
-		rayfire.fading.lifeTime = 2f;
-		rayfire.Demolish();
+		rayfireRb.Demolish();
+	}
+
+	protected override void OnValidate()
+	{
+		base.OnValidate();
+		if(rayfireRb == null)
+		{
+			rayfireRb = new GameObject(gameObject.name).AddComponent<RayfireRigid>();
+			rayfireRb.AddComponent<MeshFilter>().mesh = meshFilter.sharedMesh;
+			rayfireRb.AddComponent<MeshRenderer>().material = meshRenderer.sharedMaterial;
+			meshRenderer.enabled = false;
+			rayfireRb.transform.localScale = transform.localScale;
+			rayfireRb.transform.SetParent(transform, false);
+			rayfireRb.demolitionType = DemolitionType.AwakePrecache;
+			rayfireRb.meshDemolition.totalAmount = 2;
+			rayfireRb.limitations.col = false;
+			rayfireRb.materials.iMat = GameManager.Resource.Load<Material>("Material/ShatterInerMat");
+			rayfireRb.fading.lifeTime = 2f;
+			rayfireRb.fading.fadeType = FadeType.ScaleDown;
+			rayfireRb.demolitionType = demolitionType;
+		}
 	}
 }

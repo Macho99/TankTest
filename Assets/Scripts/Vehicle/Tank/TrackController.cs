@@ -303,6 +303,7 @@ public class TrackController : MonoBehaviour
 			Vector3 dir = spline.GetDirection(t);
 			Quaternion rot = Quaternion.LookRotation(dir, Vector3.Cross(dir, transform.forward));
 			tracks[i] = Instantiate(trackPrefab, pos, rot, transform).transform;
+			tracks[i].gameObject.layer = gameObject.layer;
 		}
 	}
 }

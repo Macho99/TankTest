@@ -65,4 +65,9 @@ public abstract class BreakableObstacle : NetworkBehaviour
 	{
 		IsBreaked = true;
 	}
+
+	private void OnTriggerStay(Collider other)
+	{
+		IsBreaked = true;
+	}
 }
