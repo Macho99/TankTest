@@ -13,6 +13,8 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] private NetworkPrefabRef testPlayer;
     NetworkRunner runner;
     private PlayerControls playerControls;
+    [SerializeField] private Transform spawnPoint;
+    private Dictionary<PlayerRef, NetworkObject> playerObjects = new Dictionary<PlayerRef, NetworkObject>();
     private async void Awake()
     {
         if (playerControls == null)
@@ -33,7 +35,7 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if (runner == null)
         {
             runner = gameObject.AddComponent<NetworkRunner>();
-           
+
 
         }
         runner.ProvideInput = true;
@@ -103,9 +105,10 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (runner.IsServer)
         {
-            NetworkObject playerObject = runner.Spawn(testPlayer, inputAuthority: player);
+            NetworkObject playerObject = runner.Spawn(testPlayer, spawnPoint.position, Quaternion.identity, inputAuthority: player);
 
             runner.SetPlayerObject(player, playerObject);
+            playerObjects.Add(player, playerObject);
         }
     }
 
@@ -115,7 +118,7 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
             return;
 
 
-        if (runner.TryGetPlayerObject(player, out NetworkObject playerObject))
+        if (playerObjects.TryGetValue(player, out NetworkObject playerObject))
         {
             if (playerObject != null)
                 runner.Despawn(playerObject);

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public enum ToolItemType { Hammer, Axe, Size }
+public enum ToolItemType { Hammer, Axe,PickAxe, Size }
 
 [Serializable]
 public class ToolItemData : ItemData

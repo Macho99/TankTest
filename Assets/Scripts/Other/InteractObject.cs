@@ -8,6 +8,8 @@ public enum InteractType
 {
     None,
     TreeCut,
+    RockBreak,
+    IronDig,
     Size
 }
 [Serializable]
@@ -25,17 +27,60 @@ public abstract class InteractObject : NetworkBehaviour
 
     [SerializeField] protected MaterialItem materialItemPrefab;
 
-    protected InteractState state;
     public event Action<MaterialItem> onComplete;
-    [Networked] public NetworkBool isUsed { get; set; }
-    public abstract void Detect(out InteractInfo interactInfo);
+    [Networked, HideInInspector, OnChangedRender(nameof(OnChangeState))] public InteractState interactState { get; set; } = InteractState.None;
+    [Networked, HideInInspector] public NetworkBool isUsed { get; set; }
 
-    public abstract bool Interact(PlayerController player, out InteractObject interactObject);
-    public abstract void Stop();
+    public override void Spawned()
+    {
+        if (HasStateAuthority)
+        {
+            isUsed = false;
+        }
+    }
+    public virtual bool Detect(out InteractInfo interactInfo)
+    {
+
+        if (interactState != InteractState.None)
+        {
+            interactInfo = default;
+            return false;
+        }
+        Debug.Log(interactState);
+        interactInfo = this.info;
+        return true;
+
+    }
+    public override void FixedUpdateNetwork()
+    {
+        if (currentProgress.IsRunning)
+        {
+            if (!currentProgress.Expired(Runner))
+                return;
+            else
+            {
+                interactState = InteractState.End;
+            }
+        }
+    }
+
+    public virtual bool Interact(out InteractObject interactObject)
+    {
+        if (isUsed == true && interactState != InteractState.None)
+        {
+            interactObject = null;
+            return false;
+        }
+        isUsed = true;
+        interactObject = this;
+
+        return true;
+    }
+
     public virtual void StartInteract()
     {
-        state = InteractState.Progress;
-        currentProgress = TickTimer.CreateFromSeconds(Runner, targetTime);
+        interactState = InteractState.Progress;
+
     }
 
     public float Progress()
@@ -52,7 +97,7 @@ public abstract class InteractObject : NetworkBehaviour
 
 
 
-        return state;
+        return interactState;
     }
     public virtual void Complete()
     {
@@ -60,5 +105,38 @@ public abstract class InteractObject : NetworkBehaviour
         onComplete?.Invoke(item);
 
     }
-    public abstract void Result();
+    public void Cancel()
+    {
+        currentProgress = TickTimer.None;
+        if (HasStateAuthority)
+            isUsed = false;
+
+    }
+
+    protected virtual void OnChangeState()
+    {
+        switch (interactState)
+        {
+            case InteractState.None:
+                Cancel();
+
+                break;
+
+            case InteractState.Progress:
+                if (HasStateAuthority)
+                    currentProgress = TickTimer.CreateFromSeconds(Runner, targetTime);
+                break;
+
+            case InteractState.End:
+                if (HasStateAuthority)
+                {
+                    currentProgress = TickTimer.None;
+                    isUsed = false;
+                }
+                Complete();
+
+
+                break;
+        }
+    }
 }

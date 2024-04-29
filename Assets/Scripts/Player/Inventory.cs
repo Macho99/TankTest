@@ -12,6 +12,7 @@ public class Inventory : NetworkBehaviour
 
     private void Awake()
     {
+
     }
 
     public override void Spawned()
@@ -23,19 +24,14 @@ public class Inventory : NetworkBehaviour
     }
     public void AddItem(Item newItem)
     {
-        Debug.Log(count);
 
         if (count >= MaxCount)
         {
-            Debug.Log(MaxCount);
-            Debug.Log("X");
             return;
         }
 
-        Debug.Log(MaxCount);
         for (int i = 0; i < MaxCount; i++)
         {
-            Debug.Log("add");
             if (items[i] == null)
             {
                 items[i] = newItem;
@@ -48,5 +44,4 @@ public class Inventory : NetworkBehaviour
 
 
     }
-
 }

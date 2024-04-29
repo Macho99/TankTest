@@ -128,28 +128,7 @@ public class PlayerController : NetworkBehaviour
 
         return false;
     }
-    public bool RaycastObject(out RaycastHit hitInfo)
-    {
-        Ray ray = new Ray();
 
-        ray.origin = transform.position + transform.forward * movement.Kcc.Settings.Radius + Vector3.up * 0.3f;
-        ray.direction = transform.forward;
-
-        if (Physics.Raycast(ray, out RaycastHit hit, 1f))
-        {
-            if (hit.collider.TryGetComponent(out IClimbPassable climbObject))
-            {
-                if (climbObject.CanClimbPassCheck(hit, transform.position, movement.Kcc.Settings.Height))
-                {
-                    hitInfo = hit;
-                    return true;
-                }
-            }
-        }
-        Debug.DrawRay(ray.origin, ray.direction * 1f, Color.red, 0.5f);
-        hitInfo = default;
-        return false;
-    }
     public void AddDebugText(string title, string text)
     {
         IngamedebugUI.AddDebugText(title, text);

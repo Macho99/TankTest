@@ -1,4 +1,5 @@
 using Fusion;
+using Fusion.Addons.SimpleKCC;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,12 +21,14 @@ public class PlayerInteract : NetworkBehaviour
     [SerializeField] private Transform leftHandPivot;
     [SerializeField] private Transform toolItemPivot;
     [SerializeField] private MultiParentConstraint leftParent;
+    [Networked] public Vector3 targetPoint { get; set; }
+    public float ObjectDistance { get; set; }
 
-
-    public void ActiveToolItem(ToolItemType toolType, bool isActive)
+    private SimpleKCC kcc;
+    public void ActiveToolItem(InteractType interactType, bool isActive)
     {
 
-        toolItems[(int)toolType].ActiveToolItem(isActive);
+        toolItems[(int)interactType-1].ActiveToolItem(isActive);
 
     }
     public InteractObject InteractObject { get { return interactObject; } set { interactObject = value; } }
@@ -34,10 +37,13 @@ public class PlayerInteract : NetworkBehaviour
 
     private void Awake()
     {
+        kcc = GetComponent<SimpleKCC>();
+        ObjectDistance = 1f;
         distance = 3f;
         interactBehaviors = new InteractBehavior[(int)InteractType.Size];
         PlayerController controller = GetComponent<PlayerController>();
-        interactBehaviors[(int)InteractType.TreeCut] = new TreeCutInteraction(controller);
+        interactBehaviors[(int)InteractType.TreeCut] = new FarmingInteraction(controller, InteractType.TreeCut);
+        interactBehaviors[(int)InteractType.RockBreak] = new FarmingInteraction(controller, InteractType.RockBreak);
         //toolItems = new ToolItem[(int)ToolItemType.Size];
     }
     public override void Spawned()
@@ -47,7 +53,7 @@ public class PlayerInteract : NetworkBehaviour
             SetupLocalPlayerUI();
         }
 
-      
+
     }
 
     public override void FixedUpdateNetwork()
@@ -74,12 +80,14 @@ public class PlayerInteract : NetworkBehaviour
             if (hit.collider.TryGetComponent(out InteractObject detectObject))
             {
 
-                detectObject.Detect(out InteractInfo interactInfo);
-                if (!this.interactInfo.Equals(interactInfo))
+                if (detectObject.Detect(out InteractInfo interactInfo))
                 {
-                    this.interactInfo = interactInfo;
-                    IsDetect = true;
-                    onDetect?.Invoke(IsDetect, interactInfo);
+                    if (!this.interactInfo.Equals(interactInfo))
+                    {
+                        this.interactInfo = interactInfo;
+                        IsDetect = true;
+                        onDetect?.Invoke(IsDetect, interactInfo);
+                    }
                 }
             }
             else
@@ -116,15 +124,17 @@ public class PlayerInteract : NetworkBehaviour
         {
             if (hit.collider.TryGetComponent(out InteractObject detectObject))
             {
-                if (detectObject.Interact(this.GetComponent<PlayerController>(), out InteractObject interactObject))
+                if (detectObject.Interact(out InteractObject interactObject))
+                {
                     this.interactObject = interactObject;
-                else
-                    return false;
+                    targetPoint = hit.point;
 
+                    return true;
+                }
             }
         }
-
-        return true;
+        targetPoint = Vector3.zero;
+        return false;
 
     }
     private void SetupLocalPlayerUI()
