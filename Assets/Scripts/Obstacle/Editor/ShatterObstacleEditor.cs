@@ -1,22 +1,19 @@
-using NUnit.Framework.Internal;
 using RayFire;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
-using static Unity.VisualScripting.Dependencies.Sqlite.SQLite3;
 
 [CanEditMultipleObjects]
-[CustomEditor(typeof(TestObstacle))]
-public class TestObstacleEditor : Editor
+[CustomEditor(typeof(ShatterObstacle))]
+public class ShatterObstacleEditor : Editor
 {
 	public override void OnInspectorGUI()
 	{
-		TestObstacle obstacle = target as TestObstacle;
+		ShatterObstacle obstacle = target as ShatterObstacle;
 		if (obstacle == null)
 			return;
-
+			
 		if (GUILayout.Button("Cache Prefab"))
 		{
 			CachePrefab(obstacle);
@@ -24,19 +21,33 @@ public class TestObstacleEditor : Editor
 		base.OnInspectorGUI();
 	}
 
-	public void CachePrefab(TestObstacle obstacle)
+	public void CachePrefab(ShatterObstacle obstacle)
 	{
+		Quaternion prevRot = obstacle.transform.rotation;
+		obstacle.transform.rotation = Quaternion.identity;
+
 		RayfireShatter shatter = obstacle.gameObject.AddComponent<RayfireShatter>();
 		shatter.voronoi.amount = obstacle.fragmentCnt;
 		shatter.material.iMat = Resources.Load<Material>("Material/ShatterInerMat");
 		shatter.Fragment(RayfireShatter.FragLastMode.New);
-		SaveFragments(shatter, TestObstacle.cachePath, obstacle.meshFilter.sharedMesh.name, obstacle.colType);
+		SaveFragments(shatter, ShatterObstacle.cachePath, obstacle.MeshFilter.sharedMesh.name, obstacle.colType);
+
+		obstacle.transform.rotation = prevRot;
+
+		List<GameObject> frags = shatter.fragmentsLast;
+		frags.Add(frags[0].transform.parent.gameObject);
+		int layer = LayerMask.NameToLayer("Debris");
+		foreach(var frag in frags)
+		{
+			frag.layer = layer;
+		}
 
 		GameObject savedPrefab = PrefabUtility.SaveAsPrefabAsset(shatter.fragmentsLast[0].transform.parent.gameObject,
-			$"{TestObstacle.cachePath}/{obstacle.cacheName}.prefab");
+			$"{ShatterObstacle.cachePath}/{obstacle.cacheName}.prefab");
 		if (savedPrefab != null)
 		{
 			Debug.Log("Prefab created successfully.");
+			obstacle.debrisPrefab = savedPrefab;
 		}
 		else
 		{
@@ -47,7 +58,7 @@ public class TestObstacleEditor : Editor
 	}
 
 	// Save mesh as assets
-	private void SaveFragments(RayfireShatter shatter, string path, string saveName, TestObstacle.ColliderType colType)
+	private void SaveFragments(RayfireShatter shatter, string path, string saveName, ShatterObstacle.ColliderType colType)
 	{
 		// Collect all meshes to save
 		bool hasMesh = false;
@@ -94,7 +105,7 @@ public class TestObstacleEditor : Editor
 	}
 
 	// Export meshes into asset
-	private void ExportMeshes(List<MeshFilter> meshFilters, List<Mesh> meshes, string savePath, string saveName, TestObstacle.ColliderType colType)
+	private void ExportMeshes(List<MeshFilter> meshFilters, List<Mesh> meshes, string savePath, string saveName, ShatterObstacle.ColliderType colType)
 	{
 		// Empty mesh
 		Mesh emptyMesh = new Mesh();
@@ -117,12 +128,12 @@ public class TestObstacleEditor : Editor
 
 			switch (colType)
 			{
-				case TestObstacle.ColliderType.Mesh:
+				case ShatterObstacle.ColliderType.Mesh:
 					MeshCollider meshCol = meshFilters[i].gameObject.AddComponent<MeshCollider>();
 					meshCol.sharedMesh = meshes[i];
 					meshCol.convex = true;
 					break;
-				case TestObstacle.ColliderType.Box:
+				case ShatterObstacle.ColliderType.Box:
 					BoxCollider boxCol = meshFilters[i].gameObject.AddComponent<BoxCollider>();
 					boxCol.size = meshFilters[i].sharedMesh.bounds.extents * 2f;
 					break;

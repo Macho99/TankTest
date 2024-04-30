@@ -13,7 +13,6 @@ public class CompressObstacle : BreakableObstacle
 	{
 		base.Awake();
 		transform.localScale = Vector3.one;
-		meshFilter = GetComponent<MeshFilter>();
 		mesh = meshFilter.mesh;
 		vertices = mesh.vertices;
 	}
@@ -23,7 +22,7 @@ public class CompressObstacle : BreakableObstacle
 		base.OnValidate();
 
 		//0.81: ½Â¿ëÂ÷, 1.03: ¹ö½º
-		float extentY = meshCols[0].sharedMesh.bounds.extents.y;
+		float extentY = meshFilter.sharedMesh.bounds.extents.y;
 		scaleYValue = Mathf.Clamp(0.3f - (extentY - 0.8f), 0.2f, 0.3f);
 		transform.localScale = new Vector3(1f, scaleYValue, 1f);
 	}

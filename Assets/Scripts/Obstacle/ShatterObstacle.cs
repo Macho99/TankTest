@@ -1,45 +1,80 @@
-Ôªøusing RayFire;
-using System;
+using Fusion;
+using RayFire;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
+using WebSocketSharp;
 
 public class ShatterObstacle : BreakableObstacle
 {
-	[SerializeField] RayfireRigid rayfireRb;
-	DemolitionType demolitionType = DemolitionType.AwakePrefragment;
+	const float fadeDuration = 5f;
+	public enum ColliderType { Mesh, Box }
 
-	protected override void Break()
-	{
-		base.Break();
-		foreach(MeshCollider col in meshCols)
-		{
-			col.enabled = false;
-		}
-		rayfireRb.Demolish();
-	}
+	[SerializeField] public int fragmentCnt = 5;
+	[SerializeField] public ColliderType colType = ColliderType.Mesh;
+	[SerializeField] public string cacheName;
+	[SerializeField] public GameObject debrisPrefab;
+	public const string cachePath = "Assets/Resources/RayfireCache";
+	public const string resourcePath = "RayfireCache";
+
+	public MeshFilter MeshFilter { get { return meshFilter; } }
+
+	List<Transform> debrisTransList = new();
+	TickTimer debrisFadeTimer;
 
 	protected override void OnValidate()
 	{
 		base.OnValidate();
-		if(rayfireRb == null)
+		if(cacheName.IsNullOrEmpty())
 		{
-			rayfireRb = new GameObject(gameObject.name).AddComponent<RayfireRigid>();
-			rayfireRb.AddComponent<MeshFilter>().mesh = meshFilter.sharedMesh;
-			rayfireRb.AddComponent<MeshRenderer>().material = meshRenderer.sharedMaterial;
-			meshRenderer.enabled = false;
-			rayfireRb.transform.localScale = transform.localScale;
-			rayfireRb.transform.SetParent(transform, false);
-			rayfireRb.demolitionType = DemolitionType.AwakePrecache;
-			rayfireRb.meshDemolition.totalAmount = 2;
-			rayfireRb.limitations.col = false;
-			rayfireRb.materials.iMat = GameManager.Resource.Load<Material>("Material/ShatterInerMat");
-			rayfireRb.fading.lifeTime = 2f;
-			rayfireRb.fading.fadeType = FadeType.ScaleDown;
-			rayfireRb.demolitionType = demolitionType;
+			cacheName = $"{meshFilter.sharedMesh.name}";
 		}
+		if (debrisPrefab == null)
+		{
+			debrisPrefab = Resources.Load<GameObject>($"{resourcePath}/{cacheName}");
+			if(debrisPrefab == null)
+			{
+				print($"{cacheName} «¡∏Æ∆’¿ª ƒ≥Ω√«ÿ¡÷ººø‰");
+			}
+		}
+	}
+
+	public override void FixedUpdateNetwork()
+	{
+		base.FixedUpdateNetwork();
+		if (debrisFadeTimer.IsRunning)
+		{
+			if (debrisFadeTimer.Expired(Runner))
+			{
+				Destroy(debrisTransList[0].gameObject);
+				debrisTransList.Clear();
+				debrisFadeTimer = TickTimer.None;
+			}
+			else
+			{
+				float curScale = debrisTransList[1].localScale.x;
+				float nextScale = Mathf.Max(curScale - Runner.DeltaTime / fadeDuration, 0f);
+				for (int i = 1; i < debrisTransList.Count; i++)
+				{
+					debrisTransList[i].localScale = Vector3.one * nextScale;
+				}
+			}
+		}
+	}
+
+	protected override void Break()
+	{
+		base.Break();
+		meshRenderer.enabled = false;
+		foreach(Collider col in cols)
+		{
+			col.enabled = false;
+		}
+		GameObject debris = Instantiate(debrisPrefab, transform.position, transform.rotation, transform);
+		debrisTransList.Add(debris.transform);
+		foreach(Transform child in debris.transform)
+		{
+			debrisTransList.Add(child);
+		}
+		debrisFadeTimer = TickTimer.CreateFromSeconds(Runner, fadeDuration);
 	}
 }

@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 
-[RequireComponent(typeof(NavMeshObstacle), typeof(MeshRenderer), typeof(MeshCollider))]
+[RequireComponent(typeof(NavMeshObstacle), typeof(MeshRenderer), typeof(Collider))]
 public abstract class BreakableObstacle : NetworkBehaviour
 {
-	[SerializeField] protected MeshCollider[] meshCols;
+	[SerializeField] protected Collider[] cols;
 	[SerializeField] protected MeshFilter meshFilter;
 	[SerializeField] protected MeshRenderer meshRenderer;
 	[SerializeField] protected NavMeshObstacle navObstacle;
@@ -46,14 +46,18 @@ public abstract class BreakableObstacle : NetworkBehaviour
 				netObj = gameObject.AddComponent<NetworkObject>();
 			}
 		}
-		if (meshCols == null)
-			meshCols = GetComponents<MeshCollider>();
+		if (cols == null || cols.Length == 0)
+			cols = GetComponents<Collider>();
 		if (meshFilter == null)
 			meshFilter = GetComponent<MeshFilter>();
 		if (meshRenderer == null)
 			meshRenderer = GetComponent<MeshRenderer>();
 		if (navObstacle == null)
+		{
 			navObstacle = GetComponent<NavMeshObstacle>();
+			navObstacle.carving = true;
+		}
+
 
 		if(meshFilter.sharedMesh.isReadable == false)
 		{
