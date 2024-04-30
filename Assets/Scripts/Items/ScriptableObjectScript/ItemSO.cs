@@ -4,9 +4,9 @@ using UnityEngine;
 
 public abstract class ItemSO : ScriptableObject
 {
-    [SerializeField] protected int itemId => GetInstanceID();
+    protected int itemId => GetInstanceID();
     [SerializeField] protected Sprite itemIcon;
     [SerializeField] protected string itemName;
-    [SerializeField, TextArea(0, 5)] protected string itemDescrition;
-
+    [SerializeField] protected float weight;
+    [SerializeField, TextArea(4, 5)] protected string itemDescrition;
 }

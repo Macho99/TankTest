@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4218815, g: 0.45212275, b: 0.47337884, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -11399,7 +11399,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3650089992067431894, guid: a42aa8bad80672b47bbdf3e082a85349, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3650089992067431894, guid: a42aa8bad80672b47bbdf3e082a85349, type: 3}
       propertyPath: NetworkedBehaviours.Array.data[3]
@@ -11408,11 +11408,11 @@ PrefabInstance:
     - target: {fileID: 3650089992067431894, guid: a42aa8bad80672b47bbdf3e082a85349, type: 3}
       propertyPath: NetworkedBehaviours.Array.data[4]
       value: 
-      objectReference: {fileID: 2115865028}
+      objectReference: {fileID: 909336552}
     - target: {fileID: 3650089992067431894, guid: a42aa8bad80672b47bbdf3e082a85349, type: 3}
       propertyPath: NetworkedBehaviours.Array.data[5]
       value: 
-      objectReference: {fileID: 2115865027}
+      objectReference: {fileID: 0}
     - target: {fileID: 8764801172851343966, guid: a42aa8bad80672b47bbdf3e082a85349, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -11436,6 +11436,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba7dac2ffff3cf5448c2695201dcff37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &909336552 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6957151355845968244, guid: a42aa8bad80672b47bbdf3e082a85349, type: 3}
+  m_PrefabInstance: {fileID: 909336549}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96863721c27eac14c900770487adc780, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &933569723
@@ -15184,9 +15195,10 @@ MonoBehaviour:
       m_Calls: []
   m_text: Zombie Survival
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2028e822a551a284f8e6fbaa916a6087, type: 2}
-  m_sharedMaterial: {fileID: 3657346657302950260, guid: 2028e822a551a284f8e6fbaa916a6087, type: 2}
-  m_fontSharedMaterials: []
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontSharedMaterials:
+  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
@@ -26951,28 +26963,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2113552219}
   m_CullTransparentMesh: 1
---- !u!114 &2115865027 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3550773988872675085, guid: a42aa8bad80672b47bbdf3e082a85349, type: 3}
-  m_PrefabInstance: {fileID: 909336549}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &2115865028 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8381639246281963382, guid: a42aa8bad80672b47bbdf3e082a85349, type: 3}
-  m_PrefabInstance: {fileID: 909336549}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96863721c27eac14c900770487adc780, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2118495529
 GameObject:
   m_ObjectHideFlags: 0
@@ -27165,9 +27155,10 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uB85C\uADF8\uC778\uC744 \uD655\uC778\uD558\uACE0 \uC788\uC2B5\uB2C8\uB2E4."
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2028e822a551a284f8e6fbaa916a6087, type: 2}
-  m_sharedMaterial: {fileID: 3657346657302950260, guid: 2028e822a551a284f8e6fbaa916a6087, type: 2}
-  m_fontSharedMaterials: []
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontSharedMaterials:
+  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
