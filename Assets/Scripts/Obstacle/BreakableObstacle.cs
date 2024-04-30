@@ -8,26 +8,18 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshObstacle), typeof(MeshRenderer), typeof(Collider))]
-public abstract class BreakableObstacle : NetworkBehaviour
+public abstract class BreakableObstacle : MonoBehaviour
 {
 	[SerializeField] protected Collider[] cols;
 	[SerializeField] protected MeshFilter meshFilter;
 	[SerializeField] protected MeshRenderer meshRenderer;
 	[SerializeField] protected NavMeshObstacle navObstacle;
-	[SerializeField] NetworkObject netObj;
+	[SerializeField] protected BreakableObjBehaviour owner;
 
-	[Networked, OnChangedRender(nameof(BreakRender))]
+	public int idx = -1;
 	public bool IsBreaked { get; protected set; }
 
-	protected void BreakRender()
-	{
-		if (IsBreaked == true)
-		{
-			Break();
-		}
-	}
-
-	protected virtual void Break()
+	protected virtual void Break(bool immediately = false)
 	{
 		navObstacle.enabled = false;
 	}
@@ -38,13 +30,11 @@ public abstract class BreakableObstacle : NetworkBehaviour
 
 	protected virtual void OnValidate()
 	{
-		if(netObj == null)
+		if (owner == null)
+			owner = GetComponentInParent<BreakableObjBehaviour>();
+		if(idx == -1)
 		{
-			netObj = GetComponent<NetworkObject>();
-			if(netObj == null)
-			{
-				netObj = gameObject.AddComponent<NetworkObject>();
-			}
+			idx = owner.RegisterObj(this);
 		}
 		if (cols == null || cols.Length == 0)
 			cols = GetComponents<Collider>();
@@ -67,11 +57,25 @@ public abstract class BreakableObstacle : NetworkBehaviour
 
 	private void OnCollisionStay(Collision collision)
 	{
-		IsBreaked = true;
+		BreakRequest();
 	}
 
 	private void OnTriggerStay(Collider other)
 	{
-		IsBreaked = true;
+		BreakRequest();
+	}
+
+	public void BreakRequest()
+	{
+		owner.BreakRequest(idx);
+	}
+
+	public void TryBreak(bool Immediatly = false)
+	{
+		if (IsBreaked == false)
+		{
+			IsBreaked = true;
+			Break(Immediatly);
+		}
 	}
 }

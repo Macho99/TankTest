@@ -27,7 +27,7 @@ public class CompressObstacle : BreakableObstacle
 		transform.localScale = new Vector3(1f, scaleYValue, 1f);
 	}
 
-	protected override void Break()
+	protected override void Break(bool immediately = false)
 	{
 		for(int i = 0; i < vertices.Length; i++)
 		{
@@ -38,5 +38,10 @@ public class CompressObstacle : BreakableObstacle
 		GetComponent<NavMeshObstacle>().enabled = false;
 		mesh.vertices = vertices;
 		mesh.RecalculateNormals();
+
+		if(immediately == false)
+		{
+
+		}
 	}
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
-public class VehicleBoarder : NetworkBehaviour
+public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 {
 	[SerializeField] Transform cam;
 	[SerializeField] Transform seatTrans;
@@ -179,11 +179,11 @@ public class VehicleBoarder : NetworkBehaviour
 
 	public override void Render()
 	{
-		if (isFirst)
-		{
-			GetOnRender();
-			isFirst = false;
-		}
+		//if (isFirst)
+		//{
+		//	GetOnRender();
+		//	isFirst = false;
+		//}
 
 		StringBuilder sb = new StringBuilder();
 		string localPlayerStr = localPlayer == null ? "None" : localPlayer.Object.Id.ToString();
@@ -200,5 +200,10 @@ public class VehicleBoarder : NetworkBehaviour
 		}
 
 		debugText.text = sb.ToString();
+	}
+
+	public void AfterSpawned()
+	{
+		GetOnRender();
 	}
 }

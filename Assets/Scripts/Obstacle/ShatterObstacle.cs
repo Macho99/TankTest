@@ -1,11 +1,13 @@
 using Fusion;
 using RayFire;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using WebSocketSharp;
 
 public class ShatterObstacle : BreakableObstacle
 {
+	const float fadeWaitDuration = 3f;
 	const float fadeDuration = 5f;
 	public enum ColliderType { Mesh, Box }
 
@@ -38,43 +40,49 @@ public class ShatterObstacle : BreakableObstacle
 		}
 	}
 
-	public override void FixedUpdateNetwork()
+	private IEnumerator CoFade()
 	{
-		base.FixedUpdateNetwork();
-		if (debrisFadeTimer.IsRunning)
+		yield return new WaitForSeconds(fadeWaitDuration);
+
+		while (true)
 		{
-			if (debrisFadeTimer.Expired(Runner))
+			float curScale = debrisTransList[1].localScale.x;
+			float nextScale = curScale - Time.deltaTime / fadeDuration;
+			if(nextScale < 0)
 			{
-				Destroy(debrisTransList[0].gameObject);
-				debrisTransList.Clear();
-				debrisFadeTimer = TickTimer.None;
+				break;
 			}
-			else
+
+			for (int i = 1; i < debrisTransList.Count; i++)
 			{
-				float curScale = debrisTransList[1].localScale.x;
-				float nextScale = Mathf.Max(curScale - Runner.DeltaTime / fadeDuration, 0f);
-				for (int i = 1; i < debrisTransList.Count; i++)
-				{
-					debrisTransList[i].localScale = Vector3.one * nextScale;
-				}
+				debrisTransList[i].localScale = Vector3.one * nextScale;
 			}
+			yield return null;
 		}
+
+		Destroy(debrisTransList[0].gameObject);
+		debrisTransList.Clear();
+		debrisFadeTimer = TickTimer.None;
 	}
 
-	protected override void Break()
+	protected override void Break(bool immediately = false)
 	{
-		base.Break();
+		base.Break(immediately);
 		meshRenderer.enabled = false;
 		foreach(Collider col in cols)
 		{
 			col.enabled = false;
 		}
-		GameObject debris = Instantiate(debrisPrefab, transform.position, transform.rotation, transform);
-		debrisTransList.Add(debris.transform);
-		foreach(Transform child in debris.transform)
+
+		if(immediately == false)
 		{
-			debrisTransList.Add(child);
+			GameObject debris = Instantiate(debrisPrefab, transform.position, transform.rotation, transform);
+			debrisTransList.Add(debris.transform);
+			foreach (Transform child in debris.transform)
+			{
+				debrisTransList.Add(child);
+			}
+			StartCoroutine(CoFade());
 		}
-		debrisFadeTimer = TickTimer.CreateFromSeconds(Runner, fadeDuration);
 	}
 }
