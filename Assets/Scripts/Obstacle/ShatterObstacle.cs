@@ -21,7 +21,7 @@ public class ShatterObstacle : BreakableObstacle
 	public MeshFilter MeshFilter { get { return meshFilter; } }
 
 	List<Transform> debrisTransList = new();
-	TickTimer debrisFadeTimer;
+
 
 	protected override void OnValidate()
 	{
@@ -62,14 +62,16 @@ public class ShatterObstacle : BreakableObstacle
 
 		Destroy(debrisTransList[0].gameObject);
 		debrisTransList.Clear();
-		debrisFadeTimer = TickTimer.None;
 	}
 
 	protected override void Break(bool immediately = false)
 	{
 		base.Break(immediately);
-		meshRenderer.enabled = false;
-		foreach(Collider col in cols)
+		foreach(MeshRenderer renderer in childRenderers)
+		{
+			renderer.enabled = false;
+		}
+		foreach(Collider col in childCols)
 		{
 			col.enabled = false;
 		}

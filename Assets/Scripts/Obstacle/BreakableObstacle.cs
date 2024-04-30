@@ -10,8 +10,9 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshObstacle), typeof(MeshRenderer), typeof(Collider))]
 public abstract class BreakableObstacle : MonoBehaviour
 {
-	[SerializeField] protected Collider[] cols;
+	[SerializeField] protected Collider[] childCols;
 	[SerializeField] protected MeshFilter meshFilter;
+	[SerializeField] protected MeshRenderer[] childRenderers;
 	[SerializeField] protected MeshRenderer meshRenderer;
 	[SerializeField] protected NavMeshObstacle navObstacle;
 	[SerializeField] protected BreakableObjBehaviour owner;
@@ -36,8 +37,8 @@ public abstract class BreakableObstacle : MonoBehaviour
 		{
 			idx = owner.RegisterObj(this);
 		}
-		if (cols == null || cols.Length == 0)
-			cols = GetComponents<Collider>();
+		if (childCols == null || childCols.Length == 0)
+			childCols = GetComponentsInChildren<Collider>();
 		if (meshFilter == null)
 			meshFilter = GetComponent<MeshFilter>();
 		if (meshRenderer == null)
@@ -47,12 +48,8 @@ public abstract class BreakableObstacle : MonoBehaviour
 			navObstacle = GetComponent<NavMeshObstacle>();
 			navObstacle.carving = true;
 		}
-
-
-		if(meshFilter.sharedMesh.isReadable == false)
-		{
-			print($"{gameObject.name}의 Read/Write 속성을 켜세요");
-		}
+		if(childRenderers == null || childRenderers.Length == 0)
+			childRenderers = GetComponentsInChildren<MeshRenderer>();
 	}
 
 	private void OnCollisionStay(Collision collision)

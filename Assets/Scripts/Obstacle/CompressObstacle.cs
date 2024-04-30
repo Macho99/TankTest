@@ -25,6 +25,11 @@ public class CompressObstacle : BreakableObstacle
 		float extentY = meshFilter.sharedMesh.bounds.extents.y;
 		scaleYValue = Mathf.Clamp(0.3f - (extentY - 0.8f), 0.2f, 0.3f);
 		transform.localScale = new Vector3(1f, scaleYValue, 1f);
+
+		if (meshFilter.sharedMesh.isReadable == false)
+		{
+			print($"{gameObject.name}狼 Read/Write 加己阑 难技夸");
+		}
 	}
 
 	protected override void Break(bool immediately = false)
