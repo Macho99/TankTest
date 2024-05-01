@@ -10,14 +10,12 @@ public class PlayerInteract : NetworkBehaviour
 {
     private float distance;
     [SerializeField] private Transform raycastTr;
-    public Action<InteractObject> action;
-    public Action<bool, InteractInfo> onDetect;
-    private InteractInfo interactInfo;
+    public Action<bool, InteractData> onDetect;
+    private InteractData interactData;
     [Networked] public NetworkBool IsDetect { get; set; }
 
     private InteractBehavior[] interactBehaviors;
     private InteractObject interactObject;
-    [SerializeField] private ToolItem[] toolItems;
     [SerializeField] private Transform leftHandPivot;
     [SerializeField] private Transform toolItemPivot;
     [SerializeField] private MultiParentConstraint leftParent;
@@ -25,15 +23,10 @@ public class PlayerInteract : NetworkBehaviour
     public float ObjectDistance { get; set; }
 
     private SimpleKCC kcc;
-    public void ActiveToolItem(InteractType interactType, bool isActive)
-    {
 
-        toolItems[(int)interactType-1].ActiveToolItem(isActive);
-
-    }
     public InteractObject InteractObject { get { return interactObject; } set { interactObject = value; } }
 
-    public InteractInfo InteractInfo { get { return interactInfo; } set => interactInfo = value; }
+    public InteractData InteractData { get { return interactData; } set => interactData = value; }
 
     private void Awake()
     {
@@ -42,9 +35,6 @@ public class PlayerInteract : NetworkBehaviour
         distance = 3f;
         interactBehaviors = new InteractBehavior[(int)InteractType.Size];
         PlayerController controller = GetComponent<PlayerController>();
-        interactBehaviors[(int)InteractType.TreeCut] = new FarmingInteraction(controller, InteractType.TreeCut);
-        interactBehaviors[(int)InteractType.RockBreak] = new FarmingInteraction(controller, InteractType.RockBreak);
-        //toolItems = new ToolItem[(int)ToolItemType.Size];
     }
     public override void Spawned()
     {
@@ -59,7 +49,7 @@ public class PlayerInteract : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
 
-        RaycastDetect();
+        // RaycastDetect();
 
     }
     public void RaycastDetect()
@@ -80,27 +70,26 @@ public class PlayerInteract : NetworkBehaviour
             if (hit.collider.TryGetComponent(out InteractObject detectObject))
             {
 
-                if (detectObject.Detect(out InteractInfo interactInfo))
+                if (detectObject.Detect(out InteractData interactData))
                 {
-                    if (!this.interactInfo.Equals(interactInfo))
-                    {
-                        this.interactInfo = interactInfo;
-                        IsDetect = true;
-                        onDetect?.Invoke(IsDetect, interactInfo);
-                    }
+
+                    this.interactData = interactData;
+                    IsDetect = true;
+                    onDetect?.Invoke(IsDetect, this.interactData);
+
                 }
             }
             else
             {
 
-                interactInfo = default;
+                interactData = default;
                 IsDetect = false;
                 onDetect?.Invoke(IsDetect, default);
             }
         }
         else
         {
-            interactInfo = default;
+            interactData = default;
             IsDetect = false;
             onDetect?.Invoke(IsDetect, default);
         }
@@ -110,7 +99,7 @@ public class PlayerInteract : NetworkBehaviour
 
     public bool TryInteract()
     {
-        if (interactInfo.Equals(default))
+        if (interactData.Equals(default))
             return false;
 
         if (!CanInteract())
@@ -140,17 +129,17 @@ public class PlayerInteract : NetworkBehaviour
     private void SetupLocalPlayerUI()
     {
         AimUI aimUI = GameManager.UI.ShowSceneUI<AimUI>("UI/PlayerUI/AimUI");
-        onDetect += aimUI.ReadInteractInfo;
+        //onDetect += aimUI.ReadInteractInfo;
 
     }
 
     public InteractBehavior GetInteractBehavior()
     {
-        if (interactInfo.interactType == InteractType.None)
+        if (interactData.interactType == InteractType.None)
             return null;
 
 
-        return interactBehaviors[(int)interactInfo.interactType];
+        return interactBehaviors[(int)interactData.interactType];
     }
     public bool CanInteract()
     {
@@ -162,7 +151,7 @@ public class PlayerInteract : NetworkBehaviour
     public void StopInteract()
     {
         interactObject = null;
-        interactInfo = default;
+        interactData = default;
     }
 
 

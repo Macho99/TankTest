@@ -89,6 +89,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Adherence"",
+                    ""type"": ""Button"",
+                    ""id"": ""0177cb81-6955-4a5e-bc2f-732e54d69672"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -212,6 +221,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""DebugText"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0ee89ffc-e442-4356-be5a-fe6539f14797"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": ""Hold"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Adherence"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -227,6 +247,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Player_TestMouseCursurLock = m_Player.FindAction("TestMouseCursurLock", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_DebugText = m_Player.FindAction("DebugText", throwIfNotFound: true);
+        m_Player_Adherence = m_Player.FindAction("Adherence", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -295,6 +316,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_TestMouseCursurLock;
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_DebugText;
+    private readonly InputAction m_Player_Adherence;
     public struct PlayerActions
     {
         private @PlayerControls m_Wrapper;
@@ -306,6 +328,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @TestMouseCursurLock => m_Wrapper.m_Player_TestMouseCursurLock;
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @DebugText => m_Wrapper.m_Player_DebugText;
+        public InputAction @Adherence => m_Wrapper.m_Player_Adherence;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -336,6 +359,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @DebugText.started += instance.OnDebugText;
             @DebugText.performed += instance.OnDebugText;
             @DebugText.canceled += instance.OnDebugText;
+            @Adherence.started += instance.OnAdherence;
+            @Adherence.performed += instance.OnAdherence;
+            @Adherence.canceled += instance.OnAdherence;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -361,6 +387,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @DebugText.started -= instance.OnDebugText;
             @DebugText.performed -= instance.OnDebugText;
             @DebugText.canceled -= instance.OnDebugText;
+            @Adherence.started -= instance.OnAdherence;
+            @Adherence.performed -= instance.OnAdherence;
+            @Adherence.canceled -= instance.OnAdherence;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -387,5 +416,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnTestMouseCursurLock(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
         void OnDebugText(InputAction.CallbackContext context);
+        void OnAdherence(InputAction.CallbackContext context);
     }
 }

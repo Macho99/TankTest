@@ -6,7 +6,7 @@ using UnityEngine.Animations.Rigging;
 
 public class ToolItem : NetworkBehaviour
 {
-    [SerializeField] private ToolItemData toolItemData;
+   // [SerializeField] private ToolItemData toolItemData;
     private MultiParentConstraint rig;
 
     [Networked, OnChangedRender(nameof(OnActiveToolItem))] private float weight { get; set; }

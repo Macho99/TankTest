@@ -5,7 +5,7 @@ using UnityEngine;
 public class ToolItemContainer : MonoBehaviour
 {
 
-    private ToolItem[] toolItems = new ToolItem[(int)ToolItemType.Size];
+    //private ToolItem[] toolItems = new ToolItem[(int)ToolItemType.Size];
   
 
 }

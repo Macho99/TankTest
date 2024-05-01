@@ -12,6 +12,8 @@ public class PlayerJumpState : PlayerState
 
     public override void Enter()
     {
+        owner.UpperLayerWeight = 0f;
+        owner.rigManager.LeftHandweight = 0f;
         owner.animator.SetBool("IsJump", true);
         owner.movement.TriggerJump();
     }
@@ -19,15 +21,19 @@ public class PlayerJumpState : PlayerState
     public override void Exit()
     {
         owner.animator.SetBool("IsJump", false);
+        owner.UpperLayerWeight = 1f;
+        owner.rigManager.LeftHandweight = 1f;
         isJumpingStart = false;
     }
 
     public override void FixedUpdateNetwork()
     {
 
-        
+
         if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("Jump"))
         {
+            Debug.Log(owner.VelocityY.ToString("F0"));
+
             if (!isJumpingStart)
             {
                 if (!owner.RaycastGroundCheck())
@@ -44,21 +50,21 @@ public class PlayerJumpState : PlayerState
     {
         if (isJumpingStart)
         {
-            if (owner.FallingTime <= 3f)
+            if (owner.VelocityY <= 3f)
             {
-
-
                 if (owner.movement.IsGround())
                 {
-
-                    owner.FallingTime = 0f;
-                    ChangeState(PlayerController.PlayerState.StandLocomotion);
-                    Debug.Log("exit");
+                    ChangeState(PlayerController.PlayerState.Land);
+                    Debug.Log(owner.VelocityY);
                     return;
                 }
 
             }
-
+            else if (owner.VelocityY > 3f)
+            {
+                ChangeState(PlayerController.PlayerState.Falling);
+                return;
+            }
 
 
 

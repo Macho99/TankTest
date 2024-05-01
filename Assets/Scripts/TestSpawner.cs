@@ -85,6 +85,7 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         data.buttons.Set(NetworkInputData.ButtonType.Interact, playerControls.Player.Interact.IsPressed());
         data.buttons.Set(NetworkInputData.ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
         data.buttons.Set(NetworkInputData.ButtonType.DebugText, playerControls.Player.DebugText.IsPressed());
+        data.buttons.Set(NetworkInputData.ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
 
         input.Set(data);
     }

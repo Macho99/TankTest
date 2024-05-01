@@ -10,11 +10,15 @@ public class PlayerRigManager : NetworkBehaviour
 
     public enum RigType { MultiAim }
 
-    [SerializeField] private MultiRotationConstraint aimConstraint;
+    [SerializeField] private MultiRotationConstraint bodyConstraint;
+    [SerializeField] private MultiAimConstraint aimConstraint;
     [SerializeField] private TwoBoneIKConstraint leftHandRig;
     [SerializeField] private TwoBoneIKConstraint rightHandRig;
     [SerializeField] private Transform leftHandPivot;
-    [Networked,OnChangedRender(nameof(OnChangeRigWeight))] private float multiAimweight { get; set; }
+    [Networked, OnChangedRender(nameof(OnChangeBodyWeight))] public float Bodyweight { get; set; }
+    [Networked, OnChangedRender(nameof(OnChangeLeftHandWeight))] public float LeftHandweight { get; set; }
+    [Networked, OnChangedRender(nameof(OnAimWeight))] public float Aimweight { get; set; }
+
 
     private void Awake()
     {
@@ -22,30 +26,20 @@ public class PlayerRigManager : NetworkBehaviour
     }
     public override void Spawned()
     {
-
-        ChangeRightHandWegiht(0f);
-        ChangeLeftHandWegiht(0f);
-        ChangeRigWeight(1f);
-    }
-    public void ChangeLeftHandWegiht(float newWeight)
-    {
-        this.multiAimweight = newWeight;
-        leftHandRig.weight = multiAimweight;
-    }
-    public void ChangeRightHandWegiht(float newWeight)
-    {
-        this.multiAimweight = newWeight;
-        rightHandRig.weight = multiAimweight;
-    }
-  
-    public void ChangeRigWeight(float newWeight)
-    {
-        this.multiAimweight = newWeight;
+        aimConstraint.weight = 1f;       
+        Bodyweight = 0f;
     }
 
-    private void OnChangeRigWeight()
+    private void OnChangeBodyWeight()
     {
-        aimConstraint.weight = multiAimweight;
+        bodyConstraint.weight = Bodyweight;
     }
-
+    private void OnChangeLeftHandWeight()
+    {
+        leftHandRig.weight = LeftHandweight;
+    }
+    private void OnAimWeight()
+    {
+        aimConstraint.weight = Aimweight;
+    }
 }

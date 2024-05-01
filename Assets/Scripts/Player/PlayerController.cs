@@ -19,8 +19,8 @@ public class PlayerController : NetworkBehaviour
     private LocalPlayerDebugUI LocaldebugUI;
 
     [SerializeField] private PlayerIngameDebugUI IngamedebugUI;
-    [Networked] public float FallingTime { get; set; }
-
+    [Networked] public float VelocityY { get; set; }
+    [Networked, OnChangedRender(nameof(OnChangeUpperLayerWeight))] public float UpperLayerWeight { get; set; }
     private void Awake()
     {
         myCollider = GetComponentInChildren<CapsuleCollider>();
@@ -43,17 +43,12 @@ public class PlayerController : NetworkBehaviour
     }
     public override void Spawned()
     {
-        FallingTime = 0f;
+        VelocityY = 0f;
         name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
 
 
         IngamedebugUI.SetPlayerType($"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})");
 
-
-        //debugUI = GameManager.UI.ShowInGameUI<LocalPlayerDebugUI>("UI/PlayerUI/DebugUI");
-        //debugUI.SetPlayerInfo(HasStateAuthority == true ? "Host" : "Client");
-        //debugUI.SetTarget(this.transform);
-        //debugUI.SetOffset(new Vector3(0f, 800f, 0f));
 
 
     }
@@ -76,6 +71,8 @@ public class PlayerController : NetworkBehaviour
         }
 
 
+      
+
 
         Falling();
         movement.Move();
@@ -93,23 +90,20 @@ public class PlayerController : NetworkBehaviour
     }
     public void Falling()
     {
-
-
-        if (!movement.IsGround() && movement.Kcc.RealVelocity.y < 0f)
+        if (movement.Kcc.RealVelocity.y <= -1F)
         {
-            FallingTime += Runner.DeltaTime;
+            VelocityY += Mathf.Abs(movement.Kcc.RealVelocity.y) * Runner.DeltaTime;
 
-            if (FallingTime >= 0.8f)
-            {
+            animator.SetFloat("VelocityY", VelocityY);
 
-                if (stateMachine.curStateStr != "Falling")
-                {
-                    stateMachine.ChangeState(PlayerState.Falling);
-                    return;
-                }
-            }
+            if (stateMachine.curStateStr != "Falling" && stateMachine.curStateStr != "Land" && movement.Kcc.RealVelocity.y <= -movement.JumpForce)
+                stateMachine.ChangeState(PlayerState.Falling);
 
+
+            
         }
+
+       
     }
 
     public bool RaycastGroundCheck()
@@ -138,5 +132,23 @@ public class PlayerController : NetworkBehaviour
         IngamedebugUI.AllClearDubugText();
 
     }
-
+    public void OnChangeUpperLayerWeight()
+    {
+        animator.SetLayerWeight(1, UpperLayerWeight);
+    }
+    public void Aiming()
+    {
+        if (InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Adherence))
+        {
+            animator.SetBool("Aim", true);
+            rigManager.LeftHandweight = 1f;
+            movement.CamController.ChangeCamera(BasicCamController.CameraType.Aim);
+        }
+        else if (InputListner.releaseButton.IsSet(NetworkInputData.ButtonType.Adherence))
+        {
+            animator.SetBool("Aim", false);
+            rigManager.LeftHandweight = 0f;
+            movement.CamController.ChangeCamera(BasicCamController.CameraType.None);
+        }
+    }
 }

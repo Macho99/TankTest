@@ -12,24 +12,26 @@ public class PlayerCrouchLocomotionState : PlayerState
 
     public override void Enter()
     {
-    
+
     }
 
     public override void Exit()
     {
+        owner.movement.ChangeMoveType(PlayerLocomotion.MovementType.Stand);
         isCrouchToIdleStart = false;
         isCrouchToIdleEnd = false;
+
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("CrouchIdle") || owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("CrouchMove") && isCrouchToIdleStart == false)
+        if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("CrouchIdle") || owner.animator.GetCurrentAnimatorStateInfo(0).IsName("CrouchMove") && isCrouchToIdleStart == false)
         {
             if (owner.GetInput(out NetworkInputData input))
             {
                 owner.movement.Rotate(input);
                 owner.movement.SetMove(input);
-
+                owner.Aiming();
                 if (input.buttons.IsSet(NetworkInputData.ButtonType.Crouch) && owner.movement.IsGround())
                 {
                     if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Stand))
@@ -59,7 +61,8 @@ public class PlayerCrouchLocomotionState : PlayerState
             ChangeState(PlayerController.PlayerState.StandLocomotion);
             return;
         }
-
     }
+
+
 
 }

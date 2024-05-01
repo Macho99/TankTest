@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public enum EquipWeaponSpace { LeftHand, RightHand, All, Size };
+public enum EquipWeaponSpace { OneHand,TwoHands, Size };
 
 public class WeaponItemSO : EquipmentItemSO
 {

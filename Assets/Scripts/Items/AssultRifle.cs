@@ -7,18 +7,26 @@ public class AssultRifle : Gun
 
 
 
+    public override bool CanAttack()
+    {
+        if (!base.CanAttack())
+            return false;
+
+        
+        
+        return true;
+    }
     public override void Attack()
     {
         Ray ray = new Ray();
         ray.origin = muzzlePoint.transform.position;
-        ray.direction = muzzlePoint.transform.forward;
+        ray.direction = (targetPoint.position - muzzlePoint.transform.position).normalized;
 
         if (Physics.Raycast(ray, out RaycastHit hit, ((GunItemSO)itemData).Distance))
         {
-            //µ¥¹ÌÁö
-
-
+            Debug.Log("HIT");
         }
+
 
     }
 

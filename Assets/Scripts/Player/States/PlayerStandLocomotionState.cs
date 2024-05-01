@@ -25,7 +25,7 @@ public class PlayerStandLocomotionState : PlayerState
 
         owner.movement.Rotate(owner.InputListner.currentInput);
         owner.movement.SetMove(owner.InputListner.currentInput);
-
+        owner.Aiming();
 
     }
 
@@ -55,23 +55,23 @@ public class PlayerStandLocomotionState : PlayerState
             }
         }
 
-        if (owner.GetInput(out NetworkInputData input))
-        {
-            if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Interact))
-            {
-                if (owner.interact.IsDetect)
-                {
+        //if (owner.GetInput(out NetworkInputData input))
+        //{
+        //    if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Interact))
+        //    {
+        //        if (owner.interact.IsDetect)
+        //        {
 
-                    if (owner.interact.TryInteract())
-                    {
-                        ChangeState(PlayerController.PlayerState.Interact);
-                        return;
+        //            if (owner.interact.TryInteract())
+        //            {
+        //                ChangeState(PlayerController.PlayerState.Interact);
+        //                return;
 
-                    }
-                }
+        //            }
+        //        }
 
-            }
-        }
+        //    }
+        //}
 
 
 

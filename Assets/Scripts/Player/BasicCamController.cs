@@ -2,15 +2,19 @@ using Cinemachine;
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class BasicCamController : NetworkBehaviour
 {
+    public enum CameraType { None, Aim, Zoom, Size }
     private Transform followTarget;
 
     private float rotateYSpeed;
 
+    [SerializeField] private CinemachineVirtualCamera mainCam;
+    [SerializeField] private CinemachineVirtualCamera aimCam;
 
     public Transform FollowTarget { get => followTarget; }
     private void Awake()
@@ -23,6 +27,7 @@ public class BasicCamController : NetworkBehaviour
         if (Object.InputAuthority != Runner.LocalPlayer)
         {
             transform.GetComponentInChildren<CinemachineVirtualCamera>().enabled = false;
+            ChangeCamera(CameraType.None);
         }
     }
     public float RotateX(NetworkInputData input)
@@ -44,6 +49,11 @@ public class BasicCamController : NetworkBehaviour
 
 
         return rotX;
+    }
+    public void ChangeCamera(CameraType cameraType)
+    {
+        mainCam.Priority = cameraType == CameraType.None ? (int)CameraType.Size : 0;
+        aimCam.Priority = cameraType == CameraType.Aim ? (int)CameraType.Size : 0;
     }
 
 }

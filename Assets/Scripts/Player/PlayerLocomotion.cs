@@ -2,6 +2,7 @@ using Fusion;
 using Fusion.Addons.SimpleKCC;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Windows;
 
@@ -11,10 +12,11 @@ public class PlayerLocomotion : NetworkBehaviour
 
 
     private SimpleKCC simpleKCC;
-    private BasicCamController camController;
+    public BasicCamController CamController { get; private set; }
     private float jumpForce;
     private float rotateXSpeed;
     private bool isJump;
+    private bool isLand;
     Animator animator;
     private CapsuleCollider myCollider;
     private MovementType movementType;
@@ -25,6 +27,7 @@ public class PlayerLocomotion : NetworkBehaviour
     [Networked] public float jumpVelocity { get; private set; }
     [Networked] public Vector3 moveDirection { get; private set; }
     [Networked] public float CamerRotX { get; set; }
+    public float JumpForce { get => jumpForce; }
 
     private PlayerMove[] moves;
     public bool IsGround()
@@ -42,7 +45,7 @@ public class PlayerLocomotion : NetworkBehaviour
         myCollider = GetComponentInChildren<CapsuleCollider>();
         animator = GetComponent<Animator>();
         simpleKCC = GetComponent<SimpleKCC>();
-        camController = GetComponentInChildren<BasicCamController>();
+        CamController = GetComponentInChildren<BasicCamController>();
         jumpForce = 15f;
         rotateXSpeed = 30f;
         moves = new PlayerMove[(int)MovementType.Size];
@@ -53,7 +56,7 @@ public class PlayerLocomotion : NetworkBehaviour
     public override void Spawned()
     {
 
-        CamerRotX = camController.FollowTarget.eulerAngles.x;
+        CamerRotX = CamController.FollowTarget.eulerAngles.x;
 
         moveSpeed = 0f;
         simpleKCC.SetGravity(Physics.gravity.y * 2f);
@@ -61,19 +64,20 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public override void FixedUpdateNetwork()
     {
-        if (IsGround())
-            fallingTime = 0f;
 
-        if (!IsGround())
-            Debug.Log(Kcc.RealVelocity.y.ToString("F1"));
+
+
     }
     public override void Render()
     {
-        camController.FollowTarget.localRotation = Quaternion.Euler(CamerRotX, 0f, 0f);
+        CamController.FollowTarget.localRotation = Quaternion.Euler(CamerRotX, 0f, 0f);
         animator.SetFloat("InputDirX", inputDirection.x, 0.05f, Time.deltaTime);
         animator.SetFloat("InputDirZ", inputDirection.y, 0.05f, Time.deltaTime);
         animator.SetFloat("MoveSpeed", moves[(int)movementType].MoveSpeed);
         animator.SetBool("IsGround", simpleKCC.IsGrounded);
+
+
+
 
     }
     public void Move()
@@ -108,7 +112,7 @@ public class PlayerLocomotion : NetworkBehaviour
     {
         float rotY = input.mouseDelta.x * rotateXSpeed * Runner.DeltaTime;
         simpleKCC.AddLookRotation(new Vector2(0f, rotY));
-        CamerRotX = camController.RotateX(input);
+        CamerRotX = CamController.RotateX(input);
     }
     public void Rotate(Vector3 direction)
     {
