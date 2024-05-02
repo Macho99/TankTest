@@ -14,14 +14,14 @@ public class ShatterObstacle : BreakableObstacle
 	[SerializeField] public int fragmentCnt = 5;
 	[SerializeField] public ColliderType colType = ColliderType.Mesh;
 	[SerializeField] public string cacheName;
-	[SerializeField] public GameObject debrisPrefab;
+	[SerializeField] public DebrisRoot debrisRootPrefab;
 	public const string cachePath = "Assets/Resources/RayfireCache";
 	public const string resourcePath = "RayfireCache";
 
 	public MeshFilter MeshFilter { get { return meshFilter; } }
 
-	List<Transform> debrisTransList = new();
-
+	DebrisRoot debrisRoot;
+	float curScale;
 
 	protected override void OnValidate()
 	{
@@ -30,10 +30,10 @@ public class ShatterObstacle : BreakableObstacle
 		{
 			cacheName = $"{meshFilter.sharedMesh.name}";
 		}
-		if (debrisPrefab == null)
+		if (debrisRootPrefab == null)
 		{
-			debrisPrefab = Resources.Load<GameObject>($"{resourcePath}/{cacheName}");
-			if(debrisPrefab == null)
+			debrisRootPrefab = Resources.Load<DebrisRoot>($"{resourcePath}/{cacheName}");
+			if(debrisRootPrefab == null)
 			{
 				print($"{cacheName} 프리팹을 캐시해주세요");
 			}
@@ -43,25 +43,23 @@ public class ShatterObstacle : BreakableObstacle
 	private IEnumerator CoFade()
 	{
 		yield return new WaitForSeconds(fadeWaitDuration);
+		curScale = 0.9f;
 
 		while (true)
 		{
-			float curScale = debrisTransList[1].localScale.x;
 			float nextScale = curScale - Time.deltaTime / fadeDuration;
 			if(nextScale < 0)
 			{
 				break;
 			}
 
-			for (int i = 1; i < debrisTransList.Count; i++)
-			{
-				debrisTransList[i].localScale = Vector3.one * nextScale;
-			}
+			debrisRoot.SetChildrenScale(nextScale);
+			curScale = nextScale;
 			yield return null;
 		}
 
-		Destroy(debrisTransList[0].gameObject);
-		debrisTransList.Clear();
+		Destroy(debrisRoot);
+		debrisRoot = null;
 	}
 
 	protected override void Break(bool immediately = false)
@@ -78,13 +76,27 @@ public class ShatterObstacle : BreakableObstacle
 
 		if(immediately == false)
 		{
-			GameObject debris = Instantiate(debrisPrefab, transform.position, transform.rotation, transform);
-			debrisTransList.Add(debris.transform);
-			foreach (Transform child in debris.transform)
-			{
-				debrisTransList.Add(child);
-			}
+			debrisRoot = Instantiate(debrisRootPrefab, transform.position, transform.rotation, transform);
 			StartCoroutine(CoFade());
+		}
+	}
+
+	public override void BreakEffect(BreakableObjBehaviour.BreakData breakData)
+	{
+		if(debrisRoot == null)
+		{
+			Debug.LogError("debrisRoot가 만들어지기 전에 BreakEffect가 호출됨");
+			return;
+		}
+
+		if(breakData.type == BreakableObjBehaviour.BreakType.AddForce)
+		{
+			debrisRoot.AddForceAtPosition(breakData.velocityOrForceAndRadius, breakData.position);
+		}
+		else if(breakData.type == BreakableObjBehaviour.BreakType.Explosion)
+		{
+			debrisRoot.AddExplosionForce(breakData.velocityOrForceAndRadius.x, 
+				breakData.position, breakData.velocityOrForceAndRadius.y);
 		}
 	}
 }

@@ -49,4 +49,6 @@ public class CompressObstacle : BreakableObstacle
 
 		}
 	}
+
+	public override void BreakEffect(BreakableObjBehaviour.BreakData breakData) { }
 }

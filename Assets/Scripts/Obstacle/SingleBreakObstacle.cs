@@ -11,7 +11,7 @@ public class SingleBreakObstacle : BreakableObstacle
 {
 	const float fadeWaitDuration = 10f;
 	const float fadeDuration = 5f;
-	GameObject child;
+	Rigidbody childRb;
 
 	private IEnumerator CoFade()
 	{
@@ -19,7 +19,7 @@ public class SingleBreakObstacle : BreakableObstacle
 
 		while (true)
 		{
-			float curScale = child.transform.localScale.x;
+			float curScale = childRb.transform.localScale.x;
 			float nextScale = curScale - Time.deltaTime / fadeDuration;
 			if (nextScale < 0)
 			{
@@ -27,12 +27,12 @@ public class SingleBreakObstacle : BreakableObstacle
 			}
 
 
-			child.transform.localScale = Vector3.one * nextScale;
+			childRb.transform.localScale = Vector3.one * nextScale;
 			yield return null;
 		}
 
-		Destroy(child);
-		child = null;
+		Destroy(childRb);
+		childRb = null;
 	}
 
 	protected override void Break(bool immediately = false)
@@ -49,16 +49,36 @@ public class SingleBreakObstacle : BreakableObstacle
 
 		if (immediately == false)
 		{
-			child = new GameObject("BreakVisual");
-			child.transform.SetParent(transform, false);
-			child.AddComponent<MeshFilter>().sharedMesh = meshFilter.sharedMesh;
-			child.AddComponent<MeshRenderer>().material = meshRenderer.material;
-			MeshCollider meshCol = child.AddComponent<MeshCollider>();
+			GameObject childObj = new GameObject("BreakVisual");
+			childObj.transform.SetParent(transform, false);
+			childObj.AddComponent<MeshFilter>().sharedMesh = meshFilter.sharedMesh;
+			childObj.AddComponent<MeshRenderer>().material = meshRenderer.material;
+			MeshCollider meshCol = childObj.AddComponent<MeshCollider>();
 			meshCol.sharedMesh = meshFilter.sharedMesh;
 			meshCol.convex = true;
-			child.AddComponent<Rigidbody>().mass = 20f;
+			childRb = childObj.AddComponent<Rigidbody>();
+			childRb.mass = 20f;
 
 			StartCoroutine(CoFade());
+		}
+	}
+
+	public override void BreakEffect(BreakableObjBehaviour.BreakData breakData)
+	{
+		if (childRb == null)
+		{
+			Debug.LogError("child가 만들어지기 전에 BreakEffect가 호출됨");
+			return;
+		}
+
+		if (breakData.type == BreakableObjBehaviour.BreakType.AddForce)
+		{
+			childRb.AddForceAtPosition(breakData.velocityOrForceAndRadius, breakData.position);
+		}
+		else if (breakData.type == BreakableObjBehaviour.BreakType.Explosion)
+		{
+			childRb.AddExplosionForce(breakData.velocityOrForceAndRadius.x,
+				breakData.position, breakData.velocityOrForceAndRadius.y);
 		}
 	}
 }

@@ -17,6 +17,8 @@ public abstract class BreakableObstacle : MonoBehaviour
 	[SerializeField] protected NavMeshObstacle navObstacle;
 	[SerializeField] protected BreakableObjBehaviour owner;
 
+	protected LayerMask breakMask;
+
 	public int idx = -1;
 	public bool IsBreaked { get; protected set; }
 
@@ -27,6 +29,7 @@ public abstract class BreakableObstacle : MonoBehaviour
 
 	protected virtual void Awake()
 	{
+		breakMask = LayerMask.GetMask("Default", "Vehicle");
 	}
 
 	protected virtual void OnValidate()
@@ -54,17 +57,47 @@ public abstract class BreakableObstacle : MonoBehaviour
 
 	private void OnCollisionStay(Collision collision)
 	{
-		BreakRequest();
+		if(breakMask.IsLayerInMask(collision.collider.gameObject.layer) == true)
+		{
+			BreakRequest();
+		}
 	}
 
 	private void OnTriggerStay(Collider other)
 	{
-		BreakRequest();
+		if (breakMask.IsLayerInMask(other.gameObject.layer) == true)
+		{
+			BreakRequest();
+		}
 	}
 
 	public void BreakRequest()
 	{
 		owner.BreakRequest(idx);
+	}
+
+	public void ExplosionBreakRequest(float force, Vector3 position)
+	{
+		BreakableObjBehaviour.BreakData breakData = new BreakableObjBehaviour.BreakData()
+		{
+			idx = this.idx,
+			position = position,
+			type = BreakableObjBehaviour.BreakType.Explosion,
+			velocityOrForceAndRadius = new Vector3(force, 0f, 0f)
+		};
+		owner.BreakRequest(breakData);
+	}
+
+	public void AddForceBreakRequest(Vector3 force, Vector3 position)
+	{
+		BreakableObjBehaviour.BreakData breakData = new BreakableObjBehaviour.BreakData()
+		{
+			idx = this.idx,
+			position = position,
+			type = BreakableObjBehaviour.BreakType.AddForce,
+			velocityOrForceAndRadius = force
+		};
+		owner.BreakRequest(breakData);
 	}
 
 	public void TryBreak(bool Immediatly = false)
@@ -75,4 +108,6 @@ public abstract class BreakableObstacle : MonoBehaviour
 			Break(Immediatly);
 		}
 	}
+
+	public abstract void BreakEffect(BreakableObjBehaviour.BreakData breakData);
 }

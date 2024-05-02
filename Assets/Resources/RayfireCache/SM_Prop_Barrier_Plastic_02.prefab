@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7687683107637765853}
+  - component: {fileID: 5519484489676745409}
   m_Layer: 12
   m_Name: SM_Prop_Barrier_Plastic_02
   m_TagString: Untagged
@@ -36,6 +37,24 @@ Transform:
   - {fileID: 5840495920868428109}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5519484489676745409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3420019963534496090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8881a77a2e8e9f349865b695795dc101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  childrenRb:
+  - {fileID: 5563783217166656228}
+  - {fileID: 8203703317123268643}
+  - {fileID: 4841761103407507786}
+  - {fileID: 4417295919418852175}
+  - {fileID: 6676008254617345428}
 --- !u!1 &3804492006319931318
 GameObject:
   m_ObjectHideFlags: 0

@@ -279,6 +279,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9055228454368345127}
+  - component: {fileID: -9174560925744172398}
   m_Layer: 12
   m_Name: SM_Prop_SpikeWall_04
   m_TagString: Untagged
@@ -304,6 +305,22 @@ Transform:
   - {fileID: 4719444399850757534}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-9174560925744172398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5563794702222772661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8881a77a2e8e9f349865b695795dc101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  childrenRb:
+  - {fileID: 2116399496550137355}
+  - {fileID: 6707740417058242290}
+  - {fileID: 1438470992147930031}
 --- !u!1 &6526464273838963331
 GameObject:
   m_ObjectHideFlags: 0

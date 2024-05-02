@@ -13,7 +13,7 @@ public class ShatterObstacleEditor : Editor
 		ShatterObstacle obstacle = target as ShatterObstacle;
 		if (obstacle == null)
 			return;
-			
+
 		if (GUILayout.Button("Cache Prefab"))
 		{
 			CachePrefab(obstacle);
@@ -34,20 +34,22 @@ public class ShatterObstacleEditor : Editor
 
 		obstacle.transform.rotation = prevRot;
 
+		GameObject debrisRootObj = shatter.fragmentsLast[0].transform.parent.gameObject; 
 		List<GameObject> frags = shatter.fragmentsLast;
-		frags.Add(frags[0].transform.parent.gameObject);
+		frags.Add(debrisRootObj);
 		int layer = LayerMask.NameToLayer("Debris");
 		foreach(var frag in frags)
 		{
 			frag.layer = layer;
 		}
+		debrisRootObj.AddComponent<DebrisRoot>().InitChildren();
 
-		GameObject savedPrefab = PrefabUtility.SaveAsPrefabAsset(shatter.fragmentsLast[0].transform.parent.gameObject,
+		GameObject savedPrefab = PrefabUtility.SaveAsPrefabAsset(debrisRootObj,
 			$"{ShatterObstacle.cachePath}/{obstacle.cacheName}.prefab");
 		if (savedPrefab != null)
 		{
 			Debug.Log("Prefab created successfully.");
-			obstacle.debrisPrefab = savedPrefab;
+			obstacle.debrisRootPrefab = savedPrefab.GetComponent<DebrisRoot>();
 		}
 		else
 		{

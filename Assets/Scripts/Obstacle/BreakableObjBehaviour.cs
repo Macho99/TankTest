@@ -1,24 +1,40 @@
 using Fusion;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BreakableObjBehaviour : NetworkBehaviour
 {
+	public enum BreakType { None, Explosion, AddForce }
+
+	public struct BreakData : INetworkStruct
+	{
+		public int idx;
+		public BreakType type;
+		public Vector3 position;
+		public Vector3 velocityOrForceAndRadius;
+	}
+
 	const int NETWORK_ARR_LENGTH = 100;
 
 	bool isFirstRender = true;
 
 	[SerializeField] List<BreakableObstacle> objList;
 
-	private int[] visualArr = new int[NETWORK_ARR_LENGTH];
+	int[] visualArr = new int[NETWORK_ARR_LENGTH];
+	int visualBreakCnt;
 
 	[Networked, Capacity(NETWORK_ARR_LENGTH), OnChangedRender(nameof(ChangeRender))]
-	public NetworkArray<int> networkArr => default;
+	public NetworkArray<int> NetworkArr => default;
+	[Networked, Capacity(10)]
+	public NetworkArray<BreakData> BreakNetworkArr => default;
+	[Networked] public int BreakCnt { get; private set; }
 
 	public override void Spawned()
 	{
 		base.Spawned();
+		visualBreakCnt = BreakCnt;
 		ChangeRender();
 	}
 
@@ -26,13 +42,24 @@ public class BreakableObjBehaviour : NetworkBehaviour
 	{
 		for (int i = 0; i < NETWORK_ARR_LENGTH; i++)
 		{
-			if (visualArr[i] != networkArr[i])
+			if (visualArr[i] != NetworkArr[i])
 			{
-				ChangeApply(i, visualArr[i], networkArr[i], isFirstRender);
-				visualArr[i] = networkArr[i];
+				ChangeApply(i, visualArr[i], NetworkArr[i], isFirstRender);
+				visualArr[i] = NetworkArr[i];
 			}
 		}
+		CheckBreakArr();
 		isFirstRender = false;
+	}
+
+	private void CheckBreakArr()
+	{
+		for (; visualBreakCnt < BreakCnt; visualBreakCnt++)
+		{
+			BreakData breakData = BreakNetworkArr[visualBreakCnt % BreakNetworkArr.Length];
+			print(objList[breakData.idx].gameObject.name);
+			objList[breakData.idx].BreakEffect(breakData);
+		}
 	}
 
 	private void ChangeApply(int j, int visual, int network, bool isFirstRender)
@@ -58,13 +85,19 @@ public class BreakableObjBehaviour : NetworkBehaviour
 		}
 	}
 
+	public void BreakRequest(BreakData breakData)
+	{
+		BreakNetworkArr.Set(BreakCnt++ % BreakNetworkArr.Length, breakData);
+		BreakRequest(breakData.idx);
+	}
+
 	public void BreakRequest(int objIdx)
 	{
 		int arrIdx = objIdx / 32;
 		int arrDigit = objIdx % 32;
-		int prevValue = networkArr[arrIdx];
+		int prevValue = NetworkArr[arrIdx];
 		int newValue = prevValue | (1 << arrDigit);
-		networkArr.Set(arrIdx, newValue);
+		NetworkArr.Set(arrIdx, newValue);
 	}
 
 	public int RegisterObj(BreakableObstacle obj)

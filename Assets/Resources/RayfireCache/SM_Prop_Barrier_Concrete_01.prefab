@@ -144,6 +144,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8523316682269268030}
+  - component: {fileID: 2025707474292216500}
   m_Layer: 12
   m_Name: SM_Prop_Barrier_Concrete_01
   m_TagString: Untagged
@@ -171,6 +172,24 @@ Transform:
   - {fileID: 8952628830722100104}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2025707474292216500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377382044610898433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8881a77a2e8e9f349865b695795dc101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  childrenRb:
+  - {fileID: 9178472359316175872}
+  - {fileID: 486659448734155141}
+  - {fileID: 4294966724969908451}
+  - {fileID: 1196750409175129989}
+  - {fileID: 8290108675887892807}
 --- !u!1 &5468056797703243579
 GameObject:
   m_ObjectHideFlags: 0

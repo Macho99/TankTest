@@ -1119,6 +1119,83 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
+--- !u!1 &1738675878494557588
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4474934826518545165}
+  - component: {fileID: 7474677389309318125}
+  m_Layer: 7
+  m_Name: TankFollower
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4474934826518545165
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1738675878494557588}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1780435454114578607}
+  m_Father: {fileID: 3912409241756073668}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7474677389309318125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1738675878494557588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd8ab284de1a65c49870e4b81e46134a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FollowPosition: 1
+  FollowPositionX: 1
+  FollowPositionY: 1
+  FollowPositionZ: 1
+  PositionSpace: 0
+  FollowRotation: 0
+  FollowScale: 0
+  FollowScaleFactor: 1
+  Target: {fileID: 3695659942753710040}
+  Offset: {x: 0, y: 2, z: 0}
+  AddInitialDistanceXToXOffset: 0
+  AddInitialDistanceYToYOffset: 0
+  AddInitialDistanceZToZOffset: 0
+  InterpolatePosition: 1
+  FollowPositionMode: 0
+  FollowPositionSpeed: 10
+  PositionSpringDamping: 0.3
+  PositionSpringFrequency: 3
+  InterpolateRotation: 1
+  FollowRotationMode: 1
+  FollowRotationSpeed: 10
+  InterpolateScale: 1
+  FollowScaleMode: 1
+  FollowScaleSpeed: 10
+  UpdateMode: 0
+  DisableSelfOnSetActiveFalse: 0
+  UseMinimumDistanceBeforeFollow: 0
+  MinimumDistanceBeforeFollow: 1
+  UseMaximumDistance: 0
+  MaximumDistance: 1
+  AnchorToInitialPosition: 0
+  MaxDistanceToAnchor: 1
 --- !u!1 &1834602632518691549
 GameObject:
   m_ObjectHideFlags: 0
@@ -4929,7 +5006,7 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3695659942753710040}
-  - {fileID: 1780435454114578607}
+  - {fileID: 4474934826518545165}
   - {fileID: 59557337839832745}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5510,7 +5587,7 @@ MonoBehaviour:
   turretTrans: {fileID: 7057164864533397634}
   barrelTrans: {fileID: 8101321226629483408}
   firePoint: {fileID: 7201701986394561743}
-  turrentRotSpeed: 40
+  turretRotSpeed: 40
   barrelRotSpeed: 40
   depressionCurve:
     serializedVersion: 2
@@ -5577,6 +5654,18 @@ MonoBehaviour:
   hitVFX: {fileID: 5957145100804776440, guid: beff618826e09ff4c97f585a2b5ebaca, type: 3}
   fireCooltime: 8
   fireRebound: 300000
+  attackUIPrefab: {fileID: 91368930306778078, guid: 7054302a4bd834a45a369c71b2cc11b7, type: 3}
+  finalAcc: 1
+  minBodyAcc: 0.5
+  maxBodyAcc: 3
+  minTurretAcc: 0.5
+  maxTurretAcc: 1
+  aimingSpeed: 1
+  velocityAccMul: 1
+  turretRotAccMul: 0.05
+  realAccMul: 0.05
+  _BodyAcc: 0
+  _TurretAcc: 0
   _TurretAngle: 0
   _BarrelAngle: 0
   _FireCnt: 0
@@ -6035,7 +6124,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1780435454114578607}
-  - component: {fileID: 1588940626067281957}
   m_Layer: 7
   m_Name: CamPivot
   m_TagString: Untagged
@@ -6051,58 +6139,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9194385255670278787}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4196314898003804307}
-  m_Father: {fileID: 3912409241756073668}
+  m_Father: {fileID: 4474934826518545165}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1588940626067281957
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9194385255670278787}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd8ab284de1a65c49870e4b81e46134a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  FollowPosition: 1
-  FollowPositionX: 1
-  FollowPositionY: 1
-  FollowPositionZ: 1
-  PositionSpace: 0
-  FollowRotation: 0
-  FollowScale: 0
-  FollowScaleFactor: 1
-  Target: {fileID: 3695659942753710040}
-  Offset: {x: 0, y: 2, z: 0}
-  AddInitialDistanceXToXOffset: 0
-  AddInitialDistanceYToYOffset: 0
-  AddInitialDistanceZToZOffset: 0
-  InterpolatePosition: 1
-  FollowPositionMode: 0
-  FollowPositionSpeed: 10
-  PositionSpringDamping: 0.3
-  PositionSpringFrequency: 3
-  InterpolateRotation: 1
-  FollowRotationMode: 1
-  FollowRotationSpeed: 10
-  InterpolateScale: 1
-  FollowScaleMode: 1
-  FollowScaleSpeed: 10
-  UpdateMode: 0
-  DisableSelfOnSetActiveFalse: 0
-  UseMinimumDistanceBeforeFollow: 0
-  MinimumDistanceBeforeFollow: 1
-  UseMaximumDistance: 0
-  MaximumDistance: 1
-  AnchorToInitialPosition: 0
-  MaxDistanceToAnchor: 1
 --- !u!1 &9197333862420222731
 GameObject:
   m_ObjectHideFlags: 0
