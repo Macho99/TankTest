@@ -16,9 +16,6 @@ public class PlayerInteract : NetworkBehaviour
 
     private InteractBehavior[] interactBehaviors;
     private InteractObject interactObject;
-    [SerializeField] private Transform leftHandPivot;
-    [SerializeField] private Transform toolItemPivot;
-    [SerializeField] private MultiParentConstraint leftParent;
     [Networked] public Vector3 targetPoint { get; set; }
     public float ObjectDistance { get; set; }
 
@@ -49,7 +46,7 @@ public class PlayerInteract : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
 
-        // RaycastDetect();
+         RaycastDetect();
 
     }
     public void RaycastDetect()
@@ -72,6 +69,10 @@ public class PlayerInteract : NetworkBehaviour
 
                 if (detectObject.Detect(out InteractData interactData))
                 {
+                    if(interactData == this.interactData)
+                    {
+
+                    }
 
                     this.interactData = interactData;
                     IsDetect = true;
@@ -129,7 +130,7 @@ public class PlayerInteract : NetworkBehaviour
     private void SetupLocalPlayerUI()
     {
         AimUI aimUI = GameManager.UI.ShowSceneUI<AimUI>("UI/PlayerUI/AimUI");
-        //onDetect += aimUI.ReadInteractInfo;
+        onDetect += aimUI.ReadInteractInfo;
 
     }
 

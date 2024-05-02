@@ -2752,11 +2752,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Animator: {fileID: 2887623592706997783}
-  TotalWords: 13
+  TotalWords: 10
   ApplyTiming: 2
   SyncSettings: -1
-  StateHashes: 000000006bd5a32d398fdc04900f541e8a9e6ef420e23b685928a8ce28a981077af3fe2e48d3833bccf055d4150d3635b049d18a52f6b98561459cb2aa5bac3789ebaf913f74a3b60cc78681ef1c4e8384973a1599449fadf2cfeb3b3adaf4b3611602698a18fce470a960e2b70fece3f68a43085eec2d27bb913cfd70158280f3cbb28139875abb01bc6b6d8527350bb3388c9b958341e2ffc6947f63cb14a55ac700a1c4b36c94f0f74ba9122c76edbb667068
-  TriggerHashes: 00000000b4ecb233ed6cef2b63cb14a58527350b9a2c4204
+  StateHashes: 000000006bd5a32d398fdc04900f541e8a9e6ef420e23b685928a8ce28a981077af3fe2e48d3833bccf055d4150d3635b049d18a52f6b98561459cb2aa5bac3789ebaf913f74a3b60cc78681ef1c4e8384973a1599449fadf2cfeb3b3adaf4b3611602698a18fce470a960e2b70fece3f68a43085eec2d27bb913cfd70158280f3cbb28139875abb01bc6b6d8527350bb3388c9b958341e2ffc6947f63cb14a55ac700a1
+  TriggerHashes: 00000000b4ecb233ed6cef2b63cb14a58527350b
 --- !u!114 &8153018902636825378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2847,13 +2847,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f21f43602155d241acddec5ade0a3ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  raycastTr: {fileID: 0}
+  raycastTr: {fileID: 4081293369529807383}
   _IsDetect:
     _value: 0
-  toolItems: []
-  leftHandPivot: {fileID: 0}
-  toolItemPivot: {fileID: 0}
-  leftParent: {fileID: 0}
   _targetPoint: {x: 0, y: 0, z: 0}
 --- !u!114 &5971571254669413268
 MonoBehaviour:
@@ -9506,6 +9502,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+--- !u!4 &4081293369529807383 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7505511476366747571, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+  m_PrefabInstance: {fileID: 5803807697405875620}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6207268683438186631 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 481851776173307171, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}

@@ -31,24 +31,17 @@ public abstract class InteractObject : NetworkBehaviour
     public enum InteractState { None, Progress, End }
 
     public event Action<MaterialItem> onComplete;
-    //[Networked, HideInInspector, OnChangedRender(nameof(OnChangeState))] public InteractState interactState { get; set; } = InteractState.None;
-    [Networked, HideInInspector] public NetworkBool isUsed { get; set; }
+
 
     public override void Spawned()
     {
-        if (HasStateAuthority)
-        {
-            isUsed = false;
-        }
+        
+        interactData = new InteractData();
+        interactData.interactHint = "F";
     }
     public virtual bool Detect(out InteractData interactInfo)
     {
-
-        //if (interactState != InteractState.None)
-        //{
-        //    interactInfo = null;
-        //    return false;
-        //}
+           
         interactInfo = interactData;
         return true;
 
@@ -81,4 +74,4 @@ public abstract class InteractObject : NetworkBehaviour
 
 }
 
-  
+

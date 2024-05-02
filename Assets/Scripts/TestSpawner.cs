@@ -106,7 +106,7 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (runner.IsServer)
         {
-            NetworkObject playerObject = runner.Spawn(testPlayer, spawnPoint.position, Quaternion.identity, inputAuthority: player);
+            NetworkObject playerObject = runner.Spawn(testPlayer, spawnPoint.position, spawnPoint.rotation, inputAuthority: player);
 
             runner.SetPlayerObject(player, playerObject);
             playerObjects.Add(player, playerObject);
