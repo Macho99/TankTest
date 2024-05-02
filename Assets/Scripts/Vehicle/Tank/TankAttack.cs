@@ -20,7 +20,8 @@ public class TankAttack : VehicleBehaviour
 	[SerializeField] float elevationAngle = 25f;
 	[SerializeField] GameObject fireVFX;
 	[SerializeField] GameObject hitVFX;
-	[SerializeField] float fireCooltime = 8f;
+	[SerializeField] float[] reloadTimes;
+	[SerializeField] float intervalFireCooltime = 4f;
 	[SerializeField] float fireRebound = 10000f;
 	[SerializeField] TankAttackUI attackUIPrefab;
 	[SerializeField] float finalAcc = 1f;
@@ -48,15 +49,17 @@ public class TankAttack : VehicleBehaviour
 	Vector3 targetPosition;
 	float accuracy;
 	float curTurretRotSpeed;
+	TickTimer intervalFireTimer;
 
-	[Networked, HideInInspector] public float BodyAcc { get; private set; }
-	[Networked, HideInInspector] public float TurretAcc { get; private set; }
+	[Networked, HideInInspector] public float CurBodyAcc { get; private set; }
+	[Networked, HideInInspector] public float CurTurretAcc { get; private set; }
 	[Networked, HideInInspector] public float TurretAngle { get; private set; }
 	[Networked, HideInInspector] public float BarrelAngle { get; private set; }
 	[Networked, HideInInspector] public int FireCnt { get; private set; }
 	[Networked, HideInInspector] public Vector3 HitPosition { get; private set; }
 	[Networked, HideInInspector] public Vector3 HitNormal { get; private set; }
-	[Networked, HideInInspector] public TickTimer ReloadTimer { get; private set; }
+	[Networked, HideInInspector] public int LoadedShell { get; private set; } = -1;
+	[Networked, HideInInspector] public float LeftReloadTime { get; private set; } = 0f;
 
 	protected override void Awake()
 	{
@@ -72,6 +75,7 @@ public class TankAttack : VehicleBehaviour
 	public override void Spawned()
 	{
 		base.Spawned();
+		intervalFireTimer = TickTimer.CreateFromTicks(Runner, 1);
 		if(Object.HasInputAuthority == false)
 		{
 			cam.gameObject.SetActive(false);
@@ -93,10 +97,16 @@ public class TankAttack : VehicleBehaviour
 		Vector3 fireForward = (targetPosition - barrelTrans.position).normalized;
 		RotateTurret(fireForward);
 		RotateBarrel(fireForward);
+		ReloadShell();
 
-		if(input.buttons.IsSet(Buttons.Fire) == true)
+		if (HasInputAuthority)
 		{
-			if(ReloadTimer.ExpiredOrNotRunning(Runner) == true)
+			UpdateUI();
+		}
+
+		if (input.buttons.IsSet(Buttons.Fire) == true)
+		{
+			if(LoadedShell > 0)
 			{
 				Fire();
 			}
@@ -105,15 +115,15 @@ public class TankAttack : VehicleBehaviour
 
 	private void CalcAccuracy()
 	{
-		accuracy = BodyAcc + TurretAcc;
+		accuracy = CurBodyAcc + CurTurretAcc;
 
-		BodyAcc -= Runner.DeltaTime * aimingSpeed;
-		BodyAcc += rb.velocity.magnitude * Runner.DeltaTime * velocityAccMul;
-		BodyAcc = Mathf.Clamp(BodyAcc, minBodyAcc, maxBodyAcc);
+		CurBodyAcc -= Runner.DeltaTime * aimingSpeed;
+		CurBodyAcc += rb.velocity.magnitude * Runner.DeltaTime * velocityAccMul;
+		CurBodyAcc = Mathf.Clamp(CurBodyAcc, minBodyAcc, maxBodyAcc);
 
-		TurretAcc -= Runner.DeltaTime * aimingSpeed;
-		TurretAcc += Mathf.Abs(curTurretRotSpeed) * Runner.DeltaTime * turretRotAccMul;
-		TurretAcc = Mathf.Clamp(TurretAcc, minTurretAcc, maxTurretAcc);
+		CurTurretAcc -= Runner.DeltaTime * aimingSpeed;
+		CurTurretAcc += Mathf.Abs(curTurretRotSpeed) * Runner.DeltaTime * turretRotAccMul;
+		CurTurretAcc = Mathf.Clamp(CurTurretAcc, minTurretAcc, maxTurretAcc);
 	}
 
 	private void SetTargetPos(Vector3 camForward)
@@ -139,11 +149,6 @@ public class TankAttack : VehicleBehaviour
 		barrelTrans.localRotation = Quaternion.Lerp(barrelTrans.localRotation, 
 			Quaternion.Euler(BarrelAngle, 0f, 0f), Time.deltaTime * 2f);
 
-		if (HasInputAuthority)
-		{
-			UpdateUI();
-		}
-
 		if(FireCnt != visualFireCnt)
 		{
 			GameManager.Resource.Instantiate(fireVFX, firePoint.position, firePoint.rotation, true);
@@ -155,8 +160,26 @@ public class TankAttack : VehicleBehaviour
 		}
 	}
 
+	private void ReloadShell()
+	{
+		if (LoadedShell > reloadTimes.Length) { return; }
+
+		LeftReloadTime -= Runner.DeltaTime;
+		if (LeftReloadTime < 0f)
+		{
+			LoadedShell++;
+			if (LoadedShell < reloadTimes.Length)
+			{
+				LeftReloadTime = reloadTimes[LoadedShell];
+			}
+		}
+	}
+
+
 	private void UpdateUI()
 	{
+		print(LoadedShell);
+
 		Vector3 curHitPos;
 		if (Physics.Raycast(barrelTrans.position, barrelTrans.forward, out RaycastHit hitInfo, MAX_DIST, hitMask) == true)
 		{
@@ -168,9 +191,56 @@ public class TankAttack : VehicleBehaviour
 		}
 		Vector3 screenPos = Camera.main.WorldToScreenPoint(curHitPos);
 		attackUI?.UpdateAimUI(screenPos, accuracy);
-		float? leftTime = ReloadTimer.RemainingTime(Runner);
-		print(leftTime);
-		attackUI?.UpdateReloadUI(leftTime);
+
+		float largeTime;
+		float smallTime;
+		float barRatio;
+		bool fireReady;
+
+		//탄간 장전 중일때
+		if(intervalFireTimer.ExpiredOrNotRunning(Runner) == false)
+		{
+			fireReady = false;
+			if(LoadedShell == 0)
+			{
+				smallTime = LeftReloadTime;
+				largeTime = LeftReloadTime;
+				barRatio = largeTime / reloadTimes[0];
+			}
+			else
+			{
+				smallTime = LeftReloadTime;
+				largeTime = intervalFireTimer.RemainingTime(Runner).Value;
+				barRatio = largeTime / intervalFireCooltime;
+			}
+		}
+		//탄간 장전 아닐때
+		else
+		{
+			if(LoadedShell == 0)
+			{
+				fireReady = false;
+				smallTime = LeftReloadTime;
+				largeTime = LeftReloadTime;
+				barRatio = largeTime / reloadTimes[0];
+			}
+			else if(LoadedShell == 1)
+			{
+				fireReady = true;
+				smallTime = LeftReloadTime;
+				largeTime = intervalFireCooltime;
+				barRatio = 0f;
+			}
+			else
+			{
+				fireReady = true;
+				smallTime = LeftReloadTime;
+				largeTime = intervalFireCooltime;
+				barRatio = 0f;
+			}
+		}
+
+		attackUI?.UpdateReloadUI(smallTime, largeTime, barRatio, fireReady);
 	}
 
 	private void RotateTurret(Vector3 forward)
@@ -200,14 +270,17 @@ public class TankAttack : VehicleBehaviour
 
 	private void Fire()
 	{
-		ReloadTimer = TickTimer.CreateFromSeconds(Runner, fireCooltime);
+		LoadedShell--;
+		LeftReloadTime = reloadTimes[LoadedShell];
+
 		FireCnt++;
+		intervalFireTimer = TickTimer.CreateFromSeconds(Runner, intervalFireCooltime);
 
 		rb.AddForceAtPosition(-barrelTrans.forward * fireRebound, barrelTrans.position, ForceMode.Impulse);
 
 		Random.InitState(Runner.Tick * unchecked((int)Object.Id.Raw));
-		BodyAcc = maxBodyAcc;
-		TurretAcc = maxTurretAcc;
+		CurBodyAcc = maxBodyAcc;
+		CurTurretAcc = maxTurretAcc;
 		if (Physics.Raycast(firePoint.position, barrelTrans.forward + Random.insideUnitSphere * accuracy * realAccMul, 
 			out RaycastHit hit, 200f, hitMask))
 		{
@@ -240,7 +313,7 @@ public class TankAttack : VehicleBehaviour
 		if (player.HasInputAuthority && Runner.IsForward)
 		{
 			attackUI = GameManager.UI.ShowSceneUI(attackUIPrefab);
-			attackUI.Init(finalAcc, fireCooltime);
+			attackUI.Init(finalAcc);
 		}
 	}
 

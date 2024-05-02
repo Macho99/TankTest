@@ -14,10 +14,8 @@ public class TankAttackUI : SceneUI
 	Image targetAimImg;
 
 	Image reloadBar;
-	TextMeshProUGUI reloadText;
-
-	float reloadTime;
-	float ratioMultiplier;
+	TextMeshProUGUI smallReloadText;
+	TextMeshProUGUI largeReloadText;
 
 	protected override void Awake()
 	{
@@ -26,14 +24,13 @@ public class TankAttackUI : SceneUI
 		targetAimImg = images["TargetAimImg"];
 
 		reloadBar = images["ReloadBar"];
-		reloadText = texts["ReloadText"];
+		smallReloadText = texts["SmallReloadText"];
+		largeReloadText = texts["LargeReloadText"];
 	}
 
-	public void Init(float finalAccuracy, float reloadTime)
+	public void Init(float finalAccuracy)
 	{
 		targetAimImg.rectTransform.localScale = Vector3.one * finalAccuracy;
-		this.reloadTime = reloadTime;
-		ratioMultiplier = 1f / reloadTime;
 	}
 
 	public void UpdateAimUI(Vector3 screenPos, float accuracy)
@@ -49,32 +46,17 @@ public class TankAttackUI : SceneUI
 		curAimImg.rectTransform.localScale = Vector3.one * accuracy;
 	}
 
-	public void UpdateReloadUI(float? remainNullableTime)
+	public void UpdateReloadUI(float smallTime, float largeTime, float barRatio, bool fireReady)
 	{
-		Color color;
-		if(remainNullableTime.HasValue == true)
-		{
-			float remainTime = remainNullableTime.Value;
-			if(remainTime > 0f)
-			{
-				reloadBar.fillAmount = (reloadTime - remainTime) * ratioMultiplier * 0.5f;
-				reloadText.text = remainTime.ToString("F2");
-				color = reloadColor;
-			}
-			else
-			{
-				reloadBar.fillAmount = 0.5f;
-				reloadText.text = reloadTime.ToString("F2");
-				color = readyColor;
-			}
-		}
-		else
-		{
-			reloadBar.fillAmount = 0.5f;
-			reloadText.text = reloadTime.ToString("F2");
-			color = readyColor;
-		}
+		barRatio = Mathf.Clamp01(barRatio);
+		barRatio = 1 - barRatio;
+		barRatio *= 0.5f;
+		Color color = fireReady ? readyColor : reloadColor;
+
+		reloadBar.fillAmount = barRatio;
+		this.smallReloadText.text = smallTime.ToString("F2");
+		this.largeReloadText.text = largeTime.ToString("F2");
 		reloadBar.color = color;
-		reloadText.color = color;
+		this.largeReloadText.color = color;
 	}
 }
