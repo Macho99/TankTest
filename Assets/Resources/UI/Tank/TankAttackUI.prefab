@@ -248,6 +248,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5935405376032992104}
   - component: {fileID: 91368930306778078}
+  - component: {fileID: 6333682860072580574}
   m_Layer: 5
   m_Name: TankAttackUI
   m_TagString: Untagged
@@ -289,6 +290,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   readyColor: {r: 0.6137271, g: 1, b: 0.6084906, a: 1}
   reloadColor: {r: 1, g: 0.5613208, b: 0.5613208, a: 1}
+  shellReloadColor: {r: 0.99607843, g: 0.29538462, b: 0.23529412, a: 1}
+  shellReadyColor: {r: 0.5647059, g: 0.9960785, b: 0.53333336, a: 1}
+--- !u!95 &6333682860072580574
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3978740817909610238}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 0397f13ed0199d84a9eec933aa09afaf, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &4172833518487054075
 GameObject:
   m_ObjectHideFlags: 0
@@ -338,6 +362,7 @@ GameObject:
   - component: {fileID: 1213295990629610937}
   - component: {fileID: 3585746384391946654}
   - component: {fileID: 1925177838396926904}
+  - component: {fileID: 8188300619494403826}
   m_Layer: 5
   m_Name: Shell0Background
   m_TagString: Untagged
@@ -355,7 +380,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.12, y: 0.12, z: 0.12}
-  m_ConstrainProportionsScale: 1
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8165645642095652287}
   m_Father: {fileID: 1630996015031562611}
@@ -418,6 +443,18 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 1}
   m_EffectDistance: {x: 8, y: -8}
   m_UseGraphicAlpha: 1
+--- !u!225 &8188300619494403826
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5746847073234817334}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &6153300557239603677
 GameObject:
   m_ObjectHideFlags: 0
@@ -948,7 +985,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -54, y: -199.5}
+  m_AnchoredPosition: {x: -54, y: -156}
   m_SizeDelta: {x: 124.649994, y: 94.399994}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &8630792818495910426
@@ -1328,7 +1365,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2749708641982727653, guid: b15edfd88d8b73346998c6c6bc5cc162, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -151
+      value: -126
       objectReference: {fileID: 0}
     - target: {fileID: 2749708641982727653, guid: b15edfd88d8b73346998c6c6bc5cc162, type: 3}
       propertyPath: m_AnchoredPosition.y

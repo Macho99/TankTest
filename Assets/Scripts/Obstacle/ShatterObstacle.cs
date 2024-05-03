@@ -88,15 +88,7 @@ public class ShatterObstacle : BreakableObstacle
 			Debug.LogError("debrisRoot가 만들어지기 전에 BreakEffect가 호출됨");
 			return;
 		}
-
-		if(breakData.type == BreakableObjBehaviour.BreakType.AddForce)
-		{
-			debrisRoot.AddForceAtPosition(breakData.velocityOrForceAndRadius, breakData.position);
-		}
-		else if(breakData.type == BreakableObjBehaviour.BreakType.Explosion)
-		{
-			debrisRoot.AddExplosionForce(breakData.velocityOrForceAndRadius.x, 
-				breakData.position, breakData.velocityOrForceAndRadius.y);
-		}
+		debrisRoot.AddExplosionForce(breakData.force,
+			breakData.position, 5f);
 	}
 }

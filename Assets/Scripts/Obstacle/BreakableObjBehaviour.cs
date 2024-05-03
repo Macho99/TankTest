@@ -11,9 +11,8 @@ public class BreakableObjBehaviour : NetworkBehaviour
 	public struct BreakData : INetworkStruct
 	{
 		public int idx;
-		public BreakType type;
 		public Vector3 position;
-		public Vector3 velocityOrForceAndRadius;
+		public float force;
 	}
 
 	const int NETWORK_ARR_LENGTH = 100;
@@ -57,7 +56,7 @@ public class BreakableObjBehaviour : NetworkBehaviour
 		for (; visualBreakCnt < BreakCnt; visualBreakCnt++)
 		{
 			BreakData breakData = BreakNetworkArr[visualBreakCnt % BreakNetworkArr.Length];
-			print(objList[breakData.idx].gameObject.name);
+			//print(objList[breakData.idx].gameObject.name);
 			objList[breakData.idx].BreakEffect(breakData);
 		}
 	}
@@ -77,7 +76,7 @@ public class BreakableObjBehaviour : NetworkBehaviour
 			}
 			else if(visualBool == false && networkBool == true)
 			{
-				objList[idx].TryBreak(isFirstRender);
+				objList[idx].OwnerTryBreak(isFirstRender);
 			}
 
 			visual >>= 1;

@@ -71,14 +71,6 @@ public class SingleBreakObstacle : BreakableObstacle
 			return;
 		}
 
-		if (breakData.type == BreakableObjBehaviour.BreakType.AddForce)
-		{
-			childRb.AddForceAtPosition(breakData.velocityOrForceAndRadius, breakData.position);
-		}
-		else if (breakData.type == BreakableObjBehaviour.BreakType.Explosion)
-		{
-			childRb.AddExplosionForce(breakData.velocityOrForceAndRadius.x,
-				breakData.position, breakData.velocityOrForceAndRadius.y);
-		}
+		childRb.AddExplosionForce(breakData.force, breakData.position, 5f);
 	}
 }

@@ -81,7 +81,6 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 		player.Teleport(seatTrans.position);
 		player.CollisionEnable(false);
 		player.transform.parent = seatTrans;
-		print($"{id.Raw} 탑승");
 	}
 
 	private void LocalGetOff(NetworkId id)
@@ -93,7 +92,6 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 		}
 		player.CollisionEnable(true);
 		player.transform.parent = null;
-		print($"{id.Raw} 하차");
 	}
 
 	public bool GetOn(TestPlayer player)
@@ -102,7 +100,6 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 		{
 			localPlayer = player;
 		}
-		print(player.name);
 		int idx = AssignIdx(player);
 		if (idx == -1)
 		{
@@ -179,12 +176,6 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 
 	public override void Render()
 	{
-		//if (isFirst)
-		//{
-		//	GetOnRender();
-		//	isFirst = false;
-		//}
-
 		StringBuilder sb = new StringBuilder();
 		string localPlayerStr = localPlayer == null ? "None" : localPlayer.Object.Id.ToString();
 		sb.AppendLine($"LocalPlayer: {localPlayerStr}");

@@ -25,6 +25,7 @@ public class TrackController : MonoBehaviour
 	[SerializeField] float controlMagMultiplier = 0.32f;
 	public float Velocity { get; private set; }
 
+	float updateUntil;
 	TankMove tankMove;
 	Transform[] tracks;
 	WheelCollider[] wheelCols;
@@ -69,9 +70,6 @@ public class TrackController : MonoBehaviour
 
 	private void Update()
 	{
-		//if (Time.time < nextUpdateTime) return;
-
-		//nextUpdateTime = Time.time + updateInterval;
 		float rpm = trackType == TrackType.Left ? tankMove.RawLeftRpm : tankMove.RawRightRpm;
 
 		Velocity = rpm * 60f * 2 * radius * Mathf.PI * 0.001f;
@@ -133,7 +131,13 @@ public class TrackController : MonoBehaviour
 	{
 		if (tracks == null) return;
 
-		if (rb.velocity.sqrMagnitude < 0.01f && Mathf.Approximately(Velocity, 0f) == true) return;
+		if (rb.velocity.sqrMagnitude > 0.01f || Mathf.Approximately(Velocity, 0f) == false)
+		{
+			updateUntil = Time.time + 10f;
+		}
+
+		if (Time.time > updateUntil)
+			return;
 
 		curTrackOffset -= Velocity * 1000f / 3600f / totalLength * Time.deltaTime;
 

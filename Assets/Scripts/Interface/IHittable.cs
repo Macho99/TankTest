@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+
 public interface IHittable
 {
-	public void ApplyDamage(Transform source, Vector3 point, Vector3 velocity, int damage);
+	public uint HitID { get; }
+	public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage);
 }

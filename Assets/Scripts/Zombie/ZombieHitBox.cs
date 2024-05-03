@@ -19,6 +19,8 @@ public class ZombieHitBox : MonoBehaviour, IHittable
 	public ZombieBody BodyType { get { return bodyType; } }
 	public Rigidbody RB { get { return rb; } }
 
+	public uint HitID => owner.Object.Id.Raw;
+
 	protected ZombieBase owner;
 
 	protected virtual void Awake()
@@ -26,8 +28,8 @@ public class ZombieHitBox : MonoBehaviour, IHittable
 		owner = GetComponentInParent<ZombieBase>();
 	}
 
-	public virtual void ApplyDamage(Transform source, Vector3 point, Vector3 velocity, int damage)
+	public virtual void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
 	{
-		owner.ApplyDamage(source, this, point, velocity, damage);
+		owner.ApplyDamage(source, this, point, force, damage);
 	}
 }

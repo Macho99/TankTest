@@ -14,6 +14,8 @@ public class BruteDefenceTrace : BruteZombieState
 
 	TickTimer defenceTimer;
 
+	public BruteZombie Owner { get { return owner; } }
+
 	public BruteDefenceTrace(BruteZombie owner) : base(owner)
 	{
 	}

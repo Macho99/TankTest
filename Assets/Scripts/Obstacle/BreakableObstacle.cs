@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshObstacle), typeof(MeshRenderer), typeof(Collider))]
-public abstract class BreakableObstacle : MonoBehaviour
+public abstract class BreakableObstacle : MonoBehaviour, IHittable
 {
 	[SerializeField] protected Collider[] childCols;
 	[SerializeField] protected MeshFilter meshFilter;
@@ -21,6 +21,9 @@ public abstract class BreakableObstacle : MonoBehaviour
 
 	public int idx = -1;
 	public bool IsBreaked { get; protected set; }
+	public int CurHp { get; protected set; } = 100;
+
+	public uint HitID => owner.Object.Id.Raw * (uint) idx;
 
 	protected virtual void Break(bool immediately = false)
 	{
@@ -71,36 +74,35 @@ public abstract class BreakableObstacle : MonoBehaviour
 		}
 	}
 
-	public void BreakRequest()
+	private void BreakRequest()
 	{
 		owner.BreakRequest(idx);
 	}
 
-	public void ExplosionBreakRequest(float force, Vector3 position)
+	private void ExplosionBreakRequest(float force, Vector3 position)
 	{
 		BreakableObjBehaviour.BreakData breakData = new BreakableObjBehaviour.BreakData()
 		{
 			idx = this.idx,
 			position = position,
-			type = BreakableObjBehaviour.BreakType.Explosion,
-			velocityOrForceAndRadius = new Vector3(force, 0f, 0f)
+			force = force
 		};
 		owner.BreakRequest(breakData);
 	}
 
-	public void AddForceBreakRequest(Vector3 force, Vector3 position)
-	{
-		BreakableObjBehaviour.BreakData breakData = new BreakableObjBehaviour.BreakData()
-		{
-			idx = this.idx,
-			position = position,
-			type = BreakableObjBehaviour.BreakType.AddForce,
-			velocityOrForceAndRadius = force
-		};
-		owner.BreakRequest(breakData);
-	}
+	//public void AddForceBreakRequest(Vector3 force, Vector3 position)
+	//{
+	//	BreakableObjBehaviour.BreakData breakData = new BreakableObjBehaviour.BreakData()
+	//	{
+	//		idx = this.idx,
+	//		position = position,
+	//		type = BreakableObjBehaviour.BreakType.AddForce,
+	//		velocityOrForceAndRadius = force
+	//	};
+	//	owner.BreakRequest(breakData);
+	//}
 
-	public void TryBreak(bool Immediatly = false)
+	public void OwnerTryBreak(bool Immediatly = false)
 	{
 		if (IsBreaked == false)
 		{
@@ -110,4 +112,13 @@ public abstract class BreakableObstacle : MonoBehaviour
 	}
 
 	public abstract void BreakEffect(BreakableObjBehaviour.BreakData breakData);
+
+	public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
+	{
+		CurHp -= damage;
+		if(CurHp <= 0)
+		{
+			ExplosionBreakRequest(force.magnitude, point);
+		}
+	}
 }

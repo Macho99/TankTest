@@ -2,6 +2,7 @@
 using Fusion;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Windows;
@@ -23,16 +24,18 @@ public class TankAttack : VehicleBehaviour
 	[SerializeField] float[] reloadTimes;
 	[SerializeField] float intervalFireCooltime = 4f;
 	[SerializeField] float fireRebound = 10000f;
+	[SerializeField] int damage = 500;
+	[SerializeField] float explosionRadius = 5f;
 	[SerializeField] TankAttackUI attackUIPrefab;
-	[SerializeField] float finalAcc = 1f;
+	[SerializeField] float finalAcc = 0.8f;
 	[SerializeField] float minBodyAcc = 0.5f;
-	[SerializeField] float maxBodyAcc = 3f;
+	[SerializeField] float maxBodyAcc = 2f;
 	[SerializeField] float minTurretAcc = 0.5f;
-	[SerializeField] float maxTurretAcc = 1f;
-	[SerializeField] float aimingSpeed = 0.5f;
+	[SerializeField] float maxTurretAcc = 2f;
+	[SerializeField] float aimingSpeed = 0.8f;
 	[SerializeField] float velocityAccMul = 1f;
 	[SerializeField] float turretRotAccMul = 0.05f;
-	[SerializeField] float realAccMul = 0.05f;
+	[SerializeField] float realAccMul = 0.02f;
 	LayerMask hitMask;
 	LayerMask damageableMask;
 	int monsterLayer;
@@ -44,12 +47,14 @@ public class TankAttack : VehicleBehaviour
 	int visualFireCnt;
 	Rigidbody rb;
 
-	Collider[] attackCols = new Collider[10];
+	Collider[] attackCols = new Collider[40];
 
 	Vector3 targetPosition;
 	float accuracy;
 	float curTurretRotSpeed;
 	TickTimer intervalFireTimer;
+
+	HitPointComparer hitPointComparer = new();
 
 	[Networked, HideInInspector] public float CurBodyAcc { get; private set; }
 	[Networked, HideInInspector] public float CurTurretAcc { get; private set; }
@@ -58,7 +63,7 @@ public class TankAttack : VehicleBehaviour
 	[Networked, HideInInspector] public int FireCnt { get; private set; }
 	[Networked, HideInInspector] public Vector3 HitPosition { get; private set; }
 	[Networked, HideInInspector] public Vector3 HitNormal { get; private set; }
-	[Networked, HideInInspector] public int LoadedShell { get; private set; } = -1;
+	[Networked, HideInInspector] public int LoadedShell { get; private set; } = 0;
 	[Networked, HideInInspector] public float LeftReloadTime { get; private set; } = 0f;
 
 	protected override void Awake()
@@ -77,9 +82,9 @@ public class TankAttack : VehicleBehaviour
 		base.Spawned();
 		if(HasStateAuthority)
 		{
+			LoadedShell = 0;
 			LeftReloadTime = reloadTimes[0];
 		}
-
 		intervalFireTimer = TickTimer.CreateFromTicks(Runner, 1);
 
 		if(HasInputAuthority == false)
@@ -104,11 +109,6 @@ public class TankAttack : VehicleBehaviour
 		RotateTurret(fireForward);
 		RotateBarrel(fireForward);
 		ReloadShell();
-
-		if (HasInputAuthority)
-		{
-			UpdateUI();
-		}
 
 		if (input.buttons.IsSet(Buttons.Fire) == true)
 		{
@@ -144,6 +144,11 @@ public class TankAttack : VehicleBehaviour
 	public override void Render()
 	{
 		base.Render();
+		if(attackUI != null)
+		{
+			UpdateUI();
+		}
+
 		Quaternion prevRot = turretTrans.localRotation;
 		Quaternion nextRot = Quaternion.Lerp(prevRot, Quaternion.Euler(0f, TurretAngle, 0f), Time.deltaTime * 2f);
 		turretTrans.localRotation = nextRot;
@@ -155,7 +160,7 @@ public class TankAttack : VehicleBehaviour
 		barrelTrans.localRotation = Quaternion.Lerp(barrelTrans.localRotation, 
 			Quaternion.Euler(BarrelAngle, 0f, 0f), Time.deltaTime * 2f);
 
-		if(FireCnt != visualFireCnt)
+		if(visualFireCnt < FireCnt)
 		{
 			GameManager.Resource.Instantiate(fireVFX, firePoint.position, firePoint.rotation, true);
 			if(HitPosition != Vector3.zero)
@@ -168,12 +173,16 @@ public class TankAttack : VehicleBehaviour
 
 	private void ReloadShell()
 	{
-		print($"{LoadedShell}, {LeftReloadTime}");
 		if (LoadedShell >= reloadTimes.Length) { return; }
 
 		LeftReloadTime -= Runner.DeltaTime;
 		if (LeftReloadTime < 0f)
 		{
+			if(attackUI != null && Runner.IsForward)
+			{
+				attackUI.Reloaded();
+			}
+
 			LoadedShell++;
 			if (LoadedShell < reloadTimes.Length)
 			{
@@ -182,10 +191,8 @@ public class TankAttack : VehicleBehaviour
 		}
 	}
 
-
 	private void UpdateUI()
 	{
-
 		Vector3 curHitPos;
 		if (Physics.Raycast(barrelTrans.position, barrelTrans.forward, out RaycastHit hitInfo, MAX_DIST, hitMask) == true)
 		{
@@ -196,7 +203,7 @@ public class TankAttack : VehicleBehaviour
 			curHitPos = barrelTrans.position + barrelTrans.forward * MAX_DIST;
 		}
 		Vector3 screenPos = Camera.main.WorldToScreenPoint(curHitPos);
-		attackUI?.UpdateAimUI(screenPos, accuracy);
+		attackUI.UpdateAimUI(screenPos, accuracy);
 
 		float largeTime;
 		float smallTime;
@@ -206,6 +213,7 @@ public class TankAttack : VehicleBehaviour
 		//탄간 장전 중일때
 		if(intervalFireTimer.ExpiredOrNotRunning(Runner) == false)
 		{
+			smallTime = LeftReloadTime;
 			fireReady = false;
 			if(LoadedShell == 0)
 			{
@@ -223,26 +231,35 @@ public class TankAttack : VehicleBehaviour
 		{
 			if(LoadedShell == 0)
 			{
+				smallTime = LeftReloadTime;
 				fireReady = false;
 				largeTime = LeftReloadTime;
 				barRatio = largeTime / reloadTimes[0];
 			}
 			else if(LoadedShell == 1)
 			{
+				smallTime = LeftReloadTime;
+				fireReady = true;
+				largeTime = intervalFireCooltime;
+				barRatio = 0f;
+			}
+			else if(LoadedShell == reloadTimes.Length)
+			{
+				smallTime = reloadTimes[LoadedShell - 1];
 				fireReady = true;
 				largeTime = intervalFireCooltime;
 				barRatio = 0f;
 			}
 			else
 			{
+				smallTime = LeftReloadTime;
 				fireReady = true;
 				largeTime = intervalFireCooltime;
 				barRatio = 0f;
 			}
 		}
-		smallTime = LeftReloadTime;
-		float smallRatio = LoadedShell == reloadTimes.Length ? 0f : smallTime / reloadTimes[LoadedShell];
-		attackUI?.UpdateReloadUI(smallTime, smallRatio, LoadedShell, largeTime, barRatio, fireReady);
+		float smallRatio = LoadedShell >= reloadTimes.Length ? 0f : smallTime / reloadTimes[LoadedShell];
+		attackUI.UpdateReloadUI(smallTime, smallRatio, largeTime, barRatio, fireReady);
 	}
 
 	private void RotateTurret(Vector3 forward)
@@ -275,6 +292,11 @@ public class TankAttack : VehicleBehaviour
 		LoadedShell--;
 		LeftReloadTime = reloadTimes[LoadedShell];
 
+		if (attackUI != null && Runner.IsForward)
+		{
+			attackUI.Fired();
+		}
+
 		FireCnt++;
 		intervalFireTimer = TickTimer.CreateFromSeconds(Runner, intervalFireCooltime);
 
@@ -288,26 +310,28 @@ public class TankAttack : VehicleBehaviour
 		{
 			HitPosition = hit.point;
 			HitNormal = hit.normal;
-			int result = Physics.OverlapSphereNonAlloc(hit.point, 3f, attackCols, damageableMask);
+			int result = Physics.OverlapSphereNonAlloc(hit.point, explosionRadius, attackCols, damageableMask);
+
+			hitPointComparer.hitPoint = hit.point;
+			Array.Sort(attackCols, 0, result, hitPointComparer);
+			List<uint> idList = new List<uint>();
+
 			for(int i = 0; i < result; i++)
 			{
-				int layer = attackCols[i].gameObject.layer;
-				if (layer == monsterLayer)
+				IHittable hittable = attackCols[i].gameObject.GetComponent<IHittable>();
+				if(hittable == null)
 				{
+					continue;
+				}
 
-				}
-				else if(layer == breakableLayer)
+				uint id = hittable.HitID;
+				if (idList.Contains(id))
 				{
-					BreakableObstacle obstacle = attackCols[i].gameObject.GetComponent<BreakableObstacle>();
-					if (obstacle == null)
-					{
-						Debug.LogError($"{attackCols[i].gameObject.name}에 BreakableObstacle이 없습니다!");
-					}
-					else
-					{
-						obstacle.ExplosionBreakRequest(5000f, hit.point);
-					}
+					continue;
 				}
+				idList.Add(id);
+				hittable.ApplyDamage(transform, hit.point, 
+					(attackCols[i].transform.position - hit.point).normalized * 100f, damage);
 			}
 		}
 		else
@@ -322,7 +346,7 @@ public class TankAttack : VehicleBehaviour
 		if (player.HasInputAuthority && Runner.IsForward)
 		{
 			attackUI = GameManager.UI.ShowSceneUI(attackUIPrefab);
-			attackUI.Init(finalAcc);
+			attackUI.Init(finalAcc, LoadedShell);
 		}
 	}
 
@@ -339,7 +363,20 @@ public class TankAttack : VehicleBehaviour
 	{
 		if (spawned == true)
 		{
-			Gizmos.DrawWireSphere(HitPosition, 3f);
+			Gizmos.DrawWireSphere(HitPosition, explosionRadius);
+		}
+	}
+
+	public class HitPointComparer : IComparer<Collider>
+	{
+		public Vector3 hitPoint;
+
+		public int Compare(Collider a, Collider b)
+		{
+			float aDist = (a.gameObject.transform.position - hitPoint).sqrMagnitude;
+			float bDist = (b.gameObject.transform.position - hitPoint).sqrMagnitude;
+
+			return aDist.CompareTo(bDist);
 		}
 	}
 }

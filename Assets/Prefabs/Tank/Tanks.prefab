@@ -5652,25 +5652,31 @@ MonoBehaviour:
   elevationAngle: 25
   fireVFX: {fileID: 8362269676599913071, guid: c6f1f00f97c76b0479b80b53e3b602a9, type: 3}
   hitVFX: {fileID: 5957145100804776440, guid: beff618826e09ff4c97f585a2b5ebaca, type: 3}
-  fireCooltime: 8
+  reloadTimes:
+  - 13.6
+  - 9.7
+  - 8.4
+  intervalFireCooltime: 3
   fireRebound: 300000
   attackUIPrefab: {fileID: 91368930306778078, guid: 7054302a4bd834a45a369c71b2cc11b7, type: 3}
-  finalAcc: 1
+  finalAcc: 0.8
   minBodyAcc: 0.5
-  maxBodyAcc: 3
+  maxBodyAcc: 2
   minTurretAcc: 0.5
-  maxTurretAcc: 1
-  aimingSpeed: 1
+  maxTurretAcc: 2
+  aimingSpeed: 0.8
   velocityAccMul: 1
   turretRotAccMul: 0.05
-  realAccMul: 0.05
-  _BodyAcc: 0
-  _TurretAcc: 0
+  realAccMul: 0.04
+  _CurBodyAcc: 0
+  _CurTurretAcc: 0
   _TurretAngle: 0
   _BarrelAngle: 0
   _FireCnt: 0
   _HitPosition: {x: 0, y: 0, z: 0}
   _HitNormal: {x: 0, y: 0, z: 0}
+  _LoadedShell: -1
+  _LeftReloadTime: 0
 --- !u!114 &748171137692600879
 MonoBehaviour:
   m_ObjectHideFlags: 0

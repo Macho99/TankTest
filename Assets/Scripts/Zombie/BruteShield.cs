@@ -20,6 +20,8 @@ public class BruteShield : MonoBehaviour, IHittable
 	public bool Enabled { get; private set; }
 	public int CurShieldHp { get; set; }
 
+	public uint HitID => owner.Owner.Object.Id.Raw;
+
 	private void Awake()
 	{
 		col = GetComponent<Collider>();

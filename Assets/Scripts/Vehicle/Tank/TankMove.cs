@@ -26,7 +26,7 @@ public class TankMove : VehicleBehaviour
 	[SerializeField] float maxReverseSpeed = -15f;
 	[SerializeField] float minRotateRpmDiff = 100f;
 	[SerializeField] float maxRotateRpmDiff = 300f;
-	[SerializeField] float torqueMultiplier = 2.5f;
+	[SerializeField] float finalTorqueMultiplier = 2.5f;
 
 	[SerializeField] Transform[] leftWheelTrans;
 	[SerializeField] Transform[] rightWheelTrans;
@@ -254,6 +254,8 @@ public class TankMove : VehicleBehaviour
 
 	private void Steering()
 	{
+		const float RPM_DIFF = 10f;
+		float torqueAdder = 2000f;
 		float xInput = moveInput.x;
 		FrictionAdjust(xInput);
 
@@ -263,19 +265,19 @@ public class TankMove : VehicleBehaviour
 			float leftTargetRpm = AbsWheelRpm + xInput * rotateRpmDiff;
 			float rightTargetRpm = AbsWheelRpm - xInput * rotateRpmDiff;
 
-			if (Mathf.Abs(leftTargetRpm - LeftRpm) > 10)
+			if (Mathf.Abs(leftTargetRpm - LeftRpm) > RPM_DIFF)
 			{
 				for (int i = 1; i < wheelNum - 1; i++)
 				{
-					leftWheelCols[i].motorTorque += leftTargetRpm < LeftRpm ? -2000f : 2000f;
+					leftWheelCols[i].motorTorque += leftTargetRpm < LeftRpm ? -torqueAdder : torqueAdder;
 				}
 			}
 
-			if (Mathf.Abs(rightTargetRpm - RightRpm) > 10)
+			if (Mathf.Abs(rightTargetRpm - RightRpm) > RPM_DIFF)
 			{
 				for (int i = 1; i < wheelNum - 1; i++)
 				{
-					rightWheelCols[i].motorTorque += rightTargetRpm < RightRpm ? -2000f : 2000f;
+					rightWheelCols[i].motorTorque += rightTargetRpm < RightRpm ? -torqueAdder : torqueAdder;
 				}
 			}
 		}
@@ -284,19 +286,19 @@ public class TankMove : VehicleBehaviour
 			float leftTargetRpm = -AbsWheelRpm + xInput * rotateRpmDiff;
 			float rightTargetRpm = -AbsWheelRpm - xInput * rotateRpmDiff;
 
-			if (Mathf.Abs(leftTargetRpm - LeftRpm) > 10)
+			if (Mathf.Abs(leftTargetRpm - LeftRpm) > RPM_DIFF)
 			{
 				for (int i = 1; i < wheelNum - 1; i++)
 				{
-					leftWheelCols[i].motorTorque += leftTargetRpm < LeftRpm ? 2000f : -2000f;
+					leftWheelCols[i].motorTorque += leftTargetRpm < LeftRpm ? torqueAdder : -torqueAdder;
 				}
 			}
 
-			if (Mathf.Abs(rightTargetRpm - RightRpm) > 10)
+			if (Mathf.Abs(rightTargetRpm - RightRpm) > RPM_DIFF)
 			{
 				for (int i = 1; i < wheelNum - 1; i++)
 				{
-					rightWheelCols[i].motorTorque += rightTargetRpm < RightRpm ? 2000f : -2000f;
+					rightWheelCols[i].motorTorque += rightTargetRpm < RightRpm ? torqueAdder : -torqueAdder;
 				}
 			}
 		}
@@ -328,7 +330,7 @@ public class TankMove : VehicleBehaviour
 		float torque = torquePerRpm.Evaluate((EngineRpm - minEngineRpm) / maxEngineRpm);
 		torque *= gears[CurGear];
 		torque /= wheelNum - 2;
-		torque *= torqueMultiplier;
+		torque *= finalTorqueMultiplier;
 
 		CurMotorTorque = torque;
 	}

@@ -57,7 +57,13 @@ public class TankDrive : TankMoveState
 	{
 		float y = owner.MoveInput.y;
 		owner.SetEngineRpmWithWheel();
-		if(y > -0.1f)
+
+		if (y < -0.1f)
+		{
+			owner.TorqueMultiplier = 0f;
+			owner.BrakeMultiplier = 1f;
+		}
+		else
 		{
 			if (owner.Velocity > owner.MaxSpeed)
 			{
@@ -87,11 +93,6 @@ public class TankDrive : TankMoveState
 				owner.TorqueMultiplier = 0f;
 				owner.BrakeMultiplier = 0f;
 			}
-		}
-		else if(y < -0.1f)
-		{
-			owner.TorqueMultiplier = 0f;
-			owner.BrakeMultiplier = 1f;
 		}
 	}
 }

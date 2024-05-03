@@ -212,9 +212,9 @@ public abstract class ZombieBase : NetworkBehaviour
 	}
 
 	public virtual void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
-		Vector3 point, Vector3 velocity, int damage, bool playHitVFX = true)
+		Vector3 point, Vector3 force, int damage, bool playHitVFX = true)
 	{
-		HitVelocity = velocity;
+		HitVelocity = force;
 		HitBody = zombieHitBox.BodyType;
 		HitPoint = point;
 		if(playHitVFX)
