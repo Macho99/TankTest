@@ -209,13 +209,11 @@ public class TankAttack : VehicleBehaviour
 			fireReady = false;
 			if(LoadedShell == 0)
 			{
-				smallTime = LeftReloadTime;
 				largeTime = LeftReloadTime;
 				barRatio = largeTime / reloadTimes[0];
 			}
 			else
 			{
-				smallTime = LeftReloadTime;
 				largeTime = intervalFireTimer.RemainingTime(Runner).Value;
 				barRatio = largeTime / intervalFireCooltime;
 			}
@@ -226,27 +224,25 @@ public class TankAttack : VehicleBehaviour
 			if(LoadedShell == 0)
 			{
 				fireReady = false;
-				smallTime = LeftReloadTime;
 				largeTime = LeftReloadTime;
 				barRatio = largeTime / reloadTimes[0];
 			}
 			else if(LoadedShell == 1)
 			{
 				fireReady = true;
-				smallTime = LeftReloadTime;
 				largeTime = intervalFireCooltime;
 				barRatio = 0f;
 			}
 			else
 			{
 				fireReady = true;
-				smallTime = LeftReloadTime;
 				largeTime = intervalFireCooltime;
 				barRatio = 0f;
 			}
 		}
-
-		attackUI?.UpdateReloadUI(smallTime, largeTime, barRatio, fireReady);
+		smallTime = LeftReloadTime;
+		float smallRatio = LoadedShell == reloadTimes.Length ? 0f : smallTime / reloadTimes[LoadedShell];
+		attackUI?.UpdateReloadUI(smallTime, smallRatio, LoadedShell, largeTime, barRatio, fireReady);
 	}
 
 	private void RotateTurret(Vector3 forward)

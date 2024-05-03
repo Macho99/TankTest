@@ -9,6 +9,10 @@ public class TankAttackUI : SceneUI
 {
 	[SerializeField] Color readyColor;
 	[SerializeField] Color reloadColor;
+	[SerializeField] Color shellReloadColor;
+	[SerializeField] Color shellReadyColor;
+
+	Image[] shellImages = new Image[3];
 
 	Image curAimImg;
 	Image targetAimImg;
@@ -26,6 +30,10 @@ public class TankAttackUI : SceneUI
 		reloadBar = images["ReloadBar"];
 		smallReloadText = texts["SmallReloadText"];
 		largeReloadText = texts["LargeReloadText"];
+
+		shellImages[0] = images["Shell0"];
+		shellImages[1] = images["Shell1"];
+		shellImages[2] = images["Shell2"];
 	}
 
 	public void Init(float finalAccuracy)
@@ -46,7 +54,7 @@ public class TankAttackUI : SceneUI
 		curAimImg.rectTransform.localScale = Vector3.one * accuracy;
 	}
 
-	public void UpdateReloadUI(float smallTime, float largeTime, float barRatio, bool fireReady)
+	public void UpdateReloadUI(float smallTime, float shellRatio, int loadedShell, float largeTime, float barRatio, bool fireReady)
 	{
 		barRatio = Mathf.Clamp01(barRatio);
 		barRatio = 1 - barRatio;
@@ -58,5 +66,7 @@ public class TankAttackUI : SceneUI
 		this.largeReloadText.text = largeTime.ToString("F2");
 		reloadBar.color = color;
 		this.largeReloadText.color = color;
+
+
 	}
 }
