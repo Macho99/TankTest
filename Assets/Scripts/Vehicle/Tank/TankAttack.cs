@@ -75,8 +75,14 @@ public class TankAttack : VehicleBehaviour
 	public override void Spawned()
 	{
 		base.Spawned();
+		if(HasStateAuthority)
+		{
+			LeftReloadTime = reloadTimes[0];
+		}
+
 		intervalFireTimer = TickTimer.CreateFromTicks(Runner, 1);
-		if(Object.HasInputAuthority == false)
+
+		if(HasInputAuthority == false)
 		{
 			cam.gameObject.SetActive(false);
 		}
@@ -106,7 +112,7 @@ public class TankAttack : VehicleBehaviour
 
 		if (input.buttons.IsSet(Buttons.Fire) == true)
 		{
-			if(LoadedShell > 0)
+			if(LoadedShell > 0 && intervalFireTimer.ExpiredOrNotRunning(Runner))
 			{
 				Fire();
 			}
@@ -162,7 +168,8 @@ public class TankAttack : VehicleBehaviour
 
 	private void ReloadShell()
 	{
-		if (LoadedShell > reloadTimes.Length) { return; }
+		print($"{LoadedShell}, {LeftReloadTime}");
+		if (LoadedShell >= reloadTimes.Length) { return; }
 
 		LeftReloadTime -= Runner.DeltaTime;
 		if (LeftReloadTime < 0f)
@@ -178,7 +185,6 @@ public class TankAttack : VehicleBehaviour
 
 	private void UpdateUI()
 	{
-		print(LoadedShell);
 
 		Vector3 curHitPos;
 		if (Physics.Raycast(barrelTrans.position, barrelTrans.forward, out RaycastHit hitInfo, MAX_DIST, hitMask) == true)
@@ -296,8 +302,15 @@ public class TankAttack : VehicleBehaviour
 				}
 				else if(layer == breakableLayer)
 				{
-					attackCols[i].gameObject.GetComponent<BreakableObstacle>().
-						ExplosionBreakRequest(5000f, hit.point);
+					BreakableObstacle obstacle = attackCols[i].gameObject.GetComponent<BreakableObstacle>();
+					if (obstacle == null)
+					{
+						Debug.LogError($"{attackCols[i].gameObject.name}에 BreakableObstacle이 없습니다!");
+					}
+					else
+					{
+						obstacle.ExplosionBreakRequest(5000f, hit.point);
+					}
 				}
 			}
 		}
