@@ -25,8 +25,6 @@ public abstract class ZombieBase : NetworkBehaviour
 		public Collider col;
 	}
 
-	public enum TargetType { None, Meat, Player }
-
 	[SerializeField] protected float viewAngle = 45f;
 	[SerializeField] protected float lookDist = 10f;
 	[SerializeField] protected float playerLostTime = 5f;
@@ -44,7 +42,6 @@ public abstract class ZombieBase : NetworkBehaviour
 
 	protected BodyPart[] bodyHitParts = new BodyPart[(int)ZombieBody.Size];
 
-
 	public string WaitName { get; set; }
 	public string NextState { get; set; }
 	protected string prevState;
@@ -54,12 +51,18 @@ public abstract class ZombieBase : NetworkBehaviour
 	public Transform Eyes { get; private set; }
 	public Animator Anim { get { return anim; } }
 	public NavMeshAgent Agent { get { return agent; } }
-	public LayerMask PlayerMask { get; private set; }
-	public int PlayerLayer { get; set; }
 	public AnimWaitStruct? AnimWaitStruct { get; set; }
-	public TargetType CurTargetType { get; set; }
-	public Transform Target { get; set; }
-	public Tick LastPlayerFindTick { get; protected set; }
+
+	#region LayerAndMask
+	public LayerMask PlayerMask { get; private set; }
+	public LayerMask HittableMask { get; private set; }
+	public LayerMask FindObstacleMask { get; private set; }
+	public int PlayerLayer { get; private set; }
+	public int VehicleLayer { get; private set; }
+	#endregion
+
+	public TargetData TargetData { get; private set; }
+
 	public int CurHp { get; protected set; }
 	public int MaxHP { get { return maxHp; } }
 	public bool SyncTransfrom { get; set; } = true;
@@ -77,7 +80,10 @@ public abstract class ZombieBase : NetworkBehaviour
 	{
 		CurHp = MaxHP;
 		PlayerMask = LayerMask.GetMask("Player");
+		HittableMask = LayerMask.GetMask("Player", "Vehicle", "Breakable");
+		FindObstacleMask = LayerMask.GetMask("Default", "Environment", "Breakable");
 		PlayerLayer = LayerMask.NameToLayer("Player");
+		VehicleLayer = LayerMask.NameToLayer("Vehicle");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
 
@@ -105,6 +111,7 @@ public abstract class ZombieBase : NetworkBehaviour
 	public override void Spawned()
 	{
 		Agent.enabled = true;
+		TargetData = new TargetData(transform, Runner);
 	}
 
 	public override void FixedUpdateNetwork()
@@ -114,13 +121,14 @@ public abstract class ZombieBase : NetworkBehaviour
 
 		FindPlayer();
 		TargetManage();
+		TargetData.UpdateTargetData();
 	}
+
 
 	private void FindPlayer()
 	{
-		if (CurTargetType == TargetType.Player) return;
+		if (TargetData.Layer == PlayerLayer || TargetData.Layer == VehicleLayer) return;
 		if (PlayerFindTimer.ExpiredOrNotRunning(Runner) == false) return;
-
 		int result = Physics.OverlapSphereNonAlloc(transform.position, lookDist, overlapCols, PlayerMask);
 
 		if (result == 0)
@@ -135,12 +143,12 @@ public abstract class ZombieBase : NetworkBehaviour
 		float length = toPlayerVec.magnitude;
 		if (Vector3.Dot(toPlayerDir, Eyes.forward) > Mathf.Cos(viewAngle * Mathf.Deg2Rad))
 		{
-			if (Physics.Raycast(Eyes.position, toPlayerDir, length, LayerMask.GetMask("Default")) == false)
+			if (Physics.Raycast(Eyes.position, toPlayerDir, length, FindObstacleMask) == false)
 			{
-				LastPlayerFindTick = Runner.Tick;
-				Target = overlapCols[0].transform;
-				CurTargetType = TargetType.Player;
-				agent.ResetPath();
+				TargetData.LastFindTick = Runner.Tick;
+				TargetData.SetTarget(overlapCols[0].transform);
+				if (agent.enabled)
+					agent.ResetPath();
 			}
 		}
 
@@ -149,29 +157,32 @@ public abstract class ZombieBase : NetworkBehaviour
 
 	private void TargetManage()
 	{
-		if (Target == null) return;
+		if (TargetData.IsTargeting == false) return;
 
 		if (destinationTimer.ExpiredOrNotRunning(Runner))
 		{
 			destinationTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
-			if (Target != null && agent.enabled == true)
+			if (agent.enabled == true)
 			{
-				agent.SetDestination(Target.position);
+				agent.SetDestination(TargetData.Position);
 			}
 		}
 
-		if (CurTargetType != TargetType.Player) return;
+		if (TargetData.Layer != PlayerLayer && TargetData.Layer != VehicleLayer) return;
 
-		Vector3 toPlayerVec = ((Target.position + Vector3.up) - Eyes.position);
-		if (Physics.Raycast(Eyes.position, toPlayerVec.normalized, toPlayerVec.magnitude, LayerMask.GetMask("Default")) == false)
+		Vector3 toTargetVec = ((TargetData.Position + Vector3.up) - Eyes.position);
+		float toTargetMag = toTargetVec.magnitude;
+		if(toTargetMag < lookDist * 2f)
 		{
-			LastPlayerFindTick = Runner.Tick;
+			if (Physics.Raycast(Eyes.position, toTargetVec.normalized, toTargetMag, FindObstacleMask) == false)
+			{
+				TargetData.LastFindTick = Runner.Tick;
+			}
 		}
 
-		if (LastPlayerFindTick + playerLostTime * Runner.TickRate < Runner.Tick)
+		if (TargetData.LastFindTick + playerLostTime * Runner.TickRate < Runner.Tick)
 		{
-			Target = null;
-			CurTargetType = TargetType.None;
+			TargetData.SetTarget();
 		}
 	}
 
@@ -181,8 +192,8 @@ public abstract class ZombieBase : NetworkBehaviour
 		StringBuilder sb = new StringBuilder();
 		string printState = curState.Equals("AnimWait") ? $"{prevState} -> AnimWait({WaitName}) -> {NextState}" : curState;
 		sb.AppendLine($"현재 상태: {printState}");
-		sb.AppendLine($"마지막 타겟 발견시간: {((LastPlayerFindTick - Runner.Tick) / (float)Runner.TickRate).ToString("F1")}");
-		sb.AppendLine($"Target: {CurTargetType}");
+		sb.AppendLine($"마지막 타겟 발견시간: {((TargetData.LastFindTick - Runner.Tick) / (float)Runner.TickRate).ToString("F1")}");
+		sb.AppendLine($"Target: {(TargetData.IsTargeting == false ? "None" : LayerMask.LayerToName(TargetData.Layer))}");
 		sb.AppendLine($"CurHP: {CurHp}");
 		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
 		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
@@ -224,9 +235,7 @@ public abstract class ZombieBase : NetworkBehaviour
 
 		if (Object.IsProxy) return;
 
-		Target = source;
-		CurTargetType = TargetType.Player;
-		LastPlayerFindTick = Runner.Tick;
+		TargetData.SetTarget(source);
 
 		CurHp -= damage;
 		if (CurHp <= 0)

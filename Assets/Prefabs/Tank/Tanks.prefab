@@ -352,15 +352,16 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 555861431534664298}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 82.3, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0.9998447, z: -0, w: -0.017626194}
+  m_LocalPosition: {x: 93.22, y: 0, z: -9.65}
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4071876040818272264}
   - {fileID: 5480117570928288317}
+  - {fileID: 4752119859726280694}
   m_Father: {fileID: 3912409241756073668}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -182.02, z: 0}
 --- !u!114 &249517054183651742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -422,7 +423,7 @@ MonoBehaviour:
   maxReverseSpeed: -15.5
   minRotateRpmDiff: 50
   maxRotateRpmDiff: 70
-  torqueMultiplier: 2.5
+  finalTorqueMultiplier: 2
   leftWheelTrans:
   - {fileID: 1207109260035558212}
   - {fileID: 1214962575259576524}
@@ -1659,7 +1660,7 @@ GameObject:
   - component: {fileID: 4752119859726280694}
   - component: {fileID: 2691392653022538291}
   m_Layer: 7
-  m_Name: ObstacleBreaker
+  m_Name: VehicleTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1673,12 +1674,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2433544720001232517}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.002, z: 3.839}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.002, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4071876040818272264}
+  m_Father: {fileID: 3695659942753710040}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &2691392653022538291
 BoxCollider:
@@ -1699,7 +1700,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3.47, y: 1.7, z: 1}
+  m_Size: {x: 4.1, y: 2.2, z: 8.48}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2468536378980693593
 GameObject:
@@ -2142,7 +2143,6 @@ Transform:
   - {fileID: 5487329654377865658}
   - {fileID: 2923291012429266730}
   - {fileID: 2065246939012899723}
-  - {fileID: 4752119859726280694}
   m_Father: {fileID: 3695659942753710040}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3237691944118853331
@@ -5653,11 +5653,13 @@ MonoBehaviour:
   fireVFX: {fileID: 8362269676599913071, guid: c6f1f00f97c76b0479b80b53e3b602a9, type: 3}
   hitVFX: {fileID: 5957145100804776440, guid: beff618826e09ff4c97f585a2b5ebaca, type: 3}
   reloadTimes:
-  - 13.6
-  - 9.7
-  - 8.4
+  - 3.5
+  - 4
+  - 5
   intervalFireCooltime: 3
   fireRebound: 300000
+  damage: 500
+  explosionRadius: 5
   attackUIPrefab: {fileID: 91368930306778078, guid: 7054302a4bd834a45a369c71b2cc11b7, type: 3}
   finalAcc: 0.8
   minBodyAcc: 0.5
@@ -5667,7 +5669,7 @@ MonoBehaviour:
   aimingSpeed: 0.8
   velocityAccMul: 1
   turretRotAccMul: 0.05
-  realAccMul: 0.04
+  realAccMul: 0.02
   _CurBodyAcc: 0
   _CurTurretAcc: 0
   _TurretAngle: 0

@@ -30,7 +30,7 @@ public class BruteRoar : BruteZombieState
 
 	public override void Enter()
 	{
-		target = owner.Target;
+		target = owner.TargetData.Transform;
 		owner.LookWeight = 0f;
 		animEntered = false;
 		spawnTimer = TickTimer.CreateFromSeconds(owner.Runner, 2f);
@@ -67,7 +67,7 @@ public class BruteRoar : BruteZombieState
 		Zombie zombie = netObj.GetComponent<Zombie>();
 		zombie.transform.rotation = Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value));
 		zombie.transform.position = owner.transform.position + pos;
-		zombie.Target = target;
+		zombie.TargetData.SetTarget(target);
 	}
 
 	public override void SetUp()

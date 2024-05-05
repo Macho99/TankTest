@@ -63,7 +63,7 @@ public class BruteTrace : BruteZombieState
 
 	private bool CheckTransition()
 	{
-		if (owner.Target == null)
+		if (owner.TargetData.IsTargeting == false)
 		{
 			if (owner.Agent.hasPath && owner.Agent.remainingDistance < owner.NormalAttackDist)
 			{
@@ -74,40 +74,29 @@ public class BruteTrace : BruteZombieState
 			return false;
 		}
 
-		Vector3 attackPos = owner.transform.position;
-		float dist = (attackPos - owner.Target.position).magnitude;
-
 		//플레이어가 좁은 건물로 들어갈 경우
 		//if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
 		if (owner.Agent.pathStatus == NavMeshPathStatus.PathPartial)
 		{
-			if (dist > 5f)
+			if (owner.TargetData.Distance > 5f)
 			{
 				ChangeState(BruteZombie.State.Roar);
-				owner.CurTargetType = ZombieBase.TargetType.None;
-				owner.Target = null;
+				owner.TargetData.SetTarget();
 				owner.PlayerFindTimer = TickTimer.CreateFromSeconds(owner.Runner, 10f);
 				owner.Agent.ResetPath();
 				return true;
 			}
 		}
 
-		Vector3 targetDir = (owner.Target.position - owner.transform.position);
-		targetDir.y = 0f;
-		targetDir.Normalize();
-
-		float angle = Vector3.SignedAngle(owner.transform.forward, targetDir, owner.transform.up);
-		float sign = Mathf.Sign(angle);
-		angle = Mathf.Abs(angle);
-
 		float attackDist = owner.NormalAttackDist;
+		TargetData targetData = owner.TargetData;
 		if (owner.IsBerserk)
 		{
 			//특수 공격 쿨타임 되면
 			if (owner.TwoHandGroundTimer.ExpiredOrNotRunning(owner.Runner))
 			{
 				//특수 근접공격
-				if (dist < attackDist && angle < 60f)
+				if (targetData.Distance < attackDist && targetData.Angle < 60f)
 				{
 					Attack(BruteZombie.AttackType.TwoHandGround);
 					owner.TwoHandGroundTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.TwoHandGroundCooltime);
@@ -116,10 +105,10 @@ public class BruteTrace : BruteZombieState
 			}
 			if (owner.DashTimer.ExpiredOrNotRunning(owner.Runner))
 			{
-				if(CheckDash(targetDir, dist) == true)
+				if(CheckDash(targetData.Direction, targetData.Distance) == true)
 				{
 					//돌진 공격
-					if (dist < owner.DashDist && angle < 5f)
+					if (targetData.Distance < owner.DashDist && targetData.Angle < 5f)
 					{
 						Attack(BruteZombie.AttackType.Dash);
 						owner.DashTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.DashCooltime);
@@ -130,9 +119,9 @@ public class BruteTrace : BruteZombieState
 			if (owner.JumpTimer.ExpiredOrNotRunning(owner.Runner))
 			{
 				//점프 공격
-				if (owner.MinJumpDist < dist && dist < owner.MaxJumpDist)
+				if (owner.MinJumpDist < targetData.Distance && targetData.Distance < owner.MaxJumpDist)
 				{
-					if (CheckJump(dist) == true)
+					if (CheckJump(targetData.Distance) == true)
 					{
 						Attack(BruteZombie.AttackType.Jump);
 						owner.JumpTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.JumpCooltime);
@@ -143,9 +132,9 @@ public class BruteTrace : BruteZombieState
 			if (owner.StoneTimer.ExpiredOrNotRunning(owner.Runner))
 			{
 				//돌 던지기 공격
-				if (owner.MinStoneDist < dist && dist < owner.MaxStoneDist)
+				if (owner.MinStoneDist < targetData.Distance && targetData.Distance < owner.MaxStoneDist)
 				{
-					if (CheckStone(dist) == true)
+					if (CheckStone(targetData.Distance) == true)
 					{
 						Attack(BruteZombie.AttackType.ThrowStone);
 						owner.StoneTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.StoneCooltime);
@@ -154,17 +143,17 @@ public class BruteTrace : BruteZombieState
 				}
 			}
 		}
-		if (dist < owner.NormalAttackDist)
+		if (targetData.Distance < owner.NormalAttackDist)
 		{
-			print(angle);
+			print(targetData.Angle);
 			BruteZombie.AttackType attackType;
-			if (angle > 90f)
+			if (targetData.Angle > 90f)
 			{
 				attackType = BruteZombie.AttackType.Back;
 			}
-            else if(angle > 30f)
+            else if(targetData.Angle > 30f)
             {
-				attackType = sign < 0f ? BruteZombie.AttackType.LeftFoot : BruteZombie.AttackType.RightFoot;
+				attackType = targetData.Sign < 0f ? BruteZombie.AttackType.LeftFoot : BruteZombie.AttackType.RightFoot;
             }
 			else
 			{
@@ -198,9 +187,7 @@ public class BruteTrace : BruteZombieState
 
 		if (type == BruteZombie.AttackType.ThrowStone)
 		{
-			lookDir = owner.Target.position - owner.transform.position;
-			lookDir.y = 0f;
-			lookDir.Normalize();
+			lookDir = owner.TargetData.Direction;
 			animWait.startAction += () =>
 			{
 				stoneCreateTimer = TickTimer.CreateFromSeconds(owner.Runner, 1.2f);

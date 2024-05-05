@@ -4,10 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.AI;
-using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
 public enum RagdollState { Animate, Ragdoll, FaceUpStand, FaceDownStand, FaceUpCrawl, FaceDownCrawl };
@@ -30,8 +27,9 @@ public class Zombie : ZombieBase
 	//public static BoneTransform[] FaceUpBoneTransforms { get; private set; }
 	//public static BoneTransform[] FaceDownBoneTranforms { get; private set; }
 	public float FallAsleepThreshold { get { return fallAsleepThreshold; } }
-	public LayerMask FallAsleepMask { get; set; }
-	public LayerMask MeatMask { get; set; }
+	public LayerMask DebrisMask { get; set; }
+	public int MeatLayer { get; private set; }
+	public LayerMask MeatMask { get; private set; }
 
 	private float maxSpeed;
 	public float TraceSpeed { get 
@@ -52,7 +50,8 @@ public class Zombie : ZombieBase
 
 		CurLegHp = MaxLegHp;
 		MeatMask = LayerMask.GetMask("Meat");
-		FallAsleepMask = LayerMask.GetMask("FallAsleepObject");
+		DebrisMask = LayerMask.GetMask("Debris");
+		MeatLayer = LayerMask.NameToLayer("Meat");
 
 		Bones = Hips.GetComponentsInChildren<Transform>();
 		RagdollBones = ragdollHips.GetComponentsInChildren<Transform>();
@@ -123,7 +122,7 @@ public class Zombie : ZombieBase
 
 	private void FindMeat()
 	{
-		if (agent.hasPath || CurTargetType == TargetType.Player) return;
+		if (agent.hasPath || TargetData.Layer == PlayerLayer || TargetData.Layer == VehicleLayer) return;
 		if (meatFindTimer.ExpiredOrNotRunning(Runner) == false) return;
 		if (CurHp == MaxHP) return;
 
@@ -134,9 +133,9 @@ public class Zombie : ZombieBase
 		if (result == 0)
 			return;
 
-		agent.ResetPath();
-		Target = overlapCols[0].transform;
-		CurTargetType = TargetType.Meat;
+		if (agent.enabled)
+			agent.ResetPath();
+		TargetData.SetTarget(overlapCols[0].transform);
 	}
 
 	public void EnableRagdoll(bool value)
@@ -254,7 +253,7 @@ public class Zombie : ZombieBase
 
 	private void StartRagdoll()
 	{
-		LastPlayerFindTick = Runner.Tick + Runner.TickRate * 10;
+		TargetData.LastFindTick = Runner.Tick + Runner.TickRate * 10;
 		CurRagdollState = RagdollState.Ragdoll;
 		RagdollCnt++;
 	}

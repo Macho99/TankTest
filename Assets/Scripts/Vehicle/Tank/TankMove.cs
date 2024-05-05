@@ -89,12 +89,12 @@ public class TankMove : VehicleBehaviour
 		netRb = GetComponent<NetworkRigidbody3D>();
 
 		stateMachine = GetComponent<NetworkStateMachine>();
-		stateMachine.AddState(State.Park, new TankPark(this));
-		stateMachine.AddState(State.RpmMatch, new TankRpmMatch(this));
-		stateMachine.AddState(State.Drive, new TankDrive(this));
-		stateMachine.AddState(State.GearShift, new TankGearShift(this));
-		stateMachine.AddState(State.ReverseRpmMatch, new TankReverseRpmMatch(this));
-		stateMachine.AddState(State.Reverse, new TankReverse(this));
+		stateMachine.AddState(State.Park, new VehiclePark(this));
+		stateMachine.AddState(State.RpmMatch, new VehicleRpmMatch(this));
+		stateMachine.AddState(State.Drive, new VehicleDrive(this));
+		stateMachine.AddState(State.GearShift, new VehicleGearShift(this));
+		stateMachine.AddState(State.ReverseRpmMatch, new VehicleReverseRpmMatch(this));
+		stateMachine.AddState(State.Reverse, new VehicleReverse(this));
 
 		stateMachine.InitState(State.Park);
 
@@ -179,7 +179,7 @@ public class TankMove : VehicleBehaviour
 
 	private float CalculateWheelRPM(out float velocity)
 	{
-		float radios = leftWheelCols[1].radius;
+		float radios = leftWheelCols[1].radius * transform.localScale.x;
 
 		#region minBaseRpm
 		//float measuredLeftRpm = float.MaxValue;

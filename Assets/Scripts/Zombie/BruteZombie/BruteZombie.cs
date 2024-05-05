@@ -128,9 +128,9 @@ public class BruteZombie : ZombieBase
 
 	public void LookTarget()
 	{
-		if (Target != null)
+		if (TargetData.IsTargeting == true)
 		{
-			LookPos = Target.position;
+			LookPos = TargetData.Position;
 		}
 		else
 		{
@@ -343,19 +343,19 @@ public class BruteZombie : ZombieBase
 		}
 
 		Vector3 targetDir;
-		if (Target == null)
+		if (TargetData.IsTargeting == false)
 		{
 			targetDir = transform.forward;
 		}
 		else
 		{
-			targetDir = Target.position - transform.position;
+			targetDir = TargetData.Position - transform.position;
 			if (drawJumpGizmos == true){
 				Gizmos.color = Color.blue;
 
 				Vector3 jumpLineOffset = Vector3.up * 2f;
 				Vector3 startPos = transform.position + jumpLineOffset;
-				Vector3 endPos = Target.position + jumpLineOffset;
+				Vector3 endPos = TargetData.Position + jumpLineOffset;
 				float jumpHeight = GetJumpHeight((startPos - endPos).magnitude);
 
 				Vector3 curPos = startPos;
@@ -377,7 +377,7 @@ public class BruteZombie : ZombieBase
 
 			if(drawStoneGizmos == true){
 				Gizmos.color = Color.gray;
-				Vector3 targetPos = Target.position;
+				Vector3 targetPos = TargetData.Position;
 				Vector3 ownerPosition = transform.position + Vector3.up * 3f;
 				float arriveTime = (targetPos - ownerPosition).magnitude / StoneSpeed;
 				Vector3 stoneVelocity = (targetPos - ownerPosition) / arriveTime;

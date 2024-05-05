@@ -18,8 +18,6 @@ public class ZombieCrawlTrace : ZombieState
 	bool eatEnd;
 	float eatElapsed;
 
-	TickTimer destinationTimer;
-
 	public ZombieCrawlTrace(Zombie owner) : base(owner)
 	{
 	}
@@ -40,13 +38,6 @@ public class ZombieCrawlTrace : ZombieState
 
 	public override void FixedUpdateNetwork()
 	{
-		if (destinationTimer.ExpiredOrNotRunning(owner.Runner))
-		{
-			destinationTimer = TickTimer.CreateFromSeconds(owner.Runner, 0.5f);
-			if (owner.Target != null)
-				owner.Agent.SetDestination(owner.Target.position);
-		}
-
 		if (CheckTurn() == true) { return; }
 
 		float speedY = 0f;
@@ -93,40 +84,67 @@ public class ZombieCrawlTrace : ZombieState
 
 		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 2f)
 		{
-			if (owner.Target == null)
+			if (owner.TargetData.IsTargeting == false)
 			{
 				owner.Agent.ResetPath();
 				ChangeState(Zombie.State.CrawlIdle);
 				return;
 			}
 
-			Vector3 eyePos = owner.Eyes.position;
-			eyePos.y = owner.transform.position.y;
-			Vector3 targetHeadVec = owner.Target.position - eyePos;
+			//Vector3 eyePos = owner.Eyes.position;
+			//eyePos.y = owner.transform.position.y;
+			//Vector3 targetHeadVec = owner.TargetData.Position - eyePos;
 
-			if (Vector3.Dot(targetHeadVec.normalized, owner.transform.forward) > Mathf.Cos(30f * Mathf.Deg2Rad))
+			//if (Vector3.Dot(targetHeadVec.normalized, owner.transform.forward) > Mathf.Cos(30f * Mathf.Deg2Rad))
+			//{
+			//	Vector3 targetVec = owner.TargetData.Position - owner.Position;
+			//	float sqrMag = targetVec.sqrMagnitude;
+			//	if(owner.TargetData.Layer == owner.MeatLayer)
+			//	{
+			//		if(owner.Agent.remainingDistance < 1f)
+			//		{
+			//			Eat();
+			//		}
+			//		return;
+			//	}
+
+			//	if (sqrMag < 3f)
+			//	{
+			//		if(sqrMag > 1.5f)
+			//		{
+			//			Attack(1);
+			//		}
+			//		else
+			//		{
+			//			Attack(0);
+			//		}
+			//	}
+			//}
+
+			if (owner.TargetData.Layer == owner.MeatLayer)
 			{
-				Vector3 targetVec = owner.Target.position - owner.transform.position;
-				float sqrMag = targetVec.sqrMagnitude;
-				if(owner.CurTargetType == Zombie.TargetType.Meat)
+				if (owner.TargetData.Distance < 1f && owner.TargetData.AbsAngle < 30f)
 				{
-					if(owner.Agent.remainingDistance < 1f)
-					{
-						Eat();
-					}
+					Eat();
 					return;
 				}
-
-				if (sqrMag < 3f)
+			}
+			if (owner.TargetData.Layer == owner.PlayerLayer || owner.TargetData.Layer == owner.VehicleLayer)
+			{
+				if(owner.TargetData.CheckObstacleAttack(owner.transform.position))
 				{
-					if(sqrMag > 1.5f)
-					{
-						Attack(1);
-					}
-					else
-					{
-						Attack(0);
-					}
+					Attack(0);
+					return;
+				}
+				if (owner.TargetData.Distance < 3f && owner.TargetData.AbsAngle < 20f)
+				{
+					Attack(1);
+					return;
+				}
+				else if (owner.TargetData.Distance < 1.5f && owner.TargetData.AbsAngle < 45f)
+				{
+					Attack(0);
+					return;
 				}
 			}
 		}
@@ -194,14 +212,13 @@ public class ZombieCrawlTrace : ZombieState
 					if (owner.CurHp == owner.MaxHP)
 					{
 						eatEnd = true;
-						owner.Target = null;
-						owner.CurTargetType = Zombie.TargetType.None;
+						owner.TargetData.SetTarget(null);
 						owner.SetAnimBool("Eat", false);
 						return;
 					}
 				}
 
-				if (owner.CurTargetType == Zombie.TargetType.Player)
+				if (owner.TargetData.Layer == owner.PlayerLayer)
 				{
 					eatEnd = true;
 					owner.SetAnimBool("Eat", false);
