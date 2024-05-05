@@ -75,7 +75,7 @@ public class TrackController : MonoBehaviour
 		Velocity = rpm * 60f * 2 * radius * Mathf.PI * 0.001f;
 
 		int vertexIdx = frontIdx - 1;
-		for (int i = 1; i < wheelCols.Length - 1; i++)
+		for (int i = 0; i < wheelCols.Length; i++)
 		{
 			wheelCols[i].GetWorldPose(out Vector3 pos, out Quaternion quat);
 			Vector3 trackPos = transform.InverseTransformPoint(pos);

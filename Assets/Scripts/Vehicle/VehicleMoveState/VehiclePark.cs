@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class VehiclePark : VehicleMoveState
 {
-	public VehiclePark(TankMove owner) : base(owner)
+	public VehiclePark(VehicleMove owner) : base(owner)
 	{
 	}
 
@@ -34,11 +34,11 @@ public class VehiclePark : VehicleMoveState
 		if(y < -0.1f)
 		{
 			owner.Reverse = true;
-			ChangeState(TankMove.State.ReverseRpmMatch);
+			ChangeState(VehicleMove.State.ReverseRpmMatch);
 		}
 		else if (owner.MoveInput.sqrMagnitude > 0.1f)
 		{
-			ChangeState(TankMove.State.RpmMatch);
+			ChangeState(VehicleMove.State.RpmMatch);
 		}
 	}
 

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 public abstract class VehicleMoveState : NetworkBaseState
 {
-	protected TankMove owner;
+	protected VehicleMove owner;
 
-	public VehicleMoveState(TankMove owner)
+	public VehicleMoveState(VehicleMove owner)
 	{
 		this.owner = owner;
 	}

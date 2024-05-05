@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class VehicleReverse : VehicleMoveState
 {
-	public VehicleReverse(TankMove owner) : base(owner)
+	public VehicleReverse(VehicleMove owner) : base(owner)
 	{
 	}
 

@@ -86,11 +86,6 @@ public class TankAttack : VehicleBehaviour
 			LeftReloadTime = reloadTimes[0];
 		}
 		intervalFireTimer = TickTimer.CreateFromTicks(Runner, 1);
-
-		if(HasInputAuthority == false)
-		{
-			cam.gameObject.SetActive(false);
-		}
 		visualFireCnt = FireCnt;
 		spawned = true;
 	}

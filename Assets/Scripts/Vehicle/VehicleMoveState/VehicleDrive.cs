@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class VehicleDrive : VehicleMoveState
 {
-	public VehicleDrive(TankMove owner) : base(owner)
+	public VehicleDrive(VehicleMove owner) : base(owner)
 	{
 	}
 
@@ -29,7 +29,7 @@ public class VehicleDrive : VehicleMoveState
 			if (owner.Velocity > owner.GearChangeSpeeds[owner.CurGear])
 			{
 				owner.CurGear++;
-				ChangeState(TankMove.State.GearShift);
+				ChangeState(VehicleMove.State.GearShift);
 				return;
 			}
 		}
@@ -39,7 +39,7 @@ public class VehicleDrive : VehicleMoveState
 			if (owner.Velocity < owner.GearChangeSpeeds[owner.CurGear - 1] - 4f)
 			{
 				owner.CurGear--;
-				ChangeState(TankMove.State.GearShift);
+				ChangeState(VehicleMove.State.GearShift);
 				return;
 			}
 		}
@@ -48,7 +48,7 @@ public class VehicleDrive : VehicleMoveState
 		{
 			owner.CurGear = 0;
 			owner.EngineRpm = owner.MinEngineRpm;
-			ChangeState(TankMove.State.Park);
+			ChangeState(VehicleMove.State.Park);
 			return;
 		}
 	}

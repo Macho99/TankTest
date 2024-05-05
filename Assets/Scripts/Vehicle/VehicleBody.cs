@@ -76,7 +76,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 
 	private void Hit(IHittable hittable, Transform colTrans)
 	{
-		print($"{colTrans.name} 때림");
+		//print($"{colTrans.name} 때림");
 		hittable.ApplyDamage(transform, transform.position,
 			(colTrans.position - transform.position).normalized * rb.velocity.magnitude * 20f, (int) (damage * rb.velocity.magnitude));
 	}

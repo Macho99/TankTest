@@ -9,7 +9,7 @@ public class VehicleRpmMatch : VehicleMoveState
 {
 	float rpm;
 
-	public VehicleRpmMatch(TankMove owner) : base(owner)
+	public VehicleRpmMatch(VehicleMove owner) : base(owner)
 	{
 	}
 
@@ -34,13 +34,13 @@ public class VehicleRpmMatch : VehicleMoveState
 	{
 		if(owner.Direction == 1 && owner.AbsWheelRpm * owner.CurGearRatio > rpm)
 		{
-			ChangeState(TankMove.State.Drive);
+			ChangeState(VehicleMove.State.Drive);
 			return;
 		}
 
 		if(rpm < owner.MinEngineRpm)
 		{
-			ChangeState(TankMove.State.Park);
+			ChangeState(VehicleMove.State.Park);
 		}
 	}
 

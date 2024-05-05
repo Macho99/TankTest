@@ -11,7 +11,7 @@ public class VehicleGearShift : VehicleMoveState
 	float rpm;
 	float velocity;
 
-	public VehicleGearShift(TankMove owner) : base(owner)
+	public VehicleGearShift(VehicleMove owner) : base(owner)
 	{
 	}
 

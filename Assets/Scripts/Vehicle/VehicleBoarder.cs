@@ -17,7 +17,6 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 
 	VehicleBehaviour[] vehicleBehaviours;
 	TestPlayer localPlayer;
-	bool isFirst = true;
 	const int MAX_PLAYER = 4;
 
 	public Transform Cam {  get { return cam; } }
@@ -180,7 +179,7 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 		string localPlayerStr = localPlayer == null ? "None" : localPlayer.Object.Id.ToString();
 		sb.AppendLine($"LocalPlayer: {localPlayerStr}");
 		sb.AppendLine("Local List");
-		for(int i = 0; i < MAX_PLAYER; i++)
+		for (int i = 0; i < MAX_PLAYER; i++)
 		{
 			sb.Append($"{localGetOnPlayers[i].Raw} / ");
 		}

@@ -9,7 +9,7 @@ public class VehicleReverseRpmMatch : VehicleMoveState
 {
 	float rpm;
 
-	public VehicleReverseRpmMatch(TankMove owner) : base(owner)
+	public VehicleReverseRpmMatch(VehicleMove owner) : base(owner)
 	{
 	}
 	public override void Enter()
