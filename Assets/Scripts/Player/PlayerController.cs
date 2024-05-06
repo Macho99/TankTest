@@ -18,7 +18,7 @@ public class PlayerController : NetworkBehaviour
     public Inventory Inventory { get; private set; }
     private LocalPlayerDebugUI LocaldebugUI;
 
-    [SerializeField] private PlayerIngameDebugUI IngamedebugUI;
+    [SerializeField] private IngameDebugUI IngamedebugUI;
     [Networked] public float VelocityY { get; set; }
     [Networked, OnChangedRender(nameof(OnChangeUpperLayerWeight))] public float UpperLayerWeight { get; set; }
     private void Awake()
@@ -55,30 +55,13 @@ public class PlayerController : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        if (InputListner.pressButton.IsSet(NetworkInputData.ButtonType.MouseLock))
-        {
-            if (Cursor.visible == true)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
-        }
-
-
-      
-
 
         Falling();
+
         movement.Move();
 
 
-        if (InputListner.pressButton.IsSet(NetworkInputData.ButtonType.DebugText))
+        if (InputListner.pressButton.IsSet(ButtonType.DebugText))
         {
             ClearDebugText();
         }
@@ -87,23 +70,34 @@ public class PlayerController : NetworkBehaviour
     public override void Render()
     {
         AddDebugText("State", stateMachine.curStateStr);
+
     }
     public void Falling()
     {
+
+
+        animator.SetFloat("VelocityY", VelocityY);
+
         if (movement.Kcc.RealVelocity.y <= -1F)
         {
             VelocityY += Mathf.Abs(movement.Kcc.RealVelocity.y) * Runner.DeltaTime;
 
-            animator.SetFloat("VelocityY", VelocityY);
-
             if (stateMachine.curStateStr != "Falling" && stateMachine.curStateStr != "Land" && movement.Kcc.RealVelocity.y <= -movement.JumpForce)
+            {
+
+                Debug.Log("falling");
                 stateMachine.ChangeState(PlayerState.Falling);
+            }
 
 
-            
+            if (VelocityY <= 3f && movement.IsGround())
+            {
+                VelocityY = 0f;
+            }
+
         }
 
-       
+
     }
 
     public bool RaycastGroundCheck()
@@ -138,13 +132,13 @@ public class PlayerController : NetworkBehaviour
     }
     public void Aiming()
     {
-        if (InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Adherence))
+        if (InputListner.pressButton.IsSet(ButtonType.Adherence))
         {
             animator.SetBool("Aim", true);
             rigManager.LeftHandweight = 1f;
             movement.CamController.ChangeCamera(BasicCamController.CameraType.Aim);
         }
-        else if (InputListner.releaseButton.IsSet(NetworkInputData.ButtonType.Adherence))
+        else if (InputListner.releaseButton.IsSet(ButtonType.Adherence))
         {
             animator.SetBool("Aim", false);
             rigManager.LeftHandweight = 0f;

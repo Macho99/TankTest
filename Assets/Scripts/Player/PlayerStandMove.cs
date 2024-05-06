@@ -19,7 +19,7 @@ public class PlayerStandMove : PlayerMove
     {
         if (input.inputDirection == Vector2.zero)
             moveSpeed = 0f;
-        else if (input.buttons.IsSet(NetworkInputData.ButtonType.Run))
+        else if (input.buttons.IsSet(ButtonType.Run))
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;

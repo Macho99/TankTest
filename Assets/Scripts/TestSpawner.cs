@@ -79,13 +79,14 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         NetworkInputData data = new NetworkInputData();
         data.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
         data.mouseDelta = Mouse.current.delta.value;
-        data.buttons.Set(NetworkInputData.ButtonType.Run, playerControls.Player.Run.IsPressed());
-        data.buttons.Set(NetworkInputData.ButtonType.Jump, playerControls.Player.Jump.IsPressed());
-        data.buttons.Set(NetworkInputData.ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
-        data.buttons.Set(NetworkInputData.ButtonType.Interact, playerControls.Player.Interact.IsPressed());
-        data.buttons.Set(NetworkInputData.ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
-        data.buttons.Set(NetworkInputData.ButtonType.DebugText, playerControls.Player.DebugText.IsPressed());
-        data.buttons.Set(NetworkInputData.ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
+        data.buttons.Set(ButtonType.Run, playerControls.Player.Run.IsPressed());
+        data.buttons.Set(ButtonType.Jump, playerControls.Player.Jump.IsPressed());
+        data.buttons.Set(ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
+        data.buttons.Set(ButtonType.Interact, playerControls.Player.Interact.IsPressed());
+        data.buttons.Set(ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
+        data.buttons.Set(ButtonType.DebugText, playerControls.Player.DebugText.IsPressed());
+        data.buttons.Set(ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
+        data.buttons.Set(ButtonType.ActiveItemContainer, playerControls.Player.ActiveItemContainer.IsPressed());
 
         input.Set(data);
     }
@@ -107,7 +108,6 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if (runner.IsServer)
         {
             NetworkObject playerObject = runner.Spawn(testPlayer, spawnPoint.position, spawnPoint.rotation, inputAuthority: player);
-
             runner.SetPlayerObject(player, playerObject);
             playerObjects.Add(player, playerObject);
         }

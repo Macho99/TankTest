@@ -98,6 +98,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ActiveItemContainer"",
+                    ""type"": ""Button"",
+                    ""id"": ""fe00fdf4-8a7a-489a-bb9c-cdfa0c12d894"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -232,6 +241,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Adherence"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8b5c74a8-cf83-42e2-b7ff-7f9de3ca4699"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ActiveItemContainer"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -248,6 +268,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_DebugText = m_Player.FindAction("DebugText", throwIfNotFound: true);
         m_Player_Adherence = m_Player.FindAction("Adherence", throwIfNotFound: true);
+        m_Player_ActiveItemContainer = m_Player.FindAction("ActiveItemContainer", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -317,6 +338,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_DebugText;
     private readonly InputAction m_Player_Adherence;
+    private readonly InputAction m_Player_ActiveItemContainer;
     public struct PlayerActions
     {
         private @PlayerControls m_Wrapper;
@@ -329,6 +351,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @DebugText => m_Wrapper.m_Player_DebugText;
         public InputAction @Adherence => m_Wrapper.m_Player_Adherence;
+        public InputAction @ActiveItemContainer => m_Wrapper.m_Player_ActiveItemContainer;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -362,6 +385,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Adherence.started += instance.OnAdherence;
             @Adherence.performed += instance.OnAdherence;
             @Adherence.canceled += instance.OnAdherence;
+            @ActiveItemContainer.started += instance.OnActiveItemContainer;
+            @ActiveItemContainer.performed += instance.OnActiveItemContainer;
+            @ActiveItemContainer.canceled += instance.OnActiveItemContainer;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -390,6 +416,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Adherence.started -= instance.OnAdherence;
             @Adherence.performed -= instance.OnAdherence;
             @Adherence.canceled -= instance.OnAdherence;
+            @ActiveItemContainer.started -= instance.OnActiveItemContainer;
+            @ActiveItemContainer.performed -= instance.OnActiveItemContainer;
+            @ActiveItemContainer.canceled -= instance.OnActiveItemContainer;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -417,5 +446,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnInteract(InputAction.CallbackContext context);
         void OnDebugText(InputAction.CallbackContext context);
         void OnAdherence(InputAction.CallbackContext context);
+        void OnActiveItemContainer(InputAction.CallbackContext context);
     }
 }

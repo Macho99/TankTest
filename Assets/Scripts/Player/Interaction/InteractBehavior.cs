@@ -23,11 +23,4 @@ public abstract class InteractBehavior
     public abstract void InteractEnd();
 
     public abstract void InteractStop();
-    protected virtual void Complete(MaterialItem item)
-    {
-
-        owner.Inventory.AddItem(item);
-
-        InteractStop();
-    }
 }

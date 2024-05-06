@@ -8,30 +8,27 @@ using UnityEngine.Animations.Rigging;
 
 public class PlayerInteract : NetworkBehaviour
 {
-    private float distance;
+    private float rayDistance;
     [SerializeField] private Transform raycastTr;
-    public Action<bool, InteractData> onDetect;
-    private InteractData interactData;
+    [SerializeField] private ItemContainer itemContainer;
+    private PlayerInputListner inputListner;
+    public Action<bool, DetectData> onDetect;
+    private DetectData interactData;
     [Networked] public NetworkBool IsDetect { get; set; }
 
     private InteractBehavior[] interactBehaviors;
     private InteractObject interactObject;
-    [Networked] public Vector3 targetPoint { get; set; }
-    public float ObjectDistance { get; set; }
-
-    private SimpleKCC kcc;
 
     public InteractObject InteractObject { get { return interactObject; } set { interactObject = value; } }
 
-    public InteractData InteractData { get { return interactData; } set => interactData = value; }
+    public DetectData InteractData { get { return interactData; } set => interactData = value; }
 
     private void Awake()
     {
-        kcc = GetComponent<SimpleKCC>();
-        ObjectDistance = 1f;
-        distance = 3f;
+        rayDistance = 5f;
         interactBehaviors = new InteractBehavior[(int)InteractType.Size];
         PlayerController controller = GetComponent<PlayerController>();
+        inputListner = GetComponent<PlayerInputListner>();
     }
     public override void Spawned()
     {
@@ -46,84 +43,77 @@ public class PlayerInteract : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
 
-         RaycastDetect();
+        RaycastDetect();
+
+
+        if (Runner.IsForward)
+        {
+            if (inputListner.pressButton.IsSet(ButtonType.Interact))
+            {
+                if (TryInteract())
+                {
+                    interactObject.StartInteraction();
+                }
+            }
+
+        }
+
+
 
     }
     public void RaycastDetect()
     {
-        if (!CanInteract())
-        {
-            IsDetect = false;
-            onDetect?.Invoke(IsDetect, default);
-            return;
-        }
 
         Ray ray = new Ray();
         ray.origin = raycastTr.position;
         ray.direction = raycastTr.transform.forward;
 
-        if (Physics.Raycast(ray, out RaycastHit hit, distance))
+        Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.red);
+        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
         {
-            if (hit.collider.TryGetComponent(out InteractObject detectObject))
+            if (hit.collider.TryGetComponent(out IDetectable detectObject))
             {
-
-                if (detectObject.Detect(out InteractData interactData))
-                {
-                    if(interactData == this.interactData)
-                    {
-
-                    }
-
-                    this.interactData = interactData;
-                    IsDetect = true;
-                    onDetect?.Invoke(IsDetect, this.interactData);
-
-                }
-            }
-            else
-            {
-
-                interactData = default;
-                IsDetect = false;
-                onDetect?.Invoke(IsDetect, default);
+                detectObject.OnEnterDetect(out DetectData interactData);
+                this.interactData = interactData;
+                IsDetect = true;
+                onDetect?.Invoke(IsDetect, this.interactData);
+                return;
             }
         }
-        else
-        {
-            interactData = default;
-            IsDetect = false;
-            onDetect?.Invoke(IsDetect, default);
-        }
 
-        Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
+        if (interactData != null)
+        {
+            interactData.detectable.OnExitDetect();
+            interactData = null;
+        }
+        interactObject = null;
+        IsDetect = false;
+        onDetect?.Invoke(IsDetect, default);
+
+
     }
 
     public bool TryInteract()
     {
-        if (interactData.Equals(default))
-            return false;
 
-        if (!CanInteract())
-            return false;
+        //if (!CanInteract())
+        //    return false;
 
         Ray ray = new Ray();
         ray.origin = raycastTr.position;
         ray.direction = raycastTr.transform.forward;
 
-        if (Physics.Raycast(ray, out RaycastHit hit, distance))
+        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
         {
             if (hit.collider.TryGetComponent(out InteractObject detectObject))
             {
-                if (detectObject.Interact(out InteractObject interactObject))
+                if (detectObject.Interact(this, out InteractObject interactObject))
                 {
                     this.interactObject = interactObject;
-                    targetPoint = hit.point;
-
                     return true;
                 }
             }
         }
-        targetPoint = Vector3.zero;
         return false;
 
     }
@@ -142,18 +132,20 @@ public class PlayerInteract : NetworkBehaviour
 
         return interactBehaviors[(int)interactData.interactType];
     }
-    public bool CanInteract()
-    {
-        if (interactObject != null)
-            return false;
-
-        return true;
-    }
+   
     public void StopInteract()
     {
         interactObject = null;
         interactData = default;
     }
+
+    public void SearchItemInteract(ItemSearchData searchData)
+    {
+        itemContainer.SetupSearchData(searchData);
+
+        itemContainer.ActiveItemContainerUI(true);
+    }
+
 
 
 }

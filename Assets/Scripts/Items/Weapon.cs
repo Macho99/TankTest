@@ -4,7 +4,7 @@ using UnityEngine;
 
 public abstract class Weapon : Item
 {
-    [SerializeField] protected Animator weaponAnim;
+    [SerializeField] protected AnimatorOverrideController weaponAnim;
     [SerializeField] protected Transform subHandPivot;
     
     public abstract void Attack();

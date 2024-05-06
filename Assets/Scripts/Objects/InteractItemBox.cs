@@ -2,55 +2,52 @@ using Fusion;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class InteractItemBox : InteractObject
 {
 
     public enum ItemBoxState { Open = -1, Close = 1 }
-    [Networked] public ItemBoxState itemBoxState { get; set; }
+    [Networked,OnChangedRender(nameof(OnChangeState))] public ItemBoxState itemBoxState { get; set; }
     [SerializeField] private Transform openerTr;
     private float rotateValue;
     private float turnSpeed;
     private Coroutine processRoutine;
-    private void Awake()
+    [SerializeField] private List<ItemSO> itemDataList;
+    private ItemSearchData searchData;
+    [Networked] private string detectName { get; set; }
+    protected override void Awake()
     {
+        base.Awake();
         turnSpeed = 1f;
         rotateValue = -120f;
     }
     public override void Spawned()
     {
+        searchData = new ItemSearchData(this);
+        for (int i = 0; i < itemDataList.Count; i++)
+        {
+            searchData.AddItemData(itemDataList[i].CreateItemData());
+        }
+
         base.Spawned();
+        DetectData.interactHint = "아이템 상자 열기";
         if (HasStateAuthority)
         {
             itemBoxState = ItemBoxState.Close;
         }
 
-        if (itemBoxState == ItemBoxState.Close)
-        {
-            interactData.interactHint = "아이템 상자 열기";
-        }
-        else
-        {
-            interactData.interactHint = "아이템 상자 탐색";
-        }
-
-        //openerTr.rotation = Quaternion.Euler(-120, 0f, 0f);
     }
 
-    public override bool Detect(out InteractData interactInfo)
+    public override bool Detect(out DetectData interactInfo)
     {
 
-        interactInfo = interactData;
+        interactInfo = DetectData;
 
         return true;
     }
-    public override bool Interact(out InteractObject interactObject)
-    {
-        interactObject = this;
 
 
-        return true;
-    }
     public void ChangeState()
     {
         if (itemBoxState == ItemBoxState.Close)
@@ -60,7 +57,7 @@ public class InteractItemBox : InteractObject
         }
         else
         {
-
+            playerInteract?.SearchItemInteract(searchData);
         }
     }
     private IEnumerator ProcessRoutin()
@@ -72,9 +69,72 @@ public class InteractItemBox : InteractObject
         while (Mathf.Abs(dotProduct) < 0.99f)
         {
             openerTr.rotation = Quaternion.Slerp(openerTr.rotation, Quaternion.Euler(rotateValue, 0f, 0f), turnSpeed * Time.deltaTime);
+
+            dotProduct = Quaternion.Dot(openerTr.rotation, targetQuat);
             yield return null;
         }
 
+        if (itemBoxState == ItemBoxState.Close)
+        {
+            itemBoxState = ItemBoxState.Open;
+        }
+
     }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public override void RPC_StartInteraction()
+    {
+        // ChangeState();
+    }
+
+
+    public override void StartInteraction()
+    {
+        ChangeState();
+    }
+    public void OnChangeState()
+    {
+        if(itemBoxState == ItemBoxState.Open)
+        {
+            DetectData.interactHint = "아이템 상자 탐색";
+        }
+    }
+
+
+
+
+
+}
+public class ItemSearchData
+{
+    private NetworkBehaviour owner;
+    public List<ItemInstance> itemList;
+
+    public ItemSearchData(NetworkBehaviour owner)
+    {
+        this.owner = owner;
+        itemList = new List<ItemInstance>();
+    }
+    public ItemSearchData(NetworkBehaviour owner, List<ItemInstance> itemList)
+    {
+        this.owner = owner;
+        this.itemList = itemList;
+    }
+
+    public void AddItemData(ItemInstance item)
+    {
+        itemList.Add(item);
+    }
+    public void CreateItem(NetworkRunner runner, int index)
+    {
+        if (owner.HasStateAuthority)
+        {
+            itemList[index].CreateItem(runner);
+        }
+        itemList.RemoveAt(index);
+    }
+
+
+
 
 }

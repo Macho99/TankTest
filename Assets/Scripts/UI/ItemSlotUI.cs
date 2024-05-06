@@ -1,53 +1,54 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ItemSlotUI : MonoBehaviour
+public abstract class ItemSlotUI : MonoBehaviour, IPointerClickHandler
 {
-    public enum ItemSlotType { Inventory, Equipment }
-    public enum DurabilityState { Lot, Normal, Few }
+    protected int slotIndex;
+    [SerializeField] protected TextMeshProUGUI itemNameTMP;
+    [SerializeField] protected Image itemIconImage;
+    [SerializeField] protected TextMeshProUGUI itemCountTMP;
+    [SerializeField] protected Image durabilityAmountImg;
 
-    [SerializeField] private Sprite itemEmptyIcon;
-    [SerializeField] private Image itemIconImage;
-    [SerializeField] private TextMeshProUGUI itemCountTMP;
-    [SerializeField] private GameObject durabilityObj;
-    [SerializeField] private Image durabilityAmountImg;
-    [SerializeField] private Sprite[] durabilityAmountImage;
+    protected bool isEmpty;
+    public event Action<int> onItemRightClick;
 
-
-    private bool isEmpty;
-
-    public ItemSlotType itemSlotType { get; private set; }
-
-    // Start is called before the first frame update
-    void Start()
+  
+    public void Init(int slotIndex)
     {
-
+        this.slotIndex = slotIndex;
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    public void SetItem(Item item)
+    public void SetItem(ItemInstance item)
     {
         isEmpty = item == null ? true : false;
         CheckEmpty();
+        if (isEmpty)
+            return;
 
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
 
-
-      
-
+        itemIconImage.enabled = true;
+        itemIconImage.sprite = item.ItemData.ItemIcon;
+        itemNameTMP.text = item.ItemData.ItemName;
 
     }
     private void CheckEmpty()
     {
-        durabilityObj.SetActive(!isEmpty);
         itemCountTMP.enabled = !isEmpty;
-        itemIconImage.sprite = isEmpty ? itemEmptyIcon : itemIconImage.sprite;
+        itemIconImage.enabled = isEmpty ? false : true;
+        onItemRightClick = null;
+        gameObject.SetActive(false);
+    }
+
+    public abstract void OnPointerClick(PointerEventData eventData);
+
+    public void OnPointerRightClickEvent()
+    {
+        onItemRightClick?.Invoke(slotIndex);
     }
 }

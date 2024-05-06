@@ -4,5 +4,6 @@ using UnityEngine;
 
 public interface IDetectable
 {
-    public void Detect(out InteractData interactData);
+    public void OnEnterDetect(out DetectData interactData);
+    public void OnExitDetect();
 }

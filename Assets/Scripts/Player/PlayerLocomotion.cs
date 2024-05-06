@@ -15,8 +15,6 @@ public class PlayerLocomotion : NetworkBehaviour
     public BasicCamController CamController { get; private set; }
     private float jumpForce;
     private float rotateXSpeed;
-    private bool isJump;
-    private bool isLand;
     Animator animator;
     private CapsuleCollider myCollider;
     private MovementType movementType;
@@ -28,6 +26,7 @@ public class PlayerLocomotion : NetworkBehaviour
     [Networked] public Vector3 moveDirection { get; private set; }
     [Networked] public float CamerRotX { get; set; }
     public float JumpForce { get => jumpForce; }
+
 
     private PlayerMove[] moves;
     public bool IsGround()
@@ -65,8 +64,6 @@ public class PlayerLocomotion : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
 
-
-
     }
     public override void Render()
     {
@@ -82,13 +79,13 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public void Move()
     {
-
+     
         simpleKCC.Move(moveDirection * moveSpeed, jumpVelocity);
-        if (simpleKCC.HasJumped)
+        if (jumpVelocity != 0f)
         {
-            jumpVelocity = 0f;
-            return;
+            jumpVelocity = 0f;            
         }
+
     }
     public void SetMove(NetworkInputData input)
     {
@@ -118,7 +115,6 @@ public class PlayerLocomotion : NetworkBehaviour
     {
         Quaternion newForward = Quaternion.RotateTowards(Quaternion.Euler(transform.forward), Quaternion.Euler(direction), Runner.DeltaTime);
 
-        //simpleKCC.AddLookRotation(new Vector2(0f,));
 
         transform.rotation = newForward;
     }
@@ -129,13 +125,13 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public void TriggerJump()
     {
+  
         if (simpleKCC.IsGrounded)
         {
             jumpVelocity = jumpForce;
-            isJump = true;
-
         }
     }
+
     public void ChangeMoveType(MovementType newMoveType)
     {
         this.movementType = newMoveType;

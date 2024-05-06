@@ -16,7 +16,7 @@ public class AimUI : SceneUI
         detectRoot.SetActive(false);
     }
 
-    public void ReadInteractInfo(bool isDetect,InteractData info)
+    public void ReadInteractInfo(bool isDetect,DetectData info)
     {
         if (isDetect == false)
         {

@@ -76,6 +76,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ActiveItemContainer",
+                    "type": "Button",
+                    "id": "fe00fdf4-8a7a-489a-bb9c-cdfa0c12d894",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -208,6 +217,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Adherence",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8b5c74a8-cf83-42e2-b7ff-7f9de3ca4699",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ActiveItemContainer",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

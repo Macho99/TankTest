@@ -27,12 +27,11 @@ public class PlayerCrouchLocomotionState : PlayerState
     {
         if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("CrouchIdle") || owner.animator.GetCurrentAnimatorStateInfo(0).IsName("CrouchMove") && isCrouchToIdleStart == false)
         {
-            if (owner.GetInput(out NetworkInputData input))
-            {
-                owner.movement.Rotate(input);
-                owner.movement.SetMove(input);
+           
+                owner.movement.Rotate(owner.InputListner.currentInput);
+                owner.movement.SetMove(owner.InputListner.currentInput);
                 owner.Aiming();
-                if (input.buttons.IsSet(NetworkInputData.ButtonType.Crouch) && owner.movement.IsGround())
+                if (owner.InputListner.pressButton.IsSet(ButtonType.Crouch) && owner.movement.IsGround())
                 {
                     if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Stand))
                     {
@@ -42,7 +41,7 @@ public class PlayerCrouchLocomotionState : PlayerState
 
                     }
                 }
-            }
+          
         }
         else if (isCrouchToIdleStart)
         {

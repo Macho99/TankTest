@@ -19,7 +19,7 @@ public abstract class Gun : Weapon
     }
     public virtual void Reload()
     {
-        currentAmmoCount = ((GunItemSO)itemData).MaxBulletCount;
+        currentAmmoCount = ((GunItemSO)itemInstance.ItemData).MaxAmmoCount;
 
 
     }

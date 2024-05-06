@@ -6,41 +6,41 @@ using UnityEngine;
 public class Inventory : NetworkBehaviour
 {
 
-    private Item[] items;
-    [Networked] private int count { get; set; }
-    [Networked] private int MaxCount { get; set; }
+    private List<ItemInstance> items = new List<ItemInstance>();
+    [Networked] private int Weight { get; set; }
+    [Networked] private float MaxWeight { get; set; }
+
 
     private void Awake()
     {
 
     }
 
+
     public override void Spawned()
     {
-        count = 0;
-        MaxCount = 20;
-        items = new Item[MaxCount];
+        Weight = 0;
+        MaxWeight = 100f;
+        items = new List<ItemInstance>();
+
 
     }
+
     public void AddItem(Item newItem)
     {
 
-        if (count >= MaxCount)
-        {
-            return;
-        }
+    }
 
-        for (int i = 0; i < MaxCount; i++)
-        {
-            if (items[i] == null)
-            {
-                items[i] = newItem;
-                items[i].transform.SetParent(transform);
-                items[i].gameObject.SetActive(false);
-                count++;
-                break;
-            }
-        }
+
+    private void Checkweight(Item item)
+    {
+        //float itemWeight = item.ItemData.Weight;
+
+
+        //if (itemWeight + this.Weight > MaxWeight)
+        //{
+
+        //}
 
 
     }

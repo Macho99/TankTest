@@ -29,10 +29,8 @@ public class PlayerJumpState : PlayerState
     public override void FixedUpdateNetwork()
     {
 
-
         if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("Jump"))
         {
-            Debug.Log(owner.VelocityY.ToString("F0"));
 
             if (!isJumpingStart)
             {
@@ -55,7 +53,6 @@ public class PlayerJumpState : PlayerState
                 if (owner.movement.IsGround())
                 {
                     ChangeState(PlayerController.PlayerState.Land);
-                    Debug.Log(owner.VelocityY);
                     return;
                 }
 

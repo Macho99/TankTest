@@ -36,16 +36,16 @@ public class PlayerStandLocomotionState : PlayerState
     public override void Transition()
     {
 
-        if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Jump) && owner.movement.IsGround())
-        {
 
+        if (owner.InputListner.pressButton.IsSet(ButtonType.Jump) && owner.movement.IsGround())
+        {
             //점프상태로 전환
             ChangeState(PlayerController.PlayerState.Jump);
             return;
 
 
         }
-        else if (owner.InputListner.pressButton.IsSet(NetworkInputData.ButtonType.Crouch) && owner.movement.IsGround())
+        else if (owner.InputListner.pressButton.IsSet(ButtonType.Crouch) && owner.movement.IsGround())
         {
             if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Crouch))
             {
