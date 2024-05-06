@@ -40,7 +40,6 @@ public class VehicleMove : VehicleBehaviour
 
 	protected int wheelNum;
 	protected Vector2 moveInput;
-	protected Vector2 lerpedMoveInput;
 
 	public int Direction { get; private set; }
 	public float MaxTorqueRpm { get; private set; }
@@ -65,6 +64,7 @@ public class VehicleMove : VehicleBehaviour
 	public float BrakeMultiplier { get; set; }
 	public int CurGear { get; set; }
 
+	[Networked] public Vector2 LerpedMoveInput { get; set; }
 	[Networked] public float LeftRpm { get; private set; }
 	[Networked] public float RightRpm { get; private set; }
 	[Networked] public float RawLeftRpm { get; private set; }
@@ -132,7 +132,7 @@ public class VehicleMove : VehicleBehaviour
 		}
 		if (Runner.IsForward)
 		{
-			lerpedMoveInput = Vector2.Lerp(lerpedMoveInput, moveInput, Runner.DeltaTime * 2f);
+			LerpedMoveInput = Vector2.Lerp(LerpedMoveInput, moveInput, Runner.DeltaTime * 2f);
 		}
 
 		//if(input.buttons.IsSet(Buttons.Respawn))
@@ -243,8 +243,8 @@ public class VehicleMove : VehicleBehaviour
 
 	protected virtual void Steering()
 	{
-		leftWheelCols[0].steerAngle = lerpedMoveInput.x * steerAngle;
-		rightWheelCols[0].steerAngle = lerpedMoveInput.x * steerAngle;
+		leftWheelCols[0].steerAngle = LerpedMoveInput.x * steerAngle;
+		rightWheelCols[0].steerAngle = LerpedMoveInput.x * steerAngle;
 	}
 
 
@@ -274,31 +274,27 @@ public class VehicleMove : VehicleBehaviour
 
 	protected virtual void SyncWheelRenderer(float leftRps, float rightRps)
 	{
+		Vector3 leftEuler = leftWheelTrans[0].localRotation.eulerAngles;
+		leftEuler.y = LerpedMoveInput.x * steerAngle + leftEuler.z;
+		leftWheelTrans[0].localRotation = Quaternion.Euler(leftEuler);
+
+		Vector3 rightEuler = rightWheelTrans[0].localRotation.eulerAngles;
+		rightEuler.y = LerpedMoveInput.x * steerAngle + rightEuler.z;
+		rightWheelTrans[0].localRotation = Quaternion.Euler(rightEuler);
+
 		for (int i = 0; i < wheelNum; i++)
 		{
-			leftWheelTrans[i].Rotate(360f * leftRps * Runner.DeltaTime, 0f, 0f);
-			rightWheelTrans[i].Rotate(360f * rightRps * Runner.DeltaTime, 0f, 0f);
+			leftWheelTrans[i].Rotate(Vector3.right, 360f * leftRps * Time.deltaTime);
+			rightWheelTrans[i].Rotate(Vector3.right, 360f * rightRps * Time.deltaTime);
 		}
 
 		for (int i = 0; i < wheelNum; i++)
 		{
 			leftWheelCols[i].GetWorldPose(out Vector3 posLeft, out Quaternion rotLeft);
-			leftWheelTrans[i].position = posLeft;
-			Vector3 localPos = leftWheelTrans[i].localPosition;
-			localPos.y += wheelYOffset;
-			leftWheelTrans[i].localPosition = localPos;
+			leftWheelTrans[i].localPosition = leftWheelTrans[i].parent.InverseTransformPoint(posLeft) + Vector3.up * wheelYOffset;
 
 			rightWheelCols[i].GetWorldPose(out Vector3 posRight, out Quaternion rotRight);
-			rightWheelTrans[i].position = posRight;
-			localPos = rightWheelTrans[i].localPosition;
-			localPos.y += wheelYOffset;
-			rightWheelTrans[i].localPosition = localPos;
-
-			if (i == 0)
-			{
-				leftWheelTrans[i].rotation = rotLeft;
-				rightWheelTrans[i].rotation = rotRight;
-			}
+			rightWheelTrans[i].localPosition = rightWheelTrans[i].parent.InverseTransformPoint(posRight) + Vector3.up * wheelYOffset;
 		}
 	}
 

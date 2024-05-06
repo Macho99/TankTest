@@ -295,7 +295,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -420,7 +420,7 @@ MonoBehaviour:
   maxSpeed: 60
   maxReverseSpeed: -15.5
   finalTorqueMultiplier: 2
-  steerAngle: 40
+  steerAngle: 0
   leftWheelTrans:
   - {fileID: 1214962575259576524}
   - {fileID: 8995305906795572466}
@@ -462,6 +462,7 @@ MonoBehaviour:
   - 22
   - 35
   - 50
+  _LerpedMoveInput: {x: 0, y: 0}
   _LeftRpm: 0
   _RightRpm: 0
   _RawLeftRpm: 0
@@ -514,7 +515,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vehicleTrigger: {fileID: 2691392653022538291}
   maxHp: 5000
-  damage: 50
+  damage: 100
   hitCooltime: 0.5
 --- !u!54 &7225674256980331819
 Rigidbody:
@@ -638,7 +639,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -709,7 +710,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -924,7 +925,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 0.5
   m_ForceAppPointDistance: 0
@@ -995,7 +996,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -1099,7 +1100,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 0.5
   m_ForceAppPointDistance: 0
@@ -1332,7 +1333,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 0.5
   m_ForceAppPointDistance: 0
@@ -1837,7 +1838,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 0.5
   m_ForceAppPointDistance: 0
@@ -2280,7 +2281,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -2480,7 +2481,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -3306,7 +3307,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -3711,7 +3712,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -3866,7 +3867,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -4129,7 +4130,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -4382,7 +4383,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 3.98}
+  m_AnchoredPosition: {x: 0, y: 2}
   m_SizeDelta: {x: 6, y: 3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &429714283001907140
@@ -4872,7 +4873,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -5169,7 +5170,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -6103,7 +6104,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0
@@ -6145,7 +6146,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1780435454114578607
 Transform:
   m_ObjectHideFlags: 0
@@ -6206,7 +6207,7 @@ WheelCollider:
   m_Radius: 0.28
   m_SuspensionSpring:
     spring: 350000
-    damper: 45000
+    damper: 30000
     targetPosition: 0.5
   m_SuspensionDistance: 1
   m_ForceAppPointDistance: 0

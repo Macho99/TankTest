@@ -37,7 +37,6 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks, IBefo
 		// Create the Fusion runner and let it know that we will be providing user input
 		runner = gameObject.AddComponent<NetworkRunner>();
 		runner.ProvideInput = true;
-		gameObject.AddComponent<HitboxManager>();
 
 		// Create the NetworkSceneInfo from the current scene
 		var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);

@@ -43,8 +43,8 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.6
   m_SuspensionSpring:
-    spring: 387333.4
-    damper: 20000
+    spring: 77466
+    damper: 6000
     targetPosition: 0.65
   m_SuspensionDistance: 0.4
   m_ForceAppPointDistance: 0
@@ -114,8 +114,8 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.6
   m_SuspensionSpring:
-    spring: 387333.4
-    damper: 20000
+    spring: 77466
+    damper: 6000
     targetPosition: 0.65
   m_SuspensionDistance: 0.4
   m_ForceAppPointDistance: 0
@@ -185,8 +185,8 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.6
   m_SuspensionSpring:
-    spring: 387333.4
-    damper: 20000
+    spring: 77466
+    damper: 6000
     targetPosition: 0.65
   m_SuspensionDistance: 0.4
   m_ForceAppPointDistance: 0
@@ -256,8 +256,8 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.6
   m_SuspensionSpring:
-    spring: 387333.4
-    damper: 20000
+    spring: 77466
+    damper: 6000
     targetPosition: 0.65
   m_SuspensionDistance: 0.4
   m_ForceAppPointDistance: 0
@@ -1150,7 +1150,7 @@ GameObject:
   - component: {fileID: 5201383989823723664}
   - component: {fileID: 5199625254562730176}
   - component: {fileID: 2461952936578879834}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SM_Veh_Army_Truck_01 (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1671,8 +1671,8 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.6
   m_SuspensionSpring:
-    spring: 387333.4
-    damper: 20000
+    spring: 77466
+    damper: 6000
     targetPosition: 0.65
   m_SuspensionDistance: 0.4
   m_ForceAppPointDistance: 0
@@ -1779,8 +1779,8 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.6
   m_SuspensionSpring:
-    spring: 387333.4
-    damper: 20000
+    spring: 77466
+    damper: 6000
     targetPosition: 0.65
   m_SuspensionDistance: 0.4
   m_ForceAppPointDistance: 0
@@ -1886,12 +1886,52 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: maxSpeed
+      value: 110
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
       propertyPath: brakeTorque
-      value: 20000
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: maxEngineRpm
+      value: 5000
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: rpmMatchSpeed
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: maxReverseSpeed
+      value: -25
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: gears.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: gears.Array.data[0]
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: gears.Array.data[1]
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: gears.Array.data[2]
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: gears.Array.data[3]
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: gears.Array.data[4]
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
       propertyPath: finalTorqueMultiplier
-      value: 30
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
       propertyPath: leftWheelCols.Array.size
@@ -1908,6 +1948,10 @@ PrefabInstance:
     - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
       propertyPath: rightWheelTrans.Array.size
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: gearChangeSpeeds.Array.size
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
       propertyPath: leftWheelCols.Array.data[0]
@@ -1957,6 +2001,54 @@ PrefabInstance:
       propertyPath: rightWheelTrans.Array.data[2]
       value: 
       objectReference: {fileID: 5243570526156611780}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[1].time
+      value: 0.21885802
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[2].time
+      value: 0.9980667
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[1].value
+      value: 29.011358
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[2].value
+      value: 25.021025
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[0].inSlope
+      value: 18.328587
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[1].inSlope
+      value: 0.033344924
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[2].inSlope
+      value: -12.60402
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[0].outSlope
+      value: 18.328587
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[1].outSlope
+      value: 0.033344924
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[2].inWeight
+      value: 0.054719992
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[2].outSlope
+      value: -12.60402
+      objectReference: {fileID: 0}
+    - target: {fileID: 115710660512785071, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
+      propertyPath: torquePerRpm.m_Curve.Array.data[1].outWeight
+      value: 0.14176618
+      objectReference: {fileID: 0}
     - target: {fileID: 1498137829148175136, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
       propertyPath: SortKey
       value: 149947816
@@ -1967,7 +2059,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2847333928945603062, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
       propertyPath: m_Mass
-      value: 25000
+      value: 5800
       objectReference: {fileID: 0}
     - target: {fileID: 2847333928945603062, guid: a0e975eed1bdc914988d6b29feecb180, type: 3}
       propertyPath: m_CenterOfMass.y
