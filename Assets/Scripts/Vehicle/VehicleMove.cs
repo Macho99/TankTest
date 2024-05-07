@@ -10,7 +10,7 @@ using Fusion;
 public class VehicleMove : VehicleBehaviour
 {
 	public enum State { Park, RpmMatch, Drive, ReverseRpmMatch, Reverse, GearShift, }
-
+	[SerializeField] NetworkObject trailNetObject;
 	[SerializeField] float wheelYOffset = 0.2f;
 	[SerializeField] float brakeTorque = 2000f;
 	[SerializeField] DashBoard dashBoardPrefab;
@@ -301,7 +301,14 @@ public class VehicleMove : VehicleBehaviour
 	protected override void OnAssign(TestPlayer player)
 	{
 		if (player.HasInputAuthority && Runner.IsForward)
+		{
 			dashBoard = GameManager.UI.ShowSceneUI(dashBoardPrefab);
+		}
+
+		if (HasStateAuthority)
+		{
+			trailNetObject?.AssignInputAuthority(player.Object.InputAuthority);
+		}
 	}
 
 	protected override void OnGetOff()
@@ -310,6 +317,11 @@ public class VehicleMove : VehicleBehaviour
 		{
 			GameManager.UI.CloseSceneUI(dashBoard);
 			dashBoard = null;
+		}
+
+		if (HasStateAuthority)
+		{
+			trailNetObject?.RemoveInputAuthority();
 		}
 	}
 }
