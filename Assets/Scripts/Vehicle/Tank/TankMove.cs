@@ -42,8 +42,8 @@ public class TankMove : VehicleMove
 
 		for (int i = 0; i < leftRollers.Length; i++)
 		{
-			leftRollers[i].Rotate(360f * leftRps * Runner.DeltaTime, 0f, 0f);
-			rightRollers[i].Rotate(360f * rightRps * Runner.DeltaTime, 0f, 0f);
+			leftRollers[i].Rotate(360f * leftRps * Time.deltaTime, 0f, 0f);
+			rightRollers[i].Rotate(360f * rightRps * Time.deltaTime, 0f, 0f);
 		}
 	}
 
