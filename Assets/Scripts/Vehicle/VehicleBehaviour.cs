@@ -5,12 +5,14 @@ using Fusion;
 
 public class VehicleBehaviour : NetworkBehaviour
 {
+	const string camPrefabPath = "Vehicle/VehicleFollowerCam";
+
 	[SerializeField] float lookSpeed = 20f;
 	TestPlayer player;
 	protected VehicleBoarder boarder;
 	bool isFirst = true;
 
-	protected Transform cam;
+	protected VehicleCam followCam;
 
 	[Networked, HideInInspector] public float CamYAngle { get; private set; }
 	[Networked, HideInInspector] public float CamXAngle { get; private set; }
@@ -19,19 +21,28 @@ public class VehicleBehaviour : NetworkBehaviour
 	protected virtual void Awake()
 	{
 		boarder = GetComponentInParent<VehicleBoarder>();
-		cam = boarder.Cam;
+		//cam = boarder.Cam;
 	}
 
 	public void Assign(TestPlayer player)
 	{
 		OnAssign(player);
+		if(Runner.IsForward)
+		{
+			followCam = GameManager.Resource.Instantiate<VehicleCam>(camPrefabPath, true);
+			followCam.Init(transform, Vector3.up * 2, 4f);
+			if (player.HasInputAuthority == false)
+			{
+				followCam.CamActive(false);
+			}
+		}
+
 		if (HasStateAuthority)
 		{
 			Object.AssignInputAuthority(player.Object.InputAuthority);
 			player.Object.RemoveInputAuthority();
 		}
 		this.player = player;
-
 	}
 
 	protected virtual void OnAssign(TestPlayer player) { }
@@ -61,6 +72,11 @@ public class VehicleBehaviour : NetworkBehaviour
 	private void GetOff()
 	{
 		OnGetOff();
+		if (Runner.IsForward)
+		{
+			GameManager.Resource.Destroy(followCam.gameObject);
+		}
+
 		if (HasStateAuthority)
 		{
 			player.Object.AssignInputAuthority(Object.InputAuthority);
@@ -81,7 +97,7 @@ public class VehicleBehaviour : NetworkBehaviour
 		
 		if(HasInputAuthority)
 		{
-			cam.rotation = Quaternion.Euler(CamYAngle, CamXAngle, 0f);
+			followCam.transform.rotation = Quaternion.Euler(CamYAngle, CamXAngle, 0f);
 		}
 	}
 }

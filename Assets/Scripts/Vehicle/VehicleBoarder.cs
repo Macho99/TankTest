@@ -10,7 +10,6 @@ using UnityEngine;
 
 public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 {
-	[SerializeField] Transform cam;
 	[SerializeField] Transform seatTrans;
 	[SerializeField] TextMeshProUGUI debugText;
 	[SerializeField] Transform[] getOnObjectTrans;
@@ -18,9 +17,7 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 	VehicleBehaviour[] vehicleBehaviours;
 	TestPlayer localPlayer;
 	const int MAX_PLAYER = 4;
-
-	public Transform Cam {  get { return cam; } }
-
+	Rigidbody rb;
 
 	// 0번 : 운전석, 1번 : 사수, 2 ~ 3 : 장전수
 	Vector3[] lastLocalPositions = new Vector3[MAX_PLAYER];
@@ -30,6 +27,7 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 
 	private void Awake()
 	{
+		rb = GetComponent<Rigidbody>();
 		if(getOnObjectTrans.Length != MAX_PLAYER)
 		{
 			Debug.LogError("GetOnObjectTrans는 Max_Player만큼 설정하세요");
@@ -73,10 +71,6 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 	private void LocalGetOn(NetworkId id)
 	{
 		TestPlayer player = Runner.FindObject(id).GetComponent<TestPlayer>();
-		if (localPlayer == player)
-		{
-			cam.gameObject.SetActive(true);
-		}
 		player.Teleport(seatTrans.position);
 		player.CollisionEnable(false);
 		player.transform.parent = seatTrans;
@@ -85,10 +79,6 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 	private void LocalGetOff(NetworkId id)
 	{
 		TestPlayer player = Runner.FindObject(id).GetComponent<TestPlayer>();
-		if (localPlayer == player)
-        {
-			cam.gameObject.SetActive(false);
-		}
 		player.CollisionEnable(true);
 		player.transform.parent = null;
 	}
@@ -175,21 +165,21 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 
 	public override void Render()
 	{
-		StringBuilder sb = new StringBuilder();
-		string localPlayerStr = localPlayer == null ? "None" : localPlayer.Object.Id.ToString();
-		sb.AppendLine($"LocalPlayer: {localPlayerStr}");
-		sb.AppendLine("Local List");
-		for (int i = 0; i < MAX_PLAYER; i++)
-		{
-			sb.Append($"{localGetOnPlayers[i].Raw} / ");
-		}
-		sb.AppendLine("\nNetwork List");
-		for (int i = 0; i < MAX_PLAYER; i++)
-		{
-			sb.Append($"{GetOnPlayers[i].Raw} / ");
-		}
+		//StringBuilder sb = new StringBuilder();
+		//string localPlayerStr = localPlayer == null ? "None" : localPlayer.Object.Id.ToString();
+		//sb.AppendLine($"LocalPlayer: {localPlayerStr}");
+		//sb.AppendLine("Local List");
+		//for (int i = 0; i < MAX_PLAYER; i++)
+		//{
+		//	sb.Append($"{localGetOnPlayers[i].Raw} / ");
+		//}
+		//sb.AppendLine("\nNetwork List");
+		//for (int i = 0; i < MAX_PLAYER; i++)
+		//{
+		//	sb.Append($"{GetOnPlayers[i].Raw} / ");
+		//}
 
-		debugText.text = sb.ToString();
+		//debugText.text = sb.ToString();
 	}
 
 	public void AfterSpawned()

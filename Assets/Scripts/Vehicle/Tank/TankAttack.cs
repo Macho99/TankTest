@@ -42,7 +42,6 @@ public class TankAttack : VehicleBehaviour
 	int breakableLayer;
 
 	TankAttackUI attackUI;
-	Vector3 camOffset;
 	bool spawned;
 	int visualFireCnt;
 	Rigidbody rb;
@@ -70,7 +69,7 @@ public class TankAttack : VehicleBehaviour
 	{
 		base.Awake();
 		rb = GetComponentInParent<Rigidbody>();
-		camOffset = new Vector3(0f, cam.transform.GetChild(0).transform.localPosition.y, 0f);
+		//camOffset = new Vector3(0f, cam.transform.GetChild(0).transform.localPosition.y, 0f);
 		hitMask = LayerMask.GetMask("Default", "Environment", "Breakable","Monster");
 		damageableMask = LayerMask.GetMask("Breakable", "Monster");
 		monsterLayer = LayerMask.NameToLayer("Monster");
@@ -129,7 +128,7 @@ public class TankAttack : VehicleBehaviour
 
 	private void SetTargetPos(Vector3 camForward)
 	{
-		if(Physics.Raycast(cam.transform.position + camOffset, camForward, 
+		if(Physics.Raycast(followCam.transform.position, camForward, 
 			out RaycastHit hitInfo, MAX_DIST, hitMask) == true)
 		{
 			targetPosition = hitInfo.point;
