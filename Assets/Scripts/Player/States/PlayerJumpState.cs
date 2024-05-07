@@ -32,6 +32,7 @@ public class PlayerJumpState : PlayerState
         if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("Jump"))
         {
 
+
             if (!isJumpingStart)
             {
                 if (!owner.RaycastGroundCheck())

@@ -66,7 +66,7 @@ public abstract class InteractObject : NetworkBehaviour, IDetectable
         return true;
 
     }
- 
+
 
     public abstract void RPC_StartInteraction();
 
@@ -95,7 +95,7 @@ public abstract class InteractObject : NetworkBehaviour, IDetectable
 
     }
 
-    public void OnExitDetect()
+    public virtual void OnExitDetect()
     {
         IsDetect(false);
         playerInteract = null;

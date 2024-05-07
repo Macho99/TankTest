@@ -17,6 +17,7 @@ public class ItemSearchUI : MonoBehaviour
             ItemSearchSlotUI itemSlotUI = Instantiate(this.itemSlotUIPrefab, itemSlotRoot.transform).GetComponent<ItemSearchSlotUI>();
             itemSlots.Add(itemSlotUI);
             itemSlotUI.Init(i);
+            //itemSlotUI.onItemAcquisition
             itemSlotUI.gameObject.SetActive(false);
 
         }
@@ -28,16 +29,18 @@ public class ItemSearchUI : MonoBehaviour
     }
     private void Start()
     {
-     
+
         Debug.Log(itemSlots.Count);
     }
-  
+
     public void UpdateSearchItemUI(int index, ItemInstance itemInstance)
     {
-        Debug.Log(itemSlots.Count);
-        Debug.Log(index);
         itemSlots[index].SetItem(itemInstance);
     }
 
+    public void OnItemAcquisition()
+    {
+        //itemSearchSystem
+    }
 
 }

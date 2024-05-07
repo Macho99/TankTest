@@ -14,7 +14,7 @@ public abstract class WeaponItemSO : EquipmentItemSO
 
 public abstract class WeaponInstance : EquipmentItemInstance
 {
-    public WeaponInstance(ItemSO itemData) : base(itemData)
+    public WeaponInstance(ItemSO itemData, int count = 1) : base(itemData,count)
     {
 
     }

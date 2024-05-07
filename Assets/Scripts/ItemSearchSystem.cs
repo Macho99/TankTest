@@ -18,8 +18,11 @@ public class ItemSearchSystem : NetworkBehaviour
     }
     public bool AddSearchItem(ItemSearchData items)
     {
-        if (!FindEqualSearchItemList(items))
+        if (FindEqualSearchItemList(items, out int listIndex))
+        {
+            Debug.Log("Ã£À½");
             return false;
+        }
 
         searchDatas.Add(items);
         int index = 0;
@@ -34,23 +37,42 @@ public class ItemSearchSystem : NetworkBehaviour
 
         return true;
     }
-    private bool FindEqualSearchItemList(ItemSearchData items)
+    private bool FindEqualSearchItemList(ItemSearchData items, out int index)
     {
-        if (searchDatas.Count <= 0)
-            return true;
-
         for (int i = 0; i < searchDatas.Count; i++)
         {
             if (searchDatas[i] == items)
-                return false;
+            {
+                index = i;
+                return true;
+            }
         }
 
-        return true;
+        index = -1;
+        return false;
     }
-    public void ClearSearchItem()
+
+    public void ClearsearchItem(ItemSearchData items)
+    {
+        if (FindEqualSearchItemList(items, out int index))
+        {
+            for (int j = 0; j < searchDatas[index].itemList.Count; j++)
+            {
+                onUpdate?.Invoke(j, null);
+            }
+            searchDatas.RemoveAt(index);
+        }
+
+
+    }
+    public void AllClearSearchItem()
     {
         searchDatas.Clear();
+    }
 
+    public void AcquisitionItem(int index)
+    {
+       
     }
 
 }

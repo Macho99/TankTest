@@ -10,7 +10,7 @@ public abstract class EquipmentItemSO : ItemSO
 
 public abstract class EquipmentItemInstance : ItemInstance
 {
-    protected EquipmentItemInstance(ItemSO itemData) : base(itemData)
+    protected EquipmentItemInstance(ItemSO itemData, int count = 1) : base(itemData,count)
     {
 
     }

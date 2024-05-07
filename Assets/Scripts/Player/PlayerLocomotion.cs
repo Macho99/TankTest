@@ -22,7 +22,7 @@ public class PlayerLocomotion : NetworkBehaviour
     [Networked] public float fallingTime { get; private set; }
     [Networked] public float moveSpeed { get; private set; }
     [Networked] public Vector2 inputDirection { get; private set; }
-    [Networked] public float jumpVelocity { get; private set; }
+    public float jumpVelocity { get; private set; }
     [Networked] public Vector3 moveDirection { get; private set; }
     [Networked] public float CamerRotX { get; set; }
     public float JumpForce { get => jumpForce; }
@@ -79,12 +79,22 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public void Move()
     {
-     
-        simpleKCC.Move(moveDirection * moveSpeed, jumpVelocity);
-        if (jumpVelocity != 0f)
-        {
-            jumpVelocity = 0f;            
-        }
+
+
+        //if (GetInput(out NetworkInputData input))
+        //{
+        //    if (input.buttons.IsSet(ButtonType.Jump))
+        //    {
+        //        if (Kcc.IsGrounded)
+        //        {
+        //            jumpVelocity = jumpForce;
+        //        }
+
+        //    }
+        //}
+
+        simpleKCC.Move(moveDirection * moveSpeed);
+       
 
     }
     public void SetMove(NetworkInputData input)
@@ -125,10 +135,18 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public void TriggerJump()
     {
-  
         if (simpleKCC.IsGrounded)
         {
             jumpVelocity = jumpForce;
+
+            Debug.Log("a");
+            
+            Kcc.Move(default, jumpVelocity);
+            if (jumpVelocity != 0f)
+            {
+                jumpVelocity = 0f;
+            }
+
         }
     }
 

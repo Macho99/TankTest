@@ -73,8 +73,8 @@ public class PlayerInteract : NetworkBehaviour
         {
             if (hit.collider.TryGetComponent(out IDetectable detectObject))
             {
-                detectObject.OnEnterDetect(out DetectData interactData);
-                this.interactData = interactData;
+                detectObject.OnEnterDetect(out DetectData interctData);
+                this.interactData = interctData;
                 IsDetect = true;
                 onDetect?.Invoke(IsDetect, this.interactData);
                 return;
@@ -88,7 +88,7 @@ public class PlayerInteract : NetworkBehaviour
         }
         interactObject = null;
         IsDetect = false;
-        onDetect?.Invoke(IsDetect, default);
+        onDetect?.Invoke(IsDetect, null);
 
 
     }
@@ -132,7 +132,7 @@ public class PlayerInteract : NetworkBehaviour
 
         return interactBehaviors[(int)interactData.interactType];
     }
-   
+
     public void StopInteract()
     {
         interactObject = null;
@@ -142,10 +142,15 @@ public class PlayerInteract : NetworkBehaviour
     public void SearchItemInteract(ItemSearchData searchData)
     {
         itemContainer.SetupSearchData(searchData);
-
+        Debug.Log(searchData.itemList.Count);
         itemContainer.ActiveItemContainerUI(true);
     }
 
+    public void StopSearchItemInteract(ItemSearchData searchData)
+    {
+        itemContainer.RemoveSerachData(searchData);
+        itemContainer.ActiveItemContainerUI(false);
+    }
 
 
 }

@@ -17,7 +17,7 @@ public abstract class ItemSlotUI : MonoBehaviour, IPointerClickHandler
     protected bool isEmpty;
     public event Action<int> onItemRightClick;
 
-  
+
     public void Init(int slotIndex)
     {
         this.slotIndex = slotIndex;
@@ -36,12 +36,20 @@ public abstract class ItemSlotUI : MonoBehaviour, IPointerClickHandler
         itemIconImage.sprite = item.ItemData.ItemIcon;
         itemNameTMP.text = item.ItemData.ItemName;
 
+        if (item.ItemData.IsStackable)
+        {
+            itemCountTMP.enabled = true;
+            itemCountTMP.text = item.Count.ToString();
+        }
+
     }
     private void CheckEmpty()
     {
         itemCountTMP.enabled = !isEmpty;
         itemIconImage.enabled = isEmpty ? false : true;
         onItemRightClick = null;
+        itemCountTMP.text = string.Empty;
+        itemCountTMP.enabled = false;
         gameObject.SetActive(false);
     }
 

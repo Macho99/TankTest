@@ -8,17 +8,17 @@ public class MiscItemSO : ItemSO
 {
     public override ItemInstance CreateItemData(int count = 1)
     {
-        return new MiscItemInstance(this);
+        return new MiscItemInstance(this,count);
     }
 }
 public class MiscItemInstance : ItemInstance
 {
-    public MiscItemInstance(ItemSO itemData) : base(itemData)
+    public MiscItemInstance(ItemSO itemData, int count = 1) : base(itemData, count)
     {
 
     }
 
-    public override Item CreateItem(NetworkRunner runner, int count = 1)
+    public override Item CreateNetworkItem(NetworkRunner runner, int count = 1)
     {
         Item item = runner.Spawn(itemObject);
 

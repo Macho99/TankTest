@@ -60,16 +60,16 @@ public class ItemContainer : NetworkBehaviour
 
             }
         }
-        Debug.Log(itemContainerUI);
     }
     public void SetupSearchData(ItemSearchData searchData)
     {
 
         if (!itemSearchSystem.AddSearchItem(searchData))
             return;
-
-
-
+    }
+    public void RemoveSerachData(ItemSearchData searchData)
+    {
+        itemSearchSystem.ClearsearchItem(searchData);
     }
     public void ActiveItemContainerUI(bool Active)
     {
@@ -100,7 +100,7 @@ public class ItemContainer : NetworkBehaviour
     }
     public void ExitItemSearch()
     {
-        
+
     }
 
 }

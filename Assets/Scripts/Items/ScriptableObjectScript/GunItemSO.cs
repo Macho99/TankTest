@@ -33,12 +33,12 @@ public class GunItemSO : WeaponItemSO
 public class GunItemInstance : WeaponInstance
 {
     private int currentAmmo;
-    public GunItemInstance(ItemSO itemData, int ammo = 0) : base(itemData)
+    public GunItemInstance(ItemSO itemData, int count = 1, int ammo = 0) : base(itemData, count)
     {
         currentAmmo = ammo;
     }
 
-    public override Item CreateItem(NetworkRunner runner, int count = 1)
+    public override Item CreateNetworkItem(NetworkRunner runner, int count = 1)
     {
         Item item = runner.Spawn(itemObject);
 

@@ -1,14 +1,16 @@
 using Fusion;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+using Random = UnityEngine.Random;
 public class InteractItemBox : InteractObject
 {
 
     public enum ItemBoxState { Open = -1, Close = 1 }
-    [Networked,OnChangedRender(nameof(OnChangeState))] public ItemBoxState itemBoxState { get; set; }
+    [Networked, OnChangedRender(nameof(OnChangeState))] public ItemBoxState itemBoxState { get; set; }
     [SerializeField] private Transform openerTr;
     private float rotateValue;
     private float turnSpeed;
@@ -27,7 +29,13 @@ public class InteractItemBox : InteractObject
         searchData = new ItemSearchData(this);
         for (int i = 0; i < itemDataList.Count; i++)
         {
-            searchData.AddItemData(itemDataList[i].CreateItemData());
+            int randCount = 1;
+            if (itemDataList[i].IsStackable)
+            {
+                randCount = Random.Range(1, itemDataList[i].MaxCount);
+            }
+            searchData.AddItemData(itemDataList[i].CreateItemData(randCount));
+            Debug.Log(searchData.itemList[i].Count);
         }
 
         base.Spawned();
@@ -66,7 +74,7 @@ public class InteractItemBox : InteractObject
         Quaternion targetQuat = Quaternion.Euler(rotateValue, 0f, 0f);
         float dotProduct = Quaternion.Dot(openerTr.rotation, targetQuat);
 
-        while (Mathf.Abs(dotProduct) < 0.99f)
+        while (Mathf.Abs(dotProduct) < 0.95f)
         {
             openerTr.rotation = Quaternion.Slerp(openerTr.rotation, Quaternion.Euler(rotateValue, 0f, 0f), turnSpeed * Time.deltaTime);
 
@@ -94,27 +102,38 @@ public class InteractItemBox : InteractObject
     }
     public void OnChangeState()
     {
-        if(itemBoxState == ItemBoxState.Open)
+        if (itemBoxState == ItemBoxState.Open)
         {
             DetectData.interactHint = "아이템 상자 탐색";
         }
     }
 
+    public override void OnExitDetect()
+    {
+        playerInteract?.StopSearchItemInteract(searchData);
+        base.OnExitDetect();
 
+    }
+    public void DeleteItem()
+    {
 
+    }
 
 
 }
+[Serializable]
 public class ItemSearchData
 {
     private NetworkBehaviour owner;
     public List<ItemInstance> itemList;
-
+    public Action<int> onItemAdd;
+    public Action<int> onItemDelete;
     public ItemSearchData(NetworkBehaviour owner)
     {
         this.owner = owner;
         itemList = new List<ItemInstance>();
     }
+
     public ItemSearchData(NetworkBehaviour owner, List<ItemInstance> itemList)
     {
         this.owner = owner;
@@ -129,12 +148,8 @@ public class ItemSearchData
     {
         if (owner.HasStateAuthority)
         {
-            itemList[index].CreateItem(runner);
+            itemList[index].CreateNetworkItem(runner);
         }
         itemList.RemoveAt(index);
     }
-
-
-
-
 }
