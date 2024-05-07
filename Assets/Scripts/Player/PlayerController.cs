@@ -2,6 +2,7 @@ using Fusion;
 using Fusion.Addons.SimpleKCC;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
@@ -55,7 +56,6 @@ public class PlayerController : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-
         Falling();
 
         movement.Move();
@@ -145,4 +145,6 @@ public class PlayerController : NetworkBehaviour
             movement.CamController.ChangeCamera(BasicCamController.CameraType.None);
         }
     }
+
+
 }

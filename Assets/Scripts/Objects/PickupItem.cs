@@ -19,11 +19,6 @@ public class PickupItem : InteractObject
 
 
     }
-    public override void RPC_StartInteraction()
-    {
-
-
-    }
 
     public override void StartInteraction()
     {

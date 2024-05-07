@@ -8,6 +8,7 @@ public class ItemSearchUI : MonoBehaviour
     [SerializeField] private RectTransform itemSlotRoot;
     private List<ItemSearchSlotUI> itemSlots = new List<ItemSearchSlotUI>();
     private ItemSearchSystem itemSearchSystem;
+    private Inventory inventory;
     private int maxCount;
     private void Awake()
     {
@@ -22,15 +23,11 @@ public class ItemSearchUI : MonoBehaviour
 
         }
     }
-    public void Init(ItemSearchSystem itemSearchSystem)
+    public void Init(ItemSearchSystem itemSearchSystem,Inventory inventory)
     {
         this.itemSearchSystem = itemSearchSystem;
+        this.inventory = inventory;
         itemSearchSystem.onUpdate += UpdateSearchItemUI;
-    }
-    private void Start()
-    {
-
-        Debug.Log(itemSlots.Count);
     }
 
     public void UpdateSearchItemUI(int index, ItemInstance itemInstance)

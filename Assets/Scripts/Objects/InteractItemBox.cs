@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 using Random = UnityEngine.Random;
-public class InteractItemBox : InteractObject
+public class InteractItemBox : InteractObject, IInterestEnter, IInterestExit
 {
 
     public enum ItemBoxState { Open = -1, Close = 1 }
@@ -17,6 +17,7 @@ public class InteractItemBox : InteractObject
     private Coroutine processRoutine;
     [SerializeField] private List<ItemSO> itemDataList;
     private ItemSearchData searchData;
+    [Networked, Capacity(20)] private NetworkArray<Item> items { get; }
     [Networked] private string detectName { get; set; }
     protected override void Awake()
     {
@@ -35,22 +36,36 @@ public class InteractItemBox : InteractObject
                 randCount = Random.Range(1, itemDataList[i].MaxCount);
             }
             searchData.AddItemData(itemDataList[i].CreateItemData(randCount));
-            Debug.Log(searchData.itemList[i].Count);
+
         }
+
+
 
         base.Spawned();
         DetectData.interactHint = "아이템 상자 열기";
         if (HasStateAuthority)
         {
             itemBoxState = ItemBoxState.Close;
+
+            //int newIndex = 0;
+            //for (int i = 0; i < itemDataList.Count; i++)
+            //{
+
+            //    ItemInstance instance = itemDataList[i].CreateItemData();
+            //    items.Set(newIndex, (instance.CreateNetworkItem(Runner)));
+            //    items[newIndex].gameObject.SetActive(false);
+            //    newIndex++;
+
+            //}
         }
 
-    }
 
+    }
     public override bool Detect(out DetectData interactInfo)
     {
 
         interactInfo = DetectData;
+
 
         return true;
     }
@@ -88,16 +103,9 @@ public class InteractItemBox : InteractObject
         }
 
     }
-
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public override void RPC_StartInteraction()
-    {
-        // ChangeState();
-    }
-
-
     public override void StartInteraction()
     {
+
         ChangeState();
     }
     public void OnChangeState()
@@ -119,7 +127,15 @@ public class InteractItemBox : InteractObject
 
     }
 
+    public void InterestEnter(PlayerRef player)
+    {
+        Debug.Log("InterestEnter : " + player);
+    }
 
+    public void InterestExit(PlayerRef player)
+    {
+        Debug.Log("InterestExit : " + player);
+    }
 }
 [Serializable]
 public class ItemSearchData

@@ -20,7 +20,6 @@ public class ItemSearchSystem : NetworkBehaviour
     {
         if (FindEqualSearchItemList(items, out int listIndex))
         {
-            Debug.Log("Ã£À½");
             return false;
         }
 

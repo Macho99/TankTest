@@ -11,7 +11,7 @@ public class ItemContainerUI : PopUpUI
     public void Init(ItemContainer itemContainer)
     {
         this.itemContainer = itemContainer;
-        searchUI.Init(itemContainer.itemSearchSystem);
+        searchUI.Init(itemContainer.itemSearchSystem, itemContainer.inventory);
 
 
     }

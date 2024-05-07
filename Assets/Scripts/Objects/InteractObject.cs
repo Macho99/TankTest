@@ -68,7 +68,6 @@ public abstract class InteractObject : NetworkBehaviour, IDetectable
     }
 
 
-    public abstract void RPC_StartInteraction();
 
     public abstract void StartInteraction();
 
