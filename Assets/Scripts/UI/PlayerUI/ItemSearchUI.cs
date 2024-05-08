@@ -43,7 +43,7 @@ public class ItemSearchUI : MonoBehaviour
     }
     public void OnItemAcquisition(int index)
     {
-        itemSearchSystem.AcquisitionItem(index);
+        //itemSearchSystem.AcquisitionItem(index);
     }
 
 }

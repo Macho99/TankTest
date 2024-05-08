@@ -5,26 +5,38 @@ using UnityEngine;
 
 public class Item : NetworkBehaviour
 {
-    protected ItemInstance itemInstance;
-
+    [SerializeField] protected ItemSO itemData;
 
     [Networked] protected int currentCount { get; set; }
-
+    //[Networked, OnChangedRender(nameof(Active))] public bool IsActive { get; set; }
+    //private void Active()
+    //{
+    //    if (IsActive)
+    //    {
+    //        gameObject.SetActive(true);
+    //    }
+    //    else
+    //    {
+    //        gameObject.SetActive(false);
+    //    }
+    //}
     public override void Spawned()
     {
-
+        gameObject.SetActive(false);
+    }
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
     }
     public int ItemCount { get { return currentCount; } }
-    public ItemInstance ItemInstance { get { return itemInstance; } }
 
-    public override void FixedUpdateNetwork()
+    public override void Render()
     {
-        Debug.Log(gameObject.name + currentCount);
+  
     }
 
-    public void Init(ItemInstance itemData, int count)
+    public void Init(int count)
     {
-        this.itemInstance = itemData;
         this.currentCount = count;
     }
 }

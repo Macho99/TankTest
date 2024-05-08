@@ -27,7 +27,7 @@ public class MiscItemInstance : ItemInstance
     {
         Item item = runner.Spawn(itemObject);
 
-        item.Init(this, count);
+        item.Init(count);
         item.name = this.itemData.ItemName;
         return item;
     }

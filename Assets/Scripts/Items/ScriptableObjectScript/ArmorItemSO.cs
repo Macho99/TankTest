@@ -34,7 +34,7 @@ public class ArmorItemInstance : EquipmentItemInstance
     public override Item CreateNetworkItem(NetworkRunner runner, int count = 1)
     {
         Item item = runner.Spawn(itemObject);
-        item.Init(this, count);
+        item.Init(count);
         item.name = this.itemData.ItemName;
         return item;
     }

@@ -41,14 +41,17 @@ public class Inventory : NetworkBehaviour
         items.Add(newItem);
         onItemUpdate?.Invoke(items.Count - 1);
 
-       //// Debug.Log(items[items.Count - 1].ItemData.ItemName);
+        //// Debug.Log(items[items.Count - 1].ItemData.ItemName);
     }
     public void RemoveItem(int index)
     {
 
     }
 
-
+    public override void Render()
+    {
+       
+    }
     private void Checkweight(Item item)
     {
         //float itemWeight = item.ItemData.Weight;

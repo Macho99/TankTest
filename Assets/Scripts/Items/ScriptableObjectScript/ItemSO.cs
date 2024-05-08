@@ -1,4 +1,5 @@
 using Fusion;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,6 +26,7 @@ public abstract class ItemSO : ScriptableObject
     public Item ItemObject { get { return itemObject; } }
 
 }
+[Serializable]
 public abstract class ItemInstance
 {
     protected ItemSO itemData;

@@ -31,7 +31,7 @@ public class BackpackItemInstance : EquipmentItemInstance
     {
         Item item = runner.Spawn(itemObject);
 
-        item.Init(this, count);
+        item.Init(count);
         return item;
     }
 }
