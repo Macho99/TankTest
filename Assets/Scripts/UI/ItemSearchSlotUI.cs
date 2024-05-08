@@ -6,12 +6,17 @@ using UnityEngine.EventSystems;
 
 public class ItemSearchSlotUI : ItemSlotUI
 {
-    public event Action<ItemSearchSlotUI> onItemAcquisition;
+    public event Action<int> onItemAcquisition;
     public override void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            onItemAcquisition?.Invoke(this);
+            if (isEmpty == true)
+                return;
+
+            Debug.Log(itemNameTMP.text);
+            Debug.Log(slotIndex);
+            onItemAcquisition?.Invoke(slotIndex);
         }
     }
 

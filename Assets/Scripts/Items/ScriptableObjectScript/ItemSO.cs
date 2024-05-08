@@ -14,7 +14,7 @@ public abstract class ItemSO : ScriptableObject
     [SerializeField] protected int maxCount;
     [SerializeField] protected Item itemObject;
     public abstract ItemInstance CreateItemData(int count = 1);
-   
+
     public int ItemID { get { return itemId; } }
     public Sprite ItemIcon { get { return itemIcon; } }
     public string ItemName { get { return itemName; } }
@@ -41,6 +41,7 @@ public abstract class ItemInstance
         this.count = count;
     }
 
+    public abstract ItemInstance Clone();
     //public abstract Item CreatItem(int count = 1);
     public abstract Item CreateNetworkItem(NetworkRunner runner, int count = 1);
 }

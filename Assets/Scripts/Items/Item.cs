@@ -4,16 +4,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Item : NetworkBehaviour
-{ 
+{
     protected ItemInstance itemInstance;
 
 
-    protected int currentCount;
+    [Networked] protected int currentCount { get; set; }
 
+    public override void Spawned()
+    {
 
+    }
     public int ItemCount { get { return currentCount; } }
     public ItemInstance ItemInstance { get { return itemInstance; } }
 
+    public override void FixedUpdateNetwork()
+    {
+        Debug.Log(gameObject.name + currentCount);
+    }
 
     public void Init(ItemInstance itemData, int count)
     {

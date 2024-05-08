@@ -17,6 +17,7 @@ public class ItemContainer : NetworkBehaviour
     {
         itemSearchSystem = GetComponentInChildren<ItemSearchSystem>();
         inventory = GetComponentInChildren<Inventory>();
+        itemSearchSystem.Init(inventory);
 
     }
     private void Start()
@@ -61,16 +62,17 @@ public class ItemContainer : NetworkBehaviour
             }
         }
     }
-    public void SetupSearchData(ItemSearchData searchData)
+    public void SetupSearchData(NetworkArray<Item> searchItem)
     {
 
-        if (!itemSearchSystem.AddSearchItem(searchData))
+        if (!itemSearchSystem.AddSearchItem(searchItem))
             return;
     }
-    public void RemoveSerachData(ItemSearchData searchData)
+    public void RemoveSerachData(NetworkArray<Item> searchItem)
     {
-        itemSearchSystem.ClearsearchItem(searchData);
+        //itemSearchSystem.ClearsearchItem(searchItem);
     }
+
     public void ActiveItemContainerUI(bool Active)
     {
         if (!HasInputAuthority)
@@ -79,7 +81,6 @@ public class ItemContainer : NetworkBehaviour
         if (isOpened == Active)
             return;
 
-        Debug.Log(Active);
         if (Active)
         {
 
@@ -102,5 +103,6 @@ public class ItemContainer : NetworkBehaviour
     {
 
     }
+   
 
 }

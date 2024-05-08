@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 using Random = UnityEngine.Random;
-public class InteractItemBox : InteractObject, IInterestEnter, IInterestExit
+public class InteractItemBox : InteractObject
 {
 
     public enum ItemBoxState { Open = -1, Close = 1 }
@@ -16,7 +16,6 @@ public class InteractItemBox : InteractObject, IInterestEnter, IInterestExit
     private float turnSpeed;
     private Coroutine processRoutine;
     [SerializeField] private List<ItemSO> itemDataList;
-    private ItemSearchData searchData;
     [Networked, Capacity(20)] private NetworkArray<Item> items { get; }
     [Networked] private string detectName { get; set; }
     protected override void Awake()
@@ -27,19 +26,6 @@ public class InteractItemBox : InteractObject, IInterestEnter, IInterestExit
     }
     public override void Spawned()
     {
-        searchData = new ItemSearchData(this);
-        for (int i = 0; i < itemDataList.Count; i++)
-        {
-            int randCount = 1;
-            if (itemDataList[i].IsStackable)
-            {
-                randCount = Random.Range(1, itemDataList[i].MaxCount);
-            }
-            searchData.AddItemData(itemDataList[i].CreateItemData(randCount));
-
-        }
-
-
 
         base.Spawned();
         DetectData.interactHint = "아이템 상자 열기";
@@ -47,16 +33,15 @@ public class InteractItemBox : InteractObject, IInterestEnter, IInterestExit
         {
             itemBoxState = ItemBoxState.Close;
 
-            //int newIndex = 0;
-            //for (int i = 0; i < itemDataList.Count; i++)
-            //{
+            int newindex = 0;
+            for (int i = 0; i < itemDataList.Count; i++)
+            {
+                ItemInstance instance = itemDataList[i].CreateItemData();
 
-            //    ItemInstance instance = itemDataList[i].CreateItemData();
-            //    items.Set(newIndex, (instance.CreateNetworkItem(Runner)));
-            //    items[newIndex].gameObject.SetActive(false);
-            //    newIndex++;
-
-            //}
+                items.Set(newindex, instance.CreateNetworkItem(Runner,4));
+                items[newindex].gameObject.SetActive(true);
+                newindex++;
+            }
         }
 
 
@@ -80,7 +65,9 @@ public class InteractItemBox : InteractObject, IInterestEnter, IInterestExit
         }
         else
         {
-            playerInteract?.SearchItemInteract(searchData);
+
+
+            playerInteract?.SearchItemInteract(items);
         }
     }
     private IEnumerator ProcessRoutin()
@@ -118,32 +105,26 @@ public class InteractItemBox : InteractObject, IInterestEnter, IInterestExit
 
     public override void OnExitDetect()
     {
-        playerInteract?.StopSearchItemInteract(searchData);
+        playerInteract?.StopSearchItemInteract(items);
         base.OnExitDetect();
 
     }
-    public void DeleteItem()
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_DeleteItem(int index)
     {
-
+        Debug.Log("delete");
+        //searchData.itemList[index] = null;
+        //searchData.onUpdate?.Invoke(searchData);
     }
 
-    public void InterestEnter(PlayerRef player)
-    {
-        Debug.Log("InterestEnter : " + player);
-    }
-
-    public void InterestExit(PlayerRef player)
-    {
-        Debug.Log("InterestExit : " + player);
-    }
 }
 [Serializable]
 public class ItemSearchData
 {
     private NetworkBehaviour owner;
     public List<ItemInstance> itemList;
-    public Action<int> onItemAdd;
-    public Action<int> onItemDelete;
+    public event Action<int> onRemove;
+    public Action<ItemSearchData> onUpdate;
     public ItemSearchData(NetworkBehaviour owner)
     {
         this.owner = owner;
@@ -159,6 +140,10 @@ public class ItemSearchData
     public void AddItemData(ItemInstance item)
     {
         itemList.Add(item);
+    }
+    public void RemoveItemData(int index)
+    {
+        onRemove?.Invoke(index);
     }
     public void CreateItem(NetworkRunner runner, int index)
     {

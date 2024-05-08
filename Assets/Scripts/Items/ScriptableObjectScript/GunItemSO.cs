@@ -37,7 +37,12 @@ public class GunItemInstance : WeaponInstance
     {
         currentAmmo = ammo;
     }
+    public override ItemInstance Clone()
+    {
+        GunItemInstance cloneItem = new GunItemInstance(this.ItemData, this.Count, this.currentAmmo);
 
+        return cloneItem;
+    }
     public override Item CreateNetworkItem(NetworkRunner runner, int count = 1)
     {
         Item item = runner.Spawn(itemObject);

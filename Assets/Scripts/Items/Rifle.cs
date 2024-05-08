@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Rifle : Gun
 {
-
     public override bool CanAttack()
     {
         if (!base.CanAttack())
