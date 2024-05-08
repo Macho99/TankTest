@@ -129,7 +129,7 @@ public class ZombieCrawlTrace : ZombieState
 					return;
 				}
 			}
-			if (owner.TargetData.Layer == owner.PlayerLayer || owner.TargetData.Layer == owner.VehicleLayer)
+			if (owner.AttackTargetMask.IsLayerInMask(owner.TargetData.Layer))
 			{
 				if(owner.TargetData.CheckObstacleAttack(owner.transform.position))
 				{
@@ -212,13 +212,13 @@ public class ZombieCrawlTrace : ZombieState
 					if (owner.CurHp == owner.MaxHP)
 					{
 						eatEnd = true;
-						owner.TargetData.SetTarget(null);
+						owner.TargetData.RemoveTarget();
 						owner.SetAnimBool("Eat", false);
 						return;
 					}
 				}
 
-				if (owner.TargetData.Layer == owner.PlayerLayer)
+				if (owner.AttackTargetMask.IsLayerInMask(owner.TargetData.Layer))
 				{
 					eatEnd = true;
 					owner.SetAnimBool("Eat", false);

@@ -19,7 +19,7 @@ public class ZombieHitBox : MonoBehaviour, IHittable
 	public ZombieBody BodyType { get { return bodyType; } }
 	public Rigidbody RB { get { return rb; } }
 
-	public uint HitID => owner.Object.Id.Raw;
+	public Int64 HitID => (owner.Object.Id.Raw << 32) + (int) bodyType;
 
 	protected ZombieBase owner;
 

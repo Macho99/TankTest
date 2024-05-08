@@ -23,7 +23,7 @@ public abstract class BreakableObstacle : MonoBehaviour, IHittable
 	public bool IsBreaked { get; protected set; }
 	public int CurHp { get; protected set; } = 100;
 
-	public uint HitID => owner.Object.Id.Raw * (uint) idx;
+	public Int64 HitID => (owner.Object.Id.Raw << 32) + idx;
 
 	protected virtual void Break(bool immediately = false)
 	{

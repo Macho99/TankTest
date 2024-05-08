@@ -7,6 +7,6 @@ using UnityEngine;
 
 public interface IHittable
 {
-	public uint HitID { get; }
+	public Int64 HitID { get; }
 	public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage);
 }

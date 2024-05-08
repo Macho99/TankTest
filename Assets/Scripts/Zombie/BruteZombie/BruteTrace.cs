@@ -81,7 +81,7 @@ public class BruteTrace : BruteZombieState
 			if (owner.TargetData.Distance > 5f)
 			{
 				ChangeState(BruteZombie.State.Roar);
-				owner.TargetData.SetTarget();
+				owner.TargetData.RemoveTarget();
 				owner.PlayerFindTimer = TickTimer.CreateFromSeconds(owner.Runner, 10f);
 				owner.Agent.ResetPath();
 				return true;
@@ -108,7 +108,7 @@ public class BruteTrace : BruteZombieState
 				if(CheckDash(targetData.Direction, targetData.Distance) == true)
 				{
 					//돌진 공격
-					if (targetData.Distance < owner.DashDist && targetData.Angle < 5f)
+					if (targetData.Distance < owner.DashDist && targetData.AbsAngle < 5f)
 					{
 						Attack(BruteZombie.AttackType.Dash);
 						owner.DashTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.DashCooltime);

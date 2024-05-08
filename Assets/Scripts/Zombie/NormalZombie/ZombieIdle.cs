@@ -1,73 +1,41 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
-public class ZombieIdle : ZombieState
+public class ZombieIdle : ZombieBaseIdle
 {
 	float wanderThreshold = 0.3f;
 
-	float idleShifter;
-	float idleTime;
-	float elapsed;
+	new Zombie owner;
 
-	public ZombieIdle(Zombie owner) : base(owner)
+	public ZombieIdle(Zombie owner) : base(owner, 4f, 10f)
 	{
+		this.owner = owner;
 	}
 
-	public override void Enter()
+	protected override void OnIdleTimerExpired()
 	{
-		elapsed = 0f;
-		idleShifter = Random.Range(0f, 2f);
-		idleTime = Random.Range(4f, 10f);
-	}
+		float dice = Random.value;
 
-	public override void Exit()
-	{
-		owner.SetAnimFloat("SpeedX", 0f);
-		owner.SetAnimFloat("SpeedY", 0f);
-	}
-
-	public override void SetUp()
-	{
-
-	}
-
-	public override void Transition()
-	{
-		if (owner.Agent.hasPath &&  owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
+		if (dice > wanderThreshold)
 		{
-			ChangeState(Zombie.State.Trace);
+			owner.SetWanderDestination(20f);
 			return;
 		}
-
-		if (elapsed > idleTime)
+		else
 		{
-			elapsed = -10f;
-			float dice = Random.value;
-
-			if(dice > wanderThreshold)
-			{
-				Vector3 pos = owner.transform.position;
-				Vector3 randPos = pos + Random.insideUnitSphere * 20f;
-				randPos.y = pos.y;
-				owner.Agent.SetDestination(randPos);
-				return;
-			}
-			else
-			{
-				Search();
-				return;
-			}
+			Search();
+			return;
 		}
 	}
 
-	public override void FixedUpdateNetwork()
+	protected override void OnTrace()
 	{
-		elapsed += owner.Runner.DeltaTime;
-		if(elapsed < 2f)
-		{
-			owner.Decelerate(1f);
-			owner.SetAnimFloat("IdleShifter", idleShifter, 0.2f);
-		}
+		ChangeState(Zombie.State.Trace);
 	}
 
 	private void Search()

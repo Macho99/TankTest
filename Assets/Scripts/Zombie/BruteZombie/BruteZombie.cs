@@ -343,7 +343,7 @@ public class BruteZombie : ZombieBase
 		}
 
 		Vector3 targetDir;
-		if (TargetData.IsTargeting == false)
+		if (TargetData == null || TargetData.IsTargeting == false)
 		{
 			targetDir = transform.forward;
 		}

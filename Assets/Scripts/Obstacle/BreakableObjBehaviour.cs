@@ -17,6 +17,7 @@ public class BreakableObjBehaviour : NetworkBehaviour
 
 	const int NETWORK_ARR_LENGTH = 100;
 
+	bool spawned;
 	bool isFirstRender = true;
 
 	[SerializeField] List<BreakableObstacle> objList;
@@ -33,6 +34,7 @@ public class BreakableObjBehaviour : NetworkBehaviour
 	public override void Spawned()
 	{
 		base.Spawned();
+		spawned = true;
 		visualBreakCnt = BreakCnt;
 		ChangeRender();
 	}
@@ -86,12 +88,16 @@ public class BreakableObjBehaviour : NetworkBehaviour
 
 	public void BreakRequest(BreakData breakData)
 	{
+		if (spawned == false) return;
+
 		BreakNetworkArr.Set(BreakCnt++ % BreakNetworkArr.Length, breakData);
 		BreakRequest(breakData.idx);
 	}
 
 	public void BreakRequest(int objIdx)
 	{
+		if (spawned == false) return;
+
 		int arrIdx = objIdx / 32;
 		int arrDigit = objIdx % 32;
 		int prevValue = NetworkArr[arrIdx];

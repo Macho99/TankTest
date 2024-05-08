@@ -3,10 +3,13 @@ using UnityEngine;
 using Fusion;
 using UnityEngine.AI;
 using System;
-using static UnityEngine.UI.GridLayoutGroup;
 using System.Text;
 using TMPro;
 using Unity.AI.Navigation;
+using UnityEditor.Rendering.LookDev;
+using System.Collections.Generic;
+using static UnityEngine.UI.GridLayoutGroup;
+using Random = UnityEngine.Random;
 
 public struct BoneTransform
 {
@@ -45,7 +48,9 @@ public abstract class ZombieBase : NetworkBehaviour
 	public string WaitName { get; set; }
 	public string NextState { get; set; }
 	protected string prevState;
+	public event Action OnDie;
 
+	public bool IsDead { get; private set; }
 	public BodyPart[] BodyHitParts { get { return bodyHitParts; } }
 	public Transform Hips { get; private set; }
 	public Transform Eyes { get; private set; }
@@ -55,10 +60,11 @@ public abstract class ZombieBase : NetworkBehaviour
 
 	#region LayerAndMask
 	public LayerMask PlayerMask { get; private set; }
+	public LayerMask AttackTargetMask { get; private set; }
 	public LayerMask HittableMask { get; private set; }
 	public LayerMask FindObstacleMask { get; private set; }
-	public int PlayerLayer { get; private set; }
-	public int VehicleLayer { get; private set; }
+	//public int PlayerLayer { get; private set; }
+	//public int VehicleLayer { get; private set; }
 	#endregion
 
 	public TargetData TargetData { get; private set; }
@@ -78,12 +84,14 @@ public abstract class ZombieBase : NetworkBehaviour
 
 	protected virtual void Awake()
 	{
+		TargetData = new TargetData(transform);
 		CurHp = MaxHP;
 		PlayerMask = LayerMask.GetMask("Player");
 		HittableMask = LayerMask.GetMask("Player", "Vehicle", "Breakable");
+		AttackTargetMask = LayerMask.GetMask("Player", "Vehicle");
 		FindObstacleMask = LayerMask.GetMask("Default", "Environment", "Breakable");
-		PlayerLayer = LayerMask.NameToLayer("Player");
-		VehicleLayer = LayerMask.NameToLayer("Vehicle");
+		//PlayerLayer = LayerMask.NameToLayer("Player");
+		//VehicleLayer = LayerMask.NameToLayer("Vehicle");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
 
@@ -98,20 +106,27 @@ public abstract class ZombieBase : NetworkBehaviour
 	private void SetBodyParts()
 	{
 		ZombieHitBox[] hitBoxes = GetComponentsInChildren<ZombieHitBox>();
+		bool[] dupCheck = new bool[(int)ZombieBody.Size];
 		foreach (ZombieHitBox hitBox in hitBoxes)
 		{
+			int bodyTypeInt = (int)hitBox.BodyType;
+			if (dupCheck[bodyTypeInt] == true)
+			{
+				Debug.LogError($"{gameObject.name}의 {hitBox.BodyType}이 중복됩니다");
+				continue;
+			}
+			dupCheck[bodyTypeInt] = true;
 			BodyPart bodyPart = new BodyPart();
 			bodyPart.zombieHitBox = hitBox;
 			bodyPart.rb = hitBox.RB;
 			bodyPart.col = hitBox.GetComponent<Collider>();
-			bodyHitParts[(int)hitBox.BodyType] = bodyPart;
+			bodyHitParts[bodyTypeInt] = bodyPart;
 		}
 	}
 
 	public override void Spawned()
 	{
 		Agent.enabled = true;
-		TargetData = new TargetData(transform, Runner);
 	}
 
 	public override void FixedUpdateNetwork()
@@ -124,10 +139,9 @@ public abstract class ZombieBase : NetworkBehaviour
 		TargetData.UpdateTargetData();
 	}
 
-
 	private void FindPlayer()
 	{
-		if (TargetData.Layer == PlayerLayer || TargetData.Layer == VehicleLayer) return;
+		if (AttackTargetMask.IsLayerInMask(TargetData.Layer)) return;
 		if (PlayerFindTimer.ExpiredOrNotRunning(Runner) == false) return;
 		int result = Physics.OverlapSphereNonAlloc(transform.position, lookDist, overlapCols, PlayerMask);
 
@@ -145,8 +159,7 @@ public abstract class ZombieBase : NetworkBehaviour
 		{
 			if (Physics.Raycast(Eyes.position, toPlayerDir, length, FindObstacleMask) == false)
 			{
-				TargetData.LastFindTick = Runner.Tick;
-				TargetData.SetTarget(overlapCols[0].transform);
+				TargetData.SetTarget(overlapCols[0].transform, Runner.Tick);
 				if (agent.enabled)
 					agent.ResetPath();
 			}
@@ -168,7 +181,7 @@ public abstract class ZombieBase : NetworkBehaviour
 			}
 		}
 
-		if (TargetData.Layer != PlayerLayer && TargetData.Layer != VehicleLayer) return;
+		if (AttackTargetMask.IsLayerInMask(TargetData.Layer) == false) return;
 
 		Vector3 toTargetVec = ((TargetData.Position + Vector3.up) - Eyes.position);
 		float toTargetMag = toTargetVec.magnitude;
@@ -182,7 +195,7 @@ public abstract class ZombieBase : NetworkBehaviour
 
 		if (TargetData.LastFindTick + playerLostTime * Runner.TickRate < Runner.Tick)
 		{
-			TargetData.SetTarget();
+			TargetData.RemoveTarget();
 		}
 	}
 
@@ -235,12 +248,17 @@ public abstract class ZombieBase : NetworkBehaviour
 
 		if (Object.IsProxy) return;
 
-		TargetData.SetTarget(source);
+		TargetData.SetTarget(source, Runner.Tick);
 
 		CurHp -= damage;
 		if (CurHp <= 0)
 		{
 			CurHp = 0;
+			if(IsDead == false)
+			{
+				IsDead = true;
+				OnDie?.Invoke();
+			}
 		}
 	}
 
@@ -253,8 +271,7 @@ public abstract class ZombieBase : NetworkBehaviour
 			Vector3 lookDir = (agent.steeringTarget - transform.position);
 			lookDir.y = 0f;
 			lookDir.Normalize();
-			transform.rotation = Quaternion.RotateTowards(transform.rotation,
-				Quaternion.LookRotation(lookDir), rotateSpeed * Runner.DeltaTime);
+			LookToward(lookDir, rotateSpeed);
 			Vector3 moveDir = agent.desiredVelocity.normalized;
 			Vector3 animDir = transform.InverseTransformDirection(moveDir);
 
@@ -263,6 +280,12 @@ public abstract class ZombieBase : NetworkBehaviour
 		}
 		SetAnimFloat("SpeedX", speedX, dampX);
 		SetAnimFloat("SpeedY", speedY, dampY);
+	}
+
+	public void LookToward(Vector3 direction, float speed)
+	{
+		transform.rotation = Quaternion.RotateTowards(transform.rotation,
+			Quaternion.LookRotation(direction), speed * Runner.DeltaTime);
 	}
 
 	public virtual void Heal(int amount, bool healLeg = true)
@@ -325,5 +348,13 @@ public abstract class ZombieBase : NetworkBehaviour
 
 		SetAnimFloat("SpeedX", 0f, dampTime, deltaTime);
 		SetAnimFloat("SpeedY", 0f, dampTime, deltaTime);
+	}
+
+	public void SetWanderDestination(float range)
+	{
+		Vector3 pos = transform.position;
+		Vector3 randPos = pos + Random.insideUnitSphere * range;
+		randPos.y = pos.y;
+		Agent.SetDestination(randPos);
 	}
 }

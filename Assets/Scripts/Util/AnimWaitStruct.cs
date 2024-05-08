@@ -10,10 +10,12 @@ public struct AnimWaitStruct
 	public Action updateAction;
 	public Action animStartAction;
 	public Action exitAction;
+	public Action nextStateAction;
 
 	public AnimWaitStruct(string animName, string nextState = null, int layer = 0, 
 		string startAnimName = null, Action startAction = null,
-		Action updateAction = null, Action animStartAction = null, Action exitAction = null)
+		Action updateAction = null, Action animStartAction = null, Action exitAction = null, 
+		Action nextStateAction = null)
 	{
 		this.animName = animName;
 		this.nextState = nextState;
@@ -23,5 +25,6 @@ public struct AnimWaitStruct
 		this.updateAction = updateAction;
 		this.animStartAction = animStartAction;
 		this.exitAction = exitAction;
+		this.nextStateAction = nextStateAction;
 	}
 }

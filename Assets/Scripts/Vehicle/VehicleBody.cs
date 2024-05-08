@@ -10,7 +10,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 {
 	private struct HitData
 	{
-		public uint id;
+		public Int64 id;
 		public TickTimer nextHitTimer;
 	}
 
@@ -28,7 +28,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 	public LayerMask BodyAttackMask { get; private set; }
 	public int MonsterLayer { get; private set; }
 
-	public uint HitID => Object.Id.Raw;
+	public Int64 HitID => (Object.Id.Raw << 32);
 
 	private void Awake()
 	{
@@ -78,7 +78,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 	{
 		//print($"{colTrans.name} 때림");
 		hittable.ApplyDamage(transform, transform.position,
-			(colTrans.position - transform.position).normalized * rb.velocity.magnitude * 20f, (int) (damage * rb.velocity.magnitude));
+			(colTrans.position - transform.position).normalized * rb.velocity.magnitude * 5f, (int) (damage * rb.velocity.magnitude));
 	}
 
 	public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)

@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ZombieAnimWait : NetworkBaseState
+public class ZombieAnimWait : ZombieBaseState
 {
-	ZombieBase owner;
 	AnimWaitStruct waitStruct;
 	bool lastAnimEntered;
 	bool startAnimEntered;
 
-	public ZombieAnimWait(ZombieBase owner)
+	public ZombieAnimWait(ZombieBase owner) : base(owner)
 	{
-		this.owner = owner;
+
 	}
 
 	public override void Enter()
@@ -53,7 +52,12 @@ public class ZombieAnimWait : NetworkBaseState
 		{
 			if (owner.IsAnimName(waitStruct.animName, waitStruct.layer) == false)
 			{
-				if (waitStruct.nextState == null)
+				if(waitStruct.nextStateAction != null)
+				{
+					waitStruct.nextStateAction.Invoke();
+					return;
+				}
+				else if (waitStruct.nextState == null)
 				{
 					ChangeState(owner.DecideState());
 					return;

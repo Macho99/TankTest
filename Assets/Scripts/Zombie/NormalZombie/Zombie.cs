@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
 public enum RagdollState { Animate, Ragdoll, FaceUpStand, FaceDownStand, FaceUpCrawl, FaceDownCrawl };
@@ -122,7 +123,7 @@ public class Zombie : ZombieBase
 
 	private void FindMeat()
 	{
-		if (agent.hasPath || TargetData.Layer == PlayerLayer || TargetData.Layer == VehicleLayer) return;
+		if (agent.hasPath || AttackTargetMask.IsLayerInMask(TargetData.Layer)) return;
 		if (meatFindTimer.ExpiredOrNotRunning(Runner) == false) return;
 		if (CurHp == MaxHP) return;
 
@@ -135,7 +136,7 @@ public class Zombie : ZombieBase
 
 		if (agent.enabled)
 			agent.ResetPath();
-		TargetData.SetTarget(overlapCols[0].transform);
+		TargetData.SetTarget(overlapCols[0].transform, Runner.Tick);
 	}
 
 	public void EnableRagdoll(bool value)

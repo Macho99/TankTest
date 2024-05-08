@@ -308,7 +308,7 @@ public class TankAttack : VehicleBehaviour
 
 			hitPointComparer.hitPoint = hit.point;
 			Array.Sort(attackCols, 0, result, hitPointComparer);
-			List<uint> idList = new List<uint>();
+			List<Int64> idList = new List<Int64>();
 
 			for(int i = 0; i < result; i++)
 			{
@@ -318,7 +318,7 @@ public class TankAttack : VehicleBehaviour
 					continue;
 				}
 
-				uint id = hittable.HitID;
+				Int64 id = hittable.HitID;
 				if (idList.Contains(id))
 				{
 					continue;

@@ -10,7 +10,6 @@ using UnityEngine;
 public class TargetData
 {
 	private Transform owner;
-	private NetworkRunner runner;
 	public bool IsTargeting { get { return Transform != null; } }
 	public Transform Transform { get; private set; }
 	public Vector3 Position { get { return Transform.position; } }
@@ -29,10 +28,9 @@ public class TargetData
 
 	private LayerMask obstacleMask;
 
-	public TargetData(Transform owner, NetworkRunner runner)
+	public TargetData(Transform owner)
 	{
 		this.owner = owner;
-		this.runner = runner;
 
 		targetHits = new RaycastHit[5];
 		ownerHits = new RaycastHit[5];
@@ -40,18 +38,23 @@ public class TargetData
 		obstacleMask = LayerMask.GetMask("Breakable", "Vehicle");
 	}
 
-	public void SetTarget(Transform target = null)
+	public void RemoveTarget()
+	{
+		Transform = null;
+		Layer = -1;
+	}
+
+	public void SetTarget(Transform target, Tick tick)
 	{
 		if (target == null)
 		{
-			Transform = null;
-			Layer = -1;
+			RemoveTarget();
 		}
 		else
 		{
 			Transform = target;
 			Layer = target.gameObject.layer;
-			LastFindTick = runner.Tick;
+			LastFindTick = tick;
 			UpdateTargetData();
 		}
 	}

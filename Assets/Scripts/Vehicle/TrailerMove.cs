@@ -42,18 +42,21 @@ public class TrailerMove : NetworkBehaviour
 
 	public override void FixedUpdateNetwork()
 	{
-		leftWheelCols[0].GetWorldPose(out Vector3 rPos, out Quaternion rRot);
-		Quaternion parentRot = leftWheelTrans[0].parent.rotation;
-		Vector3 localEuler = (Quaternion.Inverse(parentRot) * rRot).eulerAngles;
-		float curLeftXAngle = localEuler.z < 90f ? localEuler.x : localEuler.z - localEuler.x;
-		LeftAps = (Mathf.DeltaAngle(prevLeftXAngle, curLeftXAngle)) / Runner.DeltaTime;
-		prevLeftXAngle = curLeftXAngle;
+		if (Runner.IsForward)
+		{
+			leftWheelCols[0].GetWorldPose(out Vector3 rPos, out Quaternion rRot);
+			Quaternion parentRot = leftWheelTrans[0].parent.rotation;
+			Vector3 localEuler = (Quaternion.Inverse(parentRot) * rRot).eulerAngles;
+			float curLeftXAngle = localEuler.z < 90f ? localEuler.x : localEuler.z - localEuler.x;
+			LeftAps = (Mathf.DeltaAngle(prevLeftXAngle, curLeftXAngle)) / Runner.DeltaTime;
+			prevLeftXAngle = curLeftXAngle;
 
-		rightWheelCols[0].GetWorldPose(out Vector3 lPos, out Quaternion lRot);
-		localEuler = (Quaternion.Inverse(parentRot) * lRot).eulerAngles;
-		float curRightXAngle = localEuler.z < 90f ? localEuler.x : localEuler.z - localEuler.x;
-		RightAps = (Mathf.DeltaAngle(prevRightXAngle, curRightXAngle)) / Runner.DeltaTime;
-		prevRightXAngle = curRightXAngle;
+			rightWheelCols[0].GetWorldPose(out Vector3 lPos, out Quaternion lRot);
+			localEuler = (Quaternion.Inverse(parentRot) * lRot).eulerAngles;
+			float curRightXAngle = localEuler.z < 90f ? localEuler.x : localEuler.z - localEuler.x;
+			RightAps = (Mathf.DeltaAngle(prevRightXAngle, curRightXAngle)) / Runner.DeltaTime;
+			prevRightXAngle = curRightXAngle;
+		}
 	}
 
 	public override void Render()
