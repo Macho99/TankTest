@@ -9,6 +9,7 @@ using UnityEngine.Animations.Rigging;
 public class PlayerInteract : NetworkBehaviour
 {
     private float rayDistance;
+    [SerializeField] private LayerMask interactLayer;
     [SerializeField] private Transform raycastTr;
     [SerializeField] private ItemContainer itemContainer;
     private PlayerInputListner inputListner;
@@ -18,6 +19,7 @@ public class PlayerInteract : NetworkBehaviour
 
     private InteractBehavior[] interactBehaviors;
     private InteractObject interactObject;
+
 
     public InteractObject InteractObject { get { return interactObject; } set { interactObject = value; } }
 
@@ -69,7 +71,7 @@ public class PlayerInteract : NetworkBehaviour
         ray.direction = raycastTr.transform.forward;
 
         Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.red);
-        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
+        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance, interactLayer, QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.TryGetComponent(out IDetectable detectObject))
             {
@@ -103,7 +105,7 @@ public class PlayerInteract : NetworkBehaviour
         ray.origin = raycastTr.position;
         ray.direction = raycastTr.transform.forward;
 
-        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
+        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance, interactLayer, QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.TryGetComponent(out InteractObject detectObject))
             {
@@ -139,16 +141,15 @@ public class PlayerInteract : NetworkBehaviour
         interactData = default;
     }
 
-    public void SearchItemInteract(ItemSearchData searchData)
+    public void SearchItemInteract(NetworkArray<Item> searchItem)
     {
-        itemContainer.SetupSearchData(searchData);
-        Debug.Log(searchData.itemList.Count);
+        itemContainer.SetupSearchData(searchItem);
         itemContainer.ActiveItemContainerUI(true);
     }
 
-    public void StopSearchItemInteract(ItemSearchData searchData)
+    public void StopSearchItemInteract(NetworkArray<Item> searchItem)
     {
-        itemContainer.RemoveSerachData(searchData);
+        itemContainer.RemoveSerachData(searchItem);
         itemContainer.ActiveItemContainerUI(false);
     }
 

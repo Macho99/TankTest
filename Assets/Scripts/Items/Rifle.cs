@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Rifle : Gun
 {
-
     public override bool CanAttack()
     {
         if (!base.CanAttack())
@@ -20,10 +19,10 @@ public class Rifle : Gun
         ray.origin = muzzlePoint.transform.position;
         ray.direction = (targetPoint.position - muzzlePoint.transform.position).normalized;
 
-        if (Physics.Raycast(ray, out RaycastHit hit, ((GunItemSO)itemInstance.ItemData).Distance))
-        {
-            Debug.Log("HIT");
-        }
+        //if (Physics.Raycast(ray, out RaycastHit hit, ((GunItemSO)itemInstance.ItemData).Distance))
+        //{
+        //    Debug.Log("HIT");
+        //}
 
 
     }

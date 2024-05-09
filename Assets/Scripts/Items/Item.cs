@@ -4,20 +4,39 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Item : NetworkBehaviour
-{ 
-    protected ItemInstance itemInstance;
+{
+    [SerializeField] protected ItemSO itemData;
 
-
-    protected int currentCount;
-
-
-    public int ItemCount { get { return currentCount; } }
-    public ItemInstance ItemInstance { get { return itemInstance; } }
-
-
-    public void Init(ItemInstance itemData, int count)
+    [Networked] protected int currentCount { get; set; }
+    //[Networked, OnChangedRender(nameof(Active))] public bool IsActive { get; set; }
+    //private void Active()
+    //{
+    //    if (IsActive)
+    //    {
+    //        gameObject.SetActive(true);
+    //    }
+    //    else
+    //    {
+    //        gameObject.SetActive(false);
+    //    }
+    //}
+    public override void Spawned()
     {
-        this.itemInstance = itemData;
+        gameObject.SetActive(false);
+    }
+    public void SetActive(bool isActive)
+    {
+        gameObject.SetActive(isActive);
+    }
+    public int ItemCount { get { return currentCount; } }
+
+    public override void Render()
+    {
+  
+    }
+
+    public void Init(int count)
+    {
         this.currentCount = count;
     }
 }
