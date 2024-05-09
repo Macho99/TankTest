@@ -13,11 +13,14 @@ public class ItemContainer : NetworkBehaviour
 
     public ItemSearchSystem itemSearchSystem { get; set; }
     public Inventory inventory { get; set; }
+    public Equipment equipment { get; set; }
     private void Awake()
     {
         itemSearchSystem = GetComponentInChildren<ItemSearchSystem>();
         inventory = GetComponentInChildren<Inventory>();
+        equipment = GetComponentInChildren<Equipment>();
         itemSearchSystem.Init(inventory);
+        equipment.Init(inventory);
 
     }
     private void Start()

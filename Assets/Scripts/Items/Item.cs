@@ -18,12 +18,13 @@ public class Item : NetworkBehaviour
     public void SetParent(Transform parent)
     {
         transform.SetParent(parent);
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
     }
 
     public void OnChangeParent()
     {
         transform.SetParent(owner?.transform);
-        Debug.Log("√º¿Œ¡ˆ");
     }
     public override void Spawned()
     {

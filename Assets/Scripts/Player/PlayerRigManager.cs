@@ -13,7 +13,6 @@ public class PlayerRigManager : NetworkBehaviour
     [SerializeField] private MultiRotationConstraint bodyConstraint;
     [SerializeField] private MultiAimConstraint aimConstraint;
     [SerializeField] private TwoBoneIKConstraint leftHandRig;
-    [SerializeField] private TwoBoneIKConstraint rightHandRig;
     [SerializeField] private Transform leftHandPivot;
     [Networked, OnChangedRender(nameof(OnChangeBodyWeight))] public float Bodyweight { get; set; }
     [Networked, OnChangedRender(nameof(OnChangeLeftHandWeight))] public float LeftHandweight { get; set; }
@@ -26,7 +25,7 @@ public class PlayerRigManager : NetworkBehaviour
     }
     public override void Spawned()
     {
-        aimConstraint.weight = 1f;       
+        //aimConstraint.weight = 1f;       
         Bodyweight = 0f;
     }
 

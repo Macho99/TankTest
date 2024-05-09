@@ -39,15 +39,7 @@ public class Inventory : NetworkBehaviour
     }
     public override void Render()
     {
-        for (int i = 0; i < items.Length; i++)
-        {
-            if (items[i] != null)
-            {
-                Debug.Log($"{Object.Id}{items[i].name}");
 
-            }
-        }
-        Debug.Log($"{Object.Id}{Weight}");
     }
     public void AddItem(Item newItem)
     {
@@ -60,18 +52,25 @@ public class Inventory : NetworkBehaviour
 
                 items.Set(i, newItem);
                 Weight += items[i].ItemData.Weight;
-                Debug.Log($"{Object.Id}{items[i].name}");
                 items[i].SetParent(this.transform);
                 onItemUpdate?.Invoke(i, items[i]);
                 break;
             }
         }
-
     }
 
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_SetParent(Item item)
+    public Item PullItem(int index)
     {
+        if (items[index] == null)
+        {
+            Debug.Log("존재하지않음");
+            return null;
+        }
 
+        Item pullItem = items[index];
+        items.Set(index, null);
+        onItemUpdate?.Invoke(index, null);
+        return pullItem;
     }
+
 }

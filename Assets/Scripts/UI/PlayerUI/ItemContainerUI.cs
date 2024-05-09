@@ -13,8 +13,8 @@ public class ItemContainerUI : PopUpUI
     {
         this.itemContainer = itemContainer;
         searchUI.Init(itemContainer.itemSearchSystem, itemContainer.inventory);
-        invenUI.Init(itemContainer.inventory);
+        invenUI.Init(itemContainer.inventory, itemContainer.equipment);
 
     }
-   
+
 }

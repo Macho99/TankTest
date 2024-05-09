@@ -26,6 +26,13 @@ public class Rifle : Gun
 
 
     }
+    public override void Render()
+    {
+        if (transform.parent != null)
+        {
+            //Debug.Log(transform.parent.name);
+        }
+    }
 
     public override void Reload()
     {

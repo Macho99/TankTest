@@ -105,7 +105,6 @@ GameObject:
   - component: {fileID: 545150147863688124}
   - component: {fileID: 1360681501600142212}
   - component: {fileID: -7646933094852364410}
-  - component: {fileID: 7457873610575858833}
   m_Layer: 0
   m_Name: Ak-47
   m_TagString: Untagged
@@ -142,6 +141,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemData: {fileID: 11400000, guid: 600ebcc5c9056f04bb75d49767f8cb33, type: 2}
+  _currentCount: 0
+  _owner: {fileID: 0}
   weaponAnim: {fileID: 22100000, guid: b0f5167f15a71b24c82234a887b891f9, type: 2}
   subHandPivot: {fileID: 6813166146480332260}
   muzzlePoint: {fileID: 5963821964150695355}
@@ -163,23 +164,6 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 1360681501600142212}
-  - {fileID: 7457873610575858833}
---- !u!114 &7457873610575858833
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8446192739507692777}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SyncScale: 0
-  SyncParent: 1
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
 --- !u!1001 &4819136438324939371
 PrefabInstance:
   m_ObjectHideFlags: 0

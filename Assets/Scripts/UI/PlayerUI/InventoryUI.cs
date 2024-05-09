@@ -1,3 +1,4 @@
+using Fusion;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,19 +10,19 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private RectTransform slotRoot;
     private InventoryItemSlotUI[] slots;
     private Inventory inventory;
+    private Equipment equipment;
 
-    public void Init(Inventory inventory)
+    public void Init(Inventory inventory, Equipment equipment)
     {
         this.inventory = inventory;
-
+        this.equipment = equipment;
         slots = new InventoryItemSlotUI[inventory.MaxCount];
-        Debug.Log(slots.Length);
         for (int i = 0; i < slots.Length; i++)
         {
             InventoryItemSlotUI itemSlotUI = Instantiate(this.itemSlotUIPrefab, slotRoot.transform);
             slots[i] = itemSlotUI;
             slots[i].Init(i);
-            //itemSlotUI.onItemEquipment += OnItemAcquisition;
+            itemSlotUI.onItemEquipment += OnItemEquipment;
             itemSlotUI.gameObject.SetActive(false);
 
         }
@@ -33,8 +34,13 @@ public class InventoryUI : MonoBehaviour
         Debug.Log(index);
         slots[index].SetItem(itemInstance);
     }
+
     public void OnItemEquipment(int index)
     {
-        // inventory.AcquisitionItem(index);
+
+        equipment.RPC_Equipment(index);
     }
+
+
+
 }

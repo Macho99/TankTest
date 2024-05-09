@@ -121,7 +121,6 @@ public class InteractItemBox : InteractObject
         if (items[index] == null)
             return;
 
-        Debug.Log("rpcTest");
         inventory.AddItem(items[index]);
         items.Set(index, null);
 
