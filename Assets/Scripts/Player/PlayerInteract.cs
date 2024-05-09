@@ -141,15 +141,17 @@ public class PlayerInteract : NetworkBehaviour
         interactData = default;
     }
 
-    public void SearchItemInteract(NetworkArray<Item> searchItem)
+    public void SearchItemInteract(InteractItemBox interactItemBox)
     {
-        itemContainer.SetupSearchData(searchItem);
+        if (!itemContainer.SetupSearchData(interactItemBox))
+            return;
+
         itemContainer.ActiveItemContainerUI(true);
     }
 
-    public void StopSearchItemInteract(NetworkArray<Item> searchItem)
+    public void StopSearchItemInteract()
     {
-        itemContainer.RemoveSerachData(searchItem);
+        itemContainer.RemoveSerachData();
         itemContainer.ActiveItemContainerUI(false);
     }
 

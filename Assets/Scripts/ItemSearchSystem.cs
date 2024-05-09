@@ -12,9 +12,13 @@ public class ItemSearchSystem : NetworkBehaviour
 
     public int MaxCount { get { return maxCount; } }
     private int maxCount;
-    [Networked, Capacity(20)] private NetworkArray<Item> searchItems { get; }
-    public event Action<int, ItemInstance> onUpdate;
+
+    private Item[] itemSearchData;
+    public event Action<int, Item> onUpdate;
     private Inventory inventory;
+    private InteractItemBox interactItemBox;
+
+
     private void Awake()
     {
         maxCount = 10;
@@ -27,150 +31,52 @@ public class ItemSearchSystem : NetworkBehaviour
     {
         return 0;
     }
-    public bool AddSearchItem(NetworkArray<Item> searchData)
+    public void UpdateItem()
     {
+        itemSearchData = interactItemBox.items.ToArray();
 
-
-        for (int i = 0; i < searchData.Length; i++)
+        //ui 업데이트하기
+        for (int i = 0; i < itemSearchData.Length; i++)
         {
-            if (searchItems[i] == null)
-            {
-                if (searchData[i] != null)
-                {
-                    searchItems.Set(i, searchData[i]);
-                    Debug.Log(searchItems[i].name);
-                }
-            }
+
+            onUpdate?.Invoke(i, itemSearchData[i]);
         }
-        for (int i = 0; i < searchItems.Length; i++)
-        {
-            if (searchItems[i] != null)
-            {
-                Debug.Log(searchItems[i].name);
-            }
-            //    continue;
-            //else
-            //{
-            //    Debug.Log(searchItems[i].name);
-            //}
+    }
+    public bool AddSearchItem(InteractItemBox itemBox)
+    {
+        if (interactItemBox != null)
+            return false;
 
-            //for (int j = 0; j < searchData.Length; j++)
-            //{
-            //    if (searchData[j] == null)
-            //        continue;
-
-            //    Debug.Log("searchItems : " + searchItems[i] + "searchData : " + searchData[j]);
-
-            //    if (searchData[j] == searchItems[i])
-            //    {
-            //        Debug.Log("같음");
-            //    }
-            //}
-        }
-
-
-
-        //if (FindEqualSearchItemList(searchData, out int listIndex))
-        //{
-        //    return false;
-        //}
-
-        //int EmptyIndex = FindEmptySpace();
-        //if (EmptyIndex == -1)
-        //{
-        //    Debug.Log("공간이 부족합니다");
-        //    return false;
-        //}
-
-        //searchDatas[EmptyIndex] = searchData;
-
-        //for (int j = 0; j < searchDatas[EmptyIndex].itemList.Count; j++)
-        //{
-        //    onUpdate?.Invoke(j + EmptyIndex, searchDatas[EmptyIndex].itemList[j]);
-        //}
-        //searchDatas[EmptyIndex].onUpdate -= UpdateItem;
-        //searchDatas[EmptyIndex].onUpdate += UpdateItem;
+        interactItemBox = itemBox;
+        itemBox.onUpdate += UpdateItem;
+        UpdateItem();
 
         return true;
     }
-    //public void UpdateItem(ItemSearchData searchData)
-    //{
-    //    for (int j = 0; j < searchDatas.Length; j++)
-    //    {
-    //        if (searchData == searchDatas[j])
-    //        {
-    //            searchDatas[j] = searchData;
-    //            for (int j = 0; j < searchDatas[j].itemList.Count; j++)
-    //            {
-    //                onUpdate?.Invoke(j + j, searchDatas[j].itemList[j]);
-    //            }
-    //            Debug.Log("update");
-    //            return;
-    //        }
-    //    }
-    //}
-    //private int FindEmptySpace()
-    //{
-    //    for (int j = 0; j < searchDatas.Length; j++)
-    //    {
-    //        if (searchDatas[j] == null)
-    //            return j;
-    //    }
+    public void ClearSearchItem()
+    {
+        if (interactItemBox == null) return;
 
-    //    return -1;
-    //}
-    //private bool FindEqualSearchItemList(ItemSearchData items, out int index)
-    //{
-    //    for (int j = 0; j < searchDatas.Length; j++)
-    //    {
-    //        if (searchDatas[j] == null)
-    //            continue;
+        interactItemBox.onUpdate -= UpdateItem;
+        for (int i = 0; i < itemSearchData.Length; i++)
+        {
+            onUpdate?.Invoke(i, null);
+        }
+        Array.Clear(itemSearchData, 0, itemSearchData.Length);
+        interactItemBox = null;
 
-    //        if (searchDatas[j] == items)
-    //        {
-    //            index = j;
-    //            return true;
-    //        }
-    //    }
+    }
+    public void AcquisitionItem(int index)
+    {
+        if (interactItemBox == null)
+        {
+            Debug.Log("interactItemBox null");
+            return;
+        }
 
-    //    index = -1;
-    //    return false;
-    //}
-
-    //public void ClearsearchItem(ItemSearchData items)
-    //{
-    //    if (FindEqualSearchItemList(items, out int index))
-    //    {
-    //        for (int j = 0; j < searchDatas[index].itemList.Count; j++)
-    //        {
-    //            onUpdate?.Invoke(j, null);
-    //        }
-    //        searchDatas[index] = null;
-    //    }
-    //}
+        interactItemBox.RPC_AcquisitionItem(inventory, index);
 
 
-    //public void AcquisitionItem(int newindex)
-    //{
-    //    for (int j = 0; j < searchDatas.Length; j++)
-    //    {
-    //        if (searchDatas[j] == null)
-    //            continue;
-
-    //        for (int j = 0; j < searchDatas[j].itemList.Count; j++)
-    //        {
-    //            if (newindex == (j + j))
-    //            {
-    //                ItemInstance cloneItem = searchDatas[j].itemList[j].Clone();
-    //                inventory.AddItem(cloneItem);
-    //                searchDatas[j].RemoveItemData(j);
-    //                onUpdate?.Invoke(j + j, null);
-    //                break;
-    //            }
-    //        }
-    //    }
-
-
-    //}
+    }
 
 }

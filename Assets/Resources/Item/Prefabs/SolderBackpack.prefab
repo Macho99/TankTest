@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6377862605738571529}
   - component: {fileID: 6424878280663136209}
   - component: {fileID: 3567549297891975465}
+  - component: {fileID: 8733046333803863856}
   m_Layer: 0
   m_Name: SolderBackpack
   m_TagString: Untagged
@@ -47,6 +48,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemData: {fileID: 11400000, guid: f9708136eb25106468ef77bf8d0d44bc, type: 2}
+  _currentCount: 0
+  _owner: {fileID: 0}
 --- !u!114 &3567549297891975465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65,6 +68,23 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 6424878280663136209}
+  - {fileID: 8733046333803863856}
+--- !u!114 &8733046333803863856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8921764283413488665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SyncScale: 0
+  SyncParent: 1
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0
 --- !u!1001 &7158800209495320850
 PrefabInstance:
   m_ObjectHideFlags: 0

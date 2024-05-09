@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public struct ItemStruct : INetworkStruct
 {
@@ -14,53 +15,63 @@ public struct ItemStruct : INetworkStruct
 }
 public class Inventory : NetworkBehaviour
 {
-    //[Networked, Capacity(50)] private NetworkArray<Item> items { get; }
+    [Networked, Capacity(50)] private NetworkArray<Item> items { get; }
 
-    private List<ItemInstance> items;
-    [Networked] private int Weight { get; set; }
+    private int maxCount;
+    [Networked] private float Weight { get; set; }
     [Networked] private float MaxWeight { get; set; }
 
-    public event Action<int> onItemUpdate;
 
+    public int MaxCount { get { return maxCount; } }
+    public event Action<int, Item> onItemUpdate;
     private void Awake()
     {
-        items = new List<ItemInstance>();
+        maxCount = 50;
     }
 
     public override void Spawned()
     {
-        Weight = 0;
-        MaxWeight = 100f;
-
-
+        if (HasStateAuthority)
+        {
+            Weight = 0f;
+            MaxWeight = 100f;
+        }
     }
-
-    //[Rpc(RpcSources.InputAuthority, RpcTargets.All)]
-    public void AddItem(ItemInstance newItem)
-    {
-        items.Add(newItem);
-        onItemUpdate?.Invoke(items.Count - 1);
-
-        //// Debug.Log(items[items.Count - 1].ItemData.ItemName);
-    }
-    public void RemoveItem(int index)
-    {
-
-    }
-
     public override void Render()
     {
-       
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] != null)
+            {
+                Debug.Log($"{Object.Id}{items[i].name}");
+
+            }
+        }
+        Debug.Log($"{Object.Id}{Weight}");
     }
-    private void Checkweight(Item item)
+    public void AddItem(Item newItem)
     {
-        //float itemWeight = item.ItemData.Weight;
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] == null)
+            {
+                if (newItem.ItemData.Weight + Weight > MaxWeight)
+                    continue;
 
+                items.Set(i, newItem);
+                Weight += items[i].ItemData.Weight;
+                Debug.Log($"{Object.Id}{items[i].name}");
+                items[i].SetParent(this.transform);
+                onItemUpdate?.Invoke(i, items[i]);
+                break;
+            }
+        }
 
-        //if (itemWeight + this.Weight > MaxWeight)
-        //{
+    }
 
-        //}
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_SetParent(Item item)
+    {
 
     }
 }

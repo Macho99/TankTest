@@ -31,19 +31,15 @@ public class ItemSearchUI : MonoBehaviour
         itemSearchSystem.onUpdate += UpdateSearchItemUI;
     }
 
-    public void UpdateSearchItemUI(int index, ItemInstance itemInstance)
+    public void UpdateSearchItemUI(int index, Item itemInstance)
     {
         itemSlots[index].SetItem(itemInstance);
 
     }
-    public void UpdateSearchItemUI()
-    {
-      
-
-    }
+ 
     public void OnItemAcquisition(int index)
     {
-        //itemSearchSystem.AcquisitionItem(index);
+        itemSearchSystem.AcquisitionItem(index);
     }
 
 }

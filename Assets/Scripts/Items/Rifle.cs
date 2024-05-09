@@ -9,7 +9,7 @@ public class Rifle : Gun
         if (!base.CanAttack())
             return false;
 
-
+        //
 
         return true;
     }

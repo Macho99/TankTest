@@ -62,15 +62,17 @@ public class ItemContainer : NetworkBehaviour
             }
         }
     }
-    public void SetupSearchData(NetworkArray<Item> searchItem)
+    public bool SetupSearchData(InteractItemBox searchItem)
     {
 
         if (!itemSearchSystem.AddSearchItem(searchItem))
-            return;
+            return false;
+
+        return true;
     }
-    public void RemoveSerachData(NetworkArray<Item> searchItem)
+    public void RemoveSerachData()
     {
-        //itemSearchSystem.ClearsearchItem(searchItem);
+        itemSearchSystem.ClearSearchItem();
     }
 
     public void ActiveItemContainerUI(bool Active)

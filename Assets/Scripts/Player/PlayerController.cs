@@ -19,7 +19,6 @@ public class PlayerController : NetworkBehaviour
     public Inventory Inventory { get; private set; }
     private LocalPlayerDebugUI LocaldebugUI;
 
-    [SerializeField] private IngameDebugUI IngamedebugUI;
     [Networked] public float VelocityY { get; set; }
     [Networked, OnChangedRender(nameof(OnChangeUpperLayerWeight))] public float UpperLayerWeight { get; set; }
     private void Awake()
@@ -48,8 +47,6 @@ public class PlayerController : NetworkBehaviour
         name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
 
 
-        IngamedebugUI.SetPlayerType($"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})");
-
 
 
     }
@@ -61,17 +58,10 @@ public class PlayerController : NetworkBehaviour
         movement.Move();
 
 
-        if (InputListner.pressButton.IsSet(ButtonType.DebugText))
-        {
-            ClearDebugText();
-        }
+       
 
     }
-    public override void Render()
-    {
-        AddDebugText("State", stateMachine.curStateStr);
-
-    }
+   
     public void Falling()
     {
 
@@ -117,15 +107,6 @@ public class PlayerController : NetworkBehaviour
         return false;
     }
 
-    public void AddDebugText(string title, string text)
-    {
-        IngamedebugUI.AddDebugText(title, text);
-    }
-    public void ClearDebugText()
-    {
-        IngamedebugUI.AllClearDubugText();
-
-    }
     public void OnChangeUpperLayerWeight()
     {
         animator.SetLayerWeight(1, UpperLayerWeight);

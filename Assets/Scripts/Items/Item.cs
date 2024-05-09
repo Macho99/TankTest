@@ -7,22 +7,28 @@ public class Item : NetworkBehaviour
 {
     [SerializeField] protected ItemSO itemData;
 
-    [Networked] protected int currentCount { get; set; }
-    //[Networked, OnChangedRender(nameof(Active))] public bool IsActive { get; set; }
-    //private void Active()
-    //{
-    //    if (IsActive)
-    //    {
-    //        gameObject.SetActive(true);
-    //    }
-    //    else
-    //    {
-    //        gameObject.SetActive(false);
-    //    }
-    //}
+    [Networked] public int currentCount { get; set; }
+    [Networked, OnChangedRender(nameof(OnChangeParent))] public NetworkBehaviour owner { get; set; }
+    public ItemSO ItemData { get { return itemData; } }
+
+    public void SetParent(NetworkBehaviour parent)
+    {
+        owner = parent;
+    }
+    public void SetParent(Transform parent)
+    {
+        transform.SetParent(parent);
+    }
+
+    public void OnChangeParent()
+    {
+        transform.SetParent(owner?.transform);
+        Debug.Log("√º¿Œ¡ˆ");
+    }
     public override void Spawned()
     {
-        gameObject.SetActive(false);
+        OnChangeParent();
+        //gameObject.SetActive(false);
     }
     public void SetActive(bool isActive)
     {
@@ -32,7 +38,8 @@ public class Item : NetworkBehaviour
 
     public override void Render()
     {
-  
+        if (owner != null)
+            Debug.Log(owner.gameObject.name);
     }
 
     public void Init(int count)

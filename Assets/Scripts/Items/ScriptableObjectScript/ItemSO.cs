@@ -47,3 +47,8 @@ public abstract class ItemInstance
     //public abstract Item CreatItem(int count = 1);
     public abstract Item CreateNetworkItem(NetworkRunner runner, int count = 1);
 }
+public struct ItemTest : INetworkStruct
+{
+    public NetworkId owner;
+
+}

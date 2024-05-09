@@ -22,7 +22,7 @@ public abstract class ItemSlotUI : MonoBehaviour, IPointerClickHandler
     {
         this.slotIndex = slotIndex;
     }
-    public void SetItem(ItemInstance item)
+    public void SetItem(Item item)
     {
         isEmpty = item == null ? true : false;
         CheckEmpty();
@@ -39,7 +39,7 @@ public abstract class ItemSlotUI : MonoBehaviour, IPointerClickHandler
         if (item.ItemData.IsStackable)
         {
             itemCountTMP.enabled = true;
-            itemCountTMP.text = item.Count.ToString();
+            itemCountTMP.text = item.currentCount.ToString();
         }
 
     }

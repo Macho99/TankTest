@@ -14,21 +14,9 @@ public class ItemSearchSlotUI : ItemSlotUI
             if (isEmpty == true)
                 return;
 
-            Debug.Log(itemNameTMP.text);
-            Debug.Log(slotIndex);
             onItemAcquisition?.Invoke(slotIndex);
         }
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }

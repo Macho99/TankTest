@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 public class InteractItemBox : InteractObject
 {
-
+    public Action onUpdate;
     public enum ItemBoxState { Open = -1, Close = 1 }
     [Networked, OnChangedRender(nameof(OnChangeState))] public ItemBoxState itemBoxState { get; set; }
     [SerializeField] private Transform openerTr;
@@ -15,9 +15,9 @@ public class InteractItemBox : InteractObject
     private float turnSpeed;
     private Coroutine processRoutine;
     [SerializeField] private List<ItemSO> itemDataList;
-    [SerializeField] private ItemSpawnData[] spawnData;
 
-    [Networked, Capacity(10)] private NetworkArray<Item> items { get; }
+    [SerializeField] private ItemSpawnData[] spawnData;
+    [Networked, Capacity(10), OnChangedRender(nameof(UpdateItem))] public NetworkArray<Item> items { get; }
     [Networked] private string detectName { get; set; }
     protected override void Awake()
     {
@@ -61,7 +61,7 @@ public class InteractItemBox : InteractObject
         else
         {
 
-            playerInteract?.SearchItemInteract(items);
+            playerInteract?.SearchItemInteract(this);
         }
     }
     private IEnumerator ProcessRoutin()
@@ -88,9 +88,10 @@ public class InteractItemBox : InteractObject
                 {
                     Item itemInstance = Runner.Spawn(spawnData[i].SpawnItem);
                     items.Set(i, itemInstance);
-
                 }
+
             }
+
         }
 
     }
@@ -109,22 +110,30 @@ public class InteractItemBox : InteractObject
 
     public override void OnExitDetect()
     {
-        //playerInteract?.StopSearchItemInteract(localSearchData);
+        playerInteract?.StopSearchItemInteract();
         base.OnExitDetect();
 
     }
 
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_AcquisitionItem(Inventory inventory, int index)
+    {
+        if (items[index] == null)
+            return;
+
+        Debug.Log("rpcTest");
+        inventory.AddItem(items[index]);
+        items.Set(index, null);
+
+    }
+    public void UpdateItem()
+    {
+        onUpdate?.Invoke();
+    }
 
 }
-//public struct ItemSearchData : INetworkStruct
-//{
-//    public NetworkId ownerId;
-//    public NetworkBehaviour owner;
-//    public List<ItemInstance> itemList;
-//    public event Action<int> onRemove;
-//    public Action<ItemSearchData> onUpdate;
 
-//}
+
 [Serializable]
 public class ItemSpawnData
 {
