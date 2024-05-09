@@ -116,15 +116,15 @@ public class InteractItemBox : InteractObject
 
 
 }
-public struct ItemSearchData : INetworkStruct
-{
-    public NetworkId ownerId;
-    public NetworkBehaviour owner;
-    public List<ItemInstance> itemList;
-    public event Action<int> onRemove;
-    public Action<ItemSearchData> onUpdate;
+//public struct ItemSearchData : INetworkStruct
+//{
+//    public NetworkId ownerId;
+//    public NetworkBehaviour owner;
+//    public List<ItemInstance> itemList;
+//    public event Action<int> onRemove;
+//    public Action<ItemSearchData> onUpdate;
 
-}
+//}
 [Serializable]
 public class ItemSpawnData
 {
