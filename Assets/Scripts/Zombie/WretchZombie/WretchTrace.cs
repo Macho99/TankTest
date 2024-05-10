@@ -1,5 +1,4 @@
-﻿using Fusion;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,21 +46,10 @@ public class WretchTrace : WretchZombieState
 
 		if (owner.AttackTargetMask.IsLayerInMask(owner.TargetData.Layer))
 		{
-			if (owner.CurPoisonVFXData.fireTick != 0 && owner.PoisonTimer.ExpiredOrNotRunning(owner.Runner))
+			if (owner.PoisonTimer.ExpiredOrNotRunning(owner.Runner))
 			{
 				PoisonPrepare();
 				return;
-			}
-			else if(owner.CurPoisonVFXData.fireTick == 0)
-			{
-				if (owner.CheckProjectile(owner.HeadTrans.position, owner.Agent.pathEndPosition,
-					out Vector3 velocity, 1f, owner.PoisonSpeed, owner.PoisonGravity,
-					LayerMask.GetMask("Default", "Breakable", "Environment")) == true)
-				{
-					owner.PoisonVelocity = velocity;
-					PoisonAttack();
-					return;
-				}
 			}
 
 			if(owner.TargetData.Distance < 3.5f && owner.TargetData.AbsAngle < 20f && owner.Anim.GetFloat("SpeedY") > 2f)
@@ -75,11 +63,6 @@ public class WretchTrace : WretchZombieState
 				return;
 			}
 			else if(owner.TargetData.Distance < 0.5f)
-			{
-				CloseAttack();
-				return;
-			}
-			else if(owner.TargetData.CheckObstacleAttack(owner.transform.position) == true)
 			{
 				CloseAttack();
 				return;
@@ -103,9 +86,11 @@ public class WretchTrace : WretchZombieState
 		owner.SetAnimTrigger("Action");
 		owner.AnimWaitStruct = new AnimWaitStruct("Action", WretchZombie.State.Trace.ToString(), updateAction: () =>
 			{
-				owner.Decelerate(2f);
-				owner.LookToward(owner.TargetData.Direction, 60f);
-			});
+				owner.Decelerate();
+				owner.LookToward(owner.TargetData.Direction, 1f);
+			},
+			nextStateAction: PoisonAttack
+			);
 		ChangeState(WretchZombie.State.AnimWait);
 	}
 

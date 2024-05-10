@@ -136,7 +136,7 @@ public class ZombieCrawlTrace : ZombieState
 					Attack(0);
 					return;
 				}
-				else if (owner.TargetData.Distance < 3f && owner.TargetData.AbsAngle < 20f)
+				if (owner.TargetData.Distance < 3f && owner.TargetData.AbsAngle < 20f)
 				{
 					Attack(1);
 					return;

@@ -6,7 +6,9 @@ using System;
 using System.Text;
 using TMPro;
 using Unity.AI.Navigation;
+using UnityEditor.Rendering.LookDev;
 using System.Collections.Generic;
+using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
 public struct BoneTransform
@@ -57,7 +59,6 @@ public abstract class ZombieBase : NetworkBehaviour
 	public AnimWaitStruct? AnimWaitStruct { get; set; }
 
 	#region LayerAndMask
-	public LayerMask EnvironMask { get; private set; }
 	public LayerMask PlayerMask { get; private set; }
 	public LayerMask AttackTargetMask { get; private set; }
 	public LayerMask HittableMask { get; private set; }
@@ -85,11 +86,10 @@ public abstract class ZombieBase : NetworkBehaviour
 	{
 		TargetData = new TargetData(transform);
 		CurHp = MaxHP;
-		EnvironMask = LayerMask.GetMask("Default", "EnvironMask");
 		PlayerMask = LayerMask.GetMask("Player");
 		HittableMask = LayerMask.GetMask("Player", "Vehicle", "Breakable");
 		AttackTargetMask = LayerMask.GetMask("Player", "Vehicle");
-		FindObstacleMask = LayerMask.GetMask("Default", "Environment", "Vehicle", "Breakable");
+		FindObstacleMask = LayerMask.GetMask("Default", "Environment", "Breakable");
 		//PlayerLayer = LayerMask.NameToLayer("Player");
 		//VehicleLayer = LayerMask.NameToLayer("Vehicle");
 		agent = GetComponent<NavMeshAgent>();
@@ -356,51 +356,5 @@ public abstract class ZombieBase : NetworkBehaviour
 		Vector3 randPos = pos + Random.insideUnitSphere * range;
 		randPos.y = pos.y;
 		Agent.SetDestination(randPos);
-	}
-
-	public bool CheckProjectile(Vector3 firePos, Vector3 targetPos, out Vector3 velocity, 
-		float radius, float speed, Vector3 gravity, LayerMask obscuredMask, int segment = 4)
-	{
-		Vector3 diff = targetPos - firePos;
-		float dist = diff.magnitude;
-		float arriveTime = dist / speed;
-		velocity = (targetPos - firePos) / arriveTime;
-		velocity.y = (targetPos.y - firePos.y) / arriveTime
-			+ (arriveTime * -gravity.y) * 0.5f;
-
-		Vector3 curPos = firePos;
-		Vector3 nextPos;
-
-		List<Vector3> posList = new List<Vector3>();
-		for (int i = 1; i <= segment; i++)
-		{
-			float ratio = (float)i / segment;
-			float time = ratio * arriveTime;
-			nextPos = firePos + (velocity + (gravity * time * 0.5f)) * time;
-
-			Vector3 rayVel = nextPos - curPos;
-			Vector3 dir = rayVel.normalized;
-			float mag = rayVel.magnitude;
-
-			posList.Add(curPos);
-			posList.Add(nextPos);
-
-			if (i != segment)
-			{
-				if (Physics.SphereCast(curPos, radius, dir, out RaycastHit hit, mag, obscuredMask) == true)
-				{
-					return false;
-				}
-			}
-			else
-			{
-				if (Physics.Raycast(curPos, dir, mag - 1f, obscuredMask) == true)
-				{
-					return false;
-				}
-			}
-			curPos = nextPos;
-		}
-		return true;
 	}
 }

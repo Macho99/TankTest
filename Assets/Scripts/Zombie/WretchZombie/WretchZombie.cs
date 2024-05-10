@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public struct PoisonVFXData : INetworkStruct
 {
@@ -30,8 +29,6 @@ public class WretchZombie : ZombieBase
 	public enum State { Idle, AnimWait, Trace, Hide, Die }
 
 	[SerializeField] VFXAutoOff poisonFlyVFXPrefab;
-	[SerializeField] VFXAutoOff poisonExplosionPrefab;
-	[SerializeField] PoisonArea poisonAreaPrefab;
 	[SerializeField] float poisonCooltime = 20f;
 	[SerializeField] float poisonRadius = 5f;
 	[SerializeField] float poisonLiftTime = 10f;
@@ -40,9 +37,9 @@ public class WretchZombie : ZombieBase
 	const float maxPoisonFlyTime = 30f;
 
 	Transform headTrans;
+	Tick poisonExplosionTick;
 
 	TickTimer hitReactionTimer;
-	TickTimer poisonAreaHitTimer;
 	TickTimer poisonTimer;
 	LayerMask poisonMask;
 	Vector3 prevPoisonVel;
@@ -51,12 +48,8 @@ public class WretchZombie : ZombieBase
 	int visualPoisonCnt;
 	Coroutine poisonCoroutine;
 
-	List<GameObject> poisonHitList = new();
+	List<PoisonAreaStruct> poisonAreaList = new();
 
-	public Transform HeadTrans { get { return headTrans; } }
-	public Vector3 PoisonGravity { get { return Vector3.up * poisonGravity; } }
-	public Vector3 PoisonVelocity { get; set; }
-	public float PoisonSpeed {  get { return poisonSpeed; } }
 	public TickTimer PoisonTimer { get { return poisonTimer; } }
 
 	[Networked] public PoisonVFXData CurPoisonVFXData { get; private set; }
@@ -77,46 +70,41 @@ public class WretchZombie : ZombieBase
 		stateMachine.AddState(State.Idle, new WretchIdle(this));
 		stateMachine.AddState(State.Trace, new WretchTrace(this));
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
-		stateMachine.AddState(State.Die, new ZombieBaseDie(this, 30f));
+		stateMachine.AddState(State.Die, new ZombieBaseDie(this));
 
 		stateMachine.InitState(State.Idle);
+	}
+
+	private void PoisonAreaAttack(Vector3 origin)
+	{
+
 	}
 
 	public override void FixedUpdateNetwork()
 	{
 		base.FixedUpdateNetwork();
 
-		if(poisonHitList.Count > 0 && poisonAreaHitTimer.ExpiredOrNotRunning(Runner))
+		print(CurPoisonVFXData.finishTick);
+		print(CurPoisonVFXData.explosionPosition);
+
+
+		for (int i = 0; i < poisonAreaList.Count; i++)
 		{
-			poisonAreaHitTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
-			foreach(GameObject obj in poisonHitList)
+			PoisonAreaStruct poisonArea = poisonAreaList[i];
+			if (poisonArea.areaEndTimer.ExpiredOrNotRunning(Runner))
 			{
-				IHittable hittable = obj.GetComponent<IHittable>();
-				if(hittable == null)
-					continue;
-				hittable.ApplyDamage(transform, obj.transform.position, Vector3.zero, 10);
+				poisonAreaList.RemoveAt(i);
+				i--;
+				continue;
 			}
 
-			poisonHitList.Clear();
+			if (poisonArea.damageTimer.ExpiredOrNotRunning(Runner))
+			{
+				poisonArea.damageTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
+				PoisonAreaAttack(poisonArea.point);
+				poisonAreaList[i] = poisonArea;
+			}
 		}
-
-		//for (int i = 0; i < poisonAreaList.Count; i++)
-		//{
-		//	PoisonAreaStruct poisonArea = poisonAreaList[i];
-		//	if (poisonArea.areaEndTimer.ExpiredOrNotRunning(Runner))
-		//	{
-		//		poisonAreaList.RemoveAt(i);
-		//		i--;
-		//		continue;
-		//	}
-
-		//	if (poisonArea.damageTimer.ExpiredOrNotRunning(Runner))
-		//	{
-		//		poisonArea.damageTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
-		//		PoisonAreaAttack(poisonArea.point);
-		//		poisonAreaList[i] = poisonArea;
-		//	}
-		//}
 
 		if (isPoisonFly == true)
 		{
@@ -154,19 +142,8 @@ public class WretchZombie : ZombieBase
 	{
 		base.ApplyDamage(source, zombieHitBox, point, force, damage, playHitVFX);
 
-		if (Object.IsProxy) return;
-
 		if (IsDead == true)
 			return;
-
-		if(CurPoisonVFXData.fireTick == 0)
-		{
-			PoisonVFXData poisonVFXData = CurPoisonVFXData;
-			poisonVFXData.fireTick = Runner.Tick;
-			poisonVFXData.finishTick = Runner.Tick;
-			poisonVFXData.explosionPosition = headTrans.position;
-			CurPoisonVFXData = poisonVFXData;
-		}
 
 		if (hitReactionTimer.ExpiredOrNotRunning(Runner) && damage > 500)
 		{
@@ -192,8 +169,7 @@ public class WretchZombie : ZombieBase
 		}
 	}
 
-	//Animation Event
-	private void PoisonPrepare()
+	private void PoisonShot()
 	{
 		if (HasStateAuthority == false) return;
 
@@ -207,26 +183,16 @@ public class WretchZombie : ZombieBase
 		NetPoisonCnt++;
 		CurPoisonVFXData = new PoisonVFXData()
 		{
-			fireTick = 0,
+			fireTick = Runner.Tick,
 			finishTick = 0,
+
+			startPosition = anim.GetBoneTransform(HumanBodyBones.Head).position,
+			velocity = transform.forward * 10f + transform.up * 5f,
 		};
-	}
-
-	//Animation Event
-	private void PoisonShot()
-	{
-		if (HasStateAuthority == false) return;
-
-		poisonTimer = TickTimer.CreateFromSeconds(Runner, poisonCooltime);
-		PoisonVFXData poisonVFXData = CurPoisonVFXData;
-		poisonVFXData.fireTick = Runner.Tick + 2;
-		poisonVFXData.startPosition = anim.GetBoneTransform(HumanBodyBones.Head).position;
-		poisonVFXData.velocity = PoisonVelocity;
-		CurPoisonVFXData = poisonVFXData;
-
+		print(CurPoisonVFXData.startPosition);
+		print(CurPoisonVFXData.velocity);
 		prevPoisonVel = CurPoisonVFXData.velocity;
 		prevPoisonPos = CurPoisonVFXData.startPosition;
-
 		isPoisonFly = true;
 	}
 
@@ -242,15 +208,13 @@ public class WretchZombie : ZombieBase
 	private IEnumerator CoPoison()
 	{
 		VFXAutoOff poisonFlyVFX = GameManager.Resource.Instantiate(poisonFlyVFXPrefab, 
-			headTrans.position, headTrans.rotation, headTrans, true);
+			headTrans.position, headTrans.rotation, true);
 		poisonFlyVFX.SetOffTime(maxPoisonFlyTime * 2f);
 
-		while(CurPoisonVFXData.fireTick == 0 || Runner.Tick.Raw < CurPoisonVFXData.fireTick)
+		while(Runner.Tick.Raw < CurPoisonVFXData.fireTick)
 		{
 			yield return null;
 		}
-
-		poisonFlyVFX.transform.parent = null;
 
 		while (CurPoisonVFXData.finishTick == 0 || Runner.Tick.Raw < CurPoisonVFXData.finishTick)
 		{
@@ -264,24 +228,7 @@ public class WretchZombie : ZombieBase
 			yield return null;
 		}
 
-		poisonFlyVFX.SetOfftimeWithElapsed(5f);
-		GameManager.Resource.Instantiate(poisonExplosionPrefab, 
-			CurPoisonVFXData.explosionPosition, Random.rotation, true);
-
-		PoisonArea poisonArea = GameManager.Resource.Instantiate(poisonAreaPrefab, 
-			CurPoisonVFXData.explosionPosition, Quaternion.identity, true);
-		if (HasStateAuthority)
-		{
-			poisonArea.SetOwner(this);
-		}
-	}
-
-	public void AddPosionHit(GameObject obj)
-	{
-		if(poisonHitList.Contains(obj) == false)
-		{
-			poisonHitList.Add(obj);
-		}
+		poisonFlyVFX.SetOffTime(3f);
 	}
 
 	public override string DecideState()

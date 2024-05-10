@@ -134,9 +134,7 @@ public class BruteTrace : BruteZombieState
 				//돌 던지기 공격
 				if (owner.MinStoneDist < targetData.Distance && targetData.Distance < owner.MaxStoneDist)
 				{
-					if (owner.CheckProjectile(owner.transform.position + Vector3.up * 3f, owner.Agent.pathEndPosition, 
-						out stoneVelocity, 1.5f, owner.StoneSpeed, Physics.gravity, 
-						LayerMask.GetMask("Default", "Breakable", "Environment")) == true)
+					if (CheckStone(targetData.Distance) == true)
 					{
 						Attack(BruteZombie.AttackType.ThrowStone);
 						owner.StoneTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.StoneCooltime);
@@ -145,7 +143,7 @@ public class BruteTrace : BruteZombieState
 				}
 			}
 		}
-		if (targetData.Distance < owner.NormalAttackDist || owner.TargetData.CheckObstacleAttack(owner.transform.position) == true)
+		if (targetData.Distance < owner.NormalAttackDist)
 		{
 			print(targetData.Angle);
 			BruteZombie.AttackType attackType;
@@ -281,4 +279,52 @@ public class BruteTrace : BruteZombieState
 			targetDir, dist, LayerMask.GetMask("Default")) == false;
 	}
 
+	private bool CheckStone(float dist)
+	{
+		float arriveTime = dist / owner.StoneSpeed;
+		Vector3 targetPos = owner.Agent.pathEndPosition;
+		Vector3 ownerPosition = owner.transform.position + Vector3.up * 3f;
+		stoneVelocity = (targetPos - ownerPosition) / arriveTime;
+		stoneVelocity.y = (targetPos.y - ownerPosition.y) / arriveTime
+			+ (arriveTime * -Physics.gravity.y) * 0.5f;
+
+		int segment = 4;
+		Vector3 curPos = ownerPosition;
+		Vector3 nextPos;
+
+		List<Vector3> posList = new List<Vector3>();
+		for (int i = 1; i <= segment; i++)
+		{
+			float ratio = (float)i / segment;
+			float time = ratio * arriveTime;
+			nextPos = ownerPosition + (stoneVelocity + (Physics.gravity * time * 0.5f)) * time;
+
+			Vector3 rayVel = nextPos - curPos;
+			Vector3 dir = rayVel.normalized;
+			float mag = rayVel.magnitude;
+
+			posList.Add(curPos);
+			posList.Add(nextPos);
+
+			if(i != segment)
+			{
+				if (Physics.SphereCast(curPos, 1.5f, dir, out RaycastHit hit, mag, LayerMask.GetMask("Default")) == true)
+				{
+					owner.LastStoneLines = posList.ToArray();
+					return false;
+				}
+			}
+			else
+			{
+				if(Physics.Raycast(curPos, dir, mag, LayerMask.GetMask("Default")) == true)
+				{
+					owner.LastStoneLines = posList.ToArray();
+					return false;
+				}
+			}
+			curPos = nextPos;
+		}
+		owner.LastStoneLines = posList.ToArray();
+		return true;
+	}
 }
