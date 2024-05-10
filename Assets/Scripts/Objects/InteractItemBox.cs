@@ -14,10 +14,9 @@ public class InteractItemBox : InteractObject
     private float rotateValue;
     private float turnSpeed;
     private Coroutine processRoutine;
-    [SerializeField] private List<ItemSO> itemDataList;
 
     [SerializeField] private ItemSpawnData[] spawnData;
-    [Networked, Capacity(10), OnChangedRender(nameof(UpdateItem))] public NetworkArray<Item> items { get; }
+    [Networked, Capacity(10), OnChangedRender(nameof(UpdateItem)),HideInInspector] public NetworkArray<Item> items { get; }
     [Networked] private string detectName { get; set; }
     protected override void Awake()
     {

@@ -25,7 +25,6 @@ public class PlayerStandLocomotionState : PlayerState
 
         owner.movement.Rotate(owner.InputListner.currentInput);
         owner.movement.SetMove(owner.InputListner.currentInput);
-        owner.Aiming();
 
     }
 

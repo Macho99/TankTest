@@ -15,12 +15,10 @@ public class PlayerController : NetworkBehaviour
     public PlayerInteract interact { get; private set; }
     private CapsuleCollider myCollider;
     public PlayerInputListner InputListner { get; private set; }
-    public PlayerRigManager rigManager { get; private set; }
     public Inventory Inventory { get; private set; }
     private LocalPlayerDebugUI LocaldebugUI;
 
     [Networked] public float VelocityY { get; set; }
-    [Networked, OnChangedRender(nameof(OnChangeUpperLayerWeight))] public float UpperLayerWeight { get; set; }
     private void Awake()
     {
         myCollider = GetComponentInChildren<CapsuleCollider>();
@@ -29,7 +27,6 @@ public class PlayerController : NetworkBehaviour
         movement = GetComponent<PlayerLocomotion>();
         InputListner = GetComponent<PlayerInputListner>();
         interact = GetComponent<PlayerInteract>();
-        rigManager = GetComponent<PlayerRigManager>();
         Inventory = GetComponentInChildren<Inventory>();
         stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
         stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
@@ -107,25 +104,7 @@ public class PlayerController : NetworkBehaviour
         return false;
     }
 
-    public void OnChangeUpperLayerWeight()
-    {
-        animator.SetLayerWeight(1, UpperLayerWeight);
-    }
-    public void Aiming()
-    {
-        if (InputListner.pressButton.IsSet(ButtonType.Adherence))
-        {
-            animator.SetBool("Aim", true);
-            rigManager.LeftHandweight = 1f;
-            movement.CamController.ChangeCamera(BasicCamController.CameraType.Aim);
-        }
-        else if (InputListner.releaseButton.IsSet(ButtonType.Adherence))
-        {
-            animator.SetBool("Aim", false);
-            rigManager.LeftHandweight = 0f;
-            movement.CamController.ChangeCamera(BasicCamController.CameraType.None);
-        }
-    }
+
 
 
 }

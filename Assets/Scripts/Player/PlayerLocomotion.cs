@@ -71,7 +71,6 @@ public class PlayerLocomotion : NetworkBehaviour
         animator.SetFloat("InputDirX", inputDirection.x, 0.05f, Time.deltaTime);
         animator.SetFloat("InputDirZ", inputDirection.y, 0.05f, Time.deltaTime);
         animator.SetFloat("MoveSpeed", moves[(int)movementType].MoveSpeed);
-        animator.SetBool("IsGround", simpleKCC.IsGrounded);
 
 
 

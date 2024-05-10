@@ -15,7 +15,6 @@ public class PlayerLandState : PlayerState
         owner.animator.SetBool("IsLand",true);
         owner.animator.SetFloat("VelocityY", owner.VelocityY);
         Debug.Log(owner.VelocityY);
-        owner.UpperLayerWeight = 0f;
         isLandStart = false;
         isLandEnd = false;
     }
@@ -27,7 +26,6 @@ public class PlayerLandState : PlayerState
         isLandStart = false;
         isLandEnd = false;
         owner.VelocityY = 0f;
-        owner.UpperLayerWeight = 1f;
         owner.animator.SetFloat("VelocityY", 0f);
     }
 

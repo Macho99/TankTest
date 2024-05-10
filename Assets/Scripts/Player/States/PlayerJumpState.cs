@@ -12,8 +12,6 @@ public class PlayerJumpState : PlayerState
 
     public override void Enter()
     {
-        owner.UpperLayerWeight = 0f;
-        owner.rigManager.LeftHandweight = 0f;
         owner.animator.SetBool("IsJump", true);
         owner.movement.TriggerJump();
     }
@@ -21,8 +19,6 @@ public class PlayerJumpState : PlayerState
     public override void Exit()
     {
         owner.animator.SetBool("IsJump", false);
-        owner.UpperLayerWeight = 1f;
-        owner.rigManager.LeftHandweight = 1f;
         isJumpingStart = false;
     }
 

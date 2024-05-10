@@ -11,15 +11,11 @@ public class PlayerFallingState : PlayerState
     public override void Enter()
     {
         owner.animator.SetBool("IsFalling", true);
-        owner.UpperLayerWeight = 0f;
-        owner.rigManager.LeftHandweight = 0f;
     }
 
     public override void Exit()
     {
         owner.animator.SetBool("IsFalling", false);
-        owner.UpperLayerWeight = 1f;
-        owner.rigManager.LeftHandweight = 1f;
     }
 
     public override void FixedUpdateNetwork()

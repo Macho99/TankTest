@@ -30,7 +30,7 @@ public class PlayerCrouchLocomotionState : PlayerState
            
                 owner.movement.Rotate(owner.InputListner.currentInput);
                 owner.movement.SetMove(owner.InputListner.currentInput);
-                owner.Aiming();
+               
                 if (owner.InputListner.pressButton.IsSet(ButtonType.Crouch) && owner.movement.IsGround())
                 {
                     if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Stand))

@@ -15,7 +15,7 @@ public struct ItemStruct : INetworkStruct
 }
 public class Inventory : NetworkBehaviour
 {
-    [Networked, Capacity(50)] private NetworkArray<Item> items { get; }
+    [Networked, Capacity(50), OnChangedRender(nameof(OnChangeItem))] private NetworkArray<Item> items { get; }
 
     private int maxCount;
     [Networked] private float Weight { get; set; }
@@ -39,7 +39,16 @@ public class Inventory : NetworkBehaviour
     }
     public override void Render()
     {
-
+        if (Object.IsProxy)
+        {
+            for (int i = 0; i < maxCount; i++)
+            {
+                if (items[i] != null)
+                {
+                    Debug.Log(items[i].name);
+                }
+            }
+        }
     }
     public void AddItem(Item newItem)
     {
@@ -58,7 +67,16 @@ public class Inventory : NetworkBehaviour
             }
         }
     }
+    public Item GetItem(int index)
+    {
+        if (items[index] == null)
+        {
+            Debug.Log("존재하지않음");
+            return null;
+        }
 
+        return items[index];
+    }
     public Item PullItem(int index)
     {
         if (items[index] == null)
@@ -71,6 +89,17 @@ public class Inventory : NetworkBehaviour
         items.Set(index, null);
         onItemUpdate?.Invoke(index, null);
         return pullItem;
+    }
+
+    public void OnChangeItem()
+    {
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] != null)
+            {
+                items[i].SetParent(this.transform);
+            }
+        }
     }
 
 }

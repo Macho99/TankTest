@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 2351319482983619671}
   - component: {fileID: 1377963460502980772}
   - component: {fileID: 6680759504252022714}
-  - component: {fileID: -7520668375305425142}
   m_Layer: 0
   m_Name: TravalBackpack
   m_TagString: Untagged
@@ -49,7 +48,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemData: {fileID: 11400000, guid: 406a0aab284ab644b88975b48d18eefa, type: 2}
   _currentCount: 0
-  _owner: {fileID: 0}
 --- !u!114 &6680759504252022714
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,23 +66,6 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 1377963460502980772}
-  - {fileID: -7520668375305425142}
---- !u!114 &-7520668375305425142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4422779647270061035}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SyncScale: 0
-  SyncParent: 1
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
 --- !u!1001 &7570299855201184656
 PrefabInstance:
   m_ObjectHideFlags: 0

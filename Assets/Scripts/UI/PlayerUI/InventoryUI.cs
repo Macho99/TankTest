@@ -37,8 +37,8 @@ public class InventoryUI : MonoBehaviour
 
     public void OnItemEquipment(int index)
     {
-
-        equipment.RPC_Equipment(index);
+        Item item = inventory.GetItem(index);
+        equipment.RPC_Equipment(index, item);
     }
 
 
