@@ -10,7 +10,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TestPlayer : NetworkBehaviour
+public class TestPlayer : NetworkBehaviour, IHittable
 {
 	[SerializeField] Canvas playerCanvas;
 	[SerializeField] Image aimImg;
@@ -34,6 +34,8 @@ public class TestPlayer : NetworkBehaviour
 	//float yVel;
 
 	public bool IsGround { get; private set; }
+
+	public long HitID => (Object.Id.Raw << 32);
 
 	//[Networked, HideInInspector] public Vector3 Position { get; private set; }
 	//[Networked, HideInInspector] public Quaternion Rotation { get; private set; }
@@ -157,5 +159,10 @@ public class TestPlayer : NetworkBehaviour
 	public void Teleport(Vector3 position)
 	{
 		kcc.SetPosition(position);
+	}
+
+	public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
+	{
+		print($"{source.name}로부터 {damage} 데미지");
 	}
 }

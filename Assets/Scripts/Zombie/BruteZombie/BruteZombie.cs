@@ -143,7 +143,9 @@ public class BruteZombie : ZombieBase
 	{
 		base.ApplyDamage(source, zombieHitBox, point, velocity, damage, playHitVFX);
 
-		if(IsBerserk == false && CurHp < maxHp / 2)
+		if (Object.IsProxy) return;
+
+		if (IsBerserk == false && CurHp < maxHp / 2)
 		{
 			ChangeToBerserk();
 			return;
@@ -321,7 +323,6 @@ public class BruteZombie : ZombieBase
 	}
 
 	public Vector3[] LastJumpLines { get; set; }
-	public Vector3[] LastStoneLines { get; set; }
 	private void OnDrawGizmos()
 	{
 		if(drawGizmos == false) return;
@@ -432,14 +433,14 @@ public class BruteZombie : ZombieBase
 				transform.position + offset + targetDir * maxStoneDist);
 
 			Gizmos.color = Color.magenta;
-			if (LastStoneLines != null)
-			{
-				Gizmos.DrawLineList(LastStoneLines);
-				for (int i = 0; i < LastStoneLines.Length; i += 2)
-				{
-					Gizmos.DrawWireSphere(LastStoneLines[i], 1.5f);
-				}
-			}
+			//if (LastStoneLines != null)
+			//{
+			//	Gizmos.DrawLineList(LastStoneLines);
+			//	for (int i = 0; i < LastStoneLines.Length; i += 2)
+			//	{
+			//		Gizmos.DrawWireSphere(LastStoneLines[i], 1.5f);
+			//	}
+			//}
 		}
 	}
 }

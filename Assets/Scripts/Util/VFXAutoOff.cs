@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class VFXAutoOff : MonoBehaviour
 {
-	[SerializeField] float offTime = 1f;
+	[SerializeField] protected float offTime = 1f;
 	private float initOffTime; 
 
-	private float curTime = 0f;
+	protected float elapsed = 0f;
 
 
 	protected virtual void Awake()
@@ -15,30 +15,30 @@ public class VFXAutoOff : MonoBehaviour
 		initOffTime = offTime;
 	}
 
-	protected void OnEnable()
+	protected virtual void OnEnable()
 	{
-		_ = StartCoroutine(CoOff());
+		elapsed = 0f;
 	}
 
-	private IEnumerator CoOff()
+	protected virtual void Update()
 	{
-		while(true)
+		if (elapsed > offTime)
 		{
-			if(curTime > offTime)
-			{
-				GameManager.Resource.Destroy(gameObject);
-			}
-			curTime += Time.deltaTime;
-			yield return null;
+			GameManager.Resource.Destroy(gameObject);
 		}
+		elapsed += Time.deltaTime;
 	}
 
 	protected virtual void OnDisable()
 	{
-		curTime = 0f;
 		offTime = initOffTime;
 		transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
 		transform.localScale = Vector3.one;
+	}
+
+	public void SetOfftimeWithElapsed(float value)
+	{
+		offTime = value + elapsed;
 	}
 
 	public void SetOffTime(float value)

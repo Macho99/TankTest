@@ -22,6 +22,7 @@ public class VehicleMove : VehicleBehaviour
 	[SerializeField] float maxReverseSpeed = -15f;
 	[SerializeField] float finalTorqueMultiplier = 2.5f;
 	[SerializeField] float steerAngle = 40f;
+	[SerializeField] Light[] lights;
 	
 	[SerializeField] Transform[] leftWheelTrans;
 	[SerializeField] Transform[] rightWheelTrans;
@@ -64,6 +65,7 @@ public class VehicleMove : VehicleBehaviour
 	public float BrakeMultiplier { get; set; }
 	public int CurGear { get; set; }
 
+	[Networked, OnChangedRender(nameof(LightControl))] public NetworkBool PlayerGetOn { get; private set; }
 	[Networked] public Vector2 LerpedMoveInput { get; set; }
 	[Networked] public float LeftRpm { get; private set; }
 	[Networked] public float RightRpm { get; private set; }
@@ -300,6 +302,7 @@ public class VehicleMove : VehicleBehaviour
 
 	protected override void OnAssign(TestPlayer player)
 	{
+		PlayerGetOn = true;
 		if (player.HasInputAuthority && Runner.IsForward)
 		{
 			dashBoard = GameManager.UI.ShowSceneUI(dashBoardPrefab);
@@ -313,6 +316,7 @@ public class VehicleMove : VehicleBehaviour
 
 	protected override void OnGetOff()
 	{
+		PlayerGetOn = false;
 		if (HasInputAuthority && Runner.IsForward)
 		{
 			GameManager.UI.CloseSceneUI(dashBoard);
@@ -322,6 +326,14 @@ public class VehicleMove : VehicleBehaviour
 		if (HasStateAuthority)
 		{
 			trailNetObject?.RemoveInputAuthority();
+		}
+	}
+
+	protected void LightControl()
+	{
+		foreach(Light light in lights)
+		{
+			light.gameObject.SetActive(PlayerGetOn);
 		}
 	}
 }
