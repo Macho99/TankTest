@@ -52,12 +52,13 @@ public class BruteJump : BruteZombieState
 	public override void FixedUpdateNetwork()
 	{
 		owner.Decelerate();
-		owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
-			Quaternion.LookRotation(lookDir), 120f * owner.Runner.DeltaTime);
 	}
 
 	public override void Render()
 	{
+		owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
+			Quaternion.LookRotation(lookDir), 120f * Time.deltaTime);
+
 		if (owner.IsAnimName("Attack"))
 		{
 			animEntered = true;

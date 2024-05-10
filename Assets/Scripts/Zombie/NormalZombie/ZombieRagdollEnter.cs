@@ -58,24 +58,24 @@ public class ZombieRagdollEnter : ZombieState
 	{
 		owner.Agent.enabled = false;
 
-		for(int i = 0; i < owner.Bones.Length; i++)
+		for (int i = 0; i < owner.Bones.Length; i++)
 		{
 			owner.Bones[i].localPosition = owner.RagdollBones[i].localPosition;
 			owner.Bones[i].localRotation = owner.RagdollBones[i].localRotation;
 		}
 
-		Vector3 prevHipPos = owner.Hips.position;
-		Vector3 newRootPos = prevHipPos;
+		//Vector3 prevHipPos = owner.Hips.position;
+		//Vector3 newRootPos = prevHipPos;
 
-		if (Physics.Raycast(prevHipPos, Vector3.down, out RaycastHit hitInfo, 5f, LayerMask.GetMask("Default")))
-		{
-			newRootPos = hitInfo.point;
-		}
+		//if (Physics.Raycast(prevHipPos, Vector3.down, out RaycastHit hitInfo, 5f, owner.EnvironMask))
+		//{
+		//	newRootPos = hitInfo.point;
+		//}
 
-		owner.transform.position = newRootPos;
+		//owner.transform.position = newRootPos;
 
-		owner.Hips.position = prevHipPos;
-		owner.RagdollHips.position = prevHipPos;
+		//owner.Hips.position = prevHipPos;
+		//owner.RagdollHips.position = prevHipPos;
 	}
 
 	public override void SetUp()
