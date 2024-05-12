@@ -54,12 +54,13 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public override void Spawned()
     {
-
-        CamerRotX = CamController.FollowTarget.eulerAngles.x;
-
-        moveSpeed = 0f;
-        simpleKCC.SetGravity(Physics.gravity.y * 2f);
-        fallingTime = 0f;
+        if (HasStateAuthority)
+        {
+            CamerRotX = CamController.FollowTarget.eulerAngles.x;
+            moveSpeed = 0f;
+            simpleKCC.SetGravity(Physics.gravity.y * 2f);
+            fallingTime = 0f;
+        }
     }
     public override void FixedUpdateNetwork()
     {
@@ -78,22 +79,12 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public void Move()
     {
+        simpleKCC.Move(moveDirection * moveSpeed, jumpVelocity);
+        if (jumpVelocity != 0f && simpleKCC.HasJumped)
+        {
+            jumpVelocity = 0f;
+        }
 
-
-        //if (GetInput(out NetworkInputData input))
-        //{
-        //    if (input.buttons.IsSet(ButtonType.Jump))
-        //    {
-        //        if (Kcc.IsGrounded)
-        //        {
-        //            jumpVelocity = jumpForce;
-        //        }
-
-        //    }
-        //}
-
-        simpleKCC.Move(moveDirection * moveSpeed);
-       
 
     }
     public void SetMove(NetworkInputData input)
@@ -137,15 +128,6 @@ public class PlayerLocomotion : NetworkBehaviour
         if (simpleKCC.IsGrounded)
         {
             jumpVelocity = jumpForce;
-
-            Debug.Log("a");
-            
-            Kcc.Move(default, jumpVelocity);
-            if (jumpVelocity != 0f)
-            {
-                jumpVelocity = 0f;
-            }
-
         }
     }
 

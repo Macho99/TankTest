@@ -17,7 +17,7 @@ public class PlayerStandLocomotionState : PlayerState
 
     public override void Exit()
     {
-
+        owner.weaponController.ResetAim();
     }
 
     public override void FixedUpdateNetwork()
@@ -25,7 +25,7 @@ public class PlayerStandLocomotionState : PlayerState
 
         owner.movement.Rotate(owner.InputListner.currentInput);
         owner.movement.SetMove(owner.InputListner.currentInput);
-
+        owner.weaponController.WeaponControls();
     }
 
     public override void SetUp()

@@ -16,7 +16,7 @@ public class InteractItemBox : InteractObject
     private Coroutine processRoutine;
 
     [SerializeField] private ItemSpawnData[] spawnData;
-    [Networked, Capacity(10), OnChangedRender(nameof(UpdateItem)),HideInInspector] public NetworkArray<Item> items { get; }
+    [Networked, Capacity(10), OnChangedRender(nameof(UpdateItem)), HideInInspector] public NetworkArray<Item> items { get; }
     [Networked] private string detectName { get; set; }
     protected override void Awake()
     {
@@ -54,8 +54,11 @@ public class InteractItemBox : InteractObject
     {
         if (itemBoxState == ItemBoxState.Close)
         {
-            if (processRoutine == null)
-                processRoutine = StartCoroutine(ProcessRoutin());
+            if (HasStateAuthority)
+            {
+                if (processRoutine == null)
+                    processRoutine = StartCoroutine(ProcessRoutin());
+            }
         }
         else
         {

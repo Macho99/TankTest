@@ -11,10 +11,14 @@ public abstract class WeaponItemSO : EquipmentItemSO
     [SerializeField] protected Sprite itemDetailIcon;
     [SerializeField] protected EquipWeaponSpace useHandSpace;
     [SerializeField] protected WeaponType weaponType;
+    [SerializeField] protected WeaponAnimLayer weaponAnimLayer;
     [SerializeField, Range(0, 200)] protected int damage;
 
 
     public WeaponType GetWeaponType() { return weaponType; }
+    public Sprite GetItemDetailIcon() { return itemDetailIcon; }
+
+    public WeaponAnimLayer GetWeaponAnimLayer() { return weaponAnimLayer; }
 }
 
 public abstract class WeaponInstance : EquipmentItemInstance

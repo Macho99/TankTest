@@ -87,6 +87,13 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         data.buttons.Set(ButtonType.DebugText, playerControls.Player.DebugText.IsPressed());
         data.buttons.Set(ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
         data.buttons.Set(ButtonType.ActiveItemContainer, playerControls.Player.ActiveItemContainer.IsPressed());
+        data.buttons.Set(ButtonType.PutWeapon, playerControls.Player.PutWeapon.IsPressed());
+        data.buttons.Set(ButtonType.FirstWeapon, playerControls.Player.FirstWeapon.IsPressed());
+        data.buttons.Set(ButtonType.SecondWeapon, playerControls.Player.SecondWeapon.IsPressed());
+        data.buttons.Set(ButtonType.SubWeapon, playerControls.Player.SubWeapon.IsPressed());
+        data.buttons.Set(ButtonType.MilyWeapon, playerControls.Player.MilyWeapon.IsPressed());
+        data.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
+        data.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
 
         input.Set(data);
     }

@@ -9,6 +9,6 @@ public abstract class Weapon : EquipmentItem
     public Transform SubHandTarget { get { return subHandTarget; } }
     public Transform SubHandHint { get { return subHandHint; } }
 
+    public abstract bool CanAttack();
     public abstract void Attack();
-
 }

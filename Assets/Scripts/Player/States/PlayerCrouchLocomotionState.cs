@@ -21,27 +21,29 @@ public class PlayerCrouchLocomotionState : PlayerState
         isCrouchToIdleStart = false;
         isCrouchToIdleEnd = false;
 
+        owner.weaponController.ResetAim();
     }
 
     public override void FixedUpdateNetwork()
     {
         if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("CrouchIdle") || owner.animator.GetCurrentAnimatorStateInfo(0).IsName("CrouchMove") && isCrouchToIdleStart == false)
         {
-           
-                owner.movement.Rotate(owner.InputListner.currentInput);
-                owner.movement.SetMove(owner.InputListner.currentInput);
-               
-                if (owner.InputListner.pressButton.IsSet(ButtonType.Crouch) && owner.movement.IsGround())
-                {
-                    if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Stand))
-                    {
-                        isCrouchToIdleStart = true;
-                        owner.animator.SetBool("IsCrouch", false);
-                        owner.movement.StopMove();
 
-                    }
+            owner.movement.Rotate(owner.InputListner.currentInput);
+            owner.movement.SetMove(owner.InputListner.currentInput);
+            owner.weaponController.WeaponControls();
+
+            if (owner.InputListner.pressButton.IsSet(ButtonType.Crouch) && owner.movement.IsGround())
+            {
+                if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Stand))
+                {
+                    isCrouchToIdleStart = true;
+                    owner.animator.SetBool("IsCrouch", false);
+                    owner.movement.StopMove();
+
                 }
-          
+            }
+
         }
         else if (isCrouchToIdleStart)
         {

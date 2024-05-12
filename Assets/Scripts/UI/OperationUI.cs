@@ -28,7 +28,7 @@ public class OperationUI : InGameUI
     }
     //public override void CloseUI()
     //{
-    //    this.gameObject.SetActive(false);
+    //    this.gameObject.RPC_SetActive(false);
     //}
 
 }

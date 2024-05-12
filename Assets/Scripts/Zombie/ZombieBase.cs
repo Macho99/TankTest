@@ -169,7 +169,7 @@ public abstract class ZombieBase : NetworkBehaviour
 			if ((transform.position - Position).sqrMagnitude > Mathf.Lerp(0.01f, 1f, anim.GetFloat("SpeedY") * 0.2f))
 			{
 				//debugCapsule.transform.position = transform.position;
-				//debugCapsule.SetActive(true);
+				//debugCapsule.RPC_SetActive(true);
 				Agent.enabled = false;
 				transform.position = Position;
 				Agent.enabled = true;
