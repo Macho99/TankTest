@@ -36,7 +36,6 @@ public abstract class Weapon : EquipmentItem
 
     public override void Render()
     {
-        Debug.Log(target);
         if (target != null)
         {
             target.SetPositionAndRotation(subHandTarget.position, subHandTarget.rotation);

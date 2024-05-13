@@ -56,14 +56,8 @@ public class InteractItemBox : InteractObject
         {
             if (HasStateAuthority)
             {
-                if (processRoutine == null)
-                    processRoutine = StartCoroutine(ProcessRoutin());
+                itemBoxState = ItemBoxState.Opening;
             }
-        }
-        else
-        {
-            itemBoxState = ItemBoxState.Opening;
-
         }
         if (itemBoxState == ItemBoxState.Open)
         {
@@ -85,7 +79,6 @@ public class InteractItemBox : InteractObject
 
         if (itemBoxState == ItemBoxState.Opening)
         {
-            itemBoxState = ItemBoxState.Open;
 
             if (HasStateAuthority)
             {
@@ -94,7 +87,7 @@ public class InteractItemBox : InteractObject
                     Item itemInstance = Runner.Spawn(spawnData[i].SpawnItem);
                     items.Set(i, itemInstance);
                 }
-
+                itemBoxState = ItemBoxState.Open;
             }
 
         }

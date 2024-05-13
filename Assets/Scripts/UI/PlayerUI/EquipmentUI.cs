@@ -26,14 +26,12 @@ public class EquipmentUI : MonoBehaviour
     }
     public void UpdateItemSlot(int index, Item itemInstance)
     {
-        Debug.Log(index);
-        Debug.Log(itemInstance);
         slots[index].SetItem(itemInstance);
     }
 
     public void OnItemUnEquipment(int index)
     {
-        equipment.RPC_UnEquipment(index, null);
+        equipment.RPC_Equipment(index, null);
     }
 
 }

@@ -16,6 +16,10 @@ public class Item : NetworkBehaviour
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.identity;
     }
+    public void SetActive(bool active)
+    {
+        gameObject.SetActive(active);
+    }
 
 
     public override void Spawned()

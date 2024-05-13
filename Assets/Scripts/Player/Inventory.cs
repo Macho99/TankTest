@@ -64,6 +64,8 @@ public class Inventory : NetworkBehaviour
                 Weight += netItems[i].ItemData.Weight;
                 netItems[i].SetParent(this.transform);
                 netItems[i].gameObject.SetActive(false);
+                Debug.Log("add");
+                onItemUpdate?.Invoke(i, netItems[i]);
                 break;
             }
         }

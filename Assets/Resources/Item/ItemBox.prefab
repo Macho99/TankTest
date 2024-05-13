@@ -11,9 +11,8 @@ GameObject:
   - component: {fileID: 510466954394786589}
   - component: {fileID: 1271956747457559231}
   - component: {fileID: 2177310766285316723}
-  - component: {fileID: 53738462338311154}
   - component: {fileID: 7098847442739611770}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: ItemBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -53,11 +52,8 @@ MonoBehaviour:
     interactType: 0
   _itemBoxState: 1
   openerTr: {fileID: 6609294091754859623}
-  itemDataList:
-  - {fileID: 11400000, guid: 600ebcc5c9056f04bb75d49767f8cb33, type: 2}
-  - {fileID: 11400000, guid: 947df383f044e194eac640e9f0e46f34, type: 2}
-  - {fileID: 11400000, guid: f9708136eb25106468ef77bf8d0d44bc, type: 2}
-  - {fileID: 11400000, guid: 406a0aab284ab644b88975b48d18eefa, type: 2}
+  spawnData: []
+  _items: []
 --- !u!114 &2177310766285316723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76,24 +72,6 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 1271956747457559231}
-  - {fileID: 53738462338311154}
-  - {fileID: 1433963480548868457}
---- !u!114 &53738462338311154
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9204258580571746726}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
 --- !u!65 &7098847442739611770
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -171,32 +149,8 @@ PrefabInstance:
     - {fileID: 64775809335640554, guid: 9f3c9c8dbc8dab543a0a3c632669458d, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1897883986262518, guid: 9f3c9c8dbc8dab543a0a3c632669458d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1433963480548868457}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9f3c9c8dbc8dab543a0a3c632669458d, type: 3}
---- !u!1 &6607224738640042433 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1897883986262518, guid: 9f3c9c8dbc8dab543a0a3c632669458d, type: 3}
-  m_PrefabInstance: {fileID: 6608801526280577079}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1433963480548868457
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6607224738640042433}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
 --- !u!4 &6609097444996634671 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4247298325624856, guid: 9f3c9c8dbc8dab543a0a3c632669458d, type: 3}

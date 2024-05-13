@@ -24,12 +24,12 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
     [SerializeField] private MultiAimConstraint handAimIK;
     [SerializeField] private TwoBoneIKConstraint subHandIK;
     [SerializeField] private PlayerAnimEvent animEvent;
+    private Inventory inventory;
+
+    [Networked, HideInInspector, OnChangedRender(nameof(UpdateMainWeapon))] public Weapon NetMainWeapon { get; set; }
+    private Weapon mainWeapon { get; set; }
 
     public event Action<int, Item> onItemUpdate;
-    private Weapon mainWeapon { get; set; }
-    [Networked, OnChangedRender(nameof(UpdateMainWeapon))] public Weapon NetMainWeapon { get; set; }
-
-    private Inventory inventory;
 
     public Weapon GetMainWeapon() { return mainWeapon; }
     public void Init(Inventory inventory)
@@ -53,79 +53,98 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
 
 
 
+        localItems[(int)slotType] = (EquipmentItem)item;
 
+
+
+        onItemUpdate?.Invoke((int)slotType, localItems[(int)slotType]);
     }
     public void UpdateMainWeapon()
     {
+        Debug.Log("update");
+
         if (NetMainWeapon == null)
         {
-
-
-
-            if (NetMainWeapon != null)
+            Debug.Log("³Î");
+        }
+        else
+        {
+            if (mainWeapon == null)
             {
-                if (mainWeapon == null)
-                {
-                    mainWeapon = NetMainWeapon;
-                    mainWeapon.Equip(owner);
-                    //mainWeapon.SetTarget(subHandIK.data.target);
-                    //animator.SetFloat("WeaponIndex", (float)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType);
-                    //mainWeapon.SetParent(ItemPivots[(int)((EquipmentItemSO)mainWeapon.ItemData).EquipmentType].subPivot);
-                    //animEvent.onStartDrawWeapon += OnStartDraw;
-                    //animEvent.onEndDrawWeapon += OnEndDraw;
-                    handAimIK.weight = 0f;
-                    subHandIK.weight = 0f;
-                    animator.SetTrigger("Draw");
-                    Debug.Log("Âø¿ë");
-                }
+                mainWeapon = NetMainWeapon;
+                Debug.Log(mainWeapon.name);
+                SetupMainWeapon();
             }
-
-
-            if (mainWeapon != NetMainWeapon)
+            else
             {
-                
+                Debug.Log("asdasdsad");
+                handAimIK.weight = 0f;
+                subHandIK.weight = 0f;
+                mainWeapon.UnEquip();
+                mainWeapon.SetTarget(null);
+                mainWeapon.SetActive(false);
+
+                if (HasStateAuthority)
+                    animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 0f);
+                SetupMainWeapon();
 
             }
         }
+
+    }
+    private void SetupMainWeapon()
+    {
+        mainWeapon = NetMainWeapon;
+        mainWeapon.Equip(owner);
+        animator.SetTrigger("Draw");
+        mainWeapon.SetTarget(subHandIK.data.target);
+        animator.SetFloat("WeaponIndex", (float)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType);
+        mainWeapon.SetParent(ItemPivots[(int)((EquipmentItemSO)mainWeapon.ItemData).EquipmentType].subPivot);
+        animEvent.onStartDrawWeapon += OnStartDraw;
+        animEvent.onEndDrawWeapon += OnEndDraw;
+        handAimIK.weight = 0f;
+        subHandIK.weight = 0f;
     }
     public void OnStartDraw()
     {
-        //mainWeapon.SetActive(true);
-        //mainWeapon.SetParent(ItemPivots[(int)((EquipmentItemSO)mainWeapon.ItemData).EquipmentType].mainPivot);
-        //Debug.Log("startDraw");
+        mainWeapon.SetActive(true);
+        mainWeapon.SetParent(ItemPivots[(int)((EquipmentItemSO)mainWeapon.ItemData).EquipmentType].mainPivot);
 
-
-        //onItemUpdate?.Invoke((int)slotType, item);
-
+        Debug.Log("Start");
     }
-    private void EquipmentBodyItem(EquipmentSlotType slotType, EquipmentItem item)
-    {
-        if (localItems[(int)slotType] != null)
-        {
-            inventory.MoveItem(localItems[(int)slotType]);
-            localItems[(int)slotType] = null;
-
-        }
-
-        item.SetParent(ItemPivots[(int)((EquipmentItemSO)item.ItemData).EquipmentType].mainPivot);
-        item.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-        item.RPC_SetActive(true);
-        localItems[(int)slotType] = item;
-    }
-    private void SetupDrawRig(EquipmentType equipmentType)
-    {
-        animEvent.onStartDrawWeapon += OnStartDraw;
-        animEvent.onEndDrawWeapon += OnEndDraw;
-    }
-
-
     public void OnEndDraw()
     {
-        
-        
+        StartCoroutine(DrawRoutine());
+
+    }
+    private IEnumerator DrawRoutine()
+    {
+        float speed = 2f;
+        float currentValue = 0f;
+
+        while (animator.GetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType) < 1f)
+        {
+            currentValue += speed * Time.deltaTime;
+            animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, currentValue);
+
+            if (mainWeapon.SubHandTarget != null)
+            {
+                handAimIK.weight += currentValue;
+                subHandIK.weight += currentValue;
+            }
+
+
+            yield return null;
+        }
+        if (mainWeapon.SubHandTarget != null)
+        {
+            handAimIK.weight += 1f;
+            subHandIK.weight += 1f;
+        }
+        animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 1f);
+
     }
 
-  
 
 
 
@@ -135,59 +154,18 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
         NetworkSetItem(index, item);
 
     }
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_UnEquipment(int index, Item item)
-    {
-        inventory.MoveItem(netItems[index]);
-        NetworkSetItem(index, null);
-        NetworkSetItem(item);
-    }
-
-
-
-
-    public void NetworkSetItem(Item item)
-    {
-        if (item == null)
-        {
-            // netItems.Set()
-        }
-
-        if (item is EquipmentItem == false)
-            return;
-
-        //EquipmentSlotType[] slotTypes = ((EquipmentItemSO)item.ItemData).SlotTypes;
-
-        //for (int i = 0; i < slotTypes.Length; i++)
-        //{
-        //    if (netItems[(int)slotTypes[i]] == null)
-        //    {
-        //        if (netItems[(int)slotTypes[i]] is Weapon)
-        //        {
-        //            if (NetMainWeapon == null)
-        //            {
-        //                NetMainWeapon = (Weapon)netItems[(int)slotTypes[i]];
-        //            }
-        //        }
-
-        //        netItems.Set((int)slotTypes[i], (EquipmentItem)item);
-        //        onItemUpdate?.Invoke((int)slotTypes[0], (EquipmentItem)item);
-        //        return;
-        //    }
-        //}
-
-
-        //inventory.InsideMoveItem(netItems[(int)slotTypes[0]]);
-        //netItems.Set((int)slotTypes[0], (EquipmentItem)item);
-
-        //onItemUpdate?.Invoke((int)slotTypes[0], (EquipmentItem)item);
-
-    }
-  
     public void NetworkSetItem(int index, Item item)
     {
         if (item == null)
         {
+            if (netItems[index] != null)
+            {
+                if (netItems[index] == NetMainWeapon)
+                {
+                    NetMainWeapon = null;
+                }
+                inventory.InsideMoveItem(netItems[index]);
+            }
             netItems.Set(index, null);
             return;
         }
@@ -202,13 +180,25 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
             if (netItems[(int)slotTypes[i]] == null)
             {
                 netItems.Set((int)slotTypes[i], (EquipmentItem)item);
+                if (NetMainWeapon == null)
+                {
+                    NetMainWeapon = (Weapon)netItems[(int)slotTypes[i]];
+                }
+
                 inventory.InsidePullItem(index);
                 return;
             }
         }
-        netItems.Set((int)slotTypes[0], (EquipmentItem)item);
-        inventory.InsidePullItem(index);
 
+        if (netItems[(int)slotTypes[0]] == NetMainWeapon)
+        {
+            NetMainWeapon = (Weapon)item;
+        }
+
+        Item changeItem = netItems[(int)slotTypes[0]];
+        inventory.InsideMoveItem(changeItem);
+        netItems.Set((int)slotTypes[0], (EquipmentItem)item);
+        inventory.InsidePullItem(item);
 
     }
 
@@ -228,6 +218,7 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
     public void AfterSpawned()
     {
         UpdateItemList();
+        UpdateMainWeapon();
     }
 }
 

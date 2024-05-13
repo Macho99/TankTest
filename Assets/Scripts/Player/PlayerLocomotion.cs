@@ -108,7 +108,7 @@ public class PlayerLocomotion : NetworkBehaviour
     public void Rotate(NetworkInputData input)
     {
         float rotY = input.mouseDelta.x * rotateXSpeed * Runner.DeltaTime;
-        simpleKCC.AddLookRotation(new Vector2(0f, rotY));
+        simpleKCC.AddLookRotation(new Vector2(0f, rotY));   
         CamerRotX = CamController.RotateX(input);
     }
     public void Rotate(Vector3 direction)
