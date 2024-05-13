@@ -6,35 +6,52 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public abstract class ItemSlotUI : MonoBehaviour, IPointerClickHandler
+public enum ItemSlotType { Static, Dynamic }
+public class ItemSlotUI : MonoBehaviour, IPointerClickHandler
 {
+
+    public enum ItemSlotIconType { Base, Detail }
     protected int slotIndex;
+    private ItemSlotType slotType;
+    [SerializeField] private ItemSlotIconType slotIconType;
     [SerializeField] protected TextMeshProUGUI itemNameTMP;
     [SerializeField] protected Image itemIconImage;
     [SerializeField] protected TextMeshProUGUI itemCountTMP;
     [SerializeField] protected Image durabilityAmountImg;
-
+    [SerializeField] private TextMeshProUGUI ammoNameTMP;
+    [SerializeField] private TextMeshProUGUI ammoNameCount;
     protected bool isEmpty;
     public event Action<int> onItemRightClick;
 
 
-    public void Init(int slotIndex)
+    public void Init(ItemSlotType slotType, int slotIndex)
     {
+        this.slotType = slotType;
         this.slotIndex = slotIndex;
     }
     public void SetItem(Item item)
     {
         isEmpty = item == null ? true : false;
         CheckEmpty();
+
         if (isEmpty)
             return;
 
         if (!gameObject.activeSelf)
             gameObject.SetActive(true);
 
+
         itemIconImage.enabled = true;
-        itemIconImage.sprite = item.ItemData.ItemIcon;
-        itemNameTMP.text = item.ItemData.ItemName;
+        if (slotIconType == ItemSlotIconType.Base)
+            itemIconImage.sprite = item.ItemData.ItemIcon;
+        else
+            itemIconImage.sprite = ((WeaponItemSO)item.ItemData).ItemDetailIcon;
+
+        if (itemNameTMP != null)
+        {
+            itemNameTMP.enabled = true;
+            itemNameTMP.text = item.ItemData.ItemName;
+        }
 
         if (item.ItemData.IsStackable)
         {
@@ -45,18 +62,32 @@ public abstract class ItemSlotUI : MonoBehaviour, IPointerClickHandler
     }
     private void CheckEmpty()
     {
-        itemCountTMP.enabled = !isEmpty;
+        if (itemCountTMP != null)
+        {
+            itemCountTMP.enabled = !isEmpty;
+            itemCountTMP.enabled = false;
+            itemCountTMP.text = string.Empty;
+        }
+
         itemIconImage.enabled = isEmpty ? false : true;
-        onItemRightClick = null;
-        itemCountTMP.text = string.Empty;
-        itemCountTMP.enabled = false;
-        gameObject.SetActive(false);
+        if (itemNameTMP != null)
+        {
+            itemNameTMP.enabled = !isEmpty;
+        }
+        if (ItemSlotType.Dynamic == slotType)
+            gameObject.SetActive(!isEmpty);
     }
 
-    public abstract void OnPointerClick(PointerEventData eventData);
-
-    public void OnPointerRightClickEvent()
+    public void OnPointerClick(PointerEventData eventData)
     {
-        onItemRightClick?.Invoke(slotIndex);
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            if (isEmpty == true)
+                return;
+
+            onItemRightClick?.Invoke(slotIndex);
+        }
     }
+
+
 }

@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
 {
-    [SerializeField] private InventoryItemSlotUI itemSlotUIPrefab;
+    [SerializeField] private ItemSlotUI itemSlotUIPrefab;
     [SerializeField] private RectTransform slotRoot;
-    private InventoryItemSlotUI[] slots;
+    private ItemSlotUI[] slots;
     private Inventory inventory;
     private Equipment equipment;
 
@@ -16,13 +16,13 @@ public class InventoryUI : MonoBehaviour
     {
         this.inventory = inventory;
         this.equipment = equipment;
-        slots = new InventoryItemSlotUI[inventory.MaxCount];
+        slots = new ItemSlotUI[inventory.MaxCount];
         for (int i = 0; i < slots.Length; i++)
         {
-            InventoryItemSlotUI itemSlotUI = Instantiate(this.itemSlotUIPrefab, slotRoot.transform);
+            ItemSlotUI itemSlotUI = Instantiate(this.itemSlotUIPrefab, slotRoot.transform);
             slots[i] = itemSlotUI;
-            slots[i].Init(i);
-            itemSlotUI.onItemEquipment += OnItemEquipment;
+            slots[i].Init(ItemSlotType.Dynamic, i);
+            itemSlotUI.onItemRightClick += OnItemEquipment;
             itemSlotUI.gameObject.SetActive(false);
 
         }
@@ -30,8 +30,6 @@ public class InventoryUI : MonoBehaviour
     }
     public void UpdateInventorySlot(int index, Item itemInstance)
     {
-        Debug.Log(slots.Length);
-        Debug.Log(index);
         slots[index].SetItem(itemInstance);
     }
 

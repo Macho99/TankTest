@@ -3,18 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public enum EquipWeaponSpace { OneHand, TwoHands, Size };
-public enum WeaponType { Main, Sub, Mily, Throw }
-
 public abstract class WeaponItemSO : EquipmentItemSO
 {
     [SerializeField] protected Sprite itemDetailIcon;
-    [SerializeField] protected EquipWeaponSpace useHandSpace;
-    [SerializeField] protected WeaponType weaponType;
+    [SerializeField] protected WeaponAnimLayerType animLayerType;
     [SerializeField, Range(0, 200)] protected int damage;
 
-
-    public WeaponType GetWeaponType() { return weaponType; }
+    public WeaponAnimLayerType AnimLayerType { get { return animLayerType; } }
+    public Sprite ItemDetailIcon { get { return itemDetailIcon; } }
 }
 
 public abstract class WeaponInstance : EquipmentItemInstance

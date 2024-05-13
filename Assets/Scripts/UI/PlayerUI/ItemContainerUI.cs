@@ -7,6 +7,7 @@ public class ItemContainerUI : PopUpUI
 {
     [SerializeField] private ItemSearchUI searchUI;
     [SerializeField] private InventoryUI invenUI;
+    [SerializeField] private EquipmentUI equipmentUI;
 
     private ItemContainer itemContainer;
     public void Init(ItemContainer itemContainer)
@@ -14,6 +15,7 @@ public class ItemContainerUI : PopUpUI
         this.itemContainer = itemContainer;
         searchUI.Init(itemContainer.itemSearchSystem, itemContainer.inventory);
         invenUI.Init(itemContainer.inventory, itemContainer.equipment);
+        equipmentUI.Init(itemContainer.inventory, itemContainer.equipment);
 
     }
 

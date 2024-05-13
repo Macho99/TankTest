@@ -2,9 +2,7 @@ using Fusion;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public struct ItemStruct : INetworkStruct
 {
@@ -15,8 +13,9 @@ public struct ItemStruct : INetworkStruct
 }
 public class Inventory : NetworkBehaviour
 {
-    [Networked, Capacity(50), OnChangedRender(nameof(OnChangeItem))] private NetworkArray<Item> items { get; }
+    [Networked, Capacity(50), OnChangedRender(nameof(OnChangeItem))] private NetworkArray<Item> netItems { get; }
 
+    private Item[] items;
     private int maxCount;
     [Networked] private float Weight { get; set; }
     [Networked] private float MaxWeight { get; set; }
@@ -27,6 +26,8 @@ public class Inventory : NetworkBehaviour
     private void Awake()
     {
         maxCount = 50;
+        items = new Item[maxCount];
+
     }
 
     public override void Spawned()
@@ -34,8 +35,9 @@ public class Inventory : NetworkBehaviour
         if (HasStateAuthority)
         {
             Weight = 0f;
-            MaxWeight = 100f;
+            MaxWeight = 1000f;
         }
+        OnChangeItem();
     }
     public override void Render()
     {
@@ -43,61 +45,128 @@ public class Inventory : NetworkBehaviour
         {
             for (int i = 0; i < maxCount; i++)
             {
-                if (items[i] != null)
+                if (netItems[i] != null)
                 {
-                    Debug.Log(items[i].name);
+                    Debug.Log(netItems[i].name);
                 }
             }
         }
     }
     public void AddItem(Item newItem)
     {
-        for (int i = 0; i < items.Length; i++)
+        for (int i = 0; i < netItems.Length; i++)
         {
-            if (items[i] == null)
+            if (netItems[i] == null)
             {
                 if (newItem.ItemData.Weight + Weight > MaxWeight)
                     continue;
 
-                items.Set(i, newItem);
-                Weight += items[i].ItemData.Weight;
-                items[i].SetParent(this.transform);
-                onItemUpdate?.Invoke(i, items[i]);
+                netItems.Set(i, newItem);
+                Weight += netItems[i].ItemData.Weight;
+                netItems[i].SetParent(this.transform);
+                onItemUpdate?.Invoke(i, netItems[i]);
                 break;
             }
         }
     }
     public Item GetItem(int index)
     {
-        if (items[index] == null)
+        if (netItems[index] == null)
         {
             Debug.Log("존재하지않음");
             return null;
         }
 
-        return items[index];
+        return netItems[index];
+    }
+    public int GetItemIndex(Item item)
+    {
+        if (item == null)
+        {
+            Debug.Log("존재하지않음");
+            return -1;
+        }
+
+        int index = Array.FindIndex(netItems.ToArray(), (Item item2) => { return item == item2; });
+        return index;
+    }
+    public void InsideMoveItem(Item item)
+    {
+        if (item == null)
+            return;
+
+        for (int i = 0; i < netItems.Length; i++)
+        {
+            if (netItems[i] == null)
+            {
+                netItems.Set(i, item);
+                netItems[i].SetParent(this.transform);
+                netItems[i].SetActive(false);
+                onItemUpdate?.Invoke(i, netItems[i]);
+                break;
+            }
+        }
+
     }
     public Item PullItem(int index)
     {
-        if (items[index] == null)
+        if (netItems[index] == null)
         {
             Debug.Log("존재하지않음");
             return null;
         }
 
-        Item pullItem = items[index];
-        items.Set(index, null);
+
+        Item pullItem = netItems[index];
+        Weight -= pullItem.ItemData.Weight;
+        netItems.Set(index, null);
         onItemUpdate?.Invoke(index, null);
         return pullItem;
     }
+    public void InsidePullItem(Item item)
+    {
+        if (item == null)
+            return;
 
+        for (int i = 0; i < netItems.Length; i++)
+        {
+            if (netItems[i] == null)
+                continue;
+
+            if (item == netItems[i])
+            {
+                InsidePullItem(i);
+                onItemUpdate?.Invoke(i, null);
+                return;
+            }
+
+        }
+
+
+    }
+    public Item InsidePullItem(int index)
+    {
+
+        if (netItems[index] == null)
+        {
+            Debug.Log("존재하지않음");
+            return null;
+        }
+
+        Item pullItem = netItems[index];
+        netItems.Set(index, null);
+        onItemUpdate?.Invoke(index, null);
+        return pullItem;
+    }
     public void OnChangeItem()
     {
-        for (int i = 0; i < items.Length; i++)
+        for (int i = 0; i < netItems.Length; i++)
         {
-            if (items[i] != null)
+            if (netItems[i] != items[i])
             {
-                items[i].SetParent(this.transform);
+                // items[i] = netItems[i];
+
+                netItems[i].SetParent(this.transform);
             }
         }
     }

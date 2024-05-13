@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class ItemSearchUI : MonoBehaviour
 {
-    [SerializeField] private ItemSearchSlotUI itemSlotUIPrefab;
+    [SerializeField] private ItemSlotUI itemSlotUIPrefab;
     [SerializeField] private RectTransform itemSlotRoot;
-    private ItemSearchSlotUI[] itemSlots;
+    private ItemSlotUI[] itemSlots;
     private ItemSearchSystem itemSearchSystem;
     private Inventory inventory;
 
@@ -18,13 +18,13 @@ public class ItemSearchUI : MonoBehaviour
         this.itemSearchSystem = itemSearchSystem;
         this.inventory = inventory;
         maxCount = itemSearchSystem.MaxCount;
-        itemSlots = new ItemSearchSlotUI[maxCount];
+        itemSlots = new ItemSlotUI[maxCount];
         for (int i = 0; i < maxCount; i++)
         {
-            ItemSearchSlotUI itemSlotUI = Instantiate(this.itemSlotUIPrefab, itemSlotRoot.transform).GetComponent<ItemSearchSlotUI>();
+            ItemSlotUI itemSlotUI = Instantiate(this.itemSlotUIPrefab, itemSlotRoot.transform);
             itemSlots[i] = itemSlotUI;
-            itemSlots[i].Init(i);
-            itemSlotUI.onItemAcquisition += OnItemAcquisition;
+            itemSlots[i].Init(ItemSlotType.Dynamic,i);
+            itemSlotUI.onItemRightClick += OnItemAcquisition;
             itemSlotUI.gameObject.SetActive(false);
 
         }
@@ -36,7 +36,7 @@ public class ItemSearchUI : MonoBehaviour
         itemSlots[index].SetItem(itemInstance);
 
     }
- 
+
     public void OnItemAcquisition(int index)
     {
         itemSearchSystem.AcquisitionItem(index);

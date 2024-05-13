@@ -1,3 +1,4 @@
+using ExitGames.Client.Photon.StructWrapping;
 using Fusion;
 using JetBrains.Annotations;
 using System;
@@ -7,24 +8,24 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
 
-
+public enum WeaponAnimLayerType { Base, Pistol, Rifle, Shotgun, Bazuka, Mily, Size }
+public enum EquipmentSlotType { Helmet, Armor, Mask, Backpack, FirstMainWeapon, SecondMainWeapon, SubWeapon, MilyWeapon, Throw, Size }
+public enum EquipmentType { Helmet, Mask, Armor, Backpack, Rifle, Pistol, Shotgun, Bazuka, Mily, Size }
 public class Equipment : NetworkBehaviour, IAfterSpawned
 {
-    public enum EquipmentSlotType { Helmet, Armor, Mask, Backpack, FirstMainWeapon, SecondMainWeapon, SubWeapon, MilyWeapon, Throw, Size }
-    [SerializeField] private RuntimeAnimatorController baseAnimation;
+    [SerializeField] private PlayerController owner;
     [SerializeField] private Animator animator;
-    [SerializeField] private WeaponAnimData[] weaponAnims;
     [SerializeField] private EquipmentPivotData[] ItemPivots;
-
-    [Networked, Capacity((int)EquipmentSlotType.Size), OnChangedRender(nameof(UpdateItem))] public NetworkArray<EquipmentItem> netItems { get; }
+    [Networked, HideInInspector, Capacity((int)EquipmentSlotType.Size), OnChangedRender(nameof(UpdateItem))] public NetworkArray<EquipmentItem> netItems { get; }
+    private EquipmentItem[] localItems;
     [Header("WeaponRigs")]
     [SerializeField] private MultiAimConstraint handAimIK;
     [SerializeField] private TwoBoneIKConstraint subHandIK;
-    private EquipmentItem[] localItems;
-    [SerializeField] private RigBuilder rigBuilder;
     [SerializeField] private PlayerAnimEvent animEvent;
-    private bool isConnectSubhand;
-    private Weapon mainWeapon;
+
+    public event Action<int, Item> onItemUpdate;
+    private Weapon mainWeapon { get; set; }
+    [Networked, OnChangedRender(nameof(UpdateMainWeapon))] public Weapon NetMainWeapon { get; set; }
     private Inventory inventory;
     public void Init(Inventory inventory)
     {
@@ -41,144 +42,199 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
     {
         if (item == null)
         {
-            if (localItems[(int)slotType] == mainWeapon)
+            if (localItems[(int)slotType] != null)
             {
-
-                //animator.runtimeAnimatorController = baseAnimation;
-
-                mainWeapon = null;
+                localItems[(int)slotType] = null;
+                if (NetMainWeapon == item)
+                {
+                    NetMainWeapon = null;
+                }
+                onItemUpdate?.Invoke((int)slotType, null);
+                return;
             }
-            localItems[(int)slotType] = null;
-            return;
         }
 
-        if ((item is EquipmentItem) == false)
+
+
+        //if (item == null)
+        //{
+        //    if (localItems[(int)slotType] != null)
+        //    {
+        //        inventory.InsideMoveItem(item);
+
+        //        if (localItems[(int)slotType] == mainWeapon)
+        //        {
+        //            animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 0f);
+        //            handAimIK.weight = 0f;
+        //            subHandIK.weight = 0f;
+        //            mainWeapon = null;
+        //        }
+        //    }
+        //    localItems[(int)slotType].UnEquip();
+        //    localItems[(int)slotType] = null;
+
+        //    onItemUpdate?.Invoke((int)slotType, localItems[(int)slotType]);
+        //    return;
+        //}
+
+        //if ((item is EquipmentItem) == false)
+        //{
+        //    Debug.Log("장착아이템이 아닙니다.");
+        //    return;
+        //}
+
+        //if (item is Weapon)
+        //{
+
+
+
+        //    //if (localItems[(int)slotType] != null)
+        //    //{
+        //    //    if (item != localItems[(int)slotType])
+        //    //    {
+        //    //        if (NetMainWeapon == localItems[(int)slotType])
+        //    //        {
+        //    //            NetMainWeapon = null;
+        //    //        }
+
+        //    //        inventory.InsideMoveItem(localItems[(int)slotType]);
+
+        //    //    }
+        //    //}
+
+
+        //    inventory.InsidePullItem(item);
+        //    if (NetMainWeapon == null)
+        //    {
+        //        if (HasStateAuthority)
+        //        {
+        //            NetMainWeapon = (Weapon)item;
+        //        }
+        //    }
+        //    localItems[(int)slotType] = (EquipmentItem)item;
+
+        //}
+        //else
+        //{
+
+
+
+        //}
+
+        //onItemUpdate?.Invoke((int)slotType, localItems[(int)slotType]);
+    }
+    public void UpdateMainWeapon()
+    {
+        if (NetMainWeapon == null)
         {
-            Debug.Log("장착아이템이 아닙니다.");
-            return;
-        }
 
-        if (item is Weapon)
+        }
+        if (NetMainWeapon != null)
         {
             if (mainWeapon == null)
             {
-                //무기 장착시 무기 장착아이템이 존재하지않으면 무기왜폰할당
-                mainWeapon = (Weapon)item;
-                //무기종류에따라 애니메이션 변경
-                if (mainWeapon is Rifle)
-                {
-                    isConnectSubhand = false;
-
-                    item.SetParent(ItemPivots[(int)EquipmentPivotData.EquipmentType.Rifle].subPivot);
-                    animator.runtimeAnimatorController = weaponAnims[(int)WeaponAnimData.WeaponAnimType.HeavyGun].animator;
-                    animator.SetTrigger("Draw");
-                    localItems[(int)EquipmentSlotType.FirstMainWeapon] = (EquipmentItem)item;
-                    handAimIK.weight = 0f;
-                    subHandIK.weight = 0f;
-
-                    //집는모션 시작시
-
-                    animEvent.onStartDrawWeapon += () =>
-                    {
-                        item.SetActive(true);
-                        item.SetParent(ItemPivots[(int)EquipmentPivotData.EquipmentType.Rifle].mainPivot);
-                        item.transform.localPosition = Vector3.zero;
-                        item.transform.localRotation = Quaternion.identity;
-                    };
-
-                    animEvent.onEndDrawWeapon += () =>
-                    {
-
-
-                        handAimIK.weight = 1f;
-                        subHandIK.weight = 1f;
-                        isConnectSubhand = true;
-                        Debug.Log(handAimIK.weight);
-                        Debug.Log(subHandIK.weight);
-
-                    };
-
-
-
-                }
-
-                EquipmentRevolver(item);
+                mainWeapon = NetMainWeapon;
+                mainWeapon.Equip(owner);
+                mainWeapon.SetTarget(subHandIK.data.target);
+                animator.SetFloat("WeaponIndex", (float)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType);
+                mainWeapon.SetParent(ItemPivots[(int)((EquipmentItemSO)mainWeapon.ItemData).EquipmentType].subPivot);
+                animEvent.onStartDrawWeapon += OnStartDraw;
+                animEvent.onEndDrawWeapon += OnEndDraw;
+                handAimIK.weight = 0f;
+                subHandIK.weight = 0f;
+                animator.SetTrigger("Draw");
+                Debug.Log("착용");
             }
-
         }
-        else
+
+
+        if (mainWeapon != NetMainWeapon)
         {
 
         }
-
+    }
+    public void OnStartDraw()
+    {
+        mainWeapon.SetActive(true);
+        mainWeapon.SetParent(ItemPivots[(int)((EquipmentItemSO)mainWeapon.ItemData).EquipmentType].mainPivot);
+        Debug.Log("startDraw");
 
     }
-    private void LateUpdate()
+    public void OnEndDraw()
     {
-        if (mainWeapon != null)
+        Debug.Log("EndDraw");
+        StartCoroutine(DrawRoutine());
+    }
+
+    private IEnumerator DrawRoutine()
+    {
+        float speed = 2f;
+        float currentValue = 0f;
+        while (animator.GetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType) < 1f)
         {
-            if (isConnectSubhand)
+            currentValue += speed * Time.deltaTime;
+            animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, currentValue);
+            if (mainWeapon.SubHandTarget != null)
             {
-                Debug.Log(handAimIK.weight);
-                Debug.Log(subHandIK.weight);
-                subHandIK.data.target.SetPositionAndRotation(mainWeapon.SubHandTarget.position, mainWeapon.SubHandTarget.rotation);
+                subHandIK.weight = currentValue;
+                handAimIK.weight = currentValue;
             }
-        }
-    }
-    private void EquipmentWeapon(Item item)
-    {
 
-    }
-    private void EquipmentBackpack(Item item)
-    {
-        if (item is Backpack)
+            yield return null;
+        }
+        animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 1f);
+        if (mainWeapon.SubHandTarget != null)
         {
-            if (localItems[(int)EquipmentSlotType.Backpack] == null)
-            {
-
-            }
-        }
-    }
-    private void EquipmentRevolver(Item item)
-    {
-        if (item is Revolver)
-        {
-            //item.SetParent(ItemPivots[(int)EquipmentPivotData.EquipmentType.Pistol].mainPivot);
-            //animator.runtimeAnimatorController = weaponAnims[(int)WeaponAnimData.WeaponAnimType.LightGun].animator;
-            //localItems[(int)EquipmentSlotType.FirstMainWeapon] = (EquipmentItem)item;
-            //item.SetActive(true);
-            ////아이템꺼내는 애니메이션 On
-            //Debug.Log(mainWeapon.name);
-            //TwoBoneIKConstraintData data = leftHandRig.data;
-            //data.target = mainWeapon.SubHandTarget;
-            //leftHandRig.data = data;
-            //Debug.Log("착용" + item.name);
+            subHandIK.weight = 1f;
+            handAimIK.weight = 1f;
         }
 
     }
+
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     public void RPC_Equipment(int index, Item item)
     {
-        if (NetworkSetItem(item))
-        {
-            inventory.PullItem(index);
-        }
+        NetworkSetItem(item);
     }
 
 
 
-    public bool NetworkSetItem(Item item)
+
+    public void NetworkSetItem(Item item)
     {
+        if (item == null)
+        {
+            // netItems.Set()
+        }
+
         if (item is EquipmentItem == false)
-            return false;
+            return;
 
-        EquipmentSlotType slotType = CheckSlottype(item);
-        if (slotType == EquipmentSlotType.Size)
-            return false;
+        EquipmentSlotType[] slotTypes = ((EquipmentItemSO)item.ItemData).SlotTypes;
 
-        netItems.Set((int)slotType, (EquipmentItem)item);
+        for (int i = 0; i < slotTypes.Length; i++)
+        {
+            if (netItems[(int)slotTypes[i]] == null)
+            {
+                if (netItems[(int)slotTypes[i]] is Weapon)
+                {
+                    if (NetMainWeapon == null)
+                    {
+                        NetMainWeapon = (Weapon)netItems[(int)slotTypes[i]];
+                    }
+                }
 
-        return true;
+                netItems.Set((int)slotTypes[i], (EquipmentItem)item);
+                onItemUpdate?.Invoke((int)slotTypes[0], (EquipmentItem)item);
+                return;
+            }
+        }
+
+
+        inventory.InsideMoveItem(netItems[(int)slotTypes[0]]);
+        netItems.Set((int)slotTypes[0], (EquipmentItem)item);
+
+        onItemUpdate?.Invoke((int)slotTypes[0], (EquipmentItem)item);
 
     }
     private void UpdateItem()
@@ -187,53 +243,10 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
         {
             if (localItems[i] != netItems[i])
             {
+                //아이템뺴는상황// 아이템이 스왑하는상황 // 아이템 착용하는상황
                 SetEquipItem((EquipmentSlotType)i, netItems[i]);
             }
         }
-    }
-    private EquipmentSlotType CheckSlottype(Item item)
-    {
-        if (item is Weapon)
-        {
-            WeaponType weaponType = ((WeaponItemSO)item.ItemData).GetWeaponType();
-
-            if (weaponType == WeaponType.Main)
-            {
-                if (localItems[(int)EquipmentSlotType.FirstMainWeapon] == null)
-                    return EquipmentSlotType.FirstMainWeapon;
-                else if (localItems[(int)EquipmentSlotType.SecondMainWeapon] == null)
-                    return EquipmentSlotType.SecondMainWeapon;
-                else
-                    return EquipmentSlotType.Size;
-            }
-            else if (weaponType == WeaponType.Sub)
-            {
-                if (localItems[(int)EquipmentSlotType.SubWeapon] == null)
-                    return EquipmentSlotType.SubWeapon;
-                else
-                    return EquipmentSlotType.Size;
-            }
-            else if (weaponType == WeaponType.Mily)
-            {
-                if (localItems[(int)EquipmentSlotType.MilyWeapon] == null)
-                    return EquipmentSlotType.MilyWeapon;
-                else
-                    return EquipmentSlotType.Size;
-            }
-            else if (weaponType == WeaponType.Throw)
-            {
-                if (localItems[(int)EquipmentSlotType.Throw] == null)
-                    return EquipmentSlotType.Throw;
-                else
-                    return EquipmentSlotType.Size;
-            }
-        }
-        else if (item is Armor)
-        {
-
-        }
-
-        return EquipmentSlotType.Size;
     }
 
     public void AfterSpawned()
@@ -246,21 +259,8 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
 [Serializable]
 public class EquipmentPivotData
 {
-    public enum EquipmentType { Helmet, Mask, Armor, Backpack, Rifle, Pistol }
+
     public EquipmentType Type;
     public Transform mainPivot;
     public Transform subPivot;
-}
-[Serializable]
-public class WeaponAnimData
-{
-    public enum WeaponAnimType
-    {
-        LightGun,
-        HeavyGun,
-        MliyWeapon
-    }
-    public WeaponAnimType Type;
-    public RuntimeAnimatorController animator;
-
 }
