@@ -17,8 +17,8 @@ public class Inventory : NetworkBehaviour
 
     private Item[] items;
     private int maxCount;
-    [Networked] private float Weight { get; set; }
-    [Networked] private float MaxWeight { get; set; }
+    [Networked] public float Weight { get; private set; }
+    [Networked] public float MaxWeight { get; private set; }
 
 
     public int MaxCount { get { return maxCount; } }
@@ -35,7 +35,11 @@ public class Inventory : NetworkBehaviour
         if (HasStateAuthority)
         {
             Weight = 0f;
+<<<<<<< HEAD
+            MaxWeight = 500f;
+=======
             MaxWeight = 1000f;
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
         }
         OnChangeItem();
     }
@@ -61,10 +65,30 @@ public class Inventory : NetworkBehaviour
                 if (newItem.ItemData.Weight + Weight > MaxWeight)
                     continue;
 
+<<<<<<< HEAD
+                items.Set(i, newItem);
+                Weight += items[i].ItemData.Weight;
+                items[i].SetParent(this.transform);
+                items[i].gameObject.SetActive(false);
+                break;
+            }
+        }
+    }
+    public void MoveItem(Item newItem)
+    {
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] == null)
+            {
+                items.Set(i, newItem);
+                items[i].SetParent(this.transform);
+                items[i].gameObject.SetActive(false);
+=======
                 netItems.Set(i, newItem);
                 Weight += netItems[i].ItemData.Weight;
                 netItems[i].SetParent(this.transform);
                 onItemUpdate?.Invoke(i, netItems[i]);
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
                 break;
             }
         }
@@ -76,6 +100,9 @@ public class Inventory : NetworkBehaviour
             Debug.Log("존재하지않음");
             return null;
         }
+<<<<<<< HEAD
+        return items[index];
+=======
 
         return netItems[index];
     }
@@ -107,8 +134,9 @@ public class Inventory : NetworkBehaviour
             }
         }
 
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
     }
-    public Item PullItem(int index)
+    public Item InsidePullItem(int index)
     {
         if (netItems[index] == null)
         {
@@ -116,6 +144,26 @@ public class Inventory : NetworkBehaviour
             return null;
         }
 
+<<<<<<< HEAD
+        Item pullItem = items[index];
+       // Weight -= items[index].ItemData.Weight;
+
+
+        items.Set(index, null);
+        return pullItem;
+    }
+    public int GetItemIndex(Item item)
+    {
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (items[i] == null)
+                continue;
+
+            if (item.Equals(items[i]))
+                return i;
+        }
+        return -1;
+=======
 
         Item pullItem = netItems[index];
         Weight -= pullItem.ItemData.Weight;
@@ -157,6 +205,7 @@ public class Inventory : NetworkBehaviour
         netItems.Set(index, null);
         onItemUpdate?.Invoke(index, null);
         return pullItem;
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
     }
     public void OnChangeItem()
     {
@@ -164,10 +213,16 @@ public class Inventory : NetworkBehaviour
         {
             if (netItems[i] != items[i])
             {
+<<<<<<< HEAD
+                items[i].SetParent(this.transform);
+               
+=======
                 // items[i] = netItems[i];
 
                 netItems[i].SetParent(this.transform);
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
             }
+            onItemUpdate?.Invoke(i, items[i]);
         }
     }
 

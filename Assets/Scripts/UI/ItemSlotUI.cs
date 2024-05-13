@@ -6,6 +6,23 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+<<<<<<< HEAD
+
+public class ItemSlotUI : MonoBehaviour, IPointerClickHandler
+{
+    public enum ItemIconType { Base, Detail }
+    public enum ItemSlotType { Creative, Fix }
+    protected int slotIndex;
+    private ItemIconType iconType;
+    private ItemSlotType slotType;
+    [SerializeField] private TextMeshProUGUI itemNameTMP;
+    [SerializeField] private Image itemIconImage;
+    [SerializeField] private TextMeshProUGUI itemCountTMP;
+    [SerializeField] private Image durabilityAmountImg;
+    [SerializeField] private TextMeshProUGUI ammoNameTMP;
+    [SerializeField] private TextMeshProUGUI ammoCountTMP;
+
+=======
 public enum ItemSlotType { Static, Dynamic }
 public class ItemSlotUI : MonoBehaviour, IPointerClickHandler
 {
@@ -20,16 +37,24 @@ public class ItemSlotUI : MonoBehaviour, IPointerClickHandler
     [SerializeField] protected Image durabilityAmountImg;
     [SerializeField] private TextMeshProUGUI ammoNameTMP;
     [SerializeField] private TextMeshProUGUI ammoNameCount;
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
     protected bool isEmpty;
     public event Action<int> onItemRightClick;
 
 
+<<<<<<< HEAD
+    public void Init(int slotIndex, ItemIconType itemIconType, ItemSlotType itemSlotType)
+    {
+        this.iconType = itemIconType;
+=======
     public void Init(ItemSlotType slotType, int slotIndex)
     {
         this.slotType = slotType;
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
         this.slotIndex = slotIndex;
+        this.slotType = itemSlotType;
     }
-    public void SetItem(Item item)
+    public virtual void SetItem(Item item)
     {
         isEmpty = item == null ? true : false;
         CheckEmpty();
@@ -42,10 +67,21 @@ public class ItemSlotUI : MonoBehaviour, IPointerClickHandler
 
 
         itemIconImage.enabled = true;
+<<<<<<< HEAD
+        if (iconType == ItemIconType.Detail)
+        {
+            itemIconImage.sprite = ((WeaponItemSO)item.ItemData).GetItemDetailIcon();
+        }
+        else
+        {
+            itemIconImage.sprite = item.ItemData.ItemIcon;
+        }
+=======
         if (slotIconType == ItemSlotIconType.Base)
             itemIconImage.sprite = item.ItemData.ItemIcon;
         else
             itemIconImage.sprite = ((WeaponItemSO)item.ItemData).ItemDetailIcon;
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
 
         if (itemNameTMP != null)
         {
@@ -55,13 +91,43 @@ public class ItemSlotUI : MonoBehaviour, IPointerClickHandler
 
         if (item.ItemData.IsStackable)
         {
-            itemCountTMP.enabled = true;
-            itemCountTMP.text = item.currentCount.ToString();
+            if (itemCountTMP != null)
+            {
+                itemCountTMP.enabled = true;
+                itemCountTMP.text = item.currentCount.ToString();
+            }
         }
 
     }
+
     private void CheckEmpty()
     {
+<<<<<<< HEAD
+        if (isEmpty)
+        {
+            if (itemCountTMP != null)
+            {
+                itemCountTMP.enabled = false;
+                itemCountTMP.text = string.Empty;
+                itemCountTMP.enabled = false;
+            }
+            if (itemNameTMP != null)
+            {
+                itemNameTMP.text = string.Empty;
+                itemNameTMP.enabled = false;
+            }
+            itemIconImage.enabled = false;
+
+            if (slotType == ItemSlotType.Creative)
+                gameObject.SetActive(false);
+        }
+
+
+
+
+
+
+=======
         if (itemCountTMP != null)
         {
             itemCountTMP.enabled = !isEmpty;
@@ -76,17 +142,29 @@ public class ItemSlotUI : MonoBehaviour, IPointerClickHandler
         }
         if (ItemSlotType.Dynamic == slotType)
             gameObject.SetActive(!isEmpty);
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+<<<<<<< HEAD
+
         if (eventData.button == PointerEventData.InputButton.Right)
         {
+
+=======
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
             if (isEmpty == true)
                 return;
 
             onItemRightClick?.Invoke(slotIndex);
         }
+<<<<<<< HEAD
+
+=======
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
     }
 
 

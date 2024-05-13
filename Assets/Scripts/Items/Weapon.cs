@@ -13,6 +13,10 @@ public abstract class Weapon : EquipmentItem
     { get { return subHandTarget; } }
     public Transform SubHandHint { get { return subHandHint; } }
 
+<<<<<<< HEAD
+    public abstract bool CanAttack();
+    public abstract void Attack();
+=======
 
     public void SetTarget(Transform subTarget)
     {
@@ -44,5 +48,6 @@ public abstract class Weapon : EquipmentItem
     }
 
   
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
 }
 

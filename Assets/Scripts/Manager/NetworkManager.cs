@@ -322,10 +322,10 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     #endregion
 }
 public enum ButtonType
-{ PlayerMove,MouseDelta,Run, Jump, Crouch, MouseLock, Interact, DebugText, Adherence, ActiveItemContainer, Size }
+{ PlayerMove, MouseDelta, Run, Jump, Crouch, MouseLock, Interact, DebugText, Adherence, ActiveItemContainer, PutWeapon,FirstWeapon,SecondWeapon,SubWeapon,MilyWeapon,BombWeapon,Attack ,Size }
 public struct NetworkInputData : INetworkInput
 {
- 
+
     public NetworkButtons buttons;
     public Vector2 inputDirection;
     public Vector2 mouseDelta;

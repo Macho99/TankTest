@@ -15,7 +15,9 @@ public class BasicCamController : NetworkBehaviour
 
     [SerializeField] private CinemachineVirtualCamera mainCam;
     [SerializeField] private CinemachineVirtualCamera aimCam;
+    [SerializeField] private Transform raycasterTr;
 
+    public Transform RayCasterTr { get => raycasterTr; }
     public Transform FollowTarget { get => followTarget; }
     private void Awake()
     {
@@ -24,11 +26,18 @@ public class BasicCamController : NetworkBehaviour
     }
     public override void Spawned()
     {
-        if (Object.InputAuthority != Runner.LocalPlayer)
+        if (!HasInputAuthority)
         {
-            transform.GetComponentInChildren<CinemachineVirtualCamera>().enabled = false;
-            ChangeCamera(CameraType.None);
+
+            CinemachineVirtualCamera[] cameras = transform.GetComponentsInChildren<CinemachineVirtualCamera>();
+
+            for (int i = 0; i < cameras.Length; i++)
+            {
+                cameras[i].enabled = false;
+            }
+
         }
+        ChangeCamera(CameraType.None);
     }
     public float RotateX(NetworkInputData input)
     {
@@ -50,10 +59,17 @@ public class BasicCamController : NetworkBehaviour
 
         return rotX;
     }
+
+
     public void ChangeCamera(CameraType cameraType)
     {
+
         mainCam.Priority = cameraType == CameraType.None ? (int)CameraType.Size : 0;
         aimCam.Priority = cameraType == CameraType.Aim ? (int)CameraType.Size : 0;
     }
-
+    public void ResetCamera()
+    {
+        mainCam.Priority = (int)CameraType.Size;
+        aimCam.Priority = 0;
+    }
 }

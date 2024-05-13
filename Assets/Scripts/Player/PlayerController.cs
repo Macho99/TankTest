@@ -16,6 +16,8 @@ public class PlayerController : NetworkBehaviour
     private CapsuleCollider myCollider;
     public PlayerInputListner InputListner { get; private set; }
     public Inventory Inventory { get; private set; }
+
+    public WeaponController weaponController { get; private set; }
     private LocalPlayerDebugUI LocaldebugUI;
 
     [Networked] public float VelocityY { get; set; }
@@ -27,6 +29,7 @@ public class PlayerController : NetworkBehaviour
         movement = GetComponent<PlayerLocomotion>();
         InputListner = GetComponent<PlayerInputListner>();
         interact = GetComponent<PlayerInteract>();
+        weaponController = GetComponent<WeaponController>();
         Inventory = GetComponentInChildren<Inventory>();
         stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
         stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
@@ -55,10 +58,10 @@ public class PlayerController : NetworkBehaviour
         movement.Move();
 
 
-       
+
 
     }
-   
+
     public void Falling()
     {
 

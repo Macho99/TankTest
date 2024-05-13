@@ -22,10 +22,18 @@ public class ItemSearchUI : MonoBehaviour
         for (int i = 0; i < maxCount; i++)
         {
             ItemSlotUI itemSlotUI = Instantiate(this.itemSlotUIPrefab, itemSlotRoot.transform);
+<<<<<<< HEAD
+            Debug.Log(itemSlots.GetType());
+            itemSlots[i] = itemSlotUI;
+            itemSlots[i].Init(i,ItemSlotUI.ItemIconType.Base, ItemSlotUI.ItemSlotType.Creative);
+            itemSlots[i].onItemRightClick += OnItemAcquisition;
+            itemSlots[i].gameObject.SetActive(false);
+=======
             itemSlots[i] = itemSlotUI;
             itemSlots[i].Init(ItemSlotType.Dynamic,i);
             itemSlotUI.onItemRightClick += OnItemAcquisition;
             itemSlotUI.gameObject.SetActive(false);
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
 
         }
         itemSearchSystem.onUpdate += UpdateSearchItemUI;

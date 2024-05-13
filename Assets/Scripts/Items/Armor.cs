@@ -4,15 +4,14 @@ using UnityEngine;
 
 public class Armor : EquipmentItem
 {
-    // Start is called before the first frame update
-    void Start()
+    public override void Equip(PlayerController owner)
     {
-        
+        base.Equip(owner);
+
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void UnEquip()
     {
-        
+        base.UnEquip();
     }
 }

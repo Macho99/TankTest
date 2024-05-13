@@ -7,7 +7,11 @@ public class Item : NetworkBehaviour
 {
     [SerializeField] protected ItemSO itemData;
 
+<<<<<<< HEAD
+    [Networked, HideInInspector] public int currentCount { get; set; }
+=======
     [Networked] public int currentCount { get; set; }
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
     public ItemSO ItemData { get { return itemData; } }
 
     public void SetParent(Transform parent)
@@ -22,19 +26,26 @@ public class Item : NetworkBehaviour
     {
         gameObject.SetActive(false);
     }
-    public void SetActive(bool isActive)
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_SetActive(bool isActive)
     {
         gameObject.SetActive(isActive);
     }
+
     public int ItemCount { get { return currentCount; } }
 
+<<<<<<< HEAD
+
+=======
     public override void Render()
     {
 
     }
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
 
     public void Init(int count)
     {
         this.currentCount = count;
     }
+
 }

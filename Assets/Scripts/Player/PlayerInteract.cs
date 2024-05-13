@@ -20,7 +20,6 @@ public class PlayerInteract : NetworkBehaviour
     private InteractBehavior[] interactBehaviors;
     private InteractObject interactObject;
 
-
     public InteractObject InteractObject { get { return interactObject; } set { interactObject = value; } }
 
     public DetectData InteractData { get { return interactData; } set => interactData = value; }
@@ -58,6 +57,7 @@ public class PlayerInteract : NetworkBehaviour
                 }
             }
 
+
         }
 
 
@@ -85,7 +85,9 @@ public class PlayerInteract : NetworkBehaviour
 
         if (interactData != null)
         {
-            interactData.detectable.OnExitDetect();
+            if (interactData.detectable != null)
+                interactData.detectable.OnExitDetect();
+
             interactData = null;
         }
         interactObject = null;

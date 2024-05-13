@@ -54,8 +54,19 @@ public class InteractItemBox : InteractObject
     {
         if (itemBoxState == ItemBoxState.Close)
         {
+<<<<<<< HEAD
+            if (HasStateAuthority)
+            {
+                if (processRoutine == null)
+                    processRoutine = StartCoroutine(ProcessRoutin());
+            }
+        }
+        else
+        {
+=======
             itemBoxState = ItemBoxState.Opening;
             //
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
 
         }
         else if (itemBoxState == ItemBoxState.Open)
