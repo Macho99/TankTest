@@ -39,7 +39,8 @@ public class VehiclePark : VehicleMoveState
 				ChangeState(VehicleMove.State.ReverseRpmMatch);
 			}
 		}
-		else if (owner.MoveInput.sqrMagnitude > 0.1f && owner.Velocity > -3f)
+		else if (y > 0.1f && owner.Velocity > -3f)
+		//else if (owner.MoveInput.sqrMagnitude > 0.1f && owner.Velocity > -3f)
 		{
 			ChangeState(VehicleMove.State.RpmMatch);
 		}

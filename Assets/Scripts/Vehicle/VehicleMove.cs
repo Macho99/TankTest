@@ -32,14 +32,16 @@ public class VehicleMove : VehicleBehaviour
 
 	[SerializeField] float[] gears;
 	[SerializeField] float[] gearChangeSpeeds;
+	[SerializeField] int oilConsumpAmount = 10;
 
+	bool oilFilled;
 	float engineHpRatio;
 	Rigidbody rb;
 	DashBoard dashBoard;
 
-	NetworkStateMachine stateMachine;
 	NetworkRigidbody3D netRb;
 
+	protected NetworkStateMachine stateMachine;
 	protected int wheelNum;
 	protected Vector2 moveInput;
 
@@ -66,6 +68,8 @@ public class VehicleMove : VehicleBehaviour
 	public float BrakeMultiplier { get; set; }
 	public int CurGear { get; set; }
 
+	TickTimer oilConsumTimer;
+	float engineRpmRatio;
 	[Networked, OnChangedRender(nameof(HeadLightControl))] public NetworkBool PlayerGetOn { get; private set; } = false;
 	[Networked] public Vector2 LerpedMoveInput { get; set; }
 	[Networked] public float LeftRpm { get; private set; }
@@ -77,6 +81,17 @@ public class VehicleMove : VehicleBehaviour
 	{
 		base.Awake();
 		vehicleBody.OnCurEnginHpChanged += (ratio) => { engineHpRatio = ratio; };
+		vehicleBody.OnOilChanged += (ratio) => 
+		{ 
+			if(ratio < 0.01f)
+			{
+				oilFilled = false;
+			}
+			else
+			{
+				oilFilled = true;
+			}
+		};
 		netRb = GetComponent<NetworkRigidbody3D>();
 
 		stateMachine = GetComponent<NetworkStateMachine>();
@@ -105,6 +120,12 @@ public class VehicleMove : VehicleBehaviour
 
 	public void SetDashBoardGear(string gearStr)
 	{
+		if(oilFilled == false)
+		{
+			dashBoard?.SetGearUI("-");
+			return;
+		}
+
 		dashBoard?.SetGearUI(gearStr);
 	}
 
@@ -140,11 +161,22 @@ public class VehicleMove : VehicleBehaviour
 		//{
 		//	netRb.Teleport(GameObject.FindGameObjectWithTag("Respawn").transform.position);
 		//}
-
+		if (HasStateAuthority && Mathf.Abs(Velocity) > 1f)
+		{
+			OilConsump();
+		}
 		CalculateWheelRPM();
 		CalcTorque();
 		SetWheelTorque();
 		Steering();
+	}
+
+	private void OilConsump()
+	{
+		if (oilConsumTimer.ExpiredOrNotRunning(Runner) == false) { return; }
+
+		oilConsumTimer = TickTimer.CreateFromSeconds(Runner, 1f);
+		vehicleBody.ConsumpOil((int) (oilConsumpAmount * (1f + engineRpmRatio)));
 	}
 
 	private void GetMaxTorqueRpm()
@@ -251,16 +283,30 @@ public class VehicleMove : VehicleBehaviour
 
 	public void CalcTorque()
 	{
-		float torque = torquePerRpm.Evaluate((EngineRpm - minEngineRpm) / maxEngineRpm);
+		if(oilFilled == false)
+		{
+			CurMotorTorque = 0f;
+			return;
+		}
+
+		engineRpmRatio = (EngineRpm - minEngineRpm) / maxEngineRpm;
+		float torque = torquePerRpm.Evaluate(engineRpmRatio);
 		torque *= gears[CurGear];
 		torque /= wheelNum;
 		torque *= finalTorqueMultiplier;
+		torque *= engineHpRatio;
 
 		CurMotorTorque = torque;
 	}
 
 	public void SetEngineRpmWithWheel()
 	{
+		if(oilFilled == false)
+		{
+			EngineRpm = 0f;
+			return;
+		}
+
 		EngineRpm = AbsWheelRpm * gears[CurGear];
 		if (EngineRpm > maxEngineRpm)
 		{
@@ -270,7 +316,14 @@ public class VehicleMove : VehicleBehaviour
 
 	public void SetEngineRpmWithoutWheel(float value)
 	{
-		EngineRpm = value;
+		if(oilFilled == false)
+		{
+			EngineRpm = 0f;
+			return;
+		}
+
+		if(engineHpRatio > 0)
+			EngineRpm = value;
 	}
 
 	protected virtual void SyncWheelRenderer(float leftRps, float rightRps)

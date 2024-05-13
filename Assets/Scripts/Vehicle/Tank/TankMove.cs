@@ -1,12 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.Windows;
-using Fusion;
-using Cinemachine;
-using Fusion.Addons.Physics;
 
 public class TankMove : VehicleMove
 {
@@ -24,9 +16,19 @@ public class TankMove : VehicleMove
 	[SerializeField] float leftTorque;
 	[SerializeField] float rightTorque;
 
+	const string statUIPrefabPath = "UI/Vehicle/Tank/TankStatUI";
 
-	//Vector2 lerpedMoveInput;
+	protected override void Awake()
+	{
+		base.Awake();
+		stateMachine.OverrideState(State.Park.ToString(), new TankPark(this));
+	}
 
+	protected override void InstantiateStatUI()
+	{
+		//base.InstantiateStatUI();
+		statUI = GameManager.UI.ShowSceneUI<TankStatUI>(statUIPrefabPath);
+	}
 
 	public override void Spawned()
 	{

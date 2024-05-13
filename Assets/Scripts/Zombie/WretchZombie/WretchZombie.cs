@@ -159,17 +159,17 @@ public class WretchZombie : ZombieBase
 		if (IsDead == true)
 			return;
 
-		if(CurPoisonVFXData.fireTick == 0)
-		{
-			PoisonVFXData poisonVFXData = CurPoisonVFXData;
-			poisonVFXData.fireTick = Runner.Tick;
-			poisonVFXData.finishTick = Runner.Tick;
-			poisonVFXData.explosionPosition = headTrans.position;
-			CurPoisonVFXData = poisonVFXData;
-		}
-
 		if (hitReactionTimer.ExpiredOrNotRunning(Runner) && damage > 500)
 		{
+			if (CurPoisonVFXData.fireTick == 0)
+			{
+				PoisonVFXData poisonVFXData = CurPoisonVFXData;
+				poisonVFXData.fireTick = Runner.Tick;
+				poisonVFXData.finishTick = Runner.Tick;
+				poisonVFXData.explosionPosition = headTrans.position;
+				CurPoisonVFXData = poisonVFXData;
+			}
+
 			float hitShifter;
 			Vector3 forceDir = force.normalized;
 			if (Vector3.Dot(transform.forward, forceDir) > 0f)

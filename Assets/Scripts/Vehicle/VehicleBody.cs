@@ -1,10 +1,12 @@
 ﻿using Fusion;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class VehicleBody : NetworkBehaviour, IHittable
 {
@@ -23,6 +25,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 	[SerializeField] int maxEngineHp = 5000;
 	[SerializeField] int damage = 50;
 
+	LayerMask collisionMask;
 	Collider[] cols = new Collider[30];
 	Rigidbody rb;
 	List<HitData> hitDataList = new List<HitData>();
@@ -32,7 +35,6 @@ public class VehicleBody : NetworkBehaviour, IHittable
 	public LayerMask BodyAttackMask { get; private set; }
 	public int MonsterLayer { get; private set; }
 	public int BreakableLayer { get; private set; }
-	public int VehicleLayer { get; private set; }
 
 	public Int64 HitID => (Object.Id.Raw << 32);
 
@@ -54,8 +56,8 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		massRatio = rb.mass / 1500f;
 		MonsterLayer = LayerMask.NameToLayer("Monster");
 		BreakableLayer = LayerMask.NameToLayer("Breakable");
-		VehicleLayer = LayerMask.NameToLayer("Vehicle");
-		BodyAttackMask = LayerMask.GetMask("Monster", "Breakable", "Vehicle");
+		BodyAttackMask = LayerMask.GetMask("Monster", "Breakable");
+		collisionMask = LayerMask.GetMask("Environment", "Vehicle");
 	}
 
 	public override void Spawned()
@@ -69,6 +71,15 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		CurHpChanged();
 		CurOilChanged();
 		CurEngineHpChanged();
+	}
+
+	public void ConsumpOil(int amount)
+	{
+		CurOil -= amount;
+		if(CurOil < 0)
+		{
+			CurOil = 0;
+		}
 	}
 
 	public override void FixedUpdateNetwork()
@@ -122,20 +133,35 @@ public class VehicleBody : NetworkBehaviour, IHittable
 			if (force == Vector3.zero)
 				return;
 			hittable.ApplyDamage(transform, transform.position, force, finaldamage);
-			print(finaldamage);
+			print($"{other.name}: {finaldamage}");
 		}
 		else if(other.layer == BreakableLayer)
 		{
 			hittable.ApplyDamage(transform, transform.position,
 				normal * velMag * 5f, (int) (finaldamage * massRatio));
-			print((int)(finaldamage * massRatio));
-		}
-		else if(other.layer == VehicleLayer)
-		{
-			hittable.ApplyDamage(transform, transform.position, Vector3.zero, (int)(finaldamage * massRatio));
-			print((finaldamage));
+			print($"{other.name}: {(int)(finaldamage * massRatio)}");
 		}
 		this.ApplyDamage(transform, other.transform.position, force * 1.5f, finaldamage / 5);
+	}
+
+	private void OnCollisionEnter(Collision collision)
+	{
+		if (IsProxy == false && collisionMask.IsLayerInMask(collision.collider.gameObject.layer))
+		{
+			StartCoroutine(CoCheckCollision(collision.GetContact(0).point, rb.velocity));
+		}
+	}
+
+	private IEnumerator CoCheckCollision(Vector3 point, Vector3 prevVelocity)
+	{
+		for(int i = 0; i < 2; i++)
+		{
+			yield return new WaitForFixedUpdate();
+		}
+		Vector3 velDiff = rb.velocity - prevVelocity;
+		print($"{velDiff}");
+		int finaldamage = (int)(damage * velDiff.magnitude);
+		this.ApplyDamage(transform, point, Vector3.zero, finaldamage);
 	}
 
 	private Vector3 CalcForce(float otherMass, Vector3 normal, float cor)
@@ -159,14 +185,24 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		OnCurEnginHpChanged(EngineHpRatio);
 	}
 
-	public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
+	public virtual void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
 	{
-		CurHp -= damage;
-		if(CurHp < 0)
-		{
-			CurHp = 0;
-		}
+		CurHp = Mathf.Max(CurHp - damage, 0);
 
 		rb.AddForce(force, ForceMode.Impulse);
+		Vector3 diff = point - transform.position;
+		float fwdAngle = Vector3.Angle(diff, transform.forward);
+		float upAngle = Vector3.Angle(diff, transform.up);
+		CheckModuleDamaged(diff, fwdAngle, upAngle, damage);
+	}
+
+	protected virtual void CheckModuleDamaged(Vector3 diff, float fwdAngle, float upAngle, int damage)
+	{
+		Random.InitState(Runner.Tick * unchecked((int)Object.Id.Raw));
+		float engineRatio = Random.value;
+		if(fwdAngle < 20f)
+		{
+			CurEngineHp = Mathf.Max(CurEngineHp - (int) (engineRatio * damage), 0);
+		}
 	}
 }

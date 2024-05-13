@@ -6,11 +6,13 @@ using UnityEngine.UI;
 
 public class VehicleStatUI : SceneUI
 {
+	VehicleBody vehicleBody;
+
 	TextMeshProUGUI vehicleNameText;
 	TextMeshProUGUI vehicleHpText;
 	Slider vehicleHpBar;
 	Slider oilBar;
-	Slider enginBar;
+	Slider engineBar;
 
 	Coroutine updateCoroutine;
 
@@ -21,18 +23,37 @@ public class VehicleStatUI : SceneUI
 		vehicleHpBar = transforms["VehicleHpBar"].GetComponent<Slider>();
 		vehicleHpText = texts["VehicleHpText"];
 		oilBar = transforms["OilStatBar"].GetComponent<Slider>();
-		enginBar = transforms["EngineStatBar"].GetComponent<Slider>();
+		engineBar = transforms["EngineStatBar"].GetComponent<Slider>();
 	}
 
-	public void Init(string vehicleName)
+	public virtual void Init(string vehicleName, VehicleBody vehicleBody)
 	{
 		vehicleNameText.text = vehicleName;
+		this.vehicleBody = vehicleBody;
 	}
 
-	public void UpdateHp(float ratio, int minHp, int maxHp)
+	public virtual void AddEvents()
+	{
+		vehicleBody.OnCurHpChanged += UpdateHp;
+		vehicleBody.OnOilChanged += UpdateOil;
+		vehicleBody.OnCurEnginHpChanged += UpdateEnginHp;
+
+		UpdateHp(vehicleBody.HpRatio);
+		UpdateOil(vehicleBody.OilRatio);
+		UpdateEnginHp(vehicleBody.EngineHpRatio);
+	}
+
+	public virtual void RemoveEvents()
+	{
+		vehicleBody.OnCurHpChanged -= UpdateHp;
+		vehicleBody.OnOilChanged -= UpdateOil;
+		vehicleBody.OnCurEnginHpChanged -= UpdateEnginHp;
+	}
+
+	public void UpdateHp(float ratio)
 	{
 		vehicleHpBar.value = ratio;
-		vehicleHpText.text = $"{minHp} / {maxHp}";
+		vehicleHpText.text = $"{vehicleBody.CurHp} / {vehicleBody.MaxHp}";
 	}
 
 	public void UpdateOil(float ratio)
@@ -42,6 +63,6 @@ public class VehicleStatUI : SceneUI
 
 	public void UpdateEnginHp(float ratio)
 	{
-		enginBar.value = ratio;
+		engineBar.value = ratio;
 	}
 }

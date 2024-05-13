@@ -42,11 +42,8 @@ public class VehicleBehaviour : NetworkBehaviour
 			else
 			{
 				InstantiateStatUI();
-				statUI.Init(gameObject.name);
-				AddEvents();
-				UpdateHp(vehicleBody.HpRatio);
-				UpdateOil(vehicleBody.OilRatio);
-				UpdateEngineHp(vehicleBody.EngineHpRatio);
+				statUI.Init(gameObject.name, vehicleBody);
+				statUI.AddEvents();
 			}
 		}
 
@@ -61,35 +58,6 @@ public class VehicleBehaviour : NetworkBehaviour
 	protected virtual void InstantiateStatUI()
 	{
 		statUI = GameManager.UI.ShowSceneUI<VehicleStatUI>(statUIPrefabPath);
-	}
-
-	protected virtual void AddEvents()
-	{
-		vehicleBody.OnCurHpChanged += UpdateHp;
-		vehicleBody.OnOilChanged += UpdateOil;
-		vehicleBody.OnCurEnginHpChanged += UpdateEngineHp;
-	}
-
-	protected virtual void RemoveEvents()
-	{
-		vehicleBody.OnCurHpChanged -= UpdateHp;
-		vehicleBody.OnOilChanged -= UpdateOil;
-		vehicleBody.OnCurEnginHpChanged -= UpdateEngineHp;
-	}
-
-	private void UpdateHp(float ratio)
-	{
-		statUI.UpdateHp(ratio, vehicleBody.CurHp, vehicleBody.MaxHp);
-	}
-
-	private void UpdateOil(float ratio)
-	{
-		statUI.UpdateOil(ratio);
-	}
-
-	private void UpdateEngineHp(float ratio)
-	{
-		statUI.UpdateEnginHp(ratio);
 	}
 
 	protected virtual void OnAssign(TestPlayer player) { }
@@ -124,7 +92,7 @@ public class VehicleBehaviour : NetworkBehaviour
 			GameManager.Resource.Destroy(followCam.gameObject);
 			if(statUI != null)
 			{
-				RemoveEvents();
+				statUI.RemoveEvents();
 				GameManager.Resource.Destroy(statUI.gameObject);
 				statUI = null;
 			}
@@ -137,6 +105,7 @@ public class VehicleBehaviour : NetworkBehaviour
 		}
 
 		boarder.GetOff(player);
+		player = null;
 	}
 
 	protected virtual void OnGetOff() { }

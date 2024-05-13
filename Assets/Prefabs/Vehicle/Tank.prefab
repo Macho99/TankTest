@@ -1956,7 +1956,7 @@ GameObject:
   m_Component:
   - component: {fileID: 907794257910429366}
   - component: {fileID: 8999891207445055396}
-  - component: {fileID: 7034816690910571590}
+  - component: {fileID: 312558659804015955}
   m_Layer: 7
   m_Name: NetworkObject4
   m_TagString: Untagged
@@ -1996,8 +1996,8 @@ MonoBehaviour:
   Flags: 262145
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: 7034816690910571590}
---- !u!114 &7034816690910571590
+  - {fileID: 312558659804015955}
+--- !u!114 &312558659804015955
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2006,7 +2006,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2607833526544628533}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f786185d41f877d419d39b3be173ebf7, type: 3}
+  m_Script: {fileID: 11500000, guid: 90fd8edc0a1ac094f8941fb445384d2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   lookSpeed: 20
@@ -2467,7 +2467,7 @@ GameObject:
   - component: {fileID: 2824048430176714765}
   - component: {fileID: 1099080757506751890}
   - component: {fileID: 2161414957970974313}
-  - component: {fileID: 6059668285118457743}
+  - component: {fileID: 8521670882649301232}
   - component: {fileID: 5557509433577515649}
   - component: {fileID: 2227837496507699691}
   - component: {fileID: 622903230796717447}
@@ -2557,6 +2557,7 @@ MonoBehaviour:
   maxReverseSpeed: -15.5
   finalTorqueMultiplier: 2
   steerAngle: 0
+  headlights: []
   leftWheelTrans:
   - {fileID: 9114957189277401221}
   - {fileID: 5697896394562351843}
@@ -2598,6 +2599,8 @@ MonoBehaviour:
   - 22
   - 35
   - 50
+  _PlayerGetOn:
+    _value: 0
   _LerpedMoveInput: {x: 0, y: 0}
   _LeftRpm: 0
   _RightRpm: 0
@@ -2635,8 +2638,9 @@ MonoBehaviour:
   - {fileID: 2629814219299905925}
   - {fileID: 1066979177730352242}
   - {fileID: 907794257910429366}
+  vehicleBody: {fileID: 8521670882649301232}
   _GetOnPlayers: []
---- !u!114 &6059668285118457743
+--- !u!114 &8521670882649301232
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2645,13 +2649,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 3963636830516615579}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 117bc1fec81fa314388e089d6417c678, type: 3}
+  m_Script: {fileID: 11500000, guid: 9dc66f4d23d517245826441de09dd847, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   vehicleTrigger: {fileID: 515011470170301144}
-  maxHp: 5000
-  damage: 100
-  hitCooltime: 0.5
+  maxHp: 10000
+  maxOil: 5000
+  maxEngineHp: 5000
+  damage: 200
+  _CurHp: 0
+  _CurOil: 0
+  _CurEngineHp: 0
+  maxTurretHp: 5000
+  maxReloadHp: 5000
+  _CurTurretHp: 0
+  _CurReloadHp: 0
 --- !u!54 &5557509433577515649
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2752,7 +2764,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 1099080757506751890}
   - {fileID: 2161414957970974313}
-  - {fileID: 6059668285118457743}
+  - {fileID: 8521670882649301232}
   - {fileID: 2227837496507699691}
   - {fileID: 622903230796717447}
 --- !u!1 &4009133009955522546
@@ -3567,7 +3579,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1066979177730352242}
   - component: {fileID: 2108501535833134432}
-  - component: {fileID: 4672898120748612808}
+  - component: {fileID: 127191296273091553}
   m_Layer: 7
   m_Name: NetworkObject3
   m_TagString: Untagged
@@ -3607,8 +3619,8 @@ MonoBehaviour:
   Flags: 262145
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: 4672898120748612808}
---- !u!114 &4672898120748612808
+  - {fileID: 127191296273091553}
+--- !u!114 &127191296273091553
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3617,7 +3629,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6111348991871354630}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f786185d41f877d419d39b3be173ebf7, type: 3}
+  m_Script: {fileID: 11500000, guid: 90fd8edc0a1ac094f8941fb445384d2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   lookSpeed: 20

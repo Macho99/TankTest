@@ -1,5 +1,4 @@
-﻿using Cinemachine;
-using Fusion;
+﻿using Fusion;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Windows;
 using Random = UnityEngine.Random;
 
-public class TankAttack : VehicleBehaviour
+public class TankAttack : TankBehaviour
 {
 	const float MAX_DIST = 500f;
 
@@ -36,6 +35,7 @@ public class TankAttack : VehicleBehaviour
 	[SerializeField] float velocityAccMul = 1f;
 	[SerializeField] float turretRotAccMul = 0.05f;
 	[SerializeField] float realAccMul = 0.02f;
+
 	LayerMask hitMask;
 	LayerMask damageableMask;
 	int monsterLayer;
@@ -45,6 +45,8 @@ public class TankAttack : VehicleBehaviour
 	bool spawned;
 	int visualFireCnt;
 	Rigidbody rb;
+	float turretHpRatio;
+	float reloadHpRatio;
 
 	Collider[] attackCols = new Collider[40];
 
@@ -54,6 +56,8 @@ public class TankAttack : VehicleBehaviour
 	TickTimer intervalFireTimer;
 
 	HitPointComparer hitPointComparer = new();
+	public float ReloadSpeedMul { get { return 0.5f + 0.5f * reloadHpRatio; } }
+	public float FinalLeftReloadTime { get { return RawLeftReloadTime / ReloadSpeedMul; } }
 
 	[Networked, HideInInspector] public float CurBodyAcc { get; private set; }
 	[Networked, HideInInspector] public float CurTurretAcc { get; private set; }
@@ -63,7 +67,7 @@ public class TankAttack : VehicleBehaviour
 	[Networked, HideInInspector] public Vector3 HitPosition { get; private set; }
 	[Networked, HideInInspector] public Vector3 HitNormal { get; private set; }
 	[Networked, HideInInspector] public int LoadedShell { get; private set; } = 0;
-	[Networked, HideInInspector] public float LeftReloadTime { get; private set; } = 0f;
+	[Networked, HideInInspector] public float RawLeftReloadTime { get; private set; } = 0f;
 
 	protected override void Awake()
 	{
@@ -74,6 +78,9 @@ public class TankAttack : VehicleBehaviour
 		damageableMask = LayerMask.GetMask("Breakable", "Monster");
 		monsterLayer = LayerMask.NameToLayer("Monster");
 		breakableLayer = LayerMask.NameToLayer("Breakable");
+
+		tankBody.OnReloadHpChanged += (ratio) => { reloadHpRatio = ratio; };
+		tankBody.OnTurretHpChanged += (ratio) => { turretHpRatio = ratio; };
 	}
 
 	public override void Spawned()
@@ -82,7 +89,7 @@ public class TankAttack : VehicleBehaviour
 		if(HasStateAuthority)
 		{
 			LoadedShell = 0;
-			LeftReloadTime = reloadTimes[0];
+			RawLeftReloadTime = reloadTimes[0];
 		}
 		intervalFireTimer = TickTimer.CreateFromTicks(Runner, 1);
 		visualFireCnt = FireCnt;
@@ -169,8 +176,8 @@ public class TankAttack : VehicleBehaviour
 	{
 		if (LoadedShell >= reloadTimes.Length) { return; }
 
-		LeftReloadTime -= Runner.DeltaTime;
-		if (LeftReloadTime < 0f)
+		RawLeftReloadTime -= Runner.DeltaTime * 0.5f * (1f + 1f * Mathf.Clamp01(reloadHpRatio));
+		if (RawLeftReloadTime < 0f)
 		{
 			if(attackUI != null && Runner.IsForward)
 			{
@@ -180,7 +187,7 @@ public class TankAttack : VehicleBehaviour
 			LoadedShell++;
 			if (LoadedShell < reloadTimes.Length)
 			{
-				LeftReloadTime = reloadTimes[LoadedShell];
+				RawLeftReloadTime = reloadTimes[LoadedShell];
 			}
 		}
 	}
@@ -204,14 +211,15 @@ public class TankAttack : VehicleBehaviour
 		float barRatio;
 		bool fireReady;
 
+		float finalReloadTime = FinalLeftReloadTime;
 		//탄간 장전 중일때
 		if(intervalFireTimer.ExpiredOrNotRunning(Runner) == false)
 		{
-			smallTime = LeftReloadTime;
+			smallTime = finalReloadTime;
 			fireReady = false;
 			if(LoadedShell == 0)
 			{
-				largeTime = LeftReloadTime;
+				largeTime = finalReloadTime;
 				barRatio = largeTime / reloadTimes[0];
 			}
 			else
@@ -225,14 +233,14 @@ public class TankAttack : VehicleBehaviour
 		{
 			if(LoadedShell == 0)
 			{
-				smallTime = LeftReloadTime;
+				smallTime = finalReloadTime;
 				fireReady = false;
-				largeTime = LeftReloadTime;
+				largeTime = finalReloadTime;
 				barRatio = largeTime / reloadTimes[0];
 			}
 			else if(LoadedShell == 1)
 			{
-				smallTime = LeftReloadTime;
+				smallTime = finalReloadTime;
 				fireReady = true;
 				largeTime = intervalFireCooltime;
 				barRatio = 0f;
@@ -246,7 +254,7 @@ public class TankAttack : VehicleBehaviour
 			}
 			else
 			{
-				smallTime = LeftReloadTime;
+				smallTime = finalReloadTime;
 				fireReady = true;
 				largeTime = intervalFireCooltime;
 				barRatio = 0f;
@@ -284,7 +292,7 @@ public class TankAttack : VehicleBehaviour
 	private void Fire()
 	{
 		LoadedShell--;
-		LeftReloadTime = reloadTimes[LoadedShell];
+		RawLeftReloadTime = reloadTimes[LoadedShell];
 
 		if (attackUI != null && Runner.IsForward)
 		{
