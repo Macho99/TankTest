@@ -9,11 +9,7 @@ public class MilyWeapon : Weapon
         
     }
 
-    public override bool CanAttack()
-    {
-        return true;
-        //throw new System.NotImplementedException();
-    }
+
 
     public override void Equip(PlayerController owner)
     {

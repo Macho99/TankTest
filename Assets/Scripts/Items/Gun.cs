@@ -13,18 +13,6 @@ public abstract class Gun : Weapon
 
     public abstract void Attack( Vector3 targetPos);
 
-    public override bool CanAttack()
-    {
-        //if (currentAmmoCount <= 0)
-        //    return false;
-
-        if (currentRefireTime > 0f)
-            return false;
-
-
-
-        return true;
-    }
 
     public IEnumerator RefireRoutine()
     {

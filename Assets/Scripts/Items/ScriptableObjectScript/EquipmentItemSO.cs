@@ -4,20 +4,13 @@ using UnityEngine;
 
 public abstract class EquipmentItemSO : ItemSO
 {
-<<<<<<< HEAD
     [SerializeField] private EquipmentType equipmentType;
     [SerializeField] private EquipmentSlotType[] slotType;
 
     public EquipmentType EquipmentType { get { return equipmentType; } }
-    public EquipmentSlotType[] SlotType { get { return slotType; } }
 
-=======
-    [SerializeField] protected EquipmentSlotType[] slotTypes;
-    [SerializeField] protected EquipmentType equipmentType;
 
-    public EquipmentSlotType[] SlotTypes { get { return slotTypes; } }
-    public EquipmentType EquipmentType { get { return equipmentType; } }
->>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
+    public EquipmentSlotType[] SlotTypes { get { return slotType; } }
 }
 
 public abstract class EquipmentItemInstance : ItemInstance
