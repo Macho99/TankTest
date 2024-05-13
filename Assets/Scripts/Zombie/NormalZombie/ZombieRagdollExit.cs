@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ZombieRagdollExit : ZombieState
 {
-	const float resetBoneTime = 1f;
+	const float resetBoneTime = 2f;
 	float elapsed;
 	BoneTransform[] faceBoneTransforms;
 	string animName;

@@ -8,10 +8,12 @@ public class CompressObstacle : BreakableObstacle
 	[SerializeField] float scaleYValue;
 	Mesh mesh;
 	Vector3[] vertices;
+	int environLayer;
 
 	protected override void Awake()
 	{
 		base.Awake();
+		environLayer = LayerMask.NameToLayer("Environment");
 		transform.localScale = Vector3.one;
 		mesh = meshFilter.mesh;
 		vertices = mesh.vertices;
@@ -39,7 +41,7 @@ public class CompressObstacle : BreakableObstacle
 			vertices[i].y += Random.value * 0.5f;
 		}
 		transform.localScale = new Vector3(1f, scaleYValue, 1f);
-
+		gameObject.layer = environLayer;
 		GetComponent<NavMeshObstacle>().enabled = false;
 		mesh.vertices = vertices;
 		mesh.RecalculateNormals();

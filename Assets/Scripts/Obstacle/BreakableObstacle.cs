@@ -16,12 +16,13 @@ public abstract class BreakableObstacle : MonoBehaviour, IHittable
 	[SerializeField] protected MeshRenderer meshRenderer;
 	[SerializeField] protected NavMeshObstacle navObstacle;
 	[SerializeField] protected BreakableObjBehaviour owner;
+	[SerializeField] protected int maxHp;
 
 	protected LayerMask breakMask;
 
 	public int idx = -1;
 	public bool IsBreaked { get; protected set; }
-	public int CurHp { get; protected set; } = 100;
+	public int CurHp { get; protected set; }
 
 	public Int64 HitID => (owner.Object.Id.Raw << 32) + idx;
 
@@ -33,6 +34,7 @@ public abstract class BreakableObstacle : MonoBehaviour, IHittable
 	protected virtual void Awake()
 	{
 		breakMask = LayerMask.GetMask("Default", "Vehicle");
+		CurHp = maxHp;
 	}
 
 	protected virtual void OnValidate()
@@ -56,28 +58,35 @@ public abstract class BreakableObstacle : MonoBehaviour, IHittable
 		}
 		if(childRenderers == null || childRenderers.Length == 0)
 			childRenderers = GetComponentsInChildren<MeshRenderer>();
-	}
 
-	private void OnCollisionStay(Collision collision)
-	{
-		if(breakMask.IsLayerInMask(collision.collider.gameObject.layer) == true)
+		if(maxHp <= 0)
 		{
-			BreakRequest();
+			Vector3 size = meshFilter.sharedMesh.bounds.size;
+			float volume = Mathf.Max(size.x, 1f) * Mathf.Max(size.y, 1f) * Mathf.Max(size.z, 1f);
+			maxHp = (int)(Mathf.Log(volume, 2f) * 400f);
 		}
 	}
 
-	private void OnTriggerStay(Collider other)
-	{
-		if (breakMask.IsLayerInMask(other.gameObject.layer) == true)
-		{
-			BreakRequest();
-		}
-	}
+	//private void OnCollisionStay(Collision collision)
+	//{
+	//	if(breakMask.IsLayerInMask(collision.collider.gameObject.layer) == true)
+	//	{
+	//		BreakRequest();
+	//	}
+	//}
 
-	private void BreakRequest()
-	{
-		owner.BreakRequest(idx);
-	}
+	//private void OnTriggerStay(Collider other)
+	//{
+	//	if (breakMask.IsLayerInMask(other.gameObject.layer) == true)
+	//	{
+	//		BreakRequest();
+	//	}
+	//}
+
+	//private void BreakRequest()
+	//{
+	//	owner.BreakRequest(idx);
+	//}
 
 	private void ExplosionBreakRequest(float force, Vector3 position)
 	{

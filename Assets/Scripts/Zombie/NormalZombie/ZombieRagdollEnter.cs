@@ -24,7 +24,7 @@ public class ZombieRagdollEnter : ZombieState
 		owner.Agent.enabled = false;
 		transition = false;
 		elapsed = 0f;
-		exitTime = 0.3f;
+		exitTime = 1f;
 
 		if(owner.CurHp > 0)
 		{
@@ -41,7 +41,7 @@ public class ZombieRagdollEnter : ZombieState
 		//}
 		owner.EnableRagdoll(true);
 		Rigidbody rb = owner.BodyHitParts[(int)owner.HitBody].rb;
-		rb.AddForce(owner.HitVelocity * rb.mass, ForceMode.Impulse);
+		rb.AddForce(owner.HitForce * 1.5f, ForceMode.Impulse);
 	}
 
 	public override void Exit()

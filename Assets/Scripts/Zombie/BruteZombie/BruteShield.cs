@@ -20,7 +20,7 @@ public class BruteShield : MonoBehaviour, IHittable
 	public bool Enabled { get; private set; }
 	public int CurShieldHp { get; set; }
 
-	public Int64 HitID => (owner.Owner.Object.Id.Raw << 32) + 100;
+	public Int64 HitID => (owner.Owner.Object.Id.Raw << 32);
 
 	private void Awake()
 	{
@@ -48,6 +48,7 @@ public class BruteShield : MonoBehaviour, IHittable
 	{
 		Enabled = false;
 		transform.parent = null;
+		gameObject.layer = LayerMask.NameToLayer("Default");
 		col.isTrigger = false;
 		col.enabled = true;
 		rb.useGravity = true;
@@ -68,7 +69,6 @@ public class BruteShield : MonoBehaviour, IHittable
 		lastPoint = point;
 		lastVel = velocity;
 		CurShieldHp -= damage;
-		print(CurShieldHp);
 		if (CurShieldHp > 0)
 		{
 			owner.ResetTimer();

@@ -283,6 +283,12 @@ public class Zombie : ZombieBase
 		if (CurHp <= 0)
 		{
 			StartRagdoll();
+			return;
+		}
+		else if(velocity.sqrMagnitude > 30f * 30f)
+		{
+			StartRagdoll();
+			return;
 		}
 
 		float hitBodyFloat = GetHitBodyFloat(zombieHitBox.BodyType);

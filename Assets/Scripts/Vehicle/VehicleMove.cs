@@ -22,7 +22,7 @@ public class VehicleMove : VehicleBehaviour
 	[SerializeField] float maxReverseSpeed = -15f;
 	[SerializeField] float finalTorqueMultiplier = 2.5f;
 	[SerializeField] float steerAngle = 40f;
-	[SerializeField] Light[] lights;
+	[SerializeField] Light[] headlights;
 	
 	[SerializeField] Transform[] leftWheelTrans;
 	[SerializeField] Transform[] rightWheelTrans;
@@ -33,6 +33,7 @@ public class VehicleMove : VehicleBehaviour
 	[SerializeField] float[] gears;
 	[SerializeField] float[] gearChangeSpeeds;
 
+	float engineHpRatio;
 	Rigidbody rb;
 	DashBoard dashBoard;
 
@@ -65,7 +66,7 @@ public class VehicleMove : VehicleBehaviour
 	public float BrakeMultiplier { get; set; }
 	public int CurGear { get; set; }
 
-	[Networked, OnChangedRender(nameof(LightControl))] public NetworkBool PlayerGetOn { get; private set; }
+	[Networked, OnChangedRender(nameof(HeadLightControl))] public NetworkBool PlayerGetOn { get; private set; } = false;
 	[Networked] public Vector2 LerpedMoveInput { get; set; }
 	[Networked] public float LeftRpm { get; private set; }
 	[Networked] public float RightRpm { get; private set; }
@@ -75,6 +76,7 @@ public class VehicleMove : VehicleBehaviour
 	protected override void Awake()
 	{
 		base.Awake();
+		vehicleBody.OnCurEnginHpChanged += (ratio) => { engineHpRatio = ratio; };
 		netRb = GetComponent<NetworkRigidbody3D>();
 
 		stateMachine = GetComponent<NetworkStateMachine>();
@@ -98,10 +100,7 @@ public class VehicleMove : VehicleBehaviour
 	public override void Spawned()
 	{
 		base.Spawned();
-		//if (Object.HasInputAuthority == false)
-		//{
-		//	transform.parent.GetComponentInChildren<Canvas>(true)?.gameObject.SetActive(false);
-		//}
+		HeadLightControl();
 	}
 
 	public void SetDashBoardGear(string gearStr)
@@ -329,9 +328,9 @@ public class VehicleMove : VehicleBehaviour
 		}
 	}
 
-	protected void LightControl()
+	protected void HeadLightControl()
 	{
-		foreach(Light light in lights)
+		foreach(Light light in headlights)
 		{
 			light.gameObject.SetActive(PlayerGetOn);
 		}

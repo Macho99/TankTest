@@ -33,10 +33,13 @@ public class VehiclePark : VehicleMoveState
 		float y = owner.MoveInput.y;
 		if(y < -0.1f)
 		{
-			owner.Reverse = true;
-			ChangeState(VehicleMove.State.ReverseRpmMatch);
+			if (owner.Velocity < 3f)
+			{
+				owner.Reverse = true;
+				ChangeState(VehicleMove.State.ReverseRpmMatch);
+			}
 		}
-		else if (owner.MoveInput.sqrMagnitude > 0.1f)
+		else if (owner.MoveInput.sqrMagnitude > 0.1f && owner.Velocity > -3f)
 		{
 			ChangeState(VehicleMove.State.RpmMatch);
 		}

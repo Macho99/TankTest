@@ -26,6 +26,7 @@ public abstract class ZombieBase : NetworkBehaviour
 		public Collider col;
 	}
 
+	[SerializeField] protected float mass = 40f;
 	[SerializeField] protected float viewAngle = 45f;
 	[SerializeField] protected float lookDist = 10f;
 	[SerializeField] protected float playerLostTime = 5f;
@@ -48,6 +49,7 @@ public abstract class ZombieBase : NetworkBehaviour
 	protected string prevState;
 	public event Action OnDie;
 
+	public float Mass { get { return mass; } }
 	public bool IsDead { get; private set; }
 	public BodyPart[] BodyHitParts { get { return bodyHitParts; } }
 	public Transform Hips { get; private set; }
@@ -76,7 +78,7 @@ public abstract class ZombieBase : NetworkBehaviour
 	[Networked] public Quaternion Rotation { get; private set; }
 	[Networked] public ZombieBody HitBody { get; private set; }
 	[Networked] public Vector3 HitPoint { get; private set; }
-	[Networked] public Vector3 HitVelocity { get; private set; }
+	[Networked] public Vector3 HitForce { get; private set; }
 	[Networked, OnChangedRender(nameof(PlayHitFX))] public int HitCnt { get; set; }
 
 	public abstract string DecideState();
@@ -232,13 +234,13 @@ public abstract class ZombieBase : NetworkBehaviour
 	{
 		GameObject vfx = HitBody == ZombieBody.Head ? headBloodVFX : bodyBloodVFX;
 		GameManager.Resource.Instantiate(vfx, HitPoint, 
-			Quaternion.LookRotation(-HitVelocity), true);
+			Quaternion.LookRotation(-HitForce), true);
 	}
 
 	public virtual void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
 		Vector3 point, Vector3 force, int damage, bool playHitVFX = true)
 	{
-		HitVelocity = force;
+		HitForce = force;
 		HitBody = zombieHitBox.BodyType;
 		HitPoint = point;
 		if(playHitVFX)

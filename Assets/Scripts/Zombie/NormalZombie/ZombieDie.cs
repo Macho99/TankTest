@@ -9,7 +9,7 @@ public class ZombieDie : ZombieBaseDie
 {
 	new Zombie owner;
 
-	public ZombieDie(Zombie owner) : base(owner, 3f)
+	public ZombieDie(Zombie owner) : base(owner, 5f)
 	{
 		this.owner = owner;
 	}

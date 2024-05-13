@@ -147,7 +147,6 @@ public class BruteTrace : BruteZombieState
 		}
 		if (targetData.Distance < owner.NormalAttackDist || owner.TargetData.CheckObstacleAttack(owner.transform.position) == true)
 		{
-			print(targetData.Angle);
 			BruteZombie.AttackType attackType;
 			if (targetData.Angle > 90f)
 			{

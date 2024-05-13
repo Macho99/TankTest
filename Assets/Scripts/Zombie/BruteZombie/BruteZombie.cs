@@ -158,7 +158,7 @@ public class BruteZombie : ZombieBase
 		float absAngle = Mathf.Abs(angle);
 
 		//총알에 피격
-		if (damage < 100)
+		if (damage < 10000)
 		{
 			float shifter;
 			if(absAngle < 45f)

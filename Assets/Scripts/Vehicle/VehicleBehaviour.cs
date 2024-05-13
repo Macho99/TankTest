@@ -2,17 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fusion;
+using System;
 
 public class VehicleBehaviour : NetworkBehaviour
 {
 	const string camPrefabPath = "Vehicle/VehicleFollowerCam";
+	const string statUIPrefabPath = "UI/Vehicle/VehicleStatUI";
 
 	[SerializeField] float lookSpeed = 20f;
 	TestPlayer player;
 	protected VehicleBoarder boarder;
 	bool isFirst = true;
 
+	protected VehicleBody vehicleBody;
 	protected VehicleCam followCam;
+	protected VehicleStatUI statUI;
 
 	[Networked, HideInInspector] public float CamYAngle { get; private set; }
 	[Networked, HideInInspector] public float CamXAngle { get; private set; }
@@ -21,7 +25,7 @@ public class VehicleBehaviour : NetworkBehaviour
 	protected virtual void Awake()
 	{
 		boarder = GetComponentInParent<VehicleBoarder>();
-		//cam = boarder.Cam;
+		vehicleBody = boarder.VehicleBody;
 	}
 
 	public void Assign(TestPlayer player)
@@ -30,10 +34,19 @@ public class VehicleBehaviour : NetworkBehaviour
 		if(Runner.IsForward)
 		{
 			followCam = GameManager.Resource.Instantiate<VehicleCam>(camPrefabPath, true);
-			followCam.Init(transform, Vector3.up * 2, 4f);
+			followCam.Init(transform, Vector3.up * 2, 8f);
 			if (player.HasInputAuthority == false)
 			{
 				followCam.CamActive(false);
+			}
+			else
+			{
+				InstantiateStatUI();
+				statUI.Init(gameObject.name);
+				AddEvents();
+				UpdateHp(vehicleBody.HpRatio);
+				UpdateOil(vehicleBody.OilRatio);
+				UpdateEngineHp(vehicleBody.EngineHpRatio);
 			}
 		}
 
@@ -43,6 +56,40 @@ public class VehicleBehaviour : NetworkBehaviour
 			player.Object.RemoveInputAuthority();
 		}
 		this.player = player;
+	}
+
+	protected virtual void InstantiateStatUI()
+	{
+		statUI = GameManager.UI.ShowSceneUI<VehicleStatUI>(statUIPrefabPath);
+	}
+
+	protected virtual void AddEvents()
+	{
+		vehicleBody.OnCurHpChanged += UpdateHp;
+		vehicleBody.OnOilChanged += UpdateOil;
+		vehicleBody.OnCurEnginHpChanged += UpdateEngineHp;
+	}
+
+	protected virtual void RemoveEvents()
+	{
+		vehicleBody.OnCurHpChanged -= UpdateHp;
+		vehicleBody.OnOilChanged -= UpdateOil;
+		vehicleBody.OnCurEnginHpChanged -= UpdateEngineHp;
+	}
+
+	private void UpdateHp(float ratio)
+	{
+		statUI.UpdateHp(ratio, vehicleBody.CurHp, vehicleBody.MaxHp);
+	}
+
+	private void UpdateOil(float ratio)
+	{
+		statUI.UpdateOil(ratio);
+	}
+
+	private void UpdateEngineHp(float ratio)
+	{
+		statUI.UpdateEnginHp(ratio);
 	}
 
 	protected virtual void OnAssign(TestPlayer player) { }
@@ -75,6 +122,12 @@ public class VehicleBehaviour : NetworkBehaviour
 		if (Runner.IsForward)
 		{
 			GameManager.Resource.Destroy(followCam.gameObject);
+			if(statUI != null)
+			{
+				RemoveEvents();
+				GameManager.Resource.Destroy(statUI.gameObject);
+				statUI = null;
+			}
 		}
 
 		if (HasStateAuthority)

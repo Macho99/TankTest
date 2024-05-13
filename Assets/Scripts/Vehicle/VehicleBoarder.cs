@@ -13,11 +13,14 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 	[SerializeField] Transform seatTrans;
 	[SerializeField] TextMeshProUGUI debugText;
 	[SerializeField] Transform[] getOnObjectTrans;
+	[SerializeField] VehicleBody vehicleBody;
 
 	VehicleBehaviour[] vehicleBehaviours;
 	TestPlayer localPlayer;
 	const int MAX_PLAYER = 4;
 	Rigidbody rb;
+
+	public VehicleBody VehicleBody { get { return vehicleBody; } }
 
 	// 0번 : 운전석, 1번 : 사수, 2 ~ 3 : 장전수
 	Vector3[] lastLocalPositions = new Vector3[MAX_PLAYER];
@@ -28,6 +31,7 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 	private void Awake()
 	{
 		rb = GetComponent<Rigidbody>();
+
 		if(getOnObjectTrans.Length != MAX_PLAYER)
 		{
 			Debug.LogError("GetOnObjectTrans는 Max_Player만큼 설정하세요");
@@ -45,6 +49,14 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 			{
 				Debug.LogError($"{i}번째 GetOnObjectTrans에 VehicleBehaviour가 없습니다");
 			}
+		}
+	}
+
+	private void OnValidate()
+	{
+		if(vehicleBody == null)
+		{
+			vehicleBody = GetComponent<VehicleBody>();
 		}
 	}
 
