@@ -220,7 +220,7 @@ public class TankAttack : TankBehaviour
 			if(LoadedShell == 0)
 			{
 				largeTime = finalReloadTime;
-				barRatio = largeTime / reloadTimes[0];
+				barRatio = largeTime / (reloadTimes[0] / ReloadSpeedMul);
 			}
 			else
 			{
@@ -236,7 +236,7 @@ public class TankAttack : TankBehaviour
 				smallTime = finalReloadTime;
 				fireReady = false;
 				largeTime = finalReloadTime;
-				barRatio = largeTime / reloadTimes[0];
+				barRatio = largeTime / (reloadTimes[0] / ReloadSpeedMul);
 			}
 			else if(LoadedShell == 1)
 			{
@@ -247,7 +247,7 @@ public class TankAttack : TankBehaviour
 			}
 			else if(LoadedShell == reloadTimes.Length)
 			{
-				smallTime = reloadTimes[LoadedShell - 1];
+				smallTime = reloadTimes[LoadedShell - 1] / ReloadSpeedMul;
 				fireReady = true;
 				largeTime = intervalFireCooltime;
 				barRatio = 0f;
@@ -260,7 +260,7 @@ public class TankAttack : TankBehaviour
 				barRatio = 0f;
 			}
 		}
-		float smallRatio = LoadedShell >= reloadTimes.Length ? 0f : smallTime / reloadTimes[LoadedShell];
+		float smallRatio = LoadedShell >= reloadTimes.Length ? 0f : smallTime / (reloadTimes[LoadedShell] / ReloadSpeedMul);
 		attackUI.UpdateReloadUI(smallTime, smallRatio, largeTime, barRatio, fireReady);
 	}
 
@@ -273,7 +273,7 @@ public class TankAttack : TankBehaviour
 		{
 			turretAngle += 360f;
 		}
-		TurretAngle = Mathf.MoveTowardsAngle(TurretAngle, turretAngle, Runner.DeltaTime * turretRotSpeed);
+		TurretAngle = Mathf.MoveTowardsAngle(TurretAngle, turretAngle, Runner.DeltaTime * turretRotSpeed * turretHpRatio);
 	}
 
 	private void RotateBarrel(Vector3 forward)
@@ -286,7 +286,7 @@ public class TankAttack : TankBehaviour
 		{
 			barrelAngle += 360f;
 		}
-		BarrelAngle = Mathf.MoveTowardsAngle(BarrelAngle, barrelAngle, Runner.DeltaTime * barrelRotSpeed);
+		BarrelAngle = Mathf.MoveTowardsAngle(BarrelAngle, barrelAngle, Runner.DeltaTime * barrelRotSpeed * turretHpRatio);
 	}
 
 	private void Fire()

@@ -83,6 +83,6 @@ public class TrailerMove : NetworkBehaviour
 
 	private void OnJointBreak(float breakForce)
 	{
-		print(breakForce);
+		print($"트레일러 끊김: {breakForce}");
 	}
 }

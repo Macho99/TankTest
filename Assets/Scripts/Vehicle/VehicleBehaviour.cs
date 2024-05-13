@@ -42,7 +42,7 @@ public class VehicleBehaviour : NetworkBehaviour
 			else
 			{
 				InstantiateStatUI();
-				statUI.Init(gameObject.name, vehicleBody);
+				statUI.Init(vehicleBody.gameObject.name, vehicleBody);
 				statUI.AddEvents();
 			}
 		}

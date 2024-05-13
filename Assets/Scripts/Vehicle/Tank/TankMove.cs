@@ -51,8 +51,10 @@ public class TankMove : VehicleMove
 
 	protected override void Steering()
 	{
+		if (oilFilled == false) return;
+
 		const float RPM_DIFF = 10f;
-		float torqueAdder = 2000f;
+		float torqueAdder = 2000f * engineHpRatio;
 		float xInput = moveInput.x;
 		FrictionAdjust(xInput);
 

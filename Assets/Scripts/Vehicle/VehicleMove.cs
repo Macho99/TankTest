@@ -34,8 +34,8 @@ public class VehicleMove : VehicleBehaviour
 	[SerializeField] float[] gearChangeSpeeds;
 	[SerializeField] int oilConsumpAmount = 10;
 
-	bool oilFilled;
-	float engineHpRatio;
+	protected bool oilFilled;
+	protected float engineHpRatio;
 	Rigidbody rb;
 	DashBoard dashBoard;
 
@@ -276,6 +276,8 @@ public class VehicleMove : VehicleBehaviour
 
 	protected virtual void Steering()
 	{
+		if (oilFilled == false) return;
+
 		leftWheelCols[0].steerAngle = LerpedMoveInput.x * steerAngle;
 		rightWheelCols[0].steerAngle = LerpedMoveInput.x * steerAngle;
 	}

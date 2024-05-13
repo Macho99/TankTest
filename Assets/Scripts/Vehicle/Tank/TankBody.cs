@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class TankBody : VehicleBody
 {
@@ -42,9 +43,22 @@ public class TankBody : VehicleBody
 		OnReloadHpChanged?.Invoke(ReloadRatio);
 	}
 
-	public override void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
+	protected override void CheckModuleDamaged(Vector3 diff, float fwdAngle, float upAngle, int damage)
 	{
-		base.ApplyDamage(source, point, force, damage);
-
+		//base.CheckModuleDamaged(diff, fwdAngle, upAngle, damage);
+		//전차 엔진은 뒤에 있음
+		print($"{fwdAngle}, {upAngle}, {damage}");
+		if (fwdAngle > 160f)
+		{
+			float engineRatio = Random.value;
+			CurEngineHp = Mathf.Max(CurEngineHp - (int)(engineRatio * damage), 0);
+		}
+		if(upAngle < 45f)
+		{
+			float turretRatio = Random.value;
+			float reloadRatio = Random.value;
+			CurTurretHp = Mathf.Max(CurTurretHp - (int)(turretRatio * damage), 0);
+			CurReloadHp = Mathf.Max(CurReloadHp - (int)(reloadRatio * damage), 0);
+		}
 	}
 }

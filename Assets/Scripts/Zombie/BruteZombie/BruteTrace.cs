@@ -212,7 +212,7 @@ public class BruteTrace : BruteZombieState
 					owner.Runner.Spawn(owner.StonePrefab, owner.StoneHolder.position, owner.StoneHolder.rotation,
 						onBeforeSpawned: (runner, obj) =>
 						{
-							obj.GetComponent<BruteStone>().Init(stoneVelocity);
+							obj.GetComponent<BruteStone>().Init(owner.Object.Id, stoneVelocity);
 						});
 				}
 			};
@@ -223,7 +223,7 @@ public class BruteTrace : BruteZombieState
 					owner.Runner.Spawn(owner.StonePrefab, owner.StoneHolder.position, owner.StoneHolder.rotation,
 						onBeforeSpawned: (runner, obj) =>
 						{
-							obj.GetComponent<BruteStone>().Init(-owner.transform.forward);
+							obj.GetComponent<BruteStone>().Init(owner.Object.Id, -owner.transform.forward);
 						});
 				}
 				stoneCreateTimer = TickTimer.None;

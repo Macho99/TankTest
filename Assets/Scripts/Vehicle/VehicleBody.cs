@@ -48,7 +48,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 	public float EngineHpRatio { get { return (float)CurEngineHp / maxEngineHp; } }
 	[Networked, OnChangedRender(nameof(CurHpChanged))] public int CurHp { get; private set; }
 	[Networked, OnChangedRender(nameof(CurOilChanged))] public int CurOil { get; private set; }
-	[Networked, OnChangedRender(nameof(CurEngineHpChanged))] public int CurEngineHp { get; private set; }
+	[Networked, OnChangedRender(nameof(CurEngineHpChanged))] public int CurEngineHp { get; protected set; }
 
 	private void Awake()
 	{
@@ -133,20 +133,20 @@ public class VehicleBody : NetworkBehaviour, IHittable
 			if (force == Vector3.zero)
 				return;
 			hittable.ApplyDamage(transform, transform.position, force, finaldamage);
-			print($"{other.name}: {finaldamage}");
+			//print($"{other.name}: {finaldamage}");
 		}
 		else if(other.layer == BreakableLayer)
 		{
 			hittable.ApplyDamage(transform, transform.position,
 				normal * velMag * 5f, (int) (finaldamage * massRatio));
-			print($"{other.name}: {(int)(finaldamage * massRatio)}");
+			//print($"{other.name}: {(int)(finaldamage * massRatio)}");
 		}
 		this.ApplyDamage(transform, other.transform.position, force * 1.5f, finaldamage / 5);
 	}
 
 	private void OnCollisionEnter(Collision collision)
 	{
-		if (IsProxy == false && collisionMask.IsLayerInMask(collision.collider.gameObject.layer))
+		if (HasStateAuthority && collisionMask.IsLayerInMask(collision.collider.gameObject.layer))
 		{
 			StartCoroutine(CoCheckCollision(collision.GetContact(0).point, rb.velocity));
 		}
@@ -159,7 +159,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 			yield return new WaitForFixedUpdate();
 		}
 		Vector3 velDiff = rb.velocity - prevVelocity;
-		print($"{velDiff}");
+		//print($"{velDiff}");
 		int finaldamage = (int)(damage * velDiff.magnitude);
 		this.ApplyDamage(transform, point, Vector3.zero, finaldamage);
 	}
@@ -193,15 +193,16 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		Vector3 diff = point - transform.position;
 		float fwdAngle = Vector3.Angle(diff, transform.forward);
 		float upAngle = Vector3.Angle(diff, transform.up);
+
+		Random.InitState(Runner.Tick * unchecked((int)Object.Id.Raw));
 		CheckModuleDamaged(diff, fwdAngle, upAngle, damage);
 	}
 
 	protected virtual void CheckModuleDamaged(Vector3 diff, float fwdAngle, float upAngle, int damage)
 	{
-		Random.InitState(Runner.Tick * unchecked((int)Object.Id.Raw));
-		float engineRatio = Random.value;
 		if(fwdAngle < 20f)
 		{
+			float engineRatio = Random.value;
 			CurEngineHp = Mathf.Max(CurEngineHp - (int) (engineRatio * damage), 0);
 		}
 	}
