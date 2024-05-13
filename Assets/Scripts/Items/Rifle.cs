@@ -17,6 +17,7 @@ public class Rifle : Gun
         ray.origin = muzzlePoint.transform.position;
         ray.direction = muzzlePoint.forward.normalized;
 
+<<<<<<< HEAD
         Debug.DrawRay(ray.origin, ray.direction * 50, Color.red);
         Debug.Log("attack");
         currentRefireTime = ((GunItemSO)itemData).FireInterval;
@@ -29,6 +30,9 @@ public class Rifle : Gun
             //Debug.Log(transform.parent.name);
         }
     }
+=======
+    }  
+>>>>>>> 81b7febcd4941e8c50244fa3ba95f413730222e4
 
     public override void Reload()
     {
