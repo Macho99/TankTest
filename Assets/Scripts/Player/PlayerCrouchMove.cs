@@ -27,5 +27,13 @@ public class PlayerCrouchMove : PlayerMove
         return lookForward * inputDirection.y + lookRight * inputDirection.x;
     }
 
+    public override Vector3 SetMove(Transform transform, Vector3 direciton)
+    {
+        moveSpeed = crouchSpeed;
 
+        Vector3 lookRight = new Vector3(transform.right.x, 0f, transform.right.z);
+        Vector3 lookForward = new Vector3(transform.forward.x, 0f, transform.forward.z);
+
+        return lookForward * direciton.z + lookRight * direciton.x;
+    }
 }

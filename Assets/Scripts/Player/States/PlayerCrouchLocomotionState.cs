@@ -12,39 +12,41 @@ public class PlayerCrouchLocomotionState : PlayerState
 
     public override void Enter()
     {
-        owner.movement.ChangeMoveType(PlayerLocomotion.MovementType.Crouch);
+
     }
 
     public override void Exit()
     {
+        owner.movement.ChangeMoveType(PlayerLocomotion.MovementType.Stand);
         isCrouchToIdleStart = false;
         isCrouchToIdleEnd = false;
+
+        owner.weaponController.ResetAim();
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("CrouchIdle") || owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("CrouchMove") && isCrouchToIdleStart == false)
+        if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("CrouchIdle") || owner.animator.GetCurrentAnimatorStateInfo(0).IsName("CrouchMove") && isCrouchToIdleStart == false)
         {
-            if (owner.GetInput(out NetworkInputData input))
+
+            owner.movement.Rotate(owner.InputListner.currentInput);
+            owner.movement.SetMove(owner.InputListner.currentInput);
+            owner.weaponController.WeaponControls();
+
+            if (owner.InputListner.pressButton.IsSet(ButtonType.Crouch) && owner.movement.IsGround())
             {
-                owner.movement.Rotate(input);
-                owner.movement.SetMove(input);
-
-                if (input.buttons.IsSet(NetworkInputData.ButtonType.Crouch) && owner.movement.IsGround())
+                if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Stand))
                 {
-                    if (owner.movement.CanChanged(PlayerLocomotion.MovementType.Stand))
-                    {
-                        isCrouchToIdleStart = true;
-                        owner.animator.SetBool("IsCrouch", false);
-                        owner.movement.StopMove();
+                    isCrouchToIdleStart = true;
+                    owner.animator.SetBool("IsCrouch", false);
+                    owner.movement.StopMove();
 
-                    }
                 }
             }
+
         }
         else if (isCrouchToIdleStart)
         {
-            Debug.Log(owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime);
             if (owner.animator.GetCurrentAnimatorStateInfo(0).IsName("CrouchToIdle") && owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.95f && isCrouchToIdleEnd == false)
             {
                 isCrouchToIdleEnd = true;
@@ -56,10 +58,12 @@ public class PlayerCrouchLocomotionState : PlayerState
     {
         if (isCrouchToIdleEnd)
         {
+            owner.movement.ChangeMoveType(PlayerLocomotion.MovementType.Stand);
             ChangeState(PlayerController.PlayerState.StandLocomotion);
             return;
         }
-
     }
+
+
 
 }

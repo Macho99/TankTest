@@ -62,6 +62,114 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""TestMouseCursurLock"",
+                    ""type"": ""Button"",
+                    ""id"": ""b5dc5872-cf9a-4169-86e7-97d4bb2c2c0d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""98f8fb96-4274-4ea7-98af-d1459f75979d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DebugText"",
+                    ""type"": ""Button"",
+                    ""id"": ""6bb9fdcc-5fb5-4614-af5c-5e0d6f19035f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Adherence"",
+                    ""type"": ""Button"",
+                    ""id"": ""0177cb81-6955-4a5e-bc2f-732e54d69672"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ActiveItemContainer"",
+                    ""type"": ""Button"",
+                    ""id"": ""fe00fdf4-8a7a-489a-bb9c-cdfa0c12d894"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PutWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""f17b4f7c-b60b-414b-ae05-97130305e67f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""FirstWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""6192802e-e6de-4e38-81b6-472eea74d03d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SecondWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""fdf085ff-e852-4511-ab6a-77c738e5fc74"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SubWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""1df6d833-15da-4009-ba01-6326e778a41d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MilyWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""4cb080aa-bd4b-4f8e-a7db-823b2d020b13"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BombWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""799aa4a6-e0dc-41a6-a0a1-507073b3b151"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Attack"",
+                    ""type"": ""Button"",
+                    ""id"": ""0b087cbc-39e8-4475-9507-817254254275"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -152,6 +260,138 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Crouch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7e991e3e-c97a-4f2b-ae2b-ee6e7bb7c857"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TestMouseCursurLock"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6b8c70b3-033b-4e74-8c31-a964a2d273dc"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""48a8a975-cb8c-498e-a9a1-b2e7168d96b7"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DebugText"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0ee89ffc-e442-4356-be5a-fe6539f14797"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": ""Hold"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Adherence"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8b5c74a8-cf83-42e2-b7ff-7f9de3ca4699"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ActiveItemContainer"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""15176b2f-1e30-44fe-a1b0-a942a7ad4576"",
+                    ""path"": ""<Keyboard>/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PutWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3b055227-d98b-448b-8625-54374837c599"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FirstWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5a74434f-c141-4597-853b-2c63e5b3234e"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SecondWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7c415c7d-bf79-458b-95fe-eb7aea944a16"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SubWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""af7f2387-19a5-4157-8f24-0ad6d6307563"",
+                    ""path"": ""<Keyboard>/4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MilyWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1efd2e58-2100-41b6-897b-4f311cf7c841"",
+                    ""path"": ""<Keyboard>/5"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BombWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5655a0f4-5a1d-4c69-afcd-7c5f2e023a70"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -164,6 +404,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Player_Run = m_Player.FindAction("Run", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
+        m_Player_TestMouseCursurLock = m_Player.FindAction("TestMouseCursurLock", throwIfNotFound: true);
+        m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
+        m_Player_DebugText = m_Player.FindAction("DebugText", throwIfNotFound: true);
+        m_Player_Adherence = m_Player.FindAction("Adherence", throwIfNotFound: true);
+        m_Player_ActiveItemContainer = m_Player.FindAction("ActiveItemContainer", throwIfNotFound: true);
+        m_Player_PutWeapon = m_Player.FindAction("PutWeapon", throwIfNotFound: true);
+        m_Player_FirstWeapon = m_Player.FindAction("FirstWeapon", throwIfNotFound: true);
+        m_Player_SecondWeapon = m_Player.FindAction("SecondWeapon", throwIfNotFound: true);
+        m_Player_SubWeapon = m_Player.FindAction("SubWeapon", throwIfNotFound: true);
+        m_Player_MilyWeapon = m_Player.FindAction("MilyWeapon", throwIfNotFound: true);
+        m_Player_BombWeapon = m_Player.FindAction("BombWeapon", throwIfNotFound: true);
+        m_Player_Attack = m_Player.FindAction("Attack", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -229,6 +481,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Run;
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Crouch;
+    private readonly InputAction m_Player_TestMouseCursurLock;
+    private readonly InputAction m_Player_Interact;
+    private readonly InputAction m_Player_DebugText;
+    private readonly InputAction m_Player_Adherence;
+    private readonly InputAction m_Player_ActiveItemContainer;
+    private readonly InputAction m_Player_PutWeapon;
+    private readonly InputAction m_Player_FirstWeapon;
+    private readonly InputAction m_Player_SecondWeapon;
+    private readonly InputAction m_Player_SubWeapon;
+    private readonly InputAction m_Player_MilyWeapon;
+    private readonly InputAction m_Player_BombWeapon;
+    private readonly InputAction m_Player_Attack;
     public struct PlayerActions
     {
         private @PlayerControls m_Wrapper;
@@ -237,6 +501,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Run => m_Wrapper.m_Player_Run;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
         public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
+        public InputAction @TestMouseCursurLock => m_Wrapper.m_Player_TestMouseCursurLock;
+        public InputAction @Interact => m_Wrapper.m_Player_Interact;
+        public InputAction @DebugText => m_Wrapper.m_Player_DebugText;
+        public InputAction @Adherence => m_Wrapper.m_Player_Adherence;
+        public InputAction @ActiveItemContainer => m_Wrapper.m_Player_ActiveItemContainer;
+        public InputAction @PutWeapon => m_Wrapper.m_Player_PutWeapon;
+        public InputAction @FirstWeapon => m_Wrapper.m_Player_FirstWeapon;
+        public InputAction @SecondWeapon => m_Wrapper.m_Player_SecondWeapon;
+        public InputAction @SubWeapon => m_Wrapper.m_Player_SubWeapon;
+        public InputAction @MilyWeapon => m_Wrapper.m_Player_MilyWeapon;
+        public InputAction @BombWeapon => m_Wrapper.m_Player_BombWeapon;
+        public InputAction @Attack => m_Wrapper.m_Player_Attack;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -258,6 +534,42 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Crouch.started += instance.OnCrouch;
             @Crouch.performed += instance.OnCrouch;
             @Crouch.canceled += instance.OnCrouch;
+            @TestMouseCursurLock.started += instance.OnTestMouseCursurLock;
+            @TestMouseCursurLock.performed += instance.OnTestMouseCursurLock;
+            @TestMouseCursurLock.canceled += instance.OnTestMouseCursurLock;
+            @Interact.started += instance.OnInteract;
+            @Interact.performed += instance.OnInteract;
+            @Interact.canceled += instance.OnInteract;
+            @DebugText.started += instance.OnDebugText;
+            @DebugText.performed += instance.OnDebugText;
+            @DebugText.canceled += instance.OnDebugText;
+            @Adherence.started += instance.OnAdherence;
+            @Adherence.performed += instance.OnAdherence;
+            @Adherence.canceled += instance.OnAdherence;
+            @ActiveItemContainer.started += instance.OnActiveItemContainer;
+            @ActiveItemContainer.performed += instance.OnActiveItemContainer;
+            @ActiveItemContainer.canceled += instance.OnActiveItemContainer;
+            @PutWeapon.started += instance.OnPutWeapon;
+            @PutWeapon.performed += instance.OnPutWeapon;
+            @PutWeapon.canceled += instance.OnPutWeapon;
+            @FirstWeapon.started += instance.OnFirstWeapon;
+            @FirstWeapon.performed += instance.OnFirstWeapon;
+            @FirstWeapon.canceled += instance.OnFirstWeapon;
+            @SecondWeapon.started += instance.OnSecondWeapon;
+            @SecondWeapon.performed += instance.OnSecondWeapon;
+            @SecondWeapon.canceled += instance.OnSecondWeapon;
+            @SubWeapon.started += instance.OnSubWeapon;
+            @SubWeapon.performed += instance.OnSubWeapon;
+            @SubWeapon.canceled += instance.OnSubWeapon;
+            @MilyWeapon.started += instance.OnMilyWeapon;
+            @MilyWeapon.performed += instance.OnMilyWeapon;
+            @MilyWeapon.canceled += instance.OnMilyWeapon;
+            @BombWeapon.started += instance.OnBombWeapon;
+            @BombWeapon.performed += instance.OnBombWeapon;
+            @BombWeapon.canceled += instance.OnBombWeapon;
+            @Attack.started += instance.OnAttack;
+            @Attack.performed += instance.OnAttack;
+            @Attack.canceled += instance.OnAttack;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -274,6 +586,42 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Crouch.started -= instance.OnCrouch;
             @Crouch.performed -= instance.OnCrouch;
             @Crouch.canceled -= instance.OnCrouch;
+            @TestMouseCursurLock.started -= instance.OnTestMouseCursurLock;
+            @TestMouseCursurLock.performed -= instance.OnTestMouseCursurLock;
+            @TestMouseCursurLock.canceled -= instance.OnTestMouseCursurLock;
+            @Interact.started -= instance.OnInteract;
+            @Interact.performed -= instance.OnInteract;
+            @Interact.canceled -= instance.OnInteract;
+            @DebugText.started -= instance.OnDebugText;
+            @DebugText.performed -= instance.OnDebugText;
+            @DebugText.canceled -= instance.OnDebugText;
+            @Adherence.started -= instance.OnAdherence;
+            @Adherence.performed -= instance.OnAdherence;
+            @Adherence.canceled -= instance.OnAdherence;
+            @ActiveItemContainer.started -= instance.OnActiveItemContainer;
+            @ActiveItemContainer.performed -= instance.OnActiveItemContainer;
+            @ActiveItemContainer.canceled -= instance.OnActiveItemContainer;
+            @PutWeapon.started -= instance.OnPutWeapon;
+            @PutWeapon.performed -= instance.OnPutWeapon;
+            @PutWeapon.canceled -= instance.OnPutWeapon;
+            @FirstWeapon.started -= instance.OnFirstWeapon;
+            @FirstWeapon.performed -= instance.OnFirstWeapon;
+            @FirstWeapon.canceled -= instance.OnFirstWeapon;
+            @SecondWeapon.started -= instance.OnSecondWeapon;
+            @SecondWeapon.performed -= instance.OnSecondWeapon;
+            @SecondWeapon.canceled -= instance.OnSecondWeapon;
+            @SubWeapon.started -= instance.OnSubWeapon;
+            @SubWeapon.performed -= instance.OnSubWeapon;
+            @SubWeapon.canceled -= instance.OnSubWeapon;
+            @MilyWeapon.started -= instance.OnMilyWeapon;
+            @MilyWeapon.performed -= instance.OnMilyWeapon;
+            @MilyWeapon.canceled -= instance.OnMilyWeapon;
+            @BombWeapon.started -= instance.OnBombWeapon;
+            @BombWeapon.performed -= instance.OnBombWeapon;
+            @BombWeapon.canceled -= instance.OnBombWeapon;
+            @Attack.started -= instance.OnAttack;
+            @Attack.performed -= instance.OnAttack;
+            @Attack.canceled -= instance.OnAttack;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -297,5 +645,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnRun(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
+        void OnTestMouseCursurLock(InputAction.CallbackContext context);
+        void OnInteract(InputAction.CallbackContext context);
+        void OnDebugText(InputAction.CallbackContext context);
+        void OnAdherence(InputAction.CallbackContext context);
+        void OnActiveItemContainer(InputAction.CallbackContext context);
+        void OnPutWeapon(InputAction.CallbackContext context);
+        void OnFirstWeapon(InputAction.CallbackContext context);
+        void OnSecondWeapon(InputAction.CallbackContext context);
+        void OnSubWeapon(InputAction.CallbackContext context);
+        void OnMilyWeapon(InputAction.CallbackContext context);
+        void OnBombWeapon(InputAction.CallbackContext context);
+        void OnAttack(InputAction.CallbackContext context);
     }
 }

@@ -1,20 +1,45 @@
+using Cinemachine;
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class BasicCamController : NetworkBehaviour
 {
+    public enum CameraType { None, Aim, Zoom, Size }
     private Transform followTarget;
 
     private float rotateYSpeed;
 
+    [SerializeField] private CinemachineVirtualCamera mainCam;
+    [SerializeField] private CinemachineVirtualCamera aimCam;
+    [SerializeField] private Transform raycasterTr;
+
+    public Transform RayCasterTr { get => raycasterTr; }
+    public Transform FollowTarget { get => followTarget; }
     private void Awake()
     {
         followTarget = transform.Find("FollowTarget").transform;
         rotateYSpeed = 15f;
     }
-    public void RotateX(NetworkInputData input)
+    public override void Spawned()
+    {
+        if (!HasInputAuthority)
+        {
+
+            CinemachineVirtualCamera[] cameras = transform.GetComponentsInChildren<CinemachineVirtualCamera>();
+
+            for (int i = 0; i < cameras.Length; i++)
+            {
+                cameras[i].enabled = false;
+            }
+
+        }
+        ChangeCamera(CameraType.None);
+    }
+    public float RotateX(NetworkInputData input)
     {
         float mouseDeltaY = input.mouseDelta.y * rotateYSpeed * Runner.DeltaTime;
 
@@ -32,10 +57,19 @@ public class BasicCamController : NetworkBehaviour
         }
 
 
-        followTarget.transform.localRotation = Quaternion.Euler(rotX, 0, 0);
-
-
-
+        return rotX;
     }
 
+
+    public void ChangeCamera(CameraType cameraType)
+    {
+
+        mainCam.Priority = cameraType == CameraType.None ? (int)CameraType.Size : 0;
+        aimCam.Priority = cameraType == CameraType.Aim ? (int)CameraType.Size : 0;
+    }
+    public void ResetCamera()
+    {
+        mainCam.Priority = (int)CameraType.Size;
+        aimCam.Priority = 0;
+    }
 }
