@@ -2,62 +2,92 @@ using Fusion;
 using Fusion.Addons.SimpleKCC;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
-    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling }
-    private NetworkStateMachine stateMachine;
-    public PlayerLocomotion movement { get; private set; }
+    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass, Interact }
+
+    public NetworkStateMachine stateMachine { get; private set; }
     public Animator animator { get; private set; }
+    public PlayerLocomotion movement { get; private set; }
+    public PlayerInteract interact { get; private set; }
     private CapsuleCollider myCollider;
-    [Networked] public float FallingTime { get; set; }
-    [Networked] public float prevGravityDirection { get; private set; }
-    [Networked] public float currentGravityDirection { get; private set; }
+    public PlayerInputListner InputListner { get; private set; }
+    public Inventory Inventory { get; private set; }
+
+    public WeaponController weaponController { get; private set; }
+    private LocalPlayerDebugUI LocaldebugUI;
+
+    [Networked] public float VelocityY { get; set; }
     private void Awake()
     {
         myCollider = GetComponentInChildren<CapsuleCollider>();
         animator = GetComponent<Animator>();
         stateMachine = GetComponent<NetworkStateMachine>();
         movement = GetComponent<PlayerLocomotion>();
+        InputListner = GetComponent<PlayerInputListner>();
+        interact = GetComponent<PlayerInteract>();
+        weaponController = GetComponent<WeaponController>();
+        Inventory = GetComponentInChildren<Inventory>();
         stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
         stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
         stateMachine.AddState(PlayerState.Jump, new PlayerJumpState(this));
         stateMachine.AddState(PlayerState.Land, new PlayerLandState(this));
         stateMachine.AddState(PlayerState.Falling, new PlayerFallingState(this));
+        stateMachine.AddState(PlayerState.Interact, new PlayerInteractState(this));
 
         stateMachine.InitState(PlayerState.StandLocomotion);
+
     }
     public override void Spawned()
     {
-        FallingTime = 0f;
+        VelocityY = 0f;
+        name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
+
+
+
+
     }
 
     public override void FixedUpdateNetwork()
     {
         Falling();
+
         movement.Move();
 
+
+
+
     }
+
     public void Falling()
     {
 
-        if (!movement.IsGround() && movement.Kcc.RealVelocity.y < 0f)
-        {
-            FallingTime += Runner.DeltaTime;
 
-            Debug.Log(FallingTime.ToString("F1"));
-            if (FallingTime >= 0.8f)
+        animator.SetFloat("VelocityY", VelocityY);
+
+        if (movement.Kcc.RealVelocity.y <= -1F)
+        {
+            VelocityY += Mathf.Abs(movement.Kcc.RealVelocity.y) * Runner.DeltaTime;
+
+            if (stateMachine.curStateStr != "Falling" && stateMachine.curStateStr != "Land" && movement.Kcc.RealVelocity.y <= -movement.JumpForce)
             {
 
-                if (stateMachine.curStateStr != "Falling")
-                {
-                    stateMachine.ChangeState(PlayerState.Falling);
-                    return;
-                }
+                Debug.Log("falling");
+                stateMachine.ChangeState(PlayerState.Falling);
+            }
+
+
+            if (VelocityY <= 3f && movement.IsGround())
+            {
+                VelocityY = 0f;
             }
 
         }
+
+
     }
 
     public bool RaycastGroundCheck()
@@ -72,7 +102,12 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
+
+
         return false;
     }
+
+
+
 
 }

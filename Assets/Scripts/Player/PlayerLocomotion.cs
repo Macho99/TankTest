@@ -2,7 +2,9 @@ using Fusion;
 using Fusion.Addons.SimpleKCC;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.Windows;
 
 public class PlayerLocomotion : NetworkBehaviour
 {
@@ -10,10 +12,9 @@ public class PlayerLocomotion : NetworkBehaviour
 
 
     private SimpleKCC simpleKCC;
-    private BasicCamController camController;
+    public BasicCamController CamController { get; private set; }
     private float jumpForce;
     private float rotateXSpeed;
-    private bool isJump;
     Animator animator;
     private CapsuleCollider myCollider;
     private MovementType movementType;
@@ -21,8 +22,11 @@ public class PlayerLocomotion : NetworkBehaviour
     [Networked] public float fallingTime { get; private set; }
     [Networked] public float moveSpeed { get; private set; }
     [Networked] public Vector2 inputDirection { get; private set; }
-    [Networked] public float jumpVelocity { get; private set; }
+    public float jumpVelocity { get; private set; }
     [Networked] public Vector3 moveDirection { get; private set; }
+    [Networked] public float CamerRotX { get; set; }
+    public float JumpForce { get => jumpForce; }
+
 
     private PlayerMove[] moves;
     public bool IsGround()
@@ -37,11 +41,11 @@ public class PlayerLocomotion : NetworkBehaviour
 
     private void Awake()
     {
-        myCollider =GetComponentInChildren<CapsuleCollider>();
+        myCollider = GetComponentInChildren<CapsuleCollider>();
         animator = GetComponent<Animator>();
         simpleKCC = GetComponent<SimpleKCC>();
-        camController = transform.Find("ThirdCameraRoot").GetComponent<BasicCamController>();
-        jumpForce = 8f;
+        CamController = GetComponentInChildren<BasicCamController>();
+        jumpForce = 15f;
         rotateXSpeed = 30f;
         moves = new PlayerMove[(int)MovementType.Size];
         moves[(int)MovementType.Stand] = new PlayerStandMove(1.8f, 4f, 2f);
@@ -50,31 +54,38 @@ public class PlayerLocomotion : NetworkBehaviour
     }
     public override void Spawned()
     {
-        if (Object.InputAuthority == Runner.LocalPlayer)
+        if (HasStateAuthority)
         {
-            camController.gameObject.SetActive(true);
+            CamerRotX = CamController.FollowTarget.eulerAngles.x;
+            moveSpeed = 0f;
+            simpleKCC.SetGravity(Physics.gravity.y * 2f);
+            fallingTime = 0f;
         }
-        moveSpeed = 0f;
-        simpleKCC.SetGravity(Physics.gravity.y * 1f);
-        fallingTime = 0f;
+    }
+    public override void FixedUpdateNetwork()
+    {
+
     }
     public override void Render()
     {
+        CamController.FollowTarget.localRotation = Quaternion.Euler(CamerRotX, 0f, 0f);
         animator.SetFloat("InputDirX", inputDirection.x, 0.05f, Time.deltaTime);
         animator.SetFloat("InputDirZ", inputDirection.y, 0.05f, Time.deltaTime);
         animator.SetFloat("MoveSpeed", moves[(int)movementType].MoveSpeed);
-        animator.SetBool("IsGround", simpleKCC.IsGrounded);
+
+
+
 
     }
     public void Move()
     {
-
         simpleKCC.Move(moveDirection * moveSpeed, jumpVelocity);
-        if (simpleKCC.HasJumped)
+        if (jumpVelocity != 0f && simpleKCC.HasJumped)
         {
             jumpVelocity = 0f;
-            return;
         }
+
+
     }
     public void SetMove(NetworkInputData input)
     {
@@ -85,13 +96,27 @@ public class PlayerLocomotion : NetworkBehaviour
 
         moveDirection = moves[(int)movementType].SetMove(transform, input);
         moveSpeed = moves[(int)movementType].MoveSpeed;
-
     }
+    public void SetMove(Vector3 Direction)
+    {
+
+        moveDirection = moves[(int)movementType].SetMove(transform, Direction);
+        moveSpeed = moves[(int)movementType].MoveSpeed;
+    }
+
+
     public void Rotate(NetworkInputData input)
     {
         float rotY = input.mouseDelta.x * rotateXSpeed * Runner.DeltaTime;
-        simpleKCC.AddLookRotation(new Vector2(0f, rotY));
-        camController.RotateX(input);
+        simpleKCC.AddLookRotation(new Vector2(0f, rotY));   
+        CamerRotX = CamController.RotateX(input);
+    }
+    public void Rotate(Vector3 direction)
+    {
+        Quaternion newForward = Quaternion.RotateTowards(Quaternion.Euler(transform.forward), Quaternion.Euler(direction), Runner.DeltaTime);
+
+
+        transform.rotation = newForward;
     }
     public void StopMove()
     {
@@ -103,10 +128,9 @@ public class PlayerLocomotion : NetworkBehaviour
         if (simpleKCC.IsGrounded)
         {
             jumpVelocity = jumpForce;
-            isJump = true;
-
         }
     }
+
     public void ChangeMoveType(MovementType newMoveType)
     {
         this.movementType = newMoveType;
@@ -142,7 +166,7 @@ public class PlayerLocomotion : NetworkBehaviour
             }
             else
             {
-                return true; 
+                return true;
 
             }
         }

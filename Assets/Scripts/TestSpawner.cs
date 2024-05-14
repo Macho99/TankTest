@@ -3,30 +3,55 @@ using Fusion.Sockets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkPrefabRef testPlayer;
     NetworkRunner runner;
     private PlayerControls playerControls;
+    [SerializeField] private Transform spawnPoint;
+    private Dictionary<PlayerRef, NetworkObject> playerObjects = new Dictionary<PlayerRef, NetworkObject>();
     private async void Awake()
     {
-        playerControls = new PlayerControls();
-        playerControls.Enable();
+        if (playerControls == null)
+        {
+            playerControls = new PlayerControls();
+            playerControls.Enable();
+
+        }
+
+
+        // Create the NetworkSceneInfo from the current scene
+        var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
+        var sceneInfo = new NetworkSceneInfo();
+        if (scene.IsValid)
+        {
+            sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
+        }
         if (runner == null)
         {
             runner = gameObject.AddComponent<NetworkRunner>();
+
+
         }
+        runner.ProvideInput = true;
         await runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,
+            Scene = scene,
+            SceneManager = runner.GetComponent<NetworkSceneManagerDefault>(),
+            ObjectProvider = runner.GetComponent<INetworkObjectProvider>()
 
         });
+        runner.AddCallbacks(this);
     }
     void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)
     {
+
     }
 
     void INetworkRunnerCallbacks.OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
@@ -54,9 +79,21 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         NetworkInputData data = new NetworkInputData();
         data.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
         data.mouseDelta = Mouse.current.delta.value;
-        data.buttons.Set(NetworkInputData.ButtonType.Run, playerControls.Player.Run.inProgress);
-        data.buttons.Set(NetworkInputData.ButtonType.Jump, playerControls.Player.Jump.inProgress);
-        data.buttons.Set(NetworkInputData.ButtonType.Crouch, playerControls.Player.Crouch.inProgress);
+        data.buttons.Set(ButtonType.Run, playerControls.Player.Run.IsPressed());
+        data.buttons.Set(ButtonType.Jump, playerControls.Player.Jump.IsPressed());
+        data.buttons.Set(ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
+        data.buttons.Set(ButtonType.Interact, playerControls.Player.Interact.IsPressed());
+        data.buttons.Set(ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
+        data.buttons.Set(ButtonType.DebugText, playerControls.Player.DebugText.IsPressed());
+        data.buttons.Set(ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
+        data.buttons.Set(ButtonType.ActiveItemContainer, playerControls.Player.ActiveItemContainer.IsPressed());
+        data.buttons.Set(ButtonType.PutWeapon, playerControls.Player.PutWeapon.IsPressed());
+        data.buttons.Set(ButtonType.FirstWeapon, playerControls.Player.FirstWeapon.IsPressed());
+        data.buttons.Set(ButtonType.SecondWeapon, playerControls.Player.SecondWeapon.IsPressed());
+        data.buttons.Set(ButtonType.SubWeapon, playerControls.Player.SubWeapon.IsPressed());
+        data.buttons.Set(ButtonType.MilyWeapon, playerControls.Player.MilyWeapon.IsPressed());
+        data.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
+        data.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
 
         input.Set(data);
     }
@@ -77,9 +114,9 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (runner.IsServer)
         {
-            NetworkObject playerObject = runner.Spawn(testPlayer, inputAuthority: player);
-
+            NetworkObject playerObject = runner.Spawn(testPlayer, spawnPoint.position, spawnPoint.rotation, inputAuthority: player);
             runner.SetPlayerObject(player, playerObject);
+            playerObjects.Add(player, playerObject);
         }
     }
 
@@ -88,9 +125,11 @@ public class TestSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if (!runner.IsServer)
             return;
 
-        if (runner.TryGetPlayerObject(player, out NetworkObject playerObject))
+
+        if (playerObjects.TryGetValue(player, out NetworkObject playerObject))
         {
-            runner.Despawn(playerObject);
+            if (playerObject != null)
+                runner.Despawn(playerObject);
         }
 
     }
