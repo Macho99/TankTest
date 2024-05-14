@@ -19,7 +19,7 @@ public class ItemSearchSystem : NetworkBehaviour
 
     private void Awake()
     {
-        maxCount = 10;
+        maxCount = 40;
     }
     public void Init(Inventory inventory)
     {

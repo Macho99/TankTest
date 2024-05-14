@@ -51,13 +51,53 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
     public void SetEquipItem(EquipmentSlotType slotType, Item item)
     {
 
+        if (item == null)
+        {
+            if (localItems[(int)slotType] != null)
+            {
+                if (localItems[(int)slotType] is Weapon == false)
+                {
+                    localItems[(int)slotType].UnEquip();
+                    localItems[(int)slotType].SetActive(false);
+                }
+            }
+        }
+        else
+        {
+            if (item is Weapon == false)
+            {
+                if (localItems[(int)slotType] != null)
+                {
+                    localItems[(int)slotType].UnEquip();
+                    localItems[(int)slotType].SetActive(false);
+
+                }
+
+                EquipmentBodyItem(item);
 
 
-        localItems[(int)slotType] = (EquipmentItem)item;
+            }
+        }
 
+
+
+
+
+
+        if (item != null)
+            localItems[(int)slotType] = (EquipmentItem)item;
+        else
+            localItems[(int)slotType] = null;
 
 
         onItemUpdate?.Invoke((int)slotType, localItems[(int)slotType]);
+    }
+
+    private void EquipmentBodyItem(Item item)
+    {
+        ((EquipmentItem)item).Equip(owner);
+        item.SetActive(true);
+        item.SetParent(ItemPivots[(int)((EquipmentItemSO)item.ItemData).EquipmentType].mainPivot);
     }
     public void UpdateMainWeapon()
     {
@@ -65,6 +105,17 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
 
         if (NetMainWeapon == null)
         {
+            if (mainWeapon != null)
+            {
+                StopAllCoroutines();
+                handAimIK.weight = 0f;
+                subHandIK.weight = 0f;
+                mainWeapon.UnEquip();
+                mainWeapon.SetTarget(null);
+                mainWeapon.SetActive(false);
+                animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 0f);
+
+            }
             Debug.Log("³Î");
         }
         else
@@ -77,15 +128,17 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
             }
             else
             {
-                Debug.Log("asdasdsad");
+                StopAllCoroutines();
                 handAimIK.weight = 0f;
                 subHandIK.weight = 0f;
                 mainWeapon.UnEquip();
                 mainWeapon.SetTarget(null);
                 mainWeapon.SetActive(false);
 
-                if (HasStateAuthority)
-                    animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 0f);
+
+                animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 0f);
+                Debug.Log((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType);
+                Debug.Log(animator.GetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType));
                 SetupMainWeapon();
 
             }
@@ -180,11 +233,15 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
             if (netItems[(int)slotTypes[i]] == null)
             {
                 netItems.Set((int)slotTypes[i], (EquipmentItem)item);
-                if (NetMainWeapon == null)
-                {
-                    NetMainWeapon = (Weapon)netItems[(int)slotTypes[i]];
-                }
 
+                if (item is Weapon)
+                {
+                    if (NetMainWeapon == null)
+                    {
+                        NetMainWeapon = (Weapon)netItems[(int)slotTypes[i]];
+                    }
+
+                }
                 inventory.InsidePullItem(index);
                 return;
             }

@@ -38,10 +38,14 @@ public abstract class Weapon : EquipmentItem
     {
         if (target != null)
         {
-            target.SetPositionAndRotation(subHandTarget.position, subHandTarget.rotation);
+            if (subHandTarget != null)
+            {
+                target.SetPositionAndRotation(subHandTarget.position, subHandTarget.rotation);
+
+            }
         }
     }
 
-  
+
 }
 
