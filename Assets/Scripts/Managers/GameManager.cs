@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Resources;
-using UnityEditor.EditorTools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,10 +12,11 @@ public class GameManager : MonoBehaviour
 	private static ResourceManager resourceManager;
 	private static UIManager uiManager;
 
-    public static GameManager Instance { get { return instance; } }
+	public static GameManager Instance { get { return instance; } }
 	public static PoolManager Pool { get { return poolManager; } }
 	public static ResourceManager Resource { get { return resourceManager; } }
 	public static UIManager UI { get { return uiManager; } }
+	public static WeatherManager Weather { get; set; }
 
     private void Awake()
 	{

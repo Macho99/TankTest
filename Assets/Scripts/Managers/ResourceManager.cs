@@ -16,6 +16,7 @@ public class ResourceManager : MonoBehaviour
 		if(resource == null)
 		{
 			Debug.LogError($"{path}를 불러오는데 실패했습니다.");
+			return null;
 		}
 
 		resources.Add(key, resource);

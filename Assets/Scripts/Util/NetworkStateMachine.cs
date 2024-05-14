@@ -31,10 +31,22 @@ public class NetworkStateMachine : NetworkBehaviour
 		curState = stateDic[stateName];
 	}
 
+	public NetworkBaseState GetState(string statName)
+	{
+		return stateDic[statName];
+	}
+
 	public void AddState(string stateName, NetworkBaseState state)
 	{
 		state.SetStateMachine(this);
 		stateDic.Add(stateName, state);
+	}
+
+	public void OverrideState(string statName, NetworkBaseState state)
+	{
+		state.SetStateMachine(this);
+		stateDic.Remove(statName);
+		stateDic.Add(statName, state);
 	}
 
 	public void ChangeState(string stateName)

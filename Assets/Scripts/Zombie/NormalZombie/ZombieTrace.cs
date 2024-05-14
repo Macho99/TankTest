@@ -21,9 +21,10 @@ public class ZombieTrace : ZombieState
 	float eatElapsed;
 	bool eatEnd;
 
-	Collider[] cols = new Collider[1];
+	Collider lastObstacleCol;
+	float obstacleAttackTime;
 
-	TickTimer destinationTimer;
+	Collider[] cols = new Collider[1];
 
 	public ZombieTrace(Zombie owner) : base(owner)
 	{
@@ -33,6 +34,7 @@ public class ZombieTrace : ZombieState
 	{
 		if (CheckTransition() == true) return;
 
+		lastObstacleCol = null;
 		prevPosY = owner.transform.position.y;
 		//if (CheckTurn() == true) { return; }
 	}
@@ -57,23 +59,31 @@ public class ZombieTrace : ZombieState
 
 	private bool CheckTransition()
 	{
-		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1.5f)
+		if(owner.TargetData.IsTargeting == false)
 		{
-			if (owner.Target == null)
+			if (owner.Agent.hasPath && owner.Agent.remainingDistance < 2f)
 			{
 				owner.Agent.ResetPath();
 				ChangeState(Zombie.State.Idle);
 				return true;
 			}
-			else if(owner.CurTargetType == Zombie.TargetType.Meat)
+		}
+		else if(owner.TargetData.Layer == owner.MeatLayer)
+		{
+			if(owner.Agent.hasPath && owner.Agent.remainingDistance < 0.5f)
 			{
-				if(owner.Agent.remainingDistance < 1f)
-				{
-					Eat();
-					return true;
-				}
+				Eat();
+				return true;
 			}
-			else if ((owner.Target.position - owner.transform.position).sqrMagnitude < 1.5f * 1.5f)
+		}
+		else if (owner.AttackTargetMask.IsLayerInMask(owner.TargetData.Layer))
+		{
+			if(owner.TargetData.Distance < 1.5f)
+			{
+				Attack();
+				return true;
+			}
+			if (true == owner.TargetData.CheckObstacleAttack(owner.transform.position))
 			{
 				Attack();
 				return true;
@@ -99,14 +109,13 @@ public class ZombieTrace : ZombieState
 					if(owner.CurHp == owner.MaxHP)
 					{
 						eatEnd = true;
-						owner.Target = null;
-						owner.CurTargetType = Zombie.TargetType.None;
+						owner.TargetData.RemoveTarget();
 						owner.SetAnimBool("Eat", false);
 						return;
 					}
 				}
 
-				if(owner.CurTargetType == Zombie.TargetType.Player)
+				if (owner.AttackTargetMask.IsLayerInMask(owner.TargetData.Layer))
 				{
 					eatEnd = true;
 					owner.SetAnimBool("Eat", false);
@@ -125,20 +134,13 @@ public class ZombieTrace : ZombieState
 			owner.Anim.SetFloat("IdleShifter", Random.Range(0f, 1f));
 		}
 
-		Vector3 AttackDirection = (owner.Target.position - owner.transform.position).normalized;
-
-		float angle = Vector3.SignedAngle(owner.transform.forward, AttackDirection, owner.transform.up);
-		float sign = (angle >= 0f) ? 1f : -1f;
-
-		angle = Mathf.Abs(angle);
-
-		if(sign < 0f && angle > 120f)
+		if(owner.TargetData.Sign < 0f && owner.TargetData.AbsAngle > 120f)
 		{
 			owner.SetAnimFloat("TurnDir", 2f);
 		}
 		else
 		{
-			owner.SetAnimFloat("TurnDir", sign * (angle) / 90f);
+			owner.SetAnimFloat("TurnDir", owner.TargetData.Angle / 90f);
 		}
 
 		attacked = false;
@@ -153,8 +155,7 @@ public class ZombieTrace : ZombieState
 					attacked = true;
 					owner.Attack(10);
 				}
-				owner.SetAnimFloat("SpeedX", 0f, 1f);
-				owner.SetAnimFloat("SpeedY", 0f, 1f);
+				owner.Decelerate(1f);
 			});
 		ChangeState(Zombie.State.AnimWait);
 	}
@@ -167,30 +168,13 @@ public class ZombieTrace : ZombieState
 		}
 
 		speed = owner.TraceSpeed;
-		if(owner.Target == null)
+		if(owner.TargetData.IsTargeting == false)
 		{
 			speed = Mathf.Clamp(speed, 0f, 1f);
 		}
 		rotateSpeed = 60f * speed;
 
-		float speedX = 0f;
-		float speedY = 0f;
-		if (owner.Agent.hasPath)
-		{
-			Vector3 lookDir = (owner.Agent.steeringTarget - owner.transform.position);
-			lookDir.y = 0f;
-			lookDir.Normalize();
-			owner.transform.rotation = Quaternion.RotateTowards(owner.transform.rotation,
-				Quaternion.LookRotation(lookDir), rotateSpeed * owner.Runner.DeltaTime);
-			Vector3 moveDir = owner.Agent.desiredVelocity.normalized;
-			Vector3 animDir = owner.transform.InverseTransformDirection(moveDir);
-
-			speedX = animDir.x * speed;
-			speedY = animDir.z * speed;
-		}
-
-		owner.SetAnimFloat("SpeedX", speedX, 0.2f);
-		owner.SetAnimFloat("SpeedY", speedY, 0.4f);
+		owner.Trace(speed, rotateSpeed, 0.2f, 0.4f);
 	}
 
 	private bool CheckFallAsleep()
@@ -212,7 +196,7 @@ public class ZombieTrace : ZombieState
 		Collider prevCol, curCol;
 		prevCol = cols[0];
 		int cnt = Physics.OverlapSphereNonAlloc(curPos + Vector3.up * 0.3f + owner.transform.forward * 0.1f, 0.05f,
-			cols, owner.FallAsleepMask);
+			cols, owner.DebrisMask);
 
 		if (cnt > 0)
 		{

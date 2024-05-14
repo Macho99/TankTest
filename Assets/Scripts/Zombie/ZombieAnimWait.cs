@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ZombieAnimWait : NetworkBaseState
+public class ZombieAnimWait : ZombieBaseState
 {
-	ZombieBase owner;
 	AnimWaitStruct waitStruct;
-	bool animEntered;
+	bool lastAnimEntered;
+	bool startAnimEntered;
 
-	public ZombieAnimWait(ZombieBase owner)
+	public ZombieAnimWait(ZombieBase owner) : base(owner)
 	{
-		this.owner = owner;
+
 	}
 
 	public override void Enter()
@@ -21,11 +21,13 @@ public class ZombieAnimWait : NetworkBaseState
 			return;
 		}
 
-		animEntered = false;
+		startAnimEntered = false;
+		lastAnimEntered = false;
 		waitStruct = owner.AnimWaitStruct.Value;
 		waitStruct.startAction?.Invoke();
 		owner.AnimWaitStruct = null;
 
+		//Debug
 		owner.WaitName = waitStruct.animName;
 		owner.NextState = waitStruct.nextState;
 	}
@@ -42,30 +44,46 @@ public class ZombieAnimWait : NetworkBaseState
 
 	public override void Transition()
 	{
-		if (animEntered == true)
-		{
-			if(owner.IsAnimName(waitStruct.animName) == false)
-			{
-				if(waitStruct.nextState == null)
-				{
-					ChangeState(owner.DecideState());
-				}
-				else
-				{
-					ChangeState(waitStruct.nextState);
-				}
-			}
-		}
 	}
 
 	public override void FixedUpdateNetwork()
 	{
-		waitStruct.updateAction?.Invoke();
-		if(animEntered == true) { return; }
-
-		if(owner.IsAnimName(waitStruct.animName) == true)
+		if (lastAnimEntered == true)
 		{
-			animEntered = true;
+			if (owner.IsAnimName(waitStruct.animName, waitStruct.layer) == false)
+			{
+				if(waitStruct.nextStateAction != null)
+				{
+					waitStruct.nextStateAction.Invoke();
+					return;
+				}
+				else if (waitStruct.nextState == null)
+				{
+					ChangeState(owner.DecideState());
+					return;
+				}
+				else
+				{
+					ChangeState(waitStruct.nextState);
+					return;
+				}
+			}
+		}
+
+		waitStruct.updateAction?.Invoke();
+		if(lastAnimEntered == true) { return; }
+
+		if(startAnimEntered == false)
+		{
+			if(owner.IsAnimName(waitStruct.startAnimName, waitStruct.layer) == true)
+			{
+				startAnimEntered = true;
+			}
+		}
+
+		if(startAnimEntered == true && owner.IsAnimName(waitStruct.animName, waitStruct.layer) == true)
+		{
+			lastAnimEntered = true;
 			waitStruct.animStartAction?.Invoke();
 		}
 	}
