@@ -4,12 +4,15 @@ using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using static UnityEditor.Progress;
 
 
 
+public enum WeaponSwichingState { None, Changing }
 public enum WeaponAnimLayerType { Base, Pistol, Rifle, Shotgun, Bazuka, Mily, Size }
 public enum EquipmentSlotType { Helmet, Armor, Mask, Backpack, FirstMainWeapon, SecondMainWeapon, SubWeapon, MilyWeapon, Throw, Size }
 public enum EquipmentType { Helmet, Mask, Armor, Backpack, Rifle, Pistol, Shotgun, Bazuka, Mily, Size }
@@ -26,6 +29,8 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
     [SerializeField] private PlayerAnimEvent animEvent;
     private Inventory inventory;
 
+    [Networked] public WeaponSwichingState swichingState { get; private set; }
+
     [Networked, HideInInspector, OnChangedRender(nameof(UpdateMainWeapon))] public Weapon NetMainWeapon { get; set; }
     private Weapon mainWeapon { get; set; }
 
@@ -40,13 +45,21 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
     {
         localItems = new EquipmentItem[(int)EquipmentSlotType.Size];
     }
-    public override void Spawned()
-    {
 
+
+    public void EquipMainWeapon(EquipmentSlotType slotType)
+    {
+        if (netItems[(int)slotType] == null)
+            return;
+
+        NetMainWeapon = (Weapon)netItems[(int)slotType];
     }
-    public override void FixedUpdateNetwork()
+    public void UnEquipMainWeapon()
     {
-
+        if (NetMainWeapon != null)
+        {
+            NetMainWeapon = null;
+        }
     }
     public void SetEquipItem(EquipmentSlotType slotType, Item item)
     {
@@ -82,12 +95,22 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
 
 
 
-
-
         if (item != null)
+        {
+            if (item is Weapon)
+            {
+                if (NetMainWeapon != localItems[(int)slotType])
+                {
+                    item.SetActive(true);
+                    item.SetParent(ItemPivots[(int)((EquipmentItemSO)item.ItemData).EquipmentType].subPivot);
+                }
+            }
             localItems[(int)slotType] = (EquipmentItem)item;
+        }
         else
             localItems[(int)slotType] = null;
+
+
 
 
         onItemUpdate?.Invoke((int)slotType, localItems[(int)slotType]);
@@ -110,25 +133,41 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
                 StopAllCoroutines();
                 handAimIK.weight = 0f;
                 subHandIK.weight = 0f;
-                mainWeapon.UnEquip();
                 mainWeapon.SetTarget(null);
-                mainWeapon.SetActive(false);
-                animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 0f);
+                EquipmentItem equipmentItem = Array.Find(localItems.ToArray(), (item) => { return mainWeapon == item; });
+                if (equipmentItem == null)
+                {
+                    animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 0f);
+                    mainWeapon = null;
+                }
+                else
+                {
+                    swichingState = WeaponSwichingState.Changing;
+                    animEvent.onStartPutWeapon += OnStartPut;
+                    animator.SetTrigger("Put");
+                    Debug.Log("메인무기아이템이 장비창에존재");
+                }
+
+
+
+
 
             }
-            Debug.Log("널");
+
         }
         else
         {
+            swichingState = WeaponSwichingState.Changing;
             if (mainWeapon == null)
             {
                 mainWeapon = NetMainWeapon;
-                Debug.Log(mainWeapon.name);
                 SetupMainWeapon();
             }
             else
             {
                 StopAllCoroutines();
+                animEvent.onStartDrawWeapon -= OnStartDraw;
+                animEvent.onEndDrawWeapon -= OnEndDraw;
                 handAimIK.weight = 0f;
                 subHandIK.weight = 0f;
                 mainWeapon.UnEquip();
@@ -157,6 +196,14 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
         animEvent.onEndDrawWeapon += OnEndDraw;
         handAimIK.weight = 0f;
         subHandIK.weight = 0f;
+    }
+    public void OnStartPut()
+    {
+
+        mainWeapon.SetParent(ItemPivots[(int)((EquipmentItemSO)mainWeapon.ItemData).EquipmentType].subPivot);
+        animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 0f);
+        mainWeapon = null;
+        swichingState = WeaponSwichingState.None;
     }
     public void OnStartDraw()
     {
@@ -195,9 +242,16 @@ public class Equipment : NetworkBehaviour, IAfterSpawned
             subHandIK.weight += 1f;
         }
         animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 1f);
-
+        swichingState = WeaponSwichingState.None;
     }
+    public void ChangeWeaponWeight(float weight)
+    {
+        if (mainWeapon == null)
+            return;
 
+        handAimIK.weight = weight;
+        subHandIK.weight = weight;
+    }
 
 
 

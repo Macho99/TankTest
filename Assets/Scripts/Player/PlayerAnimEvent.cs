@@ -9,6 +9,7 @@ public class PlayerAnimEvent : MonoBehaviour
     public event Action onEndDrawWeapon;
     public event Action onStartPutWeapon;
     public event Action onEndPutWeapon;
+    public event Action onFire;
     public void OnStartDrawWeapon()
     {
         // equipment;
@@ -33,5 +34,12 @@ public class PlayerAnimEvent : MonoBehaviour
         Debug.Log("event");
         onStartPutWeapon = null;
         onEndPutWeapon = null;
+    }
+    public void OnFire()
+    {
+        onFire?.Invoke();
+
+        onFire = null;
+
     }
 }

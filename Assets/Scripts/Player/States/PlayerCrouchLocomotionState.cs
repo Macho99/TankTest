@@ -21,7 +21,6 @@ public class PlayerCrouchLocomotionState : PlayerState
         isCrouchToIdleStart = false;
         isCrouchToIdleEnd = false;
 
-        owner.weaponController.ResetAim();
     }
 
     public override void FixedUpdateNetwork()

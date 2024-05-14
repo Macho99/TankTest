@@ -12,12 +12,15 @@ public class PlayerJumpState : PlayerState
 
     public override void Enter()
     {
+        owner.weaponController.ResetAim();
         owner.animator.SetBool("IsJump", true);
         owner.movement.TriggerJump();
+        owner.weaponController.ChangeWeaponWeight(0f);
     }
 
     public override void Exit()
     {
+        owner.weaponController.ChangeWeaponWeight(1f);
         owner.animator.SetBool("IsJump", false);
         isJumpingStart = false;
     }
