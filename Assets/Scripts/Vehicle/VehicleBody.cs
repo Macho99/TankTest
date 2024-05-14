@@ -147,7 +147,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 				normal * velMag * 5f, (int) (finaldamage * massRatio));
 			//print($"{other.name}: {(int)(finaldamage * massRatio)}");
 		}
-		this.ApplyDamage(transform, other.transform.position, force * 1.5f, finaldamage / 5);
+		this.ApplyDamage(transform, other.transform.position, -force * 1.5f, finaldamage / 5);
 	}
 
 	private void OnCollisionEnter(Collision collision)
