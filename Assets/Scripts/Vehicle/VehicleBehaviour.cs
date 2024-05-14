@@ -105,7 +105,6 @@ public class VehicleBehaviour : NetworkBehaviour
 		}
 
 		boarder.GetOff(player);
-		player = null;
 	}
 
 	protected virtual void OnGetOff() { }

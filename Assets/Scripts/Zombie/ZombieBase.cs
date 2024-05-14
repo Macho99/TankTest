@@ -15,6 +15,7 @@ public struct BoneTransform
 	public Quaternion localRotation;
 }
 
+[RequireComponent(typeof(ZombieAnimEvent))]
 public abstract class ZombieBase : NetworkBehaviour
 {
 	[SerializeField] TextMeshProUGUI curStateText;

@@ -90,7 +90,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 
 	public override void FixedUpdateNetwork()
 	{
-		if (rb.velocity.sqrMagnitude < 10f)
+		if (rb.velocity.sqrMagnitude < 1f)
 		{
 			if(hitDataList.Count > 0 && lastHitTimer.ExpiredOrNotRunning(Runner))
 			{
