@@ -10,6 +10,8 @@ using Random = UnityEngine.Random;
 
 public class VehicleBody : NetworkBehaviour, IHittable
 {
+	const string fireVfxPath = "FX/VFX/vfx_Fire01_v1";
+	const string smokeVfxPath = "FX/VFX/vfxgraph_StylizedSmoke_v1.5";
 	const float hitCooltime = 1f;
 	const float COR = 1f; //반발계수
 
@@ -19,6 +21,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		public TickTimer nextHitTimer;
 	}
 
+	[SerializeField] Transform engineTrans;
 	[SerializeField] BoxCollider vehicleTrigger;
 	[SerializeField] int maxHp = 10000;
 	[SerializeField] int maxOil = 5000;
@@ -41,6 +44,9 @@ public class VehicleBody : NetworkBehaviour, IHittable
 	public event Action<float> OnCurHpChanged;
 	public event Action<float> OnOilChanged;
 	public event Action<float> OnCurEnginHpChanged;
+
+	public Queue<GameObject> fireList = new();
+	public Queue<GameObject> smokeList = new();
 
 	public int MaxHp { get { return maxHp; } }
 	public float HpRatio { get { return (float)CurHp / maxHp; } }
@@ -172,7 +178,50 @@ public class VehicleBody : NetworkBehaviour, IHittable
 
 	protected void CurHpChanged()
 	{
-		OnCurHpChanged?.Invoke(HpRatio);
+		float ratio = HpRatio;
+		OnCurHpChanged?.Invoke(ratio);
+		CheckFireAndSmoke(ratio);
+	}
+
+	private void CheckFireAndSmoke(float ratio)
+	{
+		int fireCnt = 0;
+		int smokeCnt = 0;
+		if(ratio < 0.8f)
+		{
+			smokeCnt = (int) ((0.8f - ratio) / 0.15f);
+			print(smokeCnt);	
+		}
+
+        if (ratio < 0.2f)
+		{
+			fireCnt = 1;
+		}
+
+		//불과 연기 위치는 동기화할 필요 X
+		while (fireList.Count < fireCnt)
+		{
+			GameObject fire = GameManager.Resource.Instantiate<GameObject>(fireVfxPath, 
+				engineTrans.position + Random.insideUnitSphere * 0.5f, Quaternion.identity, engineTrans, true);
+			fireList.Enqueue(fire);
+		}
+		while(fireList.Count > fireCnt)
+		{
+			GameObject fire = fireList.Dequeue();
+			GameManager.Resource.Destroy(fire);
+		}
+
+		while (smokeList.Count < smokeCnt)
+		{
+			GameObject smoke = GameManager.Resource.Instantiate<GameObject>(smokeVfxPath,
+				engineTrans.position + Random.insideUnitSphere * 0.5f, Quaternion.identity, engineTrans, true);
+			smokeList.Enqueue(smoke);
+		}
+		while (smokeList.Count > smokeCnt)
+		{
+			GameObject smoke = smokeList.Dequeue();
+			GameManager.Resource.Destroy(smoke);
+		}
 	}
 
 	protected void CurOilChanged()

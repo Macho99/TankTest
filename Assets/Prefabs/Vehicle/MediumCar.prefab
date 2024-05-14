@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &302792995519416164
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4273538926151905543}
+  m_Layer: 7
+  m_Name: EngineTrans
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4273538926151905543
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 302792995519416164}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.81, z: 1.53}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1372371432067635650}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &560442790255944608
 GameObject:
   m_ObjectHideFlags: 0
@@ -340,6 +371,7 @@ Transform:
   - {fileID: 5400660520569917356}
   - {fileID: 4029051660885083270}
   - {fileID: 2058793791963907093}
+  - {fileID: 4273538926151905543}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5547201401907425485
@@ -429,6 +461,7 @@ MonoBehaviour:
   - 65
   - 90
   - 120
+  oilConsumpAmount: 10
   _PlayerGetOn:
     _value: 0
   _LerpedMoveInput: {x: 0, y: 0}
@@ -468,6 +501,7 @@ MonoBehaviour:
   - {fileID: 5502641727556670349}
   - {fileID: 5839205207309999438}
   - {fileID: 3174228042895152733}
+  vehicleBody: {fileID: 7498179654484953499}
   _GetOnPlayers: []
 --- !u!114 &7498179654484953499
 MonoBehaviour:
@@ -481,10 +515,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 117bc1fec81fa314388e089d6417c678, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  engineTrans: {fileID: 4273538926151905543}
   vehicleTrigger: {fileID: 1285313908451028329}
-  maxHp: 1000
-  damage: 100
-  hitCooltime: 0.5
+  maxHp: 2000
+  maxOil: 2000
+  maxEngineHp: 1000
+  damage: 50
+  _CurHp: 0
+  _CurOil: 0
+  _CurEngineHp: 0
 --- !u!54 &3949058092545278007
 Rigidbody:
   m_ObjectHideFlags: 0

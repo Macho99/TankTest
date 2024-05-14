@@ -17,9 +17,8 @@ public class BruteStone : NetworkBehaviour
 	Collider[] cols = new Collider[10];
 	List<Int64> hitList = new();
 
-	[Networked] public NetworkId OwnerId { get; private set; }
-	[Networked] public Vector3 Velocity { get; private set; }
-	[Networked] public Vector3 AngularVelocity { get; private set; }
+	private Transform ownerTrans;
+	[Networked, OnChangedRender(nameof(GetOwnerTransform))] public NetworkObject Owner { get; private set; }
 
 	private void Awake()
 	{
@@ -27,20 +26,18 @@ public class BruteStone : NetworkBehaviour
 		hitMask = LayerMask.GetMask("Vehicle", "Breakable", "Player");
 	}
 
-	public void Init(NetworkId id, Vector3 velocity)
+	public void Init(NetworkObject owner, Vector3 velocity)
 	{
-		this.OwnerId = id;
+		this.Owner = owner;
 
 		rb.velocity = velocity;
 		rb.angularVelocity = Vector3.up * Random.Range(5f, 10f);
-
-		//this.Velocity = velocity;
-		//AngularVelocity = Vector3.up * Random.Range(5f, 10f);
+		despawnTimer = TickTimer.CreateFromSeconds(Runner, 10f);
 	}
 
-	public override void Spawned()
+	private void GetOwnerTransform()
 	{
-		despawnTimer = TickTimer.CreateFromSeconds(Runner, 500f);
+		ownerTrans = Owner.transform;
 	}
 
 	public override void FixedUpdateNetwork()
@@ -63,7 +60,7 @@ public class BruteStone : NetworkBehaviour
 			if(hittable == null) continue;
 			if(hitList.Contains(hittable.HitID) == false)
 			{
-				hittable.ApplyDamage(null, childCol.transform.position, 
+				hittable.ApplyDamage(ownerTrans, childCol.transform.position, 
 				//hittable.ApplyDamage(Runner.FindObject(OwnerId).transform, childCol.transform.position, 
 				rb.velocity, (int) (damage * rb.velocity.magnitude));
 				print($"{cols[i].gameObject.name}: {(int)(damage * rb.velocity.magnitude)} ¶§¸²");

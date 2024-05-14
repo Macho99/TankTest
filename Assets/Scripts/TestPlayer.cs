@@ -163,6 +163,6 @@ public class TestPlayer : NetworkBehaviour, IHittable
 
 	public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
 	{
-		print($"{source.name}로부터 {damage} 데미지");
+		print($"{(source == null ? "null" : source.name)}로부터 {damage} 데미지");
 	}
 }
