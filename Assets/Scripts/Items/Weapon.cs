@@ -14,11 +14,14 @@ public abstract class Weapon : EquipmentItem
     public Transform SubHandHint { get { return subHandHint; } }
 
 
+    public bool IsTarget { get { return target != null; } }
     public void SetTarget(Transform subTarget)
     {
         this.target = subTarget;
     }
     public abstract void Attack();
+
+    public abstract bool CanAttack();
 
     public override void FixedUpdateNetwork()
     {

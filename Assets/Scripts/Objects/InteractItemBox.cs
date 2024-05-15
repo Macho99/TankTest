@@ -85,6 +85,8 @@ public class InteractItemBox : InteractObject
                 for (int i = 0; i < spawnData.Length; i++)
                 {
                     Item itemInstance = Runner.Spawn(spawnData[i].SpawnItem);
+                    if (itemInstance.ItemData.IsStackable)
+                        itemInstance.currentCount = Random.Range(1, itemInstance.ItemData.MaxCount);
                     items.Set(i, itemInstance);
                 }
                 itemBoxState = ItemBoxState.Open;

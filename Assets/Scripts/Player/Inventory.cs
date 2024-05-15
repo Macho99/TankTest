@@ -53,15 +53,56 @@ public class Inventory : NetworkBehaviour
     }
     public void AddItem(Item newItem)
     {
+        if (newItem.ItemData.IsStackable)
+        {
+            int count = newItem.currentCount;
+
+            Item[] items = Array.FindAll(netItems.ToArray(), (item) =>
+            {
+                if (item == null)
+                    return false;
+
+                return (item.ItemData.ItemID == newItem.ItemData.ItemID) && item.ItemData.MaxCount > item.currentCount;
+            });
+            for (int i = 0; i < items.Length; i++)
+            {
+                if (items[i].AddItemCount(count, out int remainingCount))
+                {
+                    count = remainingCount;
+                    if (count <= 0)
+                    {
+                        newItem.ChangeItemCount(count);
+                        netItems[i].SetParent(this.transform);
+                        netItems[i].gameObject.SetActive(false);
+                        //Weight += netItems[i].ItemData.Weight * netItems[i].currentCount;
+                        onItemUpdate?.Invoke(i, netItems[i]);
+                    }
+                }
+            }
+          
+            if (count > 0)
+            {
+                newItem.ChangeItemCount(count);
+                int index = Array.FindIndex(netItems.ToArray(), (item) => { return item == null; });
+                netItems.Set(index, newItem);
+                netItems[index].SetParent(this.transform);
+                netItems[index].gameObject.SetActive(false);
+                onItemUpdate?.Invoke(index, netItems[index]);
+            }
+            return;
+
+        }
         for (int i = 0; i < netItems.Length; i++)
         {
             if (netItems[i] == null)
             {
-                if (newItem.ItemData.Weight + Weight > MaxWeight)
+                Debug.Log(newItem.currentCount);
+
+                if (newItem.ItemData.Weight * newItem.currentCount + Weight > MaxWeight)
                     continue;
 
                 netItems.Set(i, newItem);
-                Weight += netItems[i].ItemData.Weight;
+                Weight += netItems[i].ItemData.Weight * netItems[i].currentCount;
                 netItems[i].SetParent(this.transform);
                 netItems[i].gameObject.SetActive(false);
                 Debug.Log("add");
@@ -120,6 +161,7 @@ public class Inventory : NetworkBehaviour
             {
                 netItems.Set(i, item);
                 netItems[i].SetParent(this.transform);
+                netItems[i].RPC_SetActive(false);
                 onItemUpdate?.Invoke(i, netItems[i]);
                 break;
             }
@@ -140,7 +182,6 @@ public class Inventory : NetworkBehaviour
             if (item == netItems[i])
             {
                 InsidePullItem(i);
-                onItemUpdate?.Invoke(i, null);
                 return;
             }
 
@@ -166,12 +207,7 @@ public class Inventory : NetworkBehaviour
     {
         for (int i = 0; i < netItems.Length; i++)
         {
-            //if (netItems[i] != items[i])
-            //{
-            //    items[i].SetParent(this.transform);
-            //    netItems[i].SetParent(this.transform);
-            //}
-            //onItemUpdate?.Invoke(i, items[i]);
+            onItemUpdate?.Invoke(i, netItems[i]);
         }
     }
 

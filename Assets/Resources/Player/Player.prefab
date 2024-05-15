@@ -3014,11 +3014,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Animator: {fileID: 585301397921171120}
-  TotalWords: 20
+  TotalWords: 21
   ApplyTiming: 2
   SyncSettings: -65
-  StateHashes: 000000006bd5a32d398fdc04900f541e8a9e6ef420e23b685928a8ce28a981077af3fe2e48d3833bccf055d4150d3635b049d18a52f6b98561459cb2aa5bac3789ebaf913f74a3b60cc78681ef1c4e8384973a1599449fadf2cfeb3b3adaf4b361160269864151b2f1162235a764597ab5320162767f51e263e68c1274370385374b21af9c943806bab59bd0cced4afee8aaa6a8c5683684326b1c64aa2d92050972707564f06a461d9204fce9ff34f4ed4c7fc9aa8316deed9c65629bc4b44c96901b5d585b400757554d0d281cbc8a459ea6b99f2b3059dd90e985dc5712735042414eb5cea3a20bd4a22c7d8c730293103c14433a319518833f23ee2399a3f164288987fbc8db10df551d7a6c804f3910a265750125106439db9e12610ab0b71583c9ee354823ca98de5c0d713bcbabc2f921c3aff79580ce3e24a7d67f3ee4aa5d14a71ac46fe2e2390f94bae82179d1c9cd958341e2ffc6947f34cfdd963b68df903112c0d0070d79408527350bb3388c9b
-  TriggerHashes: 00000000b4ecb233ed6cef2b63cb14a58527350b3112c0d034cfdd96a9c3a4f9
+  StateHashes: 000000006bd5a32d398fdc04900f541e8a9e6ef420e23b685928a8ce28a981077af3fe2e48d3833bccf055d4150d3635b049d18a52f6b98561459cb2aa5bac3789ebaf913f74a3b60cc78681ef1c4e8384973a1599449fadf2cfeb3b3adaf4b361160269864151b2f1162235a764597ab5320162767f51e263e68c1274370385374b21af9c943806bab59bd0cced4afee8aaa6a8c5683684326b1c64aa2d92050972707564f06a461d9204fce9ff34f4ed4c7fc9aa8316deed9c65629bc4b44c96901b5d585b400757554d0d281cbc8a459ea6b99f2b3059dd90e985dc5712735042414eb5cea3a20bd4a22c7d8c730293103c14433a319518833f23ee2399a3f164288987fbc8db10df551d7a6c804f3910a265750125106439db9e12610ab0b71583c9ee354823ca98de5c0d713bcbabc2f921c3aff79580ce3e24a7d67f3ee4aa5d14a71ac46fe2e2390f94bae82179d1c9cdc01206a9463e2c6634cfdd963b68df903112c0d0070d7940f1a6ecf8c7b95568
+  TriggerHashes: 00000000b4ecb233ed6cef2b63cb14a53112c0d034cfdd96a9c3a4f90d286c40
 --- !u!114 &2252449365864992669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3218,7 +3218,7 @@ MonoBehaviour:
     ColliderLayer: 0
     CollisionLayerMask:
       serializedVersion: 2
-      m_Bits: 1
+      m_Bits: 6529
     ProxyInterpolationMode: 0
     TeleportThreshold: 1
     AntiJitterDistance: {x: 0.025, y: 0.01}
@@ -3245,7 +3245,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   equipment: {fileID: 1505670383422926341}
+  handAimIK: {fileID: 873888074482620552}
+  subHandIK: {fileID: 704515144413581369}
   camController: {fileID: 93982834951514476}
+  weaponPivotData:
+  - Type: 4
+    mainPivot: {fileID: 7345209370441946351}
+    subPivot: {fileID: 691601666512894154}
+  - Type: 5
+    mainPivot: {fileID: 8281354326004499004}
+    subPivot: {fileID: 4753408348419424706}
+  - Type: 6
+    mainPivot: {fileID: 8894425073645162569}
+    subPivot: {fileID: 4879977998432439671}
+  - Type: 7
+    mainPivot: {fileID: 3748892872426103021}
+    subPivot: {fileID: 4881289189795552658}
+  - Type: 8
+    mainPivot: {fileID: 8199936459193167979}
+    subPivot: {fileID: 5157675122686799903}
+  _swichingState: 0
 --- !u!1 &3087384671993319851
 GameObject:
   m_ObjectHideFlags: 0
@@ -3271,7 +3290,7 @@ Transform:
   m_GameObject: {fileID: 3087384671993319851}
   serializedVersion: 2
   m_LocalRotation: {x: -0.5, y: 0.5, z: -0.5, w: 0.5}
-  m_LocalPosition: {x: 0.112, y: 0.001, z: -0.062}
+  m_LocalPosition: {x: 0.112, y: 0.0339, z: -0.0621}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4334,7 +4353,7 @@ Transform:
   m_GameObject: {fileID: 4396650884849806381}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0.7071068, z: -0, w: 0}
-  m_LocalPosition: {x: 0.09, y: 0.05, z: 0.1}
+  m_LocalPosition: {x: 0.09, y: 0.05, z: -0.15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5194,40 +5213,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   owner: {fileID: 8671818899950655209}
-  animator: {fileID: 585301397921171120}
   ItemPivots:
   - Type: 0
     mainPivot: {fileID: 6063421721040318505}
-    subPivot: {fileID: 0}
   - Type: 1
     mainPivot: {fileID: 4667186395745736323}
-    subPivot: {fileID: 0}
   - Type: 2
     mainPivot: {fileID: 9006702729042878299}
-    subPivot: {fileID: 0}
   - Type: 3
     mainPivot: {fileID: 1097657165322213961}
-    subPivot: {fileID: 0}
   - Type: 4
-    mainPivot: {fileID: 7345209370441946351}
-    subPivot: {fileID: 691601666512894154}
+    mainPivot: {fileID: 691601666512894154}
   - Type: 5
-    mainPivot: {fileID: 8281354326004499004}
-    subPivot: {fileID: 4753408348419424706}
+    mainPivot: {fileID: 4753408348419424706}
   - Type: 6
-    mainPivot: {fileID: 8894425073645162569}
-    subPivot: {fileID: 4879977998432439671}
+    mainPivot: {fileID: 4879977998432439671}
   - Type: 7
-    mainPivot: {fileID: 3748892872426103021}
-    subPivot: {fileID: 4881289189795552658}
+    mainPivot: {fileID: 4881289189795552658}
   - Type: 8
-    mainPivot: {fileID: 8199936459193167979}
-    subPivot: {fileID: 5157675122686799903}
+    mainPivot: {fileID: 5157675122686799903}
   _netItems: []
-  handAimIK: {fileID: 873888074482620552}
-  subHandIK: {fileID: 704515144413581369}
-  animEvent: {fileID: 3159209636989140219}
-  _NetMainWeapon: {fileID: 0}
+  weaponController: {fileID: 0}
 --- !u!1 &5834736133114645469
 GameObject:
   m_ObjectHideFlags: 0
@@ -5796,13 +5802,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6571966159193006381}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.155, y: -0.292, z: -0.148}
+  m_LocalRotation: {x: -0.5, y: 0.5, z: -0.5, w: 0.5}
+  m_LocalPosition: {x: -0.28, y: -0.23, z: -0.148}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3232600648766078265}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: -90}
 --- !u!1 &6652540847797874616
 GameObject:
   m_ObjectHideFlags: 0
@@ -7974,9 +7980,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1359160197743623209, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+      propertyPath: m_Lens.FieldOfView
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 1686350379378643632, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+      propertyPath: CameraCollisionFilter.m_Bits
+      value: 6528
+      objectReference: {fileID: 0}
     - target: {fileID: 6317337647102774269, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
       propertyPath: m_Name
       value: ThirdCameraRoot
+      objectReference: {fileID: 0}
+    - target: {fileID: 7122473356843319290, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+      propertyPath: CameraCollisionFilter.m_Bits
+      value: 6528
       objectReference: {fileID: 0}
     - target: {fileID: 8202687627560913134, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
       propertyPath: m_LocalPosition.x

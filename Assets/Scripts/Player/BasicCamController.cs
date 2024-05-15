@@ -49,11 +49,11 @@ public class BasicCamController : NetworkBehaviour
 
         if (rotX < 180f)
         {
-            rotX = Mathf.Clamp(rotX, -1f, 50f);
+            rotX = Mathf.Clamp(rotX, -1f, 70f);
         }
         else
         {
-            rotX = Mathf.Clamp(rotX, 335f, 361f);
+            rotX = Mathf.Clamp(rotX, 320f, 361f);
         }
 
 

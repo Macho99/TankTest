@@ -26,6 +26,7 @@ public class PlayerAnimEvent : MonoBehaviour
     public void OnStartPutWeapon()
     {
         onStartPutWeapon?.Invoke();
+        onStartPutWeapon = null;
         Debug.Log("star!!");
     }
     public void OnEndPutWeapon()
@@ -38,7 +39,6 @@ public class PlayerAnimEvent : MonoBehaviour
     public void OnFire()
     {
         onFire?.Invoke();
-
         onFire = null;
 
     }

@@ -16,7 +16,6 @@ public abstract class EquipmentItem : Item
     public virtual void UnEquip()
     {
         owner = null;
-        RPC_SetActive(false);
     }
 
 }

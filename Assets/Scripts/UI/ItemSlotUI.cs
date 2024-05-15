@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 
 public enum ItemSlotType { Static, Dynamic }
-public class ItemSlotUI : MonoBehaviour, IPointerClickHandler
+public class ItemSlotUI : MonoBehaviour, IPointerClickHandler,IBeginDragHandler,IEndDragHandler,IDragHandler
 {
 
     public enum ItemSlotIconType { Base, Detail }
@@ -99,5 +99,18 @@ public class ItemSlotUI : MonoBehaviour, IPointerClickHandler
 
     }
 
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        Debug.Log(eventData.pointerDrag);
+    }
 
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        Debug.Log("OnBeginDrag");
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        Debug.Log("OnDrag");
+    }
 }

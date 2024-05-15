@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public enum GunType { AssultRiple, SniperRiple, Revolver, RocketLauncher, Shotgun }
-public enum BulletType { FiveMilymeter, }
+public enum GunType { Rifle, SniperRiple, Revolver, RocketLauncher, Shotgun }
+
 [CreateAssetMenu(fileName = "New Gun", menuName = "SO/ItemSO/Weapon/Gun")]
 public class GunItemSO : WeaponItemSO
 {
@@ -16,7 +16,7 @@ public class GunItemSO : WeaponItemSO
     [SerializeField, Range(0, 50)] private int maxAmmoCount;
     [SerializeField, Range(0f, 10f)] private float reloadTime;
     [SerializeField, Range(0f, 10f)] private float ReboundHealthSpeed;
-
+    [SerializeField] private AmmoType ammoType;
 
     public float FireSpeed { get { return fireSpeed; } }
     public float FireInterval { get { return fireInterval; } }
@@ -24,6 +24,7 @@ public class GunItemSO : WeaponItemSO
     public float Distance { get { return distance; } }
     public int MaxAmmoCount { get { return maxAmmoCount; } }
 
+    public AmmoType AmmoType { get { return ammoType; } }
 
     public override ItemInstance CreateItemData(int count = 1)
     {

@@ -14,6 +14,11 @@ public class Revolver : Gun
         //throw new System.NotImplementedException();
     }
 
+    public override bool CanAttack()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public override void Equip(PlayerController owner)
     {
         base.Equip(owner);
@@ -23,5 +28,10 @@ public class Revolver : Gun
     public override void UnEquip()
     {
         base.UnEquip();
+    }
+
+    protected override void OnFire()
+    {
+        //throw new System.NotImplementedException();
     }
 }

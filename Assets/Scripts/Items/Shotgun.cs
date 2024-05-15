@@ -14,6 +14,10 @@ public class Shotgun : Gun
         //throw new System.NotImplementedException();
     }
 
+    public override bool CanAttack()
+    {
+        return true;
+    }
 
     public override void Equip(PlayerController owner)
     {
@@ -24,5 +28,10 @@ public class Shotgun : Gun
     public override void UnEquip()
     {
         base.UnEquip();
+    }
+
+    protected override void OnFire()
+    {
+        //throw new System.NotImplementedException();
     }
 }

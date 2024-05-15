@@ -7,9 +7,65 @@ public class Item : NetworkBehaviour
 {
     [SerializeField] protected ItemSO itemData;
 
-    [Networked, HideInInspector] public int currentCount { get; set; }
+    [Networked, OnChangedRender(nameof(UpdateCount))] public int currentCount { get; set; } = 1;
     public ItemSO ItemData { get { return itemData; } }
 
+
+    public void ChangeItemCount(int count)
+    {
+        currentCount = count;
+        if (currentCount == 0)
+        {
+            if (HasStateAuthority)
+            {
+                Runner.Despawn(Object);
+            }
+        }
+    }
+    public bool AddItemCount(int count, out int remainingCount)
+    {
+        if (!itemData.IsStackable)
+        {
+            remainingCount = -1;
+            return false;
+        }
+
+        int maxCount = itemData.MaxCount;
+        if (currentCount == maxCount)
+        {
+            remainingCount = count;
+            return true;
+        }
+        if (currentCount + count > maxCount)
+        {
+            remainingCount = currentCount + count - maxCount;
+            currentCount = maxCount;
+
+            return true;
+        }
+        else
+        {
+            currentCount += count;
+            remainingCount = 0;
+
+            return true;
+        }
+
+    }
+    public void UpdateCount()
+    {
+        Debug.Log(currentCount);
+        if (currentCount <= 0)
+        {
+            if (HasStateAuthority)
+            {
+
+                Debug.Log("»èÁ¦");
+                Runner.Despawn(Object);
+                return;
+            }
+        }
+    }
     public void SetParent(Transform parent)
     {
         transform.SetParent(parent);
@@ -25,6 +81,7 @@ public class Item : NetworkBehaviour
     public override void Spawned()
     {
         gameObject.SetActive(false);
+        Debug.Log(currentCount);
     }
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_SetActive(bool isActive)
@@ -32,7 +89,7 @@ public class Item : NetworkBehaviour
         gameObject.SetActive(isActive);
     }
 
-    public int ItemCount { get { return currentCount; } }
+
 
     public override void Render()
     {
@@ -43,5 +100,6 @@ public class Item : NetworkBehaviour
     {
         this.currentCount = count;
     }
+
 
 }
