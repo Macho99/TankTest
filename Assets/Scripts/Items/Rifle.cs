@@ -1,3 +1,4 @@
+using Fusion;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,24 +6,37 @@ using UnityEngine;
 public class Rifle : Gun
 {
 
-
     public override void Attack()
     {
-        IsFire = true;
-        //muzzlePlashFX.Play();
+        base.Attack();
+
         Ray ray = new Ray();
         ray.origin = muzzlePoint.transform.position;
-        ray.direction = muzzlePoint.forward.normalized;
-
-        if (Physics.Raycast(ray.origin, ray.direction, 50))
+        float distance = 0f;
+        if (targetPoint == Vector3.zero)
         {
-            Debug.Log("╬Нец");
+            ray.direction = muzzlePoint.transform.forward;
+            distance = 100f;
         }
-        Debug.DrawRay(ray.origin, ray.direction * 50, Color.red);
-        Debug.Log("attack");
-        currentRefireTime = ((GunItemSO)itemData).FireInterval;
-        StartCoroutine(RefireRoutine());
+        else
+        {
+            ray.direction = (targetPoint - muzzlePoint.transform.position).normalized;
+            distance = Vector3.Distance(targetPoint, muzzlePoint.transform.position);
+        }
 
+        if (Physics.Raycast(ray, out RaycastHit hit, distance, LayerMask.GetMask("Monster")))
+        {
+            if (hit.collider.TryGetComponent(out IHittable hittable))
+            {
+                hittable.ApplyDamage(owner.transform, hit.point, ray.direction * 2f, ((WeaponItemSO)itemData).Damage);
+            }
+        }
+
+        Debug.DrawRay(ray.origin, ray.direction * distance, Color.blue);
+
+        Debug.Log("attack");
+
+        targetPoint = Vector3.zero;
     }
 
 
@@ -30,17 +44,7 @@ public class Rifle : Gun
     {
 
     }
-    public override void Attack(Vector3 targetPoint)
-    {
-        Ray ray = new Ray();
-        ray.origin = muzzlePoint.transform.position;
-        Vector3 distance = targetPoint - muzzlePoint.transform.position;
-        ray.direction = distance.normalized;
 
-        Debug.DrawRay(ray.origin, distance, Color.red);
-        Debug.Log("attack");
-        StartCoroutine(RefireRoutine());
-    }
 
     public override void Equip(PlayerController owner)
     {
@@ -62,13 +66,5 @@ public class Rifle : Gun
         return true;
     }
 
-    protected override void OnFire()
-    {
 
-        muzzlePlashFX.Play();
-        IsFire = !IsFire;
-
-
-        Debug.Log(IsFire);
-    }
 }

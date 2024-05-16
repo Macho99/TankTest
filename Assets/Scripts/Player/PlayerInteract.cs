@@ -9,7 +9,6 @@ using UnityEngine.Animations.Rigging;
 public class PlayerInteract : NetworkBehaviour
 {
     private float rayDistance;
-    [SerializeField] private LayerMask interactLayer;
     [SerializeField] private Transform raycastTr;
     [SerializeField] private ItemContainer itemContainer;
     private PlayerInputListner inputListner;
@@ -71,7 +70,7 @@ public class PlayerInteract : NetworkBehaviour
         ray.direction = raycastTr.transform.forward;
 
         Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.red);
-        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance, interactLayer, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
         {
             if (hit.collider.TryGetComponent(out IDetectable detectObject))
             {
@@ -107,7 +106,7 @@ public class PlayerInteract : NetworkBehaviour
         ray.origin = raycastTr.position;
         ray.direction = raycastTr.transform.forward;
 
-        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance, interactLayer, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
         {
             if (hit.collider.TryGetComponent(out InteractObject detectObject))
             {

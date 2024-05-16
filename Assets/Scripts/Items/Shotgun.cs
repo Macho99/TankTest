@@ -6,16 +6,15 @@ public class Shotgun : Gun
 {
     public override void Attack()
     {
-        //throw new System.NotImplementedException();
-    }
+        base.Attack();
 
-    public override void Attack(Vector3 targetPos)
-    {
-        //throw new System.NotImplementedException();
     }
 
     public override bool CanAttack()
     {
+        if (!base.CanAttack())
+            return false;
+
         return true;
     }
 
@@ -30,8 +29,5 @@ public class Shotgun : Gun
         base.UnEquip();
     }
 
-    protected override void OnFire()
-    {
-        //throw new System.NotImplementedException();
-    }
+
 }

@@ -9,14 +9,12 @@ public class Revolver : Gun
 
     }
 
-    public override void Attack(Vector3 targetPos)
-    {
-        //throw new System.NotImplementedException();
-    }
-
     public override bool CanAttack()
     {
-        throw new System.NotImplementedException();
+        if (!base.CanAttack())
+            return false;
+        
+        return true;
     }
 
     public override void Equip(PlayerController owner)
@@ -30,8 +28,5 @@ public class Revolver : Gun
         base.UnEquip();
     }
 
-    protected override void OnFire()
-    {
-        //throw new System.NotImplementedException();
-    }
+
 }

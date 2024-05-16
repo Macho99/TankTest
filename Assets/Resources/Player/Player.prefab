@@ -2950,9 +2950,10 @@ GameObject:
   - component: {fileID: 2130521074943661997}
   - component: {fileID: 8198301419012216965}
   - component: {fileID: 7208827102858277602}
-  m_Layer: 0
+  - component: {fileID: 9080676739221642525}
+  m_Layer: 3
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3087,9 +3088,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f21f43602155d241acddec5ade0a3ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactLayer:
-    serializedVersion: 2
-    m_Bits: 4096
   raycastTr: {fileID: 5292145193104776574}
   itemContainer: {fileID: 5807948842090437507}
   _IsDetect:
@@ -3265,6 +3263,29 @@ MonoBehaviour:
     mainPivot: {fileID: 8199936459193167979}
     subPivot: {fileID: 5157675122686799903}
   _swichingState: 0
+--- !u!136 &9080676739221642525
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2992218204746919114}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.35
+  m_Height: 1.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &3087384671993319851
 GameObject:
   m_ObjectHideFlags: 0
@@ -4763,6 +4784,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _Weight: 0
   _MaxWeight: 0
+  playerStat: {fileID: 6362893385060585982}
 --- !u!1 &5248267656797898752
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,11 +7,9 @@ public abstract class Weapon : EquipmentItem
 {
 
     [SerializeField] protected Transform subHandTarget;
-    [SerializeField] protected Transform subHandHint;
     protected Transform target;
     public Transform SubHandTarget
     { get { return subHandTarget; } }
-    public Transform SubHandHint { get { return subHandHint; } }
 
 
     public bool IsTarget { get { return target != null; } }

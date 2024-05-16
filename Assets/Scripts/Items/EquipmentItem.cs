@@ -6,7 +6,7 @@ using UnityEngine;
 public abstract class EquipmentItem : Item
 {
 
-    [Networked] public PlayerController owner { get; protected set; }
+    [Networked, HideInInspector] public PlayerController owner { get; protected set; }
 
     public virtual void Equip(PlayerController owner)
     {

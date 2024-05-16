@@ -5,46 +5,48 @@ using UnityEngine;
 
 public abstract class Gun : Weapon
 {
-    [SerializeField] protected ParticleSystem muzzlePlashFX;
+    [SerializeField] protected NetworkPrefabRef muzzlePlashPrefab;
+    protected NetworkObject muzzleFlashFx;
     //파츠아이템 
     [SerializeField] protected Transform muzzlePoint;
+    [Networked] protected Vector3 targetPoint { get; set; }
     [Networked] protected int currentAmmoCount { get; set; }
-    protected Transform targetPoint;
-    [Networked] protected float currentRefireTime { get; set; }
-    [Networked, OnChangedRender(nameof(OnFire))] protected NetworkBool IsFire { get; set; }
+
+    [Networked] protected TickTimer refireTimer { get; set; }
     public override void Spawned()
     {
-        if (HasStateAuthority)
-        {
-             IsFire = false;
-            currentRefireTime = 0f;
-        }
         base.Spawned();
     }
-    protected abstract void OnFire();
-    public abstract void Attack(Vector3 targetPos);
+    public void SetShotPoint(Vector3 targetPoint)
+    {
+        this.targetPoint = targetPoint;
+    }
 
+    public override void Attack()
+    {
+        if (muzzleFlashFx != null)
+        {
+            Runner.Despawn(muzzleFlashFx);
+            muzzleFlashFx = null;
+            Debug.Log("디스폰");
+        }
+
+        if (HasStateAuthority)
+            muzzleFlashFx = Runner.Spawn(muzzlePlashPrefab, muzzlePoint.position, muzzlePoint.rotation);
+
+
+    }
     public override bool CanAttack()
     {
-     
-        //if (currentAmmoCount <= 0)
-        //    return false;
-
-        if (currentRefireTime > 0f)
+        if (!refireTimer.ExpiredOrNotRunning(Runner))
             return false;
+
+
+        refireTimer = TickTimer.CreateFromSeconds(Runner, ((GunItemSO)itemData).FireInterval);
 
         return true;
     }
 
-    public IEnumerator RefireRoutine()
-    {
-        while (0f < currentRefireTime)
-        {
-            currentRefireTime -= Time.deltaTime;
-            yield return null;
-        }
-        currentRefireTime = 0f;
-    }
 
     public virtual void Reload()
     {

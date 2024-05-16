@@ -92,7 +92,11 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
             if (localWeapon != null)
             {
                 if (!localWeapon.CanAttack())
+                {
+                    Debug.Log("공격불가");
                     return;
+                }
+                Debug.Log("공격가능");
 
                 if (localWeapon is MilyWeapon)
                 {
@@ -101,6 +105,20 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
                 }
                 else
                 {
+                    Ray ray = new Ray();
+                    ray.origin = camController.RayCasterTr.position;
+                    ray.direction = camController.RayCasterTr.forward;
+                    if (Physics.Raycast(ray, out RaycastHit hit, 100))
+                    {
+                        ((Gun)localWeapon).SetShotPoint(hit.point);
+                        Debug.DrawLine(ray.origin, hit.point, Color.green);
+                    }
+                    else
+                    {
+                        ((Gun)localWeapon).SetShotPoint(Vector3.zero);
+                    }
+
+                  
                     animEvent.onFire += localWeapon.Attack;
                 }
                 animator.SetTrigger("Attack");

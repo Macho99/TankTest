@@ -18,7 +18,7 @@ public class Inventory : NetworkBehaviour
     private int maxCount;
     [Networked] public float Weight { get; private set; }
     [Networked] public float MaxWeight { get; private set; }
-
+    [SerializeField] private PlayerStat playerStat;
 
     public int MaxCount { get { return maxCount; } }
     public event Action<int, Item> onItemUpdate;
@@ -51,6 +51,21 @@ public class Inventory : NetworkBehaviour
             }
         }
     }
+    public void UseItem(int index)
+    {
+        if (netItems[index] is UseItem)
+        {
+            ((UseItem)netItems[index]).Use(playerStat);
+            if (netItems[index] == null)
+            {
+                netItems.Set(index, null);
+                onItemUpdate?.Invoke(index, null);
+                return;
+
+            }
+            onItemUpdate?.Invoke(index, netItems[index]);
+        }
+    }
     public void AddItem(Item newItem)
     {
         if (newItem.ItemData.IsStackable)
@@ -79,7 +94,7 @@ public class Inventory : NetworkBehaviour
                     }
                 }
             }
-          
+
             if (count > 0)
             {
                 newItem.ChangeItemCount(count);

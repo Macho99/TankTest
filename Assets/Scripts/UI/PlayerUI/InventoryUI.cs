@@ -40,7 +40,14 @@ public class InventoryUI : MonoBehaviour
     public void OnItemEquipment(int index)
     {
         Item item = inventory.GetItem(index);
-        equipment.RPC_Equipment(index, item);
+        if (item is UseItem)
+        {
+            inventory.UseItem(index);
+        }
+        else if (item is EquipmentItem)
+        {
+            equipment.RPC_Equipment(index, item);
+        }
     }
 
 
