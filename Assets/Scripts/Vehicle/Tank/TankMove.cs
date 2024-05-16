@@ -1,3 +1,4 @@
+using Fusion;
 using UnityEngine;
 
 public class TankMove : VehicleMove
@@ -36,6 +37,14 @@ public class TankMove : VehicleMove
 
 		leftTrack.gameObject.SetActive(true);
 		rightTrack.gameObject.SetActive(true);
+	}
+
+	public override void Despawned(NetworkRunner runner, bool hasState)
+	{
+		base.Despawned(runner, hasState);
+
+		leftTrack.gameObject.SetActive(false);
+		rightTrack.gameObject.SetActive(false);
 	}
 
 	protected override void SyncWheelRenderer(float leftRps, float rightRps)

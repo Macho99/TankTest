@@ -15,7 +15,7 @@ public class BruteZombie : ZombieBase
 	[SerializeField] float lookSpeed = 1.5f;
 	[SerializeField] Transform shieldHolder;
 	[SerializeField] Transform stoneHolder;
-	[SerializeField] float normalAttackDist = 3f;
+	[SerializeField] float normalAttackDist = 4f;
 	[SerializeField] float twoHandGroundCooltime = 10f;
 	[SerializeField] float dashCooltime = 20f;
 	[SerializeField] float dashDist = 15f;
@@ -327,7 +327,7 @@ public class BruteZombie : ZombieBase
 	{
 		if(drawGizmos == false) return;
 
-		Gizmos.DrawWireSphere(transform.position, lookDist);
+		Gizmos.DrawWireSphere(transform.position, lookDist * lookDistMul);
 
 		//근거리 공격
 		Gizmos.DrawWireSphere(transform.position, normalAttackDist);

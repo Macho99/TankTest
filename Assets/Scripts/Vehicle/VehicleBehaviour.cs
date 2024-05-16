@@ -31,7 +31,7 @@ public class VehicleBehaviour : NetworkBehaviour
 	public void Assign(TestPlayer player)
 	{
 		OnAssign(player);
-		if(Runner.IsForward)
+		if(followCam == null)
 		{
 			followCam = GameManager.Resource.Instantiate<VehicleCam>(camPrefabPath, true);
 			followCam.Init(transform, Vector3.up * 2, 8f);
@@ -84,18 +84,19 @@ public class VehicleBehaviour : NetworkBehaviour
 		}
 	}
 
-	private void GetOff()
+	public void GetOff()
 	{
 		OnGetOff();
-		if (Runner.IsForward)
+		if(followCam != null)
 		{
 			GameManager.Resource.Destroy(followCam.gameObject);
-			if(statUI != null)
-			{
-				statUI.RemoveEvents();
-				GameManager.Resource.Destroy(statUI.gameObject);
-				statUI = null;
-			}
+			followCam = null;
+		}
+		if (statUI != null)
+		{
+			statUI.RemoveEvents();
+			GameManager.Resource.Destroy(statUI.gameObject);
+			statUI = null;
 		}
 
 		if (HasStateAuthority)
@@ -116,7 +117,7 @@ public class VehicleBehaviour : NetworkBehaviour
 		CamXAngle = Mathf.Repeat(CamXAngle, 360f);
 		CamYAngle = Mathf.Clamp(CamYAngle, -40f, 40f);
 		
-		if(HasInputAuthority)
+		if(HasInputAuthority && followCam != null)
 		{
 			followCam.transform.rotation = Quaternion.Euler(CamYAngle, CamXAngle, 0f);
 		}

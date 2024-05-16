@@ -367,9 +367,4 @@ public class Zombie : ZombieBase
 			CurLegHp = Mathf.Min(CurLegHp, MaxLegHp);
 		}
 	}
-
-	public void Attack(int damage)
-	{
-		Heal(20);
-	}
 }

@@ -515,9 +515,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 117bc1fec81fa314388e089d6417c678, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wreckedPrefab: {fileID: 4285425376830037281, guid: 5de31300733807b42b2167fb96e27fdc, type: 3}
   engineTrans: {fileID: 4273538926151905543}
   vehicleTrigger: {fileID: 1285313908451028329}
-  maxHp: 2000
+  maxHp: 100
   maxOil: 2000
   maxEngineHp: 1000
   damage: 50
@@ -583,11 +584,11 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.945, y: 2, z: 2.32}
+  m_Extents: {x: 0.945, y: 1, z: 2.32}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: 0, z: -0.2}
+  m_Center: {x: 0, y: 1, z: -0.2}
   m_TimeToStationary: 0.5
 --- !u!64 &5299766596462992226
 MeshCollider:
@@ -1061,7 +1062,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.3655274, y: 2.09, z: 4.968237}
+  m_Size: {x: 1.66, y: 2.09, z: 4.968237}
   m_Center: {x: 0, y: 0.86, z: -0.22994387}
 --- !u!1 &5234926593225570392
 GameObject:

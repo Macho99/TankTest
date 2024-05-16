@@ -12,18 +12,21 @@ public class ZombieAnimEvent : MonoBehaviour
 {
 	const string swingPrefabPath = "FX/VFX/ZombieSwingTrail";
 	[SerializeField] protected float swingScale = 1f;
+	[SerializeField] protected float force = 60f;
 
 	Collider[] cols = new Collider[10];
 
 	Animator anim;
 	Transform lHandTrans;
 	Transform rHandTrans;
+	ZombieBase zombieBase;
 	LayerMask hitMask;
 	List<Int64> hitList = new();
 
 	private void Awake()
 	{
 		anim = GetComponent<Animator>();
+		zombieBase = GetComponent<ZombieBase>();
 		hitMask = LayerMask.GetMask("Player", "Vehicle", "Breakable");
 		lHandTrans = anim.GetBoneTransform(HumanBodyBones.LeftHand);
 		rHandTrans = anim.GetBoneTransform(HumanBodyBones.RightHand);
@@ -42,7 +45,6 @@ public class ZombieAnimEvent : MonoBehaviour
 	{
 		if(animEvent.animatorClipInfo.weight > 0.5f)
 		{
-			print("Two");
 			InstantiateSwingVfx(lHandTrans, animEvent.floatParameter);
 			InstantiateSwingVfx(rHandTrans, animEvent.floatParameter);
 		}
@@ -52,7 +54,6 @@ public class ZombieAnimEvent : MonoBehaviour
 	{
 		if(animEvent.animatorClipInfo.weight > 0.5f)
 		{
-			print("left");
 			InstantiateSwingVfx(lHandTrans, animEvent.floatParameter);
 		}
 	}
@@ -61,7 +62,6 @@ public class ZombieAnimEvent : MonoBehaviour
 	{
 		if(animEvent.animatorClipInfo.weight > 0.5f)
 		{
-			print("right");
 			InstantiateSwingVfx(rHandTrans, animEvent.floatParameter);
 		}
 	}
@@ -82,18 +82,18 @@ public class ZombieAnimEvent : MonoBehaviour
 
 		int damage = animEvent.intParameter;
 		float radius = animEvent.floatParameter;
-		Vector3 force = new();
-		if (animEvent.stringParameter.IsNullOrEmpty())
+		Vector3 direction = new();
+		if (animEvent.stringParameter.IsNullOrEmpty() == false)
 		{
 			string[] strVec = animEvent.stringParameter.Replace(" ", "").Split(',');
 			if (strVec.Length != 3)
 			{
 				Debug.LogError($"{animEvent.stringParameter}가 올바른 벡터 형식이 아닙니다");
 			}
-			force = new Vector3(float.Parse(strVec[0]), float.Parse(strVec[1]), float.Parse(strVec[2]));
-			print(force);
+			direction = new Vector3(float.Parse(strVec[0]), float.Parse(strVec[1]), float.Parse(strVec[2]));
+			direction.Normalize();
 		}
-		force = transform.rotation * force;
+		direction = transform.rotation * direction;
 		Vector3 center = transform.position + transform.forward * radius;
 		int result = Physics.OverlapSphereNonAlloc(center, radius, cols, hitMask);
 
@@ -107,8 +107,14 @@ public class ZombieAnimEvent : MonoBehaviour
 				continue;
 			if (hitList.Contains(hittable.HitID))
 				continue;
+
+			if (zombieBase.AttackTargetMask.IsLayerInMask(cols[i].gameObject.layer) == true)
+			{
+				zombieBase.TargetData.SetTarget(cols[i].transform, zombieBase.Runner.Tick);
+			}
+
 			hitList.Add(hittable.HitID);
-			hittable.ApplyDamage(transform, transform.position, force, damage);
+			hittable.ApplyDamage(transform, transform.position, direction * force, damage);
 		}
 	}
 }

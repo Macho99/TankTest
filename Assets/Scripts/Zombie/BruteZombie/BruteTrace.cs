@@ -134,7 +134,7 @@ public class BruteTrace : BruteZombieState
 				//돌 던지기 공격
 				if (owner.MinStoneDist < targetData.Distance && targetData.Distance < owner.MaxStoneDist)
 				{
-					if (owner.CheckProjectile(owner.transform.position + Vector3.up * 3f, owner.Agent.pathEndPosition, 
+					if (owner.CheckProjectile(owner.transform.position + Vector3.up * 3f, owner.TargetData.Position, 
 						out stoneVelocity, 1.5f, owner.StoneSpeed, Physics.gravity, 
 						LayerMask.GetMask("Default", "Breakable", "Environment")) == true)
 					{

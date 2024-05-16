@@ -21,6 +21,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		public TickTimer nextHitTimer;
 	}
 
+	[SerializeField] VehicleWrecked wreckedPrefab;
 	[SerializeField] Transform engineTrans;
 	[SerializeField] BoxCollider vehicleTrigger;
 	[SerializeField] int maxHp = 10000;
@@ -41,6 +42,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 
 	public Int64 HitID => (Object.Id.Raw << 32);
 
+	public event Action OnVehicleWreck;
 	public event Action<float> OnCurHpChanged;
 	public event Action<float> OnOilChanged;
 	public event Action<float> OnCurEnginHpChanged;
@@ -48,6 +50,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 	public Queue<GameObject> fireList = new();
 	public Queue<GameObject> smokeList = new();
 
+	TickTimer wreckTimer;
 	public int MaxHp { get { return maxHp; } }
 	public float HpRatio { get { return (float)CurHp / maxHp; } }
 	public float OilRatio { get { return (float)CurOil / maxOil; } }
@@ -90,16 +93,31 @@ public class VehicleBody : NetworkBehaviour, IHittable
 
 	public override void FixedUpdateNetwork()
 	{
+		CheckHit();
+
+		if (wreckTimer.Expired(Runner))
+		{
+			wreckTimer = TickTimer.None;
+			if (HasStateAuthority)
+			{
+				Runner.Spawn(wreckedPrefab, transform.position, transform.rotation);
+				Runner.Despawn(Object);
+			}
+		}
+	}
+
+	private void CheckHit()
+	{
 		if (rb.velocity.sqrMagnitude < 1f)
 		{
-			if(hitDataList.Count > 0 && lastHitTimer.ExpiredOrNotRunning(Runner))
+			if (hitDataList.Count > 0 && lastHitTimer.ExpiredOrNotRunning(Runner))
 			{
 				hitDataList.Clear();
 			}
 			return;
 		}
 
-		int result = Physics.OverlapBoxNonAlloc(vehicleTrigger.center + transform.position, 
+		int result = Physics.OverlapBoxNonAlloc(vehicleTrigger.center + transform.position,
 			vehicleTrigger.size * 0.5f, cols, transform.rotation, BodyAttackMask);
 		for (int i = 0; i < result; i++)
 		{
@@ -115,7 +133,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 			else
 			{
 				HitData hitData = hitDataList[idx];
-				if(hitData.nextHitTimer.ExpiredOrNotRunning(Runner) == true)
+				if (hitData.nextHitTimer.ExpiredOrNotRunning(Runner) == true)
 				{
 					hitData.nextHitTimer = TickTimer.CreateFromSeconds(Runner, hitCooltime);
 					hitDataList[idx] = hitData;
@@ -143,9 +161,13 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		}
 		else if(other.layer == BreakableLayer)
 		{
-			hittable.ApplyDamage(transform, transform.position,
-				normal * velMag * 5f, (int) (finaldamage * massRatio));
-			//print($"{other.name}: {(int)(finaldamage * massRatio)}");
+			float dot = Vector3.Dot(normal, rb.velocity.normalized);
+			if(dot > 0)
+			{
+				hittable.ApplyDamage(transform, transform.position,
+					normal * velMag * 5f, (int)(finaldamage * massRatio * dot));
+				//print($"{other.name}: {(int)(finaldamage * massRatio)}");
+			}
 		}
 		this.ApplyDamage(transform, other.transform.position, -force * 1.5f, finaldamage / 5);
 	}
@@ -190,7 +212,6 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		if(ratio < 0.8f)
 		{
 			smokeCnt = (int) ((0.8f - ratio) / 0.15f);
-			print(smokeCnt);	
 		}
 
         if (ratio < 0.2f)
@@ -236,7 +257,14 @@ public class VehicleBody : NetworkBehaviour, IHittable
 
 	public virtual void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
 	{
-		CurHp = Mathf.Max(CurHp - damage, 0);
+		if(CurHp != 0)
+		{
+			CurHp = Mathf.Max(CurHp - damage, 0);
+			if(CurHp == 0)
+			{
+				wreckTimer = TickTimer.CreateFromSeconds(Runner, 3f);
+			}
+		}
 
 		rb.AddForce(force, ForceMode.Impulse);
 		Vector3 diff = point - transform.position;

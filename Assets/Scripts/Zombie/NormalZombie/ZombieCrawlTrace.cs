@@ -160,7 +160,7 @@ public class ZombieCrawlTrace : ZombieState
 				if (attackTimer.Expired(owner.Runner))
 				{
 					attackTimer = TickTimer.None;
-					owner.Attack(3 * (attackShifter + 1));
+					owner.Heal(3 * (attackShifter + 1));
 				}
 				owner.SetAnimFloat("SpeedY", 0f, 1f);
 			});

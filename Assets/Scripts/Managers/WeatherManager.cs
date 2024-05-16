@@ -2,6 +2,7 @@
 using DistantLands.Cozy.Data;
 using Fusion;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,10 +32,14 @@ public class WeatherManager : NetworkBehaviour
 	[SerializeField] int initHour = 9;
 	[SerializeField] int initMinute = 0;
 	[SerializeField] float timeSpeed = 5f;
+
 	CozyWeather cozyWeather;
 	TickTimer weatherChangeTimer;
 
 	int visualWeatherCnt;
+
+	public event Action<WeatherType, float> OnWeatherChanged;
+
 	[Networked, OnChangedRender(nameof(WeatherRender))] public int WeatherCnt { get; private set; }
 	[Networked] public int TargetTick { get; private set; }
 	[Networked] public int WeatherIdx { get; private set; }
@@ -49,7 +54,6 @@ public class WeatherManager : NetworkBehaviour
 
 		GameManager.Weather = this;
 		cozyWeather = GetComponent<CozyWeather>();
-		print(timeSpeed);
 	}
 
 	private void OnDestroy()
@@ -65,15 +69,23 @@ public class WeatherManager : NetworkBehaviour
 		if(visualWeatherCnt < WeatherCnt)
 		{
 			float leftTime = (TargetTick - Runner.Tick) / Runner.TickRate;
-			if(leftTime < 0)
-			{
-				cozyWeather.weatherModule.Ecosystem.SetWeather(weatherDatas[WeatherIdx].profile);
-			}
-			else
-			{
-				cozyWeather.weatherModule.Ecosystem.SetWeather(weatherDatas[WeatherIdx].profile, leftTime);
-			}
+			leftTime = Mathf.Max(leftTime, 0);
+			cozyWeather.weatherModule.Ecosystem.SetWeather(weatherDatas[WeatherIdx].profile, leftTime);
+			StartCoroutine(CoInvokeEvent(leftTime * 0.5f));
 		}
+	}
+
+	public void GetCurWeatherInfo(out WeatherType type, out float strength)
+	{
+		type = weatherDatas[WeatherIdx].type;
+		strength = weatherDatas[WeatherIdx].strength;
+	}
+
+	private IEnumerator CoInvokeEvent(float invokeTime)
+	{
+		yield return new WaitForSeconds(invokeTime);
+		GetCurWeatherInfo(out WeatherType type, out float strength);
+		OnWeatherChanged?.Invoke(type, strength);
 	}
 
 	public override void Spawned()

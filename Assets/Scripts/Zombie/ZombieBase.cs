@@ -16,7 +16,7 @@ public struct BoneTransform
 }
 
 [RequireComponent(typeof(ZombieAnimEvent))]
-public abstract class ZombieBase : NetworkBehaviour
+public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 {
 	[SerializeField] TextMeshProUGUI curStateText;
 
@@ -34,6 +34,9 @@ public abstract class ZombieBase : NetworkBehaviour
 	[SerializeField] protected GameObject headBloodVFX;
 	[SerializeField] protected GameObject bodyBloodVFX;
 	[SerializeField] protected int maxHp = 400;
+
+	protected float lookDistMul = 1f;
+	protected float viewAngleMul = 1f;
 
 	private TickTimer destinationTimer;
 	public TickTimer PlayerFindTimer { get; set; }
@@ -65,8 +68,9 @@ public abstract class ZombieBase : NetworkBehaviour
 	public LayerMask AttackTargetMask { get; private set; }
 	public LayerMask HittableMask { get; private set; }
 	public LayerMask FindObstacleMask { get; private set; }
-	//public int PlayerLayer { get; private set; }
-	//public int VehicleLayer { get; private set; }
+	public LayerMask VehicleFindObstacleMask { get; private set; }
+	public int PlayerLayer { get; private set; }
+	public int VehicleLayer { get; private set; }
 	#endregion
 
 	public TargetData TargetData { get; private set; }
@@ -93,8 +97,9 @@ public abstract class ZombieBase : NetworkBehaviour
 		HittableMask = LayerMask.GetMask("Player", "Vehicle", "Breakable");
 		AttackTargetMask = LayerMask.GetMask("Player", "Vehicle");
 		FindObstacleMask = LayerMask.GetMask("Default", "Environment", "Vehicle", "Breakable");
-		//PlayerLayer = LayerMask.NameToLayer("Player");
-		//VehicleLayer = LayerMask.NameToLayer("Vehicle");
+		VehicleFindObstacleMask = LayerMask.GetMask("Default", "Environment", "Breakable");
+		PlayerLayer = LayerMask.NameToLayer("Player");
+		VehicleLayer = LayerMask.NameToLayer("Vehicle");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
 
@@ -144,9 +149,9 @@ public abstract class ZombieBase : NetworkBehaviour
 
 	private void FindPlayer()
 	{
-		if (AttackTargetMask.IsLayerInMask(TargetData.Layer)) return;
+		if (TargetData.IsTargeting == true && TargetData.Layer == PlayerLayer) return;
 		if (PlayerFindTimer.ExpiredOrNotRunning(Runner) == false) return;
-		int result = Physics.OverlapSphereNonAlloc(transform.position, lookDist, overlapCols, PlayerMask);
+		int result = Physics.OverlapSphereNonAlloc(transform.position, lookDist * lookDistMul, overlapCols, PlayerMask);
 
 		if (result == 0)
 		{
@@ -154,13 +159,15 @@ public abstract class ZombieBase : NetworkBehaviour
 			return;
 		}
 
-		Transform findPlayer = overlapCols[0].transform;
-		Vector3 toPlayerVec = ((findPlayer.position + Vector3.up) - Eyes.position);
+		Transform findTrans = overlapCols[0].transform;
+		Vector3 toPlayerVec = ((findTrans.position + Vector3.up) - Eyes.position);
 		Vector3 toPlayerDir = toPlayerVec.normalized;
 		float length = toPlayerVec.magnitude;
-		if (Vector3.Dot(toPlayerDir, Eyes.forward) > Mathf.Cos(viewAngle * Mathf.Deg2Rad))
+
+		LayerMask mask = TargetData.Layer == VehicleLayer ? VehicleFindObstacleMask : FindObstacleMask;
+		if (length < 3f || Vector3.Dot(toPlayerDir, Eyes.forward) > Mathf.Cos(viewAngle * viewAngleMul * Mathf.Deg2Rad))
 		{
-			if (Physics.Raycast(Eyes.position, toPlayerDir, length, FindObstacleMask) == false)
+			if (Physics.Raycast(Eyes.position, toPlayerDir, length, mask) == false)
 			{
 				TargetData.SetTarget(overlapCols[0].transform, Runner.Tick);
 				if (agent.enabled)
@@ -188,7 +195,7 @@ public abstract class ZombieBase : NetworkBehaviour
 
 		Vector3 toTargetVec = ((TargetData.Position + Vector3.up) - Eyes.position);
 		float toTargetMag = toTargetVec.magnitude;
-		if (toTargetMag < lookDist * 2f)
+		if (toTargetMag < lookDist * lookDistMul * 2f)
 		{
 			if (Physics.Raycast(Eyes.position, toTargetVec.normalized, toTargetMag, FindObstacleMask) == false)
 			{
@@ -405,5 +412,36 @@ public abstract class ZombieBase : NetworkBehaviour
 			curPos = nextPos;
 		}
 		return true;
+	}
+
+	public void AfterSpawned()
+	{
+		GameManager.Weather.GetCurWeatherInfo(out WeatherType type, out float strength);
+		WeatherChanged(type, strength);
+		GameManager.Weather.OnWeatherChanged += WeatherChanged;
+	}
+
+	public override void Despawned(NetworkRunner runner, bool hasState)
+	{
+		base.Despawned(runner, hasState);
+		GameManager.Weather.OnWeatherChanged -= WeatherChanged;
+	}
+
+	public void WeatherChanged(WeatherType type, float strength)
+	{
+		switch(type)
+		{
+			case WeatherType.Sunny:
+				lookDistMul = 1f;
+				viewAngleMul = 1f;
+				break;
+			case WeatherType.Fog:
+			case WeatherType.Rain:
+			case WeatherType.Snow:
+			case WeatherType.Storm:
+				lookDistMul = Mathf.Lerp(0.9f, 0.5f, strength);
+				viewAngleMul = Mathf.Lerp(0.9f, 0.5f, strength);
+				break;
+		}
 	}
 }

@@ -10,7 +10,6 @@ public class VFXAutoOff : MonoBehaviour
 
 	protected float elapsed = 0f;
 
-
 	protected virtual void Awake()
 	{
 		initOffTime = offTime;

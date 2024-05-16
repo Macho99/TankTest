@@ -135,6 +135,8 @@ public class TankAttack : TankBehaviour
 
 	private void SetTargetPos(Vector3 camForward)
 	{
+		if (followCam == null) return;
+
 		if(Physics.Raycast(followCam.transform.position, camForward, 
 			out RaycastHit hitInfo, MAX_DIST, hitMask) == true)
 		{
@@ -345,16 +347,19 @@ public class TankAttack : TankBehaviour
 
 	protected override void OnAssign(TestPlayer player)
 	{
-		if (player.HasInputAuthority && Runner.IsForward)
+		if (player.HasInputAuthority)
 		{
-			attackUI = GameManager.UI.ShowSceneUI(attackUIPrefab);
-			attackUI.Init(finalAcc, LoadedShell);
+			if(attackUI == null)
+			{
+				attackUI = GameManager.UI.ShowSceneUI(attackUIPrefab);
+				attackUI.Init(finalAcc, LoadedShell);
+			}
 		}
 	}
 
 	protected override void OnGetOff()
 	{
-		if (HasInputAuthority && Runner.IsForward)
+		if (attackUI != null)
 		{
 			GameManager.UI.CloseSceneUI(attackUI);
 			attackUI = null;
