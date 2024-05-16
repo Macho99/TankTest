@@ -73,6 +73,9 @@ public class BruteDefenceTrace : BruteZombieState
 
 	private void ChangeToTrace()
 	{
+		if (owner.IsAnimName("DefenceLoop", 1) == false) return;
+
+		owner.DefenceCooltimer = TickTimer.CreateFromSeconds(owner.Runner, 10f);
 		owner.SetAnimInt("Defence", 0);
 		owner.AnimWaitStruct = new AnimWaitStruct("DefenceEnd", BruteZombie.State.Trace.ToString(), 1,
 			updateAction: () =>

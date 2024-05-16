@@ -164,10 +164,9 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 		Vector3 toPlayerDir = toPlayerVec.normalized;
 		float length = toPlayerVec.magnitude;
 
-		LayerMask mask = TargetData.Layer == VehicleLayer ? VehicleFindObstacleMask : FindObstacleMask;
 		if (length < 3f || Vector3.Dot(toPlayerDir, Eyes.forward) > Mathf.Cos(viewAngle * viewAngleMul * Mathf.Deg2Rad))
 		{
-			if (Physics.Raycast(Eyes.position, toPlayerDir, length, mask) == false)
+			if (Physics.Raycast(Eyes.position, toPlayerDir, length, FindObstacleMask) == false)
 			{
 				TargetData.SetTarget(overlapCols[0].transform, Runner.Tick);
 				if (agent.enabled)
@@ -193,11 +192,12 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 
 		if (AttackTargetMask.IsLayerInMask(TargetData.Layer) == false) return;
 
+		LayerMask mask = TargetData.Layer == VehicleLayer ? VehicleFindObstacleMask : FindObstacleMask;
 		Vector3 toTargetVec = ((TargetData.Position + Vector3.up) - Eyes.position);
 		float toTargetMag = toTargetVec.magnitude;
 		if (toTargetMag < lookDist * lookDistMul * 2f)
 		{
-			if (Physics.Raycast(Eyes.position, toTargetVec.normalized, toTargetMag, FindObstacleMask) == false)
+			if (Physics.Raycast(Eyes.position, toTargetVec.normalized, toTargetMag, mask) == false)
 			{
 				TargetData.LastFindTick = Runner.Tick;
 			}

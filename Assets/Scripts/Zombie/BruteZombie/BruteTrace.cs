@@ -38,6 +38,8 @@ public class BruteTrace : BruteZombieState
 
 	private void ChangeToDefence()
 	{
+		if (owner.DefenceCooltimer.ExpiredOrNotRunning(owner.Runner) == false) return;
+
 		owner.Shield.ResetHp();
 		ChangeState(BruteZombie.State.DefenceTrace);
 	}

@@ -60,6 +60,7 @@ public class BruteZombie : ZombieBase
 	public TickTimer DashTimer { get; set; }
 	public TickTimer JumpTimer { get; set; }
 	public TickTimer StoneTimer { get; set; }
+	public TickTimer DefenceCooltimer { get; set; }
 
 	public float NormalAttackDist { get { return normalAttackDist; } }
 	public BruteShield Shield { get; private set; }
