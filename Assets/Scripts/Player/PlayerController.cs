@@ -19,7 +19,7 @@ public class PlayerController : NetworkBehaviour
 
     public WeaponController weaponController { get; private set; }
     private LocalPlayerDebugUI LocaldebugUI;
-
+    public PlayerMainUI mainUI { get; private set; }
     [Networked] public float VelocityY { get; set; }
     private void Awake()
     {
@@ -46,7 +46,10 @@ public class PlayerController : NetworkBehaviour
         VelocityY = 0f;
         name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
 
-
+        if (HasInputAuthority)
+        {
+            mainUI = GameManager.UI.ShowSceneUI<PlayerMainUI>("UI/PlayerUI/PlayerMainUI");
+        }
 
 
     }

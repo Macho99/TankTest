@@ -6,28 +6,17 @@ using Unity.VisualScripting;
 using UnityEngine;
 public enum PlayerStatType { HPGauge, ThirstGauge, HungerGauge, PoisoningGauge, Size }
 
-public class PlayerStat : NetworkBehaviour, IHittable
+public class PlayerStat : NetworkBehaviour, IHittable,IAfterSpawned
 {
     [Networked, Capacity((int)PlayerStatType.Size), OnChangedRender(nameof(UpdateStat))] public NetworkArray<PlayerStatData> statData { get; }
-   
+
 
     private PlayerMainUI mainUI;
     public long HitID { get; }
     public override void Spawned()
     {
 
-        if (HasInputAuthority)
-        {
-            mainUI = GameManager.UI.ShowSceneUI<PlayerMainUI>("UI/PlayerUI/PlayerMainUI");
-            for (int i = 0; i < statData.Length; i++)
-            {
-                statData.Set(i, new PlayerStatData(100, 100));
-                mainUI.UpdateStat((PlayerStatType)i, statData[i].currentValue, statData[i].maxValue);
-            }
-
-
-
-        }
+  
     }
     public override void Render()
     {
@@ -35,16 +24,16 @@ public class PlayerStat : NetworkBehaviour, IHittable
     }
     public override void FixedUpdateNetwork()
     {
-        if (GetInput(out NetworkInputData input))
-        {
-            if (input.buttons.IsSet(ButtonType.Attack))
-            {
-                PlayerStatData newData = statData[(int)PlayerStatType.HPGauge];
-                newData.currentValue -= 1;
-                statData.Set((int)PlayerStatType.HPGauge, newData);
-                mainUI?.UpdateStat(PlayerStatType.HPGauge, newData.currentValue, newData.maxValue);
-            }
-        }
+        //if (GetInput(out NetworkInputData input))
+        //{
+        //    if (input.buttons.IsSet(ButtonType.Attack))
+        //    {
+        //        PlayerStatData newData = statData[(int)PlayerStatType.HPGauge];
+        //        newData.currentValue -= 1;
+        //        statData.Set((int)PlayerStatType.HPGauge, newData);
+        //        mainUI?.UpdateStat(PlayerStatType.HPGauge, newData.currentValue, newData.maxValue);
+        //    }
+        //}
     }
 
     public bool Health(PlayerStatType playerStatType, int Helath)
@@ -74,6 +63,18 @@ public class PlayerStat : NetworkBehaviour, IHittable
 
     }
 
+    public void AfterSpawned()
+    {
+        if (HasInputAuthority)
+        {
+            mainUI = GetComponent<PlayerController>().mainUI;
+            for (int i = 0; i < statData.Length; i++)
+            {
+                statData.Set(i, new PlayerStatData(100, 100));
+                mainUI.UpdateStat((PlayerStatType)i, statData[i].currentValue, statData[i].maxValue);
+            }
+        }
+    }
 }
 public struct PlayerStatData : INetworkStruct
 {

@@ -21,7 +21,7 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
     Vector2Accumulator lookAccum = new Vector2Accumulator(0.02f, true);
     public void BeforeUpdate()
     {
-        playerInput.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
+        
         lookAccum.Accumulate(Mouse.current.delta.ReadValue());
         //playerInput.mouseDelta = Mouse.current.delta.ReadValue();
        
@@ -87,6 +87,7 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
 
     void INetworkRunnerCallbacks.OnInput(NetworkRunner runner, NetworkInput input)
     {
+        playerInput.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
         playerInput.buttons.Set(ButtonType.Run, playerControls.Player.Run.IsPressed());
         playerInput.buttons.Set(ButtonType.Jump, playerControls.Player.Jump.IsPressed());
         playerInput.buttons.Set(ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());

@@ -15,6 +15,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
     [SerializeField] private MultiAimConstraint handAimIK;
     [SerializeField] private TwoBoneIKConstraint subHandIK;
     [SerializeField] private BasicCamController camController;
+    private PlayerController controller;
     [SerializeField, Capacity((int)AmmoType.Size)] public Ammo netAmmo { get; }
     private PlayerAnimEvent animEvent;
     private Animator animator;
@@ -24,12 +25,15 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
     [SerializeField] private WeaponPivotData[] weaponPivotData;
     private int weaponIndexOffset;
     [Networked] public WeaponSwichingState swichingState { get; private set; }
+
+    private PlayerMainUI mainUI;
     private void Awake()
     {
         animEvent = GetComponent<PlayerAnimEvent>();
         inputListner = GetComponent<PlayerInputListner>();
         animator = GetComponent<Animator>();
         weaponIndexOffset = (int)EquipmentType.Rifle;
+
 
     }
     public override void Spawned()
@@ -38,6 +42,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
         {
             equipment.onMainWeaponUpdate += UpdateWeapon;
         }
+
     }
     public override void FixedUpdateNetwork()
     {
@@ -108,7 +113,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
                     Ray ray = new Ray();
                     ray.origin = camController.RayCasterTr.position;
                     ray.direction = camController.RayCasterTr.forward;
-                    if (Physics.Raycast(ray, out RaycastHit hit, 100))
+                    if (Physics.Raycast(ray, out RaycastHit hit, 1000))
                     {
                         ((Gun)localWeapon).SetShotPoint(hit.point);
                         Debug.DrawLine(ray.origin, hit.point, Color.green);
@@ -118,7 +123,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
                         ((Gun)localWeapon).SetShotPoint(Vector3.zero);
                     }
 
-                  
+
                     animEvent.onFire += localWeapon.Attack;
                 }
                 animator.SetTrigger("Attack");
@@ -160,7 +165,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
                     animator.SetLayerWeight((int)((WeaponItemSO)localWeapon.ItemData).AnimLayerType, 0f);
 
                 }
-
+                mainUI.ChangeWeaponUI(null);
 
 
             }
@@ -173,6 +178,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
             if (localWeapon == null)
             {
                 localWeapon = netMainWeapon;
+                mainUI.ChangeWeaponUI(localWeapon);
                 SetupMainWeapon();
             }
             else
@@ -191,6 +197,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
                 SetupMainWeapon();
 
             }
+        
         }
 
     }
@@ -229,6 +236,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
     private void SetupMainWeapon()
     {
         localWeapon = netMainWeapon;
+        mainUI.ChangeWeaponUI(localWeapon);
         animator.SetTrigger("Draw");
         localWeapon.SetTarget(subHandIK.data.target);
         animator.SetFloat("WeaponIndex", (float)((WeaponItemSO)localWeapon.ItemData).AnimLayerType);
@@ -313,6 +321,10 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
     public void AfterSpawned()
     {
         UpdateMainWeapon();
+        if (HasInputAuthority)
+        {
+            mainUI = GetComponent<PlayerController>().mainUI;
+        }
     }
     public int WeaponPivotIndex()
     {

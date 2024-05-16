@@ -10,6 +10,7 @@ public class Rifle : Gun
     {
         base.Attack();
 
+        isFireTrigger = !isFireTrigger;
         Ray ray = new Ray();
         ray.origin = muzzlePoint.transform.position;
         float distance = 0f;
@@ -24,11 +25,25 @@ public class Rifle : Gun
             distance = Vector3.Distance(targetPoint, muzzlePoint.transform.position);
         }
 
-        if (Physics.Raycast(ray, out RaycastHit hit, distance, LayerMask.GetMask("Monster")))
+        if (Physics.Raycast(ray, out RaycastHit hit, distance))
         {
-            if (hit.collider.TryGetComponent(out IHittable hittable))
+            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Monster"))
             {
-                hittable.ApplyDamage(owner.transform, hit.point, ray.direction * 2f, ((WeaponItemSO)itemData).Damage);
+                if (hit.collider.TryGetComponent(out IHittable hittable))
+                {
+                    hittable.ApplyDamage(owner.transform, hit.point, ray.direction * 2f, ((WeaponItemSO)itemData).Damage);
+                }
+            }
+            else
+            {
+                GameObject imaptPrefab = GameManager.Resource.Load<GameObject>("FX/Particle/DirtImpact");
+
+                GameObject impact = GameManager.Pool.Get(imaptPrefab);
+
+                impact.transform.position = hit.point;
+                impact.transform.rotation = Quaternion.FromToRotation(impact.transform.forward, hit.normal);
+
+
             }
         }
 

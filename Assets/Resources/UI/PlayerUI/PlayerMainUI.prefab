@@ -3648,6 +3648,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStatUI: {fileID: 1978821548165315713}
+  mainWeaponUI: {fileID: 7744881979625954685}
 --- !u!1 &5465102974836792436
 GameObject:
   m_ObjectHideFlags: 0
@@ -6309,6 +6310,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4434910219820366238}
+  - component: {fileID: 7744881979625954685}
   - component: {fileID: 6192744470894956119}
   m_Layer: 5
   m_Name: MainWeaponUI
@@ -6339,6 +6341,52 @@ RectTransform:
   m_AnchoredPosition: {x: -10, y: 10}
   m_SizeDelta: {x: 468.926, y: 292.8477}
   m_Pivot: {x: 1, y: 0}
+--- !u!114 &7744881979625954685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8779057469215819149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 859d05434984fcb4183d6a41b90a1246, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponNameTMP: {fileID: 7316385537849053574}
+  weaponImage: {fileID: 8278182845477199648}
+  ammoCount: {fileID: 4237113261425039961}
+  ammoImages:
+  - {fileID: 8657943812137997588}
+  - {fileID: 7578322232420285126}
+  - {fileID: 6946702173918704721}
+  - {fileID: 101627187549863145}
+  - {fileID: 1105229295970168271}
+  - {fileID: 8635274139483815132}
+  - {fileID: 6383809040897351844}
+  - {fileID: 3482365312700267019}
+  - {fileID: 3178871009886455408}
+  - {fileID: 7666595767209311017}
+  - {fileID: 2917850357747600209}
+  - {fileID: 7481338593671500182}
+  - {fileID: 2802454941658681650}
+  - {fileID: 5837360271756274689}
+  - {fileID: 1228431340240671893}
+  - {fileID: 7135281999813496711}
+  - {fileID: 8947421196907099186}
+  - {fileID: 8220372941874542528}
+  - {fileID: 3732492718576607318}
+  - {fileID: 908938427497629560}
+  - {fileID: 728066490275029134}
+  - {fileID: 3416118819131161353}
+  - {fileID: 4368527976234158853}
+  - {fileID: 2366704794896263942}
+  - {fileID: 3072402840246293121}
+  - {fileID: 8343174559127104578}
+  - {fileID: 3147093027740555289}
+  - {fileID: 6253838360738683732}
+  - {fileID: 2966005511349494334}
+  - {fileID: 3381102776061332477}
 --- !u!114 &6192744470894956119
 MonoBehaviour:
   m_ObjectHideFlags: 0
