@@ -7,8 +7,8 @@ using WebSocketSharp;
 
 public class ShatterObstacle : BreakableObstacle
 {
-	const float fadeWaitDuration = 3f;
-	const float fadeDuration = 5f;
+	const float fadeWaitDuration = 5f;
+	const float fadeDuration = 10f;
 	public enum ColliderType { Mesh, Box }
 
 	[SerializeField] public int fragmentCnt = 5;
@@ -40,28 +40,6 @@ public class ShatterObstacle : BreakableObstacle
 		}
 	}
 
-	private IEnumerator CoFade()
-	{
-		yield return new WaitForSeconds(fadeWaitDuration);
-		curScale = 0.9f;
-
-		while (true)
-		{
-			float nextScale = curScale - Time.deltaTime / fadeDuration;
-			if(nextScale < 0)
-			{
-				break;
-			}
-
-			debrisRoot.SetChildrenScale(nextScale);
-			curScale = nextScale;
-			yield return null;
-		}
-
-		Destroy(debrisRoot);
-		debrisRoot = null;
-	}
-
 	protected override void Break(bool immediately = false)
 	{
 		base.Break(immediately);
@@ -77,7 +55,8 @@ public class ShatterObstacle : BreakableObstacle
 		if(immediately == false)
 		{
 			debrisRoot = Instantiate(debrisRootPrefab, transform.position, transform.rotation, transform);
-			StartCoroutine(CoFade());
+			debrisRoot.Init(fadeWaitDuration, fadeDuration);
+			debrisRoot.OnDestoyEvent += () => { debrisRoot = null; };
 		}
 	}
 

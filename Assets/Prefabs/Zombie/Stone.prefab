@@ -107,10 +107,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   childCol: {fileID: 193791207832049411}
   damage: 500
-  _OwnerId:
-    Raw: 0
-  _Velocity: {x: 0, y: 0, z: 0}
-  _AngularVelocity: {x: 0, y: 0, z: 0}
+  _Owner: {fileID: 0}
 --- !u!33 &1768942680276925798
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -174,7 +171,7 @@ MeshCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -202,7 +199,7 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1

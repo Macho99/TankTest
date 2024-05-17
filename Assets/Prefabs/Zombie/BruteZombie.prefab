@@ -2315,6 +2315,61 @@ CapsuleCollider:
   m_Height: 0.42882213
   m_Direction: 0
   m_Center: {x: -0.21441106, y: 0, z: 0}
+--- !u!1 &5498700289195289345
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6358239788201591025}
+  - component: {fileID: 5948555613545275427}
+  m_Layer: 0
+  m_Name: Col
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6358239788201591025
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5498700289195289345}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 65300635177858990}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &5948555613545275427
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5498700289195289345}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.3
+  m_Height: 1.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &5633506191026877428
 GameObject:
   m_ObjectHideFlags: 0
@@ -3130,6 +3185,7 @@ GameObject:
   - component: {fileID: 2607497030365026539}
   - component: {fileID: 1968710985610841132}
   - component: {fileID: 3156337967576832378}
+  - component: {fileID: 5377491491953148377}
   m_Layer: 8
   m_Name: BruteZombie
   m_TagString: Untagged
@@ -3153,6 +3209,7 @@ Transform:
   - {fileID: 6508896970940319862}
   - {fileID: 7744169376174839988}
   - {fileID: 7669717072969121008}
+  - {fileID: 6358239788201591025}
   - {fileID: 7454731566139563227}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3169,24 +3226,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   curStateText: {fileID: 1836557425780192473}
+  mass: 40000
   viewAngle: 45
   lookDist: 40
   playerLostTime: 7
   headBloodVFX: {fileID: 2281759223855658892, guid: 5c48a4ba1a920cf409e160836fdfdcd2, type: 3}
   bodyBloodVFX: {fileID: 8428142431305946562, guid: 4eb841424a674594fb38c97285efa16a, type: 3}
-  maxHp: 10000
+  maxHp: 50000
   _Position: {x: 0, y: 0, z: 0}
   _Rotation: {x: 0, y: 0, z: 0, w: 0}
   _HitBody: 0
   _HitPoint: {x: 0, y: 0, z: 0}
-  _HitVelocity: {x: 0, y: 0, z: 0}
+  _HitForce: {x: 0, y: 0, z: 0}
   _HitCnt: 0
   lookTarget: {fileID: 684993146206104000}
   lookRig: {fileID: 6411851407304208436}
   lookSpeed: 1
   shieldHolder: {fileID: 7650069388194900635}
   stoneHolder: {fileID: 1585727901842737398}
-  normalAttackDist: 3
+  normalAttackDist: 4
   twoHandGroundCooltime: 10
   dashCooltime: 20
   dashDist: 15
@@ -3323,6 +3381,20 @@ MonoBehaviour:
   - {fileID: 4426643740252212193}
   - {fileID: 8889207041331644727}
   - {fileID: 5230454597486209998}
+--- !u!114 &5377491491953148377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7968848703890012857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 595463949e38c3547b7b827b75114fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swingScale: 3
+  force: 20000
 --- !u!1 &8303466360944016210
 GameObject:
   m_ObjectHideFlags: 0
@@ -3518,8 +3590,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uD604\uC7AC \uC0C1\uD0DC: \nSpeed X : \nSpeed Y :\nTarget : null"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: da2783ba7d3a1af4a911ed816bda92dc, type: 2}
-  m_sharedMaterial: {fileID: -6754948330605757506, guid: da2783ba7d3a1af4a911ed816bda92dc, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8477f3c1a9567dd4e858870ac8981f41, type: 2}
+  m_sharedMaterial: {fileID: 7153055336002728205, guid: 8477f3c1a9567dd4e858870ac8981f41, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

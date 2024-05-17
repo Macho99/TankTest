@@ -77,8 +77,8 @@ public class BruteTrace : BruteZombieState
 		}
 
 		//플레이어가 좁은 건물로 들어갈 경우
-		//if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
-		if (owner.Agent.pathStatus == NavMeshPathStatus.PathPartial)
+		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
+		//if (owner.Agent.pathStatus == NavMeshPathStatus.PathPartial)
 		{
 			if (owner.TargetData.Distance > 5f)
 			{
@@ -147,14 +147,15 @@ public class BruteTrace : BruteZombieState
 				}
 			}
 		}
-		if (targetData.Distance < owner.NormalAttackDist || owner.TargetData.CheckObstacleAttack(owner.transform.position) == true)
+		if (targetData.Distance < owner.NormalAttackDist || 
+			owner.TargetData.CheckObstacleAttack(owner.transform.position, owner.NormalAttackDist) == true)
 		{
 			BruteZombie.AttackType attackType;
-			if (targetData.Angle > 90f)
+			if (targetData.AbsAngle > 90f)
 			{
 				attackType = BruteZombie.AttackType.Back;
 			}
-            else if(targetData.Angle > 30f)
+            else if(targetData.AbsAngle > 30f)
             {
 				attackType = targetData.Sign < 0f ? BruteZombie.AttackType.LeftFoot : BruteZombie.AttackType.RightFoot;
             }

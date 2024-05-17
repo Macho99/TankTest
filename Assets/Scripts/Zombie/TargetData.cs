@@ -74,7 +74,7 @@ public class TargetData
 		AbsAngle = Mathf.Abs(Angle);
 	}
 
-	public bool CheckObstacleAttack(Vector3 ownerPosition)
+	public bool CheckObstacleAttack(Vector3 ownerPosition, float attackDist = 1f)
 	{
 		if (Distance > 7f)
 			return false;
@@ -84,7 +84,7 @@ public class TargetData
 
 		Vector3 offset = Vector3.up * 0.1f;
 
-		int ownerResult = Physics.RaycastNonAlloc(ownerPosition + offset, -obstacleDir, ownerHits, 1f, obstacleMask);
+		int ownerResult = Physics.RaycastNonAlloc(ownerPosition + offset, -obstacleDir, ownerHits, attackDist, obstacleMask);
 		if (ownerResult == 0) return false;
 
 		int targetResult = Physics.RaycastNonAlloc(Position + offset, obstacleDir, targetHits, 1f, obstacleMask);

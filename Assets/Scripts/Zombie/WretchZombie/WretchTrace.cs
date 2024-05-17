@@ -54,7 +54,7 @@ public class WretchTrace : WretchZombieState
 			}
 			else if(owner.CurPoisonVFXData.fireTick == 0)
 			{
-				if (owner.CheckProjectile(owner.HeadTrans.position, owner.Agent.pathEndPosition,
+				if (owner.CheckProjectile(owner.HeadTrans.position, owner.TargetData.Position,
 					out Vector3 velocity, 1f, owner.PoisonSpeed, owner.PoisonGravity,
 					LayerMask.GetMask("Default", "Breakable", "Environment")) == true)
 				{

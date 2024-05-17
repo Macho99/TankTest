@@ -65,6 +65,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 	#region LayerAndMask
 	public LayerMask EnvironMask { get; private set; }
 	public LayerMask PlayerMask { get; private set; }
+	public LayerMask VehicleMask { get; private set; }
 	public LayerMask AttackTargetMask { get; private set; }
 	public LayerMask HittableMask { get; private set; }
 	public LayerMask FindObstacleMask { get; private set; }
@@ -94,6 +95,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 		CurHp = MaxHP;
 		EnvironMask = LayerMask.GetMask("Default", "EnvironMask");
 		PlayerMask = LayerMask.GetMask("Player");
+		VehicleMask = LayerMask.GetMask("Vehicle");
 		HittableMask = LayerMask.GetMask("Player", "Vehicle", "Breakable");
 		AttackTargetMask = LayerMask.GetMask("Player", "Vehicle");
 		FindObstacleMask = LayerMask.GetMask("Default", "Environment", "Vehicle", "Breakable");
@@ -197,9 +199,17 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 		float toTargetMag = toTargetVec.magnitude;
 		if (toTargetMag < lookDist * lookDistMul * 2f)
 		{
-			if (Physics.Raycast(Eyes.position, toTargetVec.normalized, toTargetMag, mask) == false)
+			if (Physics.Raycast(Eyes.position, toTargetVec.normalized, out RaycastHit hit, toTargetMag, mask) == false)
 			{
 				TargetData.LastFindTick = Runner.Tick;
+			}
+			//플레이어가 차량에 탑승할 경우 타겟을 차량으로 변경
+			else if(hit.collider.gameObject.layer == VehicleLayer && TargetData.Layer == PlayerLayer)
+			{
+				if (Physics.Raycast(TargetData.Position + Vector3.up * 5f, Vector3.down, 5f, VehicleMask) == true)
+				{
+					TargetData.SetTarget(hit.transform, Runner.Tick);
+				}
 			}
 		}
 
