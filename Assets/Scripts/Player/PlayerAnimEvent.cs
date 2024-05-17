@@ -10,6 +10,7 @@ public class PlayerAnimEvent : MonoBehaviour
     public event Action onStartPutWeapon;
     public event Action onEndPutWeapon;
     public event Action onFire;
+    public event Action onEndReload;
     public void OnStartDrawWeapon()
     {
         // equipment;
@@ -40,6 +41,11 @@ public class PlayerAnimEvent : MonoBehaviour
     {
         onFire?.Invoke();
         onFire = null;
-
+    }
+    public void OnEndReload()
+    {
+        onEndReload?.Invoke();
+        onEndReload = null;
     }
 }
+

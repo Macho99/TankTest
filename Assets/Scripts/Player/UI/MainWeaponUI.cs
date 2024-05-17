@@ -19,7 +19,8 @@ public class MainWeaponUI : MonoBehaviour
     {
         if (weapon == null)
         {
-            this.gameObject.SetActive(true);
+            this.gameObject.SetActive(false);
+            return;
         }
         else
         {

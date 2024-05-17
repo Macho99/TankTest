@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum WeaponState { None, Reload, Put, Draw, Shot }
 public abstract class Weapon : EquipmentItem
 {
 
@@ -10,7 +11,7 @@ public abstract class Weapon : EquipmentItem
     protected Transform target;
     public Transform SubHandTarget
     { get { return subHandTarget; } }
-
+    [Networked] public WeaponState weaponState { get; protected set; }
 
     public bool IsTarget { get { return target != null; } }
     public void SetTarget(Transform subTarget)
@@ -33,6 +34,7 @@ public abstract class Weapon : EquipmentItem
         {
             target = null;
         }
+        weaponState = WeaponState.None;
     }
 
     public override void Render()
@@ -46,7 +48,10 @@ public abstract class Weapon : EquipmentItem
             }
         }
     }
-
+    public void ChangeState(WeaponState state)
+    {
+        this.weaponState = state;
+    }
 
 }
 

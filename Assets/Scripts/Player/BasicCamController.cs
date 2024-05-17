@@ -39,25 +39,26 @@ public class BasicCamController : NetworkBehaviour
         }
         ChangeCamera(CameraType.None);
     }
-    public float RotateX(NetworkInputData input)
+    public float RotateX(NetworkInputData input,float rotX)
     {
         float mouseDeltaY = input.mouseDelta.y * rotateYSpeed * Runner.DeltaTime;
 
 
-        float camAngleX = followTarget.transform.eulerAngles.x;
-        float rotX = camAngleX - mouseDeltaY;
+        //float camAngleX = followTarget.transform.eulerAngles.x;
+        float newRotX = rotX - mouseDeltaY;
 
-        if (rotX < 180f)
-        {
-            rotX = Mathf.Clamp(rotX, -1f, 70f);
-        }
-        else
-        {
-            rotX = Mathf.Clamp(rotX, 320f, 361f);
-        }
+        newRotX = Mathf.Clamp(newRotX, -40, 40);
+        //if (newRotX < 180f)
+        //{
+        //    newRotX = Mathf.Clamp(newRotX, -1f, 70f);
+        //}
+        //else
+        //{
+        //    newRotX = Mathf.Clamp(newRotX, 320f, 361f);
+        //}
 
 
-        return rotX;
+        return newRotX;
     }
 
 

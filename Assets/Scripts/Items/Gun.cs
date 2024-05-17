@@ -6,8 +6,11 @@ using static Fusion.NetworkBehaviour;
 
 public abstract class Gun : Weapon
 {
-    [Networked, OnChangedRender(nameof(OnFire))] protected bool isFireTrigger { get; set; }
-    [SerializeField] protected NetworkPrefabRef muzzlePlashPrefab;
+    [Networked, OnChangedRender(nameof(OnFire))] protected int isFireTrigger { get; set; } = 0;
+    [Networked] protected Vector3 hitPosition { get; set; }
+    [Networked] protected Quaternion hitRotation { get; set; }
+
+    [SerializeField] protected GameObject muzzlePlashPrefab;
     protected NetworkObject muzzleFlashFx;
     //파츠아이템 
     protected AudioSource audioSource;
@@ -24,33 +27,39 @@ public abstract class Gun : Weapon
     public override void Spawned()
     {
         base.Spawned();
+      
     }
     public void SetShotPoint(Vector3 targetPoint)
     {
         this.targetPoint = targetPoint;
     }
 
+    public Vector3 GetMuzzlePoint()
+    {
+        return muzzlePoint.position;
+    }
 
     public override void Attack()
     {
-        if (muzzleFlashFx != null)
-        {
-            Runner.Despawn(muzzleFlashFx);
-            muzzleFlashFx = null;
-            Debug.Log("디스폰");
-        }
-        audioSource.clip = fireSFX;
-        audioSource.Play();
+        //if (muzzleFlashFx != null)
+        //{
+        //    Runner.Despawn(muzzleFlashFx);
+        //    muzzleFlashFx = null;
+        //}
+        //audioSource.clip = fireSFX;
+        //audioSource.Play();
 
-        if (HasStateAuthority)
-            muzzleFlashFx = Runner.Spawn(muzzlePlashPrefab, muzzlePoint.position, muzzlePoint.rotation);
+        //if (HasStateAuthority)
+        //    muzzleFlashFx = Runner.Spawn(muzzlePlashPrefab, muzzlePoint.position, muzzlePoint.rotation);
 
 
     }
     public override bool CanAttack()
     {
         if (!refireTimer.ExpiredOrNotRunning(Runner))
+        {
             return false;
+        }
 
 
         refireTimer = TickTimer.CreateFromSeconds(Runner, ((GunItemSO)itemData).FireInterval);
@@ -60,8 +69,8 @@ public abstract class Gun : Weapon
 
     public void OnFire()
     {
-        
-        Debug.Log("Play");
+        GameManager.Resource.Instantiate(muzzlePlashPrefab, muzzlePoint.position, muzzlePoint.rotation, true);
+
     }
     public virtual void Reload()
     {

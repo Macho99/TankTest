@@ -69,7 +69,7 @@ public class PlayerInteract : NetworkBehaviour
         ray.origin = raycastTr.position;
         ray.direction = raycastTr.transform.forward;
 
-        Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.red);
+        //Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.red);
         if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
         {
             if (hit.collider.TryGetComponent(out IDetectable detectObject))

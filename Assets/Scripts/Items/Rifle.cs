@@ -1,16 +1,18 @@
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Rifle : Gun
 {
-
     public override void Attack()
     {
         base.Attack();
 
-        isFireTrigger = !isFireTrigger;
+
+        isFireTrigger++;
+
         Ray ray = new Ray();
         ray.origin = muzzlePoint.transform.position;
         float distance = 0f;
@@ -25,33 +27,34 @@ public class Rifle : Gun
             distance = Vector3.Distance(targetPoint, muzzlePoint.transform.position);
         }
 
-        if (Physics.Raycast(ray, out RaycastHit hit, distance))
+        if (Physics.Raycast(ray, out RaycastHit hit, distance + 1f))
         {
-            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Monster"))
+            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Player"))
             {
                 if (hit.collider.TryGetComponent(out IHittable hittable))
                 {
                     hittable.ApplyDamage(owner.transform, hit.point, ray.direction * 2f, ((WeaponItemSO)itemData).Damage);
                 }
+                else
+                {
+                    GameObject impact = GameManager.Resource.Instantiate<GameObject>("FX/Particle/DirtImpact", true);
+
+                    impact.transform.position = hit.point;
+                    impact.transform.rotation = Quaternion.FromToRotation(impact.transform.forward, hit.normal);
+
+                    Debug.Log("공격");
+
+                }
             }
-            else
-            {
-                GameObject imaptPrefab = GameManager.Resource.Load<GameObject>("FX/Particle/DirtImpact");
 
-                GameObject impact = GameManager.Pool.Get(imaptPrefab);
-
-                impact.transform.position = hit.point;
-                impact.transform.rotation = Quaternion.FromToRotation(impact.transform.forward, hit.normal);
-
-
-            }
         }
-
+        Debug.Log("테스트");
         Debug.DrawRay(ray.origin, ray.direction * distance, Color.blue);
 
-        Debug.Log("attack");
+
 
         targetPoint = Vector3.zero;
+        ChangeState(WeaponState.None);
     }
 
 

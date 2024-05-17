@@ -226,4 +226,24 @@ public class Inventory : NetworkBehaviour
         }
     }
 
+    public int GetAmmoItemCount(Gun weapon)
+    {
+
+        Item[] items = Array.FindAll(netItems.ToArray(), (item) =>
+         {
+             if (item == null || item is Ammo == false)
+                 return false;
+
+             return ((GunItemSO)weapon.ItemData).AmmoType == ((AmmoItemSO)item.ItemData).AmmoType;
+
+         });
+
+        int maxCount = 0;
+        foreach (Ammo ammo in items)
+        {
+            maxCount += ammo.currentCount;
+        }
+
+        return maxCount;
+    }
 }

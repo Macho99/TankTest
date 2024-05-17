@@ -1,22 +1,25 @@
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 public enum PlayerStatType { HPGauge, ThirstGauge, HungerGauge, PoisoningGauge, Size }
 
-public class PlayerStat : NetworkBehaviour, IHittable,IAfterSpawned
+public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 {
     [Networked, Capacity((int)PlayerStatType.Size), OnChangedRender(nameof(UpdateStat))] public NetworkArray<PlayerStatData> statData { get; }
 
+    private Animator animator;
 
     private PlayerMainUI mainUI;
-    public long HitID { get; }
+    public long HitID { get { return Object.Id.Raw << 32; } }
+    private void Awake()
+    {
+        animator = GetComponent<Animator>();
+    }
     public override void Spawned()
     {
 
-  
+
     }
     public override void Render()
     {
@@ -60,7 +63,28 @@ public class PlayerStat : NetworkBehaviour, IHittable,IAfterSpawned
 
     public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
     {
+        force.y = 0;
 
+        float angle = Vector3.Angle(transform.forward, force);
+        // 포워드와 force가 0일때 같은방향  x = 0 ,y =1
+        //포워드와 force가 -90일떄 왼쪽방향 x = -1, y = 0;
+
+        Quaternion quat = Quaternion.AngleAxis(angle, Vector3.up);
+
+        Vector3 rot = quat * transform.forward;
+
+        //Quaternion.LookRotation(transform.forward, .normalized);
+        animator.SetFloat("BeshotDirX", rot.x);
+        animator.SetFloat("BeshotDirZ", rot.z);
+        animator.SetTrigger("Hit");
+        animator.applyRootMotion = true;
+        PlayerStatData newStatData = statData[(int)PlayerStatType.HPGauge];
+        newStatData.currentValue -= damage;
+        if (newStatData.currentValue < 0)
+            newStatData.currentValue = 0;
+
+        statData.Set((int)PlayerStatType.HPGauge, newStatData);
+        mainUI?.UpdateStat(PlayerStatType.HPGauge, statData[(int)PlayerStatType.HPGauge].currentValue, statData[(int)PlayerStatType.HPGauge].maxValue);
     }
 
     public void AfterSpawned()

@@ -3015,11 +3015,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Animator: {fileID: 585301397921171120}
-  TotalWords: 21
+  TotalWords: 23
   ApplyTiming: 2
   SyncSettings: -65
-  StateHashes: 000000006bd5a32d398fdc04900f541e8a9e6ef420e23b685928a8ce28a981077af3fe2e48d3833bccf055d4150d3635b049d18a52f6b98561459cb2aa5bac3789ebaf913f74a3b60cc78681ef1c4e8384973a1599449fadf2cfeb3b3adaf4b361160269864151b2f1162235a764597ab5320162767f51e263e68c1274370385374b21af9c943806bab59bd0cced4afee8aaa6a8c5683684326b1c64aa2d92050972707564f06a461d9204fce9ff34f4ed4c7fc9aa8316deed9c65629bc4b44c96901b5d585b400757554d0d281cbc8a459ea6b99f2b3059dd90e985dc5712735042414eb5cea3a20bd4a22c7d8c730293103c14433a319518833f23ee2399a3f164288987fbc8db10df551d7a6c804f3910a265750125106439db9e12610ab0b71583c9ee354823ca98de5c0d713bcbabc2f921c3aff79580ce3e24a7d67f3ee4aa5d14a71ac46fe2e2390f94bae82179d1c9cdc01206a9463e2c6634cfdd963b68df903112c0d0070d7940f1a6ecf8c7b95568
-  TriggerHashes: 00000000b4ecb233ed6cef2b63cb14a53112c0d034cfdd96a9c3a4f90d286c40
+  StateHashes: 000000006bd5a32d398fdc04900f541e8a9e6ef420e23b685928a8ce28a981077af3fe2e48d3833bccf055d4150d3635b049d18a52f6b98561459cb2aa5bac3789ebaf913f74a3b60cc78681a1609f62d8aa0cc4ef1c4e8384973a1599449fadf2cfeb3b3adaf4b361160269864151b2f1162235a764597ab5320162767f51e263e68c1274370385374b21af9c943806bab59bd0cced4afee8aaa6a8c5683684326b1c64aa2d92050972707564f06a461d9204fce9ff34f4ed4c7fc9aa8316deb3e9b86eed9c65629bc4b44c96901b5d585b400757554d0d281cbc8a459ea6b99f2b3059dd90e985dc5712735042414eb5cea3a20bd4a22c7d8c730293103c14433a319518833f23ee2399a3f164288987fbc8db10df551d7a6c804f3910a265750125106439db9e12610ab0b71583c9ee354823ca98de5c0d713bcbabc2f921c3aff79580ce3e24a7d67f3ee4aa5d14a71ac46fe2e2390f94bae82179d1c9cdc01206a9463e2c6634cfdd963b68df903112c0d0070d7940f1a6ecf8c7b9556863cb14a55ac700a1
+  TriggerHashes: 00000000b4ecb233ed6cef2b63cb14a53112c0d034cfdd96a9c3a4f90d286c40a1609f62
 --- !u!114 &2252449365864992669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3213,7 +3213,7 @@ MonoBehaviour:
     Radius: 0.35
     Height: 1.8
     Extent: 0.035
-    ColliderLayer: 0
+    ColliderLayer: 3
     CollisionLayerMask:
       serializedVersion: 2
       m_Bits: 6529
@@ -4596,13 +4596,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4750782630790633876}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.155, y: -0.292, z: -0.148}
+  m_LocalRotation: {x: 0, y: 0.38268343, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: 0.132, y: -0.26, z: 0.021}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3232600648766078265}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 45, z: 0}
 --- !u!1 &4776265889191976840
 GameObject:
   m_ObjectHideFlags: 0
@@ -7384,13 +7384,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8369118393149462307}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.5, y: 0.5, z: -0.5, w: 0.5}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0.49660408, y: 0.5105525, z: -0.49341723, w: 0.49925944}
+  m_LocalPosition: {x: 0.3279, y: 0.0536, z: -0.0698}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 261903287003213347}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: -90}
+  m_LocalEulerAnglesHint: {x: 0.456, y: 90.834, z: -88.863}
 --- !u!1 &8435531626012477756
 GameObject:
   m_ObjectHideFlags: 0
@@ -8018,15 +8018,33 @@ PrefabInstance:
       propertyPath: CameraCollisionFilter.m_Bits
       value: 6528
       objectReference: {fileID: 0}
+    - target: {fileID: 7505511476366747571, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.675
+      objectReference: {fileID: 0}
     - target: {fileID: 8202687627560913134, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202687627560913134, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202687627560913134, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8710773601036217561, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.7
       objectReference: {fileID: 0}
     - target: {fileID: 8710773601036217561, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
       propertyPath: m_LocalPosition.z
       value: -1.1999998
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1603048301630482980, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
+    - {fileID: 6442796470731191354, guid: 80d5f53706aab784a9f078d121dd8301, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

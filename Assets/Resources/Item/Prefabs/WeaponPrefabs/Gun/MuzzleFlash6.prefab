@@ -55,8 +55,7 @@ GameObject:
   - component: {fileID: 7850202026575933737}
   - component: {fileID: 7621943602908026128}
   - component: {fileID: 9093333828446634728}
-  - component: {fileID: 3243779358421209298}
-  - component: {fileID: -7733608154621395813}
+  - component: {fileID: 3650248579999416405}
   m_Layer: 0
   m_Name: MuzzleFlash6
   m_TagString: Untagged
@@ -4882,7 +4881,7 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
---- !u!114 &3243779358421209298
+--- !u!114 &3650248579999416405
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4891,31 +4890,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7850202026575912201}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Script: {fileID: 11500000, guid: eda6b928baf6c5745a6aa9084d80a47f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 4162142472
-  ObjectInterest: 1
-  Flags: 262145
-  NestedObjects: []
-  NetworkedBehaviours:
-  - {fileID: -7733608154621395813}
---- !u!114 &-7733608154621395813
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7850202026575912201}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
+  offTime: 1
 --- !u!1 &7850202026575912203
 GameObject:
   m_ObjectHideFlags: 0

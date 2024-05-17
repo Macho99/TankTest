@@ -28,6 +28,7 @@ public class PlayerLocomotion : NetworkBehaviour
     public float JumpForce { get => jumpForce; }
 
 
+
     private PlayerMove[] moves;
     public bool IsGround()
     {
@@ -109,7 +110,7 @@ public class PlayerLocomotion : NetworkBehaviour
     {
         float rotY = input.mouseDelta.x * rotateXSpeed * Runner.DeltaTime;
         simpleKCC.AddLookRotation(new Vector2(0f, rotY));   
-        CamerRotX = CamController.RotateX(input);
+        CamerRotX = CamController.RotateX(input,CamerRotX);
     }
     public void Rotate(Vector3 direction)
     {

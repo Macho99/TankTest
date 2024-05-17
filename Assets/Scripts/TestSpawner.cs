@@ -21,10 +21,10 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
     Vector2Accumulator lookAccum = new Vector2Accumulator(0.02f, true);
     public void BeforeUpdate()
     {
-        
+
         lookAccum.Accumulate(Mouse.current.delta.ReadValue());
         //playerInput.mouseDelta = Mouse.current.delta.ReadValue();
-       
+
     }
 
     private async void Awake()
@@ -93,7 +93,6 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
         playerInput.buttons.Set(ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
         playerInput.buttons.Set(ButtonType.Interact, playerControls.Player.Interact.IsPressed());
         playerInput.buttons.Set(ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
-        playerInput.buttons.Set(ButtonType.DebugText, playerControls.Player.DebugText.IsPressed());
         playerInput.buttons.Set(ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
         playerInput.buttons.Set(ButtonType.ActiveItemContainer, playerControls.Player.ActiveItemContainer.IsPressed());
         playerInput.buttons.Set(ButtonType.PutWeapon, playerControls.Player.PutWeapon.IsPressed());
@@ -103,6 +102,7 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
         playerInput.buttons.Set(ButtonType.MilyWeapon, playerControls.Player.MilyWeapon.IsPressed());
         playerInput.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
         playerInput.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
+        playerInput.buttons.Set(ButtonType.Reload, playerControls.Player.Reload.IsPressed());
         playerInput.mouseDelta = lookAccum.ConsumeTickAligned(runner);
         //NetworkInputData data = new NetworkInputData();
         //data.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
