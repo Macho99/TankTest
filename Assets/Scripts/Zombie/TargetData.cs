@@ -13,7 +13,7 @@ public class TargetData
 	public bool IsTargeting { get { return Transform != null; } }
 	public Transform Transform { get; private set; }
 	public Vector3 Position { get { return Transform.position; } }
-	public int Layer { get; private set; }
+	public int Layer { get { return Transform == null ? -1 : Transform.gameObject.layer; }	}
 
 	public Tick LastFindTick { get; set; }
 
@@ -41,7 +41,6 @@ public class TargetData
 	public void RemoveTarget()
 	{
 		Transform = null;
-		Layer = -1;
 	}
 
 	public void SetTarget(Transform target, Tick tick)
@@ -53,7 +52,6 @@ public class TargetData
 		else
 		{
 			Transform = target;
-			Layer = target.gameObject.layer;
 			LastFindTick = tick;
 			UpdateTargetData();
 		}

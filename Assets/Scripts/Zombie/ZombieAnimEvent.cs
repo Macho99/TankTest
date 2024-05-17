@@ -1,4 +1,5 @@
-﻿using MoreMountains.Tools;
+﻿using Fusion;
+using MoreMountains.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,7 +70,7 @@ public class ZombieAnimEvent : MonoBehaviour
 		}
 	}
 
-	private void InPlaceAttack(AnimationEvent animEvent)
+	private void InplaceAttack(AnimationEvent animEvent)
 	{
 		if (animEvent.animatorClipInfo.weight < 0.5f)
 			return;
@@ -122,6 +123,8 @@ public class ZombieAnimEvent : MonoBehaviour
 
 	private void Attack(AnimationEvent animEvent, Vector3 center)
 	{
+		if (zombieBase.Object.HasStateAuthority == false) return;
+
 		int damage = animEvent.intParameter;
 		float radius = animEvent.floatParameter;
 		Vector3 direction = new();
@@ -144,10 +147,10 @@ public class ZombieAnimEvent : MonoBehaviour
 			if (hitList.Contains(hittable.HitID))
 				continue;
 
-			//if (zombieBase.AttackTargetMask.IsLayerInMask(cols[i].gameObject.layer) == true)
-			//{
-			//	zombieBase.TargetData.SetTarget(cols[i].transform, zombieBase.Runner.Tick);
-			//}
+			if (zombieBase.TargetChangeTimer.ExpiredOrNotRunning(zombieBase.Runner))
+			{
+				zombieBase.TargetChangeTimer = TickTimer.CreateFromSeconds(zombieBase.Runner, 2f);
+			}
 
 			hitList.Add(hittable.HitID);
 			float finalForce = force;

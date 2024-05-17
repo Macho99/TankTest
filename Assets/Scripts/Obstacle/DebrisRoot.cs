@@ -6,14 +6,30 @@ using UnityEngine;
 
 public class DebrisRoot : MonoBehaviour
 {
-	[SerializeField] Rigidbody[] childrenRb;
+	[SerializeField] protected Rigidbody[] childrenRb;
 	[SerializeField] float fadeWaitDuration = 5f;
 	[SerializeField] float fadeDuration = 10f;
 
-	float curScale = 0.9f;
+	protected float curScale = 0.9f;
 
 	public event Action OnDestoyEvent;
 	public Rigidbody[] ChildrenRb { get { return childrenRb; } }
+
+	protected virtual void Awake()
+	{
+
+	}
+
+	protected virtual void OnEnable()
+	{
+		StartCoroutine(CoEnable());
+	}
+
+	protected virtual void OnDisable()
+	{
+		curScale = 0.9f;
+		OnDestoyEvent = null;
+	}
 
 	private void OnValidate()
 	{
@@ -26,8 +42,9 @@ public class DebrisRoot : MonoBehaviour
 		this.fadeDuration = fadeDuration;
 	}
 
-	private IEnumerator Start()
+	private IEnumerator CoEnable()
 	{
+		yield return null;
 		yield return new WaitForSeconds(fadeWaitDuration);
 		curScale = 0.9f;
 
@@ -45,6 +62,11 @@ public class DebrisRoot : MonoBehaviour
 		}
 
 		OnDestoyEvent?.Invoke();
+		VirtualDestroy();
+	}
+
+	protected virtual void VirtualDestroy()
+	{
 		Destroy(gameObject);
 	}
 

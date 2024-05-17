@@ -40,6 +40,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 
 	private TickTimer destinationTimer;
 	public TickTimer PlayerFindTimer { get; set; }
+	public TickTimer TargetChangeTimer { get; set; }
 
 	protected NavMeshAgent agent;
 	protected NetworkStateMachine stateMachine;
@@ -206,7 +207,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 			//플레이어가 차량에 탑승할 경우 타겟을 차량으로 변경
 			else if(hit.collider.gameObject.layer == VehicleLayer && TargetData.Layer == PlayerLayer)
 			{
-				if (Physics.Raycast(TargetData.Position + Vector3.up * 5f, Vector3.down, 5f, VehicleMask) == true)
+				if (Physics.Raycast(TargetData.Position + Vector3.up * 5f, Vector3.down, 5f, VehicleMask, QueryTriggerInteraction.Ignore))
 				{
 					TargetData.SetTarget(hit.transform, Runner.Tick);
 				}
@@ -268,7 +269,11 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 
 		if (Object.IsProxy) return;
 
-		TargetData.SetTarget(source, Runner.Tick);
+		if (TargetChangeTimer.ExpiredOrNotRunning(Runner))
+		{
+			TargetData.SetTarget(source, Runner.Tick);
+			TargetChangeTimer = TickTimer.CreateFromSeconds(Runner, 10f);
+		}
 
 		CurHp -= damage;
 		if (CurHp <= 0)

@@ -98,7 +98,7 @@ public class BruteTrace : BruteZombieState
 			if (owner.TwoHandGroundTimer.ExpiredOrNotRunning(owner.Runner))
 			{
 				//특수 근접공격
-				if (targetData.Distance < attackDist && targetData.Angle < 60f)
+				if (targetData.Distance < attackDist && targetData.AbsAngle < 60f)
 				{
 					Attack(BruteZombie.AttackType.TwoHandGround);
 					owner.TwoHandGroundTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.TwoHandGroundCooltime);
@@ -155,13 +155,18 @@ public class BruteTrace : BruteZombieState
 			{
 				attackType = BruteZombie.AttackType.Back;
 			}
-            else if(targetData.AbsAngle > 30f)
+            else if(targetData.AbsAngle > 30f && owner.FootAttackTimer.ExpiredOrNotRunning(owner.Runner))
             {
 				attackType = targetData.Sign < 0f ? BruteZombie.AttackType.LeftFoot : BruteZombie.AttackType.RightFoot;
+				owner.FootAttackTimer = TickTimer.CreateFromSeconds(owner.Runner, 8f);
             }
-			else
+			else if(targetData.AbsAngle < 20f)
 			{
 				attackType = (BruteZombie.AttackType) Random.Range(2, 6);
+			}
+			else
+			{
+				return false;
 			}
             Attack(attackType);
 			return true;
