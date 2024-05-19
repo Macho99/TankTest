@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Fusion;
 
+[RequireComponent(typeof(AudioSource))]
 public class VehicleMove : VehicleBehaviour
 {
 	public enum State { Park, RpmMatch, Drive, ReverseRpmMatch, Reverse, GearShift, }
@@ -73,7 +74,6 @@ public class VehicleMove : VehicleBehaviour
 	TickTimer oilConsumTimer;
 	float engineRpmRatio;
 
-	[Networked, OnChangedRender(nameof(HeadLightControl))] public NetworkBool PlayerGetOn { get; private set; } = false;
 	[Networked] public float EngineRpm { get; set; }
 	[Networked] public Vector2 LerpedMoveInput { get; set; }
 	[Networked] public float LeftRpm { get; private set; }
@@ -108,7 +108,8 @@ public class VehicleMove : VehicleBehaviour
 
 		stateMachine.InitState(State.Park);
 
-		EngineRpm = minEngineRpm;
+		audioSource = gameObject.GetComponent<AudioSource>();
+		audioSource.clip = engineSound;
 
 		GetMaxTorqueRpm();
 
@@ -118,16 +119,9 @@ public class VehicleMove : VehicleBehaviour
 
 	public override void Spawned()
 	{
+		EngineRpm = minEngineRpm;
 		base.Spawned();
-		HeadLightControl();
-	}
-
-	protected virtual void OnValidate()
-	{
-		if(audioSource == null)
-		{
-			audioSource = gameObject.AddComponent<AudioSource>();
-		}
+		PlayerGetOnRender();
 	}
 
 	public void SetDashBoardGear(string gearStr)
@@ -144,14 +138,13 @@ public class VehicleMove : VehicleBehaviour
 	public override void Render()
 	{
 		base.Render();
-		//lerpedMoveInput = Vector2.Lerp(lerpedMoveInput, rawMoveInput, Runner.DeltaTime * inputSensitivity);
 
 		dashBoard?.SetRPMAndVelUI(EngineRpm, Velocity);
 
 		if(audioPlaying == true)
 		{
 			audioSource.pitch = Mathf.Lerp(1f, 3f, (EngineRpm - minEngineRpm) / (maxEngineRpm - engineRpmRatio));
-			if (PlayerGetOn == false || oilFilled == false)
+			if (EngineRpm < minEngineRpm + 10f && (PlayerGetOn == false || oilFilled == false))
 			{
 				audioSource.Stop();
 				audioPlaying = false;
@@ -386,7 +379,6 @@ public class VehicleMove : VehicleBehaviour
 
 	protected override void OnAssign(TestPlayer player)
 	{
-		PlayerGetOn = true;
 		if (player.HasInputAuthority && Runner.IsForward)
 		{
 			dashBoard = GameManager.UI.ShowSceneUI(dashBoardPrefab);
@@ -400,7 +392,6 @@ public class VehicleMove : VehicleBehaviour
 
 	protected override void OnGetOff()
 	{
-		PlayerGetOn = false;
 		if (HasInputAuthority && Runner.IsForward)
 		{
 			GameManager.UI.CloseSceneUI(dashBoard);
@@ -413,7 +404,7 @@ public class VehicleMove : VehicleBehaviour
 		}
 	}
 
-	protected void HeadLightControl()
+	protected override void PlayerGetOnRender()
 	{
 		foreach(Light light in headlights)
 		{

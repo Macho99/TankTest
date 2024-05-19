@@ -1688,7 +1688,7 @@ GameObject:
   - component: {fileID: 7009060266418980519}
   - component: {fileID: 1353159400204823668}
   - component: {fileID: 9144817864069773120}
-  - component: {fileID: -8044832282566646304}
+  - component: {fileID: 2037764224168671149}
   m_Layer: 7
   m_Name: Tank
   m_TagString: Untagged
@@ -1730,7 +1730,7 @@ MonoBehaviour:
   lookSpeed: 20
   _CamYAngle: 0
   _CamXAngle: 0
-  engineSound: {fileID: 0}
+  engineSound: {fileID: 8300000, guid: 77b5a893952dc434ebeacf6c71217244, type: 3}
   trailNetObject: {fileID: 0}
   wheelYOffset: 0.1
   brakeTorque: 10000
@@ -1875,7 +1875,7 @@ MonoBehaviour:
   wreckedPrefab: {fileID: 5583777240556970415, guid: 5f2eecfed3f7b374bbc8a4e7b3467592, type: 3}
   engineTrans: {fileID: 1562353913401889049}
   vehicleTrigger: {fileID: 515011470170301144}
-  maxHp: 100
+  maxHp: 50000
   maxOil: 25000
   maxEngineHp: 25000
   damage: 200
@@ -2010,7 +2010,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.7754235, y: 0.84, z: 7.66}
   m_Center: {x: 0.00000017881393, y: 1.32, z: 0}
---- !u!82 &-8044832282566646304
+--- !u!82 &2037764224168671149
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2019,18 +2019,18 @@ AudioSource:
   m_GameObject: {fileID: 3963636830516615579}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 5906934356025237100, guid: bb9db54a3b33bc547973fc4b6638e029, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.7
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 10
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0
@@ -2066,7 +2066,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

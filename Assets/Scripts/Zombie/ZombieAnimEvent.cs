@@ -36,9 +36,9 @@ public class ZombieAnimEvent : MonoBehaviour
 		rHandTrans = anim.GetBoneTransform(HumanBodyBones.RightHand);
 	}
 
-	private void InstantiateSwingVfx(Transform parent, float duration)
+	protected virtual void InstantiateSwingVfx(Transform parent, float duration)
 	{
-		VFXAutoOff vfx = GameManager.Resource.Instantiate<VFXAutoOff>(swingPrefabPath, 
+		FXAutoOff vfx = GameManager.Resource.Instantiate<FXAutoOff>(swingPrefabPath, 
 			parent.transform.position, parent.transform.rotation, parent, true);
 		vfx.transform.localScale = Vector3.one * swingScale;
 		vfx.AutoSetParentNull(duration);

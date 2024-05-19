@@ -7,10 +7,12 @@ using UnityEngine;
 using UnityEngine.Windows;
 using Random = UnityEngine.Random;
 
+[RequireComponent(typeof(AudioSource))]
 public class TankAttack : TankBehaviour
 {
 	const float MAX_DIST = 500f;
 
+	[SerializeField] AudioClip fireClip;
 	[SerializeField] Transform turretTrans;
 	[SerializeField] Transform barrelTrans;
 	[SerializeField] Transform firePoint;
@@ -36,6 +38,7 @@ public class TankAttack : TankBehaviour
 	[SerializeField] float turretRotAccMul = 0.05f;
 	[SerializeField] float realAccMul = 0.02f;
 
+	AudioSource audioSource;
 	LayerMask hitMask;
 	LayerMask damageableMask;
 	int monsterLayer;
@@ -72,10 +75,11 @@ public class TankAttack : TankBehaviour
 	protected override void Awake()
 	{
 		base.Awake();
+		audioSource = GetComponent<AudioSource>();
 		rb = GetComponentInParent<Rigidbody>();
 		//camOffset = new Vector3(0f, cam.transform.GetChild(0).transform.localPosition.y, 0f);
-		hitMask = LayerMask.GetMask("Default", "Environment", "Breakable","Monster");
-		damageableMask = LayerMask.GetMask("Breakable", "Monster");
+		hitMask = LayerMask.GetMask("Default", "Environment", "Breakable", "Monster", "Vehicle");
+		damageableMask = LayerMask.GetMask("Breakable", "Monster", "Vehicle");
 		monsterLayer = LayerMask.NameToLayer("Monster");
 		breakableLayer = LayerMask.NameToLayer("Breakable");
 
@@ -160,11 +164,17 @@ public class TankAttack : TankBehaviour
 		float curYAngle = nextRot.eulerAngles.y;
 		curTurretRotSpeed = Mathf.DeltaAngle(prevYAngle, curYAngle) / Time.deltaTime;
 
+		float ratio = Mathf.Abs(curTurretRotSpeed) / turretRotSpeed;
+
+		audioSource.volume = Mathf.Lerp(0.5f, 1f, ratio);
+		audioSource.pitch = Mathf.Lerp(0.7f, 1f, ratio);
+
 		barrelTrans.localRotation = Quaternion.Lerp(barrelTrans.localRotation, 
 			Quaternion.Euler(BarrelAngle, 0f, 0f), Time.deltaTime * 2f);
 
 		if(visualFireCnt < FireCnt)
 		{
+			GameManager.Sound.PlayOneShot(fireClip, AudioGroup.Vehicle, transform);
 			GameManager.Resource.Instantiate(fireVFX, firePoint.position, firePoint.rotation, true);
 			if(HitPosition != Vector3.zero)
 			{
@@ -322,7 +332,7 @@ public class TankAttack : TankBehaviour
 
 			for(int i = 0; i < result; i++)
 			{
-				IHittable hittable = attackCols[i].gameObject.GetComponent<IHittable>();
+				IHittable hittable = attackCols[i].gameObject.GetComponentInParent<IHittable>();
 				if(hittable == null)
 				{
 					continue;
@@ -363,6 +373,19 @@ public class TankAttack : TankBehaviour
 		{
 			GameManager.UI.CloseSceneUI(attackUI);
 			attackUI = null;
+		}
+	}
+
+	protected override void PlayerGetOnRender()
+	{
+		base.PlayerGetOnRender();
+		if(PlayerGetOn == true)
+		{
+			audioSource.Play();
+		}
+		else
+		{
+			audioSource.Stop();
 		}
 	}
 

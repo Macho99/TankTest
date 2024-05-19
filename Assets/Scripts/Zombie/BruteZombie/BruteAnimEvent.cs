@@ -13,6 +13,15 @@ public class BruteAnimEvent : ZombieAnimEvent
 	const string crackDebrisPath = "FX/PoolableDebris/SM_Env_RoadPiece_Damaged_01";
 	const string crackVfxPath = "FX/VFX/FX_splash_hit_01_floor";
 
+	[SerializeField] AudioClip swingClip;
+	[SerializeField] AudioClip crackClip;
+
+	protected override void InstantiateSwingVfx(Transform parent, float duration)
+	{
+		base.InstantiateSwingVfx(parent, duration);
+		GameManager.Sound.PlayOneShot(swingClip, AudioGroup.Zombie, transform);
+	}
+
 	private void PlayGroundCrack(AnimationEvent animEvent)
 	{
 		if (animEvent.animatorClipInfo.weight < 0.5f)
@@ -25,8 +34,10 @@ public class BruteAnimEvent : ZombieAnimEvent
 		Vector3 center = transform.position + transform.rotation * pos;
 		GameManager.Resource.Instantiate<PoolableDebrisRoot>(crackDebrisPath, center, transform.rotation, true).
 			transform.localScale = Vector3.one * scale;
-		GameManager.Resource.Instantiate<VFXAutoOff>(crackVfxPath, center, transform.rotation, true).
+		GameManager.Resource.Instantiate<FXAutoOff>(crackVfxPath, center, transform.rotation, true).
 			transform.localScale = Vector3.one * scale;
+
+		GameManager.Sound.PlayOneShot(crackClip, AudioGroup.Zombie, transform);
 	}
 
 	private void PlaySwingDebris(AnimationEvent animEvent)
@@ -42,6 +53,8 @@ public class BruteAnimEvent : ZombieAnimEvent
 		poolableDebris.transform.localScale = Vector3.one * scale;
 		poolableDebris.Init(1f, 2f);
 		poolableDebris.AddRandomVelocityAtPosition(100f * (transform.right * dir + transform.up), center);
+
+		GameManager.Sound.PlayOneShot(crackClip, AudioGroup.Zombie, transform);
 	}
 
 	private void PlayClapFeedback(AnimationEvent animEvent)
@@ -49,5 +62,7 @@ public class BruteAnimEvent : ZombieAnimEvent
 		if (animEvent.animatorClipInfo.weight < 0.5f)
 			return;
 		GameManager.Feedback.PlayClap(transform.position, 20f);
+
+		GameManager.Sound.PlayOneShot(crackClip, AudioGroup.Zombie, transform);
 	}
 }

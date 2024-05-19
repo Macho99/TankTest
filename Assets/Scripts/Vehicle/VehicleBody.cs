@@ -21,6 +21,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		public TickTimer nextHitTimer;
 	}
 
+	[SerializeField] AudioClip hitClip;
 	[SerializeField] VehicleWrecked wreckedPrefab;
 	[SerializeField] Transform engineTrans;
 	[SerializeField] BoxCollider vehicleTrigger;
@@ -29,6 +30,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 	[SerializeField] int maxEngineHp = 5000;
 	[SerializeField] int damage = 50;
 
+	AudioSource audioSource;
 	LayerMask collisionMask;
 	Collider[] cols = new Collider[30];
 	Rigidbody rb;
@@ -55,6 +57,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 	public float HpRatio { get { return (float)CurHp / maxHp; } }
 	public float OilRatio { get { return (float)CurOil / maxOil; } }
 	public float EngineHpRatio { get { return (float)CurEngineHp / maxEngineHp; } }
+	[Networked, OnChangedRender(nameof(HitSfxRender))]public int HitSfxCnt { get; private set; }
 	[Networked, OnChangedRender(nameof(CurHpChanged))] public int CurHp { get; private set; }
 	[Networked, OnChangedRender(nameof(CurOilChanged))] public int CurOil { get; private set; }
 	[Networked, OnChangedRender(nameof(CurEngineHpChanged))] public int CurEngineHp { get; protected set; }
@@ -67,6 +70,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		BreakableLayer = LayerMask.NameToLayer("Breakable");
 		BodyAttackMask = LayerMask.GetMask("Monster", "Breakable");
 		collisionMask = LayerMask.GetMask("Environment", "Vehicle");
+		audioSource = GetComponent<AudioSource>();
 	}
 
 	public override void Spawned()
@@ -145,6 +149,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 
 	private void Hit(IHittable hittable, GameObject other)
 	{
+		HitSfxCnt++;
 		lastHitTimer = TickTimer.CreateFromSeconds(Runner, 5f);
 		Vector3 normal = (other.transform.position - transform.position).normalized;
 		Vector3 force = Vector3.zero;
@@ -172,6 +177,11 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		this.ApplyDamage(transform, other.transform.position, -force * 1.5f, finaldamage / 5);
 	}
 
+	protected void HitSfxRender()
+	{
+		GameManager.Sound.PlayOneShot(hitClip, AudioGroup.Vehicle, transform, false);
+	}
+
 	private void OnCollisionEnter(Collision collision)
 	{
 		if (HasStateAuthority && collisionMask.IsLayerInMask(collision.collider.gameObject.layer))
@@ -186,6 +196,7 @@ public class VehicleBody : NetworkBehaviour, IHittable
 		{
 			yield return new WaitForFixedUpdate();
 		}
+		HitSfxCnt++;
 		Vector3 velDiff = rb.velocity - prevVelocity;
 		//print($"{velDiff}");
 		int finaldamage = (int)(damage * velDiff.magnitude);

@@ -76,6 +76,30 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -2.48
       objectReference: {fileID: 0}
+    - target: {fileID: 2037764224168671149, guid: d66c142399a548f4ca99c119b6c82b8c, type: 3}
+      propertyPath: Loop
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2037764224168671149, guid: d66c142399a548f4ca99c119b6c82b8c, type: 3}
+      propertyPath: m_Volume
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2037764224168671149, guid: d66c142399a548f4ca99c119b6c82b8c, type: 3}
+      propertyPath: MinDistance
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 2037764224168671149, guid: d66c142399a548f4ca99c119b6c82b8c, type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 23ab3b4de680b904aafc3bc7c18d351c, type: 3}
+    - target: {fileID: 2037764224168671149, guid: d66c142399a548f4ca99c119b6c82b8c, type: 3}
+      propertyPath: OutputAudioMixerGroup
+      value: 
+      objectReference: {fileID: 5906934356025237100, guid: bb9db54a3b33bc547973fc4b6638e029, type: 2}
+    - target: {fileID: 2037764224168671149, guid: d66c142399a548f4ca99c119b6c82b8c, type: 3}
+      propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2108501535833134432, guid: d66c142399a548f4ca99c119b6c82b8c, type: 3}
       propertyPath: SortKey
       value: 666209658
@@ -430,7 +454,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a5ff29c06c9b964fa474ec4474d83a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  smokeRadius: 1
+  explosionClip: {fileID: 8300000, guid: ab7b492f5f1f2d54cb9c87a9b122a3b4, type: 3}
+  velocityMul: 2
+  smokeRadius: {x: 1, y: 1, z: 1}
   wheelRendererTrans: {fileID: 5281076009867877216}
   wheelColTrans: {fileID: 3276349825735851398}
   fireTrans: {fileID: 4947525829609834464}

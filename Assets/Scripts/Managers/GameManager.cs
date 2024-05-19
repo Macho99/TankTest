@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
 	private static ResourceManager resourceManager;
 	private static UIManager uiManager;
 	private static FeedbackManager feedbackManager;
+	private static SoundManager soundManager;
 
 	public static GameManager Instance { get { return instance; } }
 	public static PoolManager Pool { get { return poolManager; } }
@@ -21,6 +22,7 @@ public class GameManager : MonoBehaviour
 	public static UIManager UI { get { return uiManager; } }
 	public static WeatherManager Weather { get; set; }
 	public static FeedbackManager Feedback { get { return feedbackManager; } }
+	public static SoundManager Sound { get { return soundManager; } }
 
     private void Awake()
 	{
@@ -53,5 +55,8 @@ public class GameManager : MonoBehaviour
 		uiManager.transform.parent = transform;
 
 		feedbackManager = Resource.Instantiate<FeedbackManager>(feedbackPath, transform);
+
+		soundManager = new GameObject("SoundManager").AddComponent<SoundManager>();
+		soundManager.transform.parent = transform;
     }
 }

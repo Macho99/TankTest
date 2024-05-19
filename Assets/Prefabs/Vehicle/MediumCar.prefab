@@ -347,7 +347,7 @@ GameObject:
   - component: {fileID: 8302711472256451824}
   - component: {fileID: 5299766596462992226}
   - component: {fileID: 7272136128554862254}
-  - component: {fileID: 1812097353453182887}
+  - component: {fileID: 4464022383160539950}
   m_Layer: 7
   m_Name: MediumCar
   m_TagString: Untagged
@@ -390,7 +390,7 @@ MonoBehaviour:
   lookSpeed: 20
   _CamYAngle: 0
   _CamXAngle: 0
-  engineSound: {fileID: 0}
+  engineSound: {fileID: 8300000, guid: 29ab67bad2ef01f40b55557d5fff870d, type: 3}
   trailNetObject: {fileID: 0}
   wheelYOffset: 0
   brakeTorque: 2000
@@ -518,6 +518,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 117bc1fec81fa314388e089d6417c678, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitClip: {fileID: 8300000, guid: 7362c01edc11d6347a75bd2eeb5d4c17, type: 3}
   wreckedPrefab: {fileID: 4285425376830037281, guid: 5de31300733807b42b2167fb96e27fdc, type: 3}
   engineTrans: {fileID: 4273538926151905543}
   vehicleTrigger: {fileID: 1285313908451028329}
@@ -525,6 +526,7 @@ MonoBehaviour:
   maxOil: 2000
   maxEngineHp: 1000
   damage: 50
+  _HitSfxCnt: 0
   _CurHp: 0
   _CurOil: 0
   _CurEngineHp: 0
@@ -640,7 +642,7 @@ MonoBehaviour:
   - {fileID: 2906567930816909885}
   - {fileID: 7498179654484953499}
   - {fileID: 2022029745668459676}
---- !u!82 &1812097353453182887
+--- !u!82 &4464022383160539950
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -654,7 +656,7 @@ AudioSource:
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PoisonArea : VFXAutoOff
+public class PoisonArea : FXAutoOff
 {
 	[SerializeField] float loopStopTime = 7f;
 
