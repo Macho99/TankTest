@@ -164,6 +164,7 @@ public class ZombieCrawlTrace : ZombieState
 				}
 				owner.SetAnimFloat("SpeedY", 0f, 1f);
 			});
+		owner.PlaySound(ZombieSoundType.Attack);
 		ChangeState(Zombie.State.AnimWait);
 	}
 
@@ -197,6 +198,7 @@ public class ZombieCrawlTrace : ZombieState
 
 	private void Eat()
 	{
+		owner.PlaySound(ZombieSoundType.Eat);
 		eatEnd = false;
 		owner.Agent.ResetPath();
 		owner.SetAnimBool("Eat", true);

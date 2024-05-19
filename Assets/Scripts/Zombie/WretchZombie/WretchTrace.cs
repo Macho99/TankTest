@@ -122,6 +122,7 @@ public class WretchTrace : WretchZombieState
 		owner.SetAnimFloat("ActionShifter", actionShifter);
 		owner.SetAnimTrigger("Attack");
 		owner.AnimWaitStruct = new AnimWaitStruct("Attack", WretchZombie.State.Trace.ToString(), updateAction: owner.Decelerate);
+		owner.PlaySound(ZombieSoundType.Attack);
 		ChangeState(WretchZombie.State.AnimWait);
 	}
 }

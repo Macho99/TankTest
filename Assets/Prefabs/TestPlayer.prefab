@@ -778,6 +778,7 @@ GameObject:
   - component: {fileID: 7370577872566965626}
   - component: {fileID: 5199989640796347361}
   - component: {fileID: 2424700729127825468}
+  - component: {fileID: 7032265760966374464}
   m_Layer: 3
   m_Name: TestPlayer
   m_TagString: Untagged
@@ -908,3 +909,19 @@ MonoBehaviour:
     StepRequireGroundTarget: 0
     SnapDistance: 0.25
     SnapSpeed: 4
+--- !u!208 &7032265760966374464
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7109066118128555570}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 0.3, y: 1, z: 0.3}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 1, z: 0}
+  m_TimeToStationary: 0.5

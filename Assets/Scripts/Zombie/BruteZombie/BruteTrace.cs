@@ -179,6 +179,7 @@ public class BruteTrace : BruteZombieState
 	TickTimer stoneThrowTimer;
 	private void Attack(BruteZombie.AttackType type)
 	{
+		owner.PlaySound(ZombieSoundType.Attack);
 		if (type == BruteZombie.AttackType.Jump)
 		{
 			owner.JumpEndPos = owner.Agent.pathEndPosition;

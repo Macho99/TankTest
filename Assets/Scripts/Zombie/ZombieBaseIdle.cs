@@ -10,6 +10,7 @@ public abstract class ZombieBaseIdle : ZombieBaseState
 	float idleShifter;
 	TickTimer idleTimer;
 	TickTimer stabilizeTimer;
+	TickTimer soundTimer;
 
 	public ZombieBaseIdle(ZombieBase owner, float minIdle, float maxIdle) : base(owner)
 	{
@@ -22,6 +23,7 @@ public abstract class ZombieBaseIdle : ZombieBaseState
 		idleShifter = Random.Range(0f, 2f);
 		idleTimer = TickTimer.CreateFromSeconds(owner.Runner, Random.Range(minIdle, maxIdle));
 		stabilizeTimer = TickTimer.CreateFromSeconds(owner.Runner, 2f);
+		soundTimer = TickTimer.CreateFromSeconds(owner.Runner, Random.Range(0f, 5f));
 	}
 
 	public override void Exit()
@@ -50,6 +52,10 @@ public abstract class ZombieBaseIdle : ZombieBaseState
 
 	public override void FixedUpdateNetwork()
 	{
+		if (soundTimer.Expired(owner.Runner))
+		{
+			owner.PlaySound(ZombieSoundType.Idle);
+		}
 
 		if (idleTimer.Expired(owner.Runner))
 		{

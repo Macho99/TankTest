@@ -26,7 +26,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 		public Rigidbody rb;
 		public Collider col;
 	}
-
+	[SerializeField] ZombieSoundSO soundSO;
 	[SerializeField] protected float mass = 40f;
 	[SerializeField] protected float viewAngle = 45f;
 	[SerializeField] protected float lookDist = 10f;
@@ -35,8 +35,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 	[SerializeField] protected GameObject bodyBloodVFX;
 	[SerializeField] protected int maxHp = 400;
 
-	protected float lookDistMul = 1f;
-	protected float viewAngleMul = 1f;
+	protected float eyeSightRatio = 1f;
 
 	private TickTimer destinationTimer;
 	public TickTimer PlayerFindTimer { get; set; }
@@ -81,11 +80,16 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 	public int MaxHP { get { return maxHp; } }
 	public bool SyncTransfrom { get; set; } = true;
 
+	AudioSource audioSource;
+	int localSoundCnt;
+
 	[Networked] public Vector3 Position { get; private set; }
 	[Networked] public Quaternion Rotation { get; private set; }
 	[Networked] public ZombieBody HitBody { get; private set; }
 	[Networked] public Vector3 HitPoint { get; private set; }
 	[Networked] public Vector3 HitForce { get; private set; }
+	[Networked] public ZombieSoundType SoundType { get; private set; }
+	[Networked, OnChangedRender(nameof(SoundRender))] public int SoundCnt { get; private set; }
 	[Networked, OnChangedRender(nameof(PlayHitFX))] public int HitCnt { get; set; }
 
 	public abstract string DecideState();
@@ -105,11 +109,13 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 		VehicleLayer = LayerMask.NameToLayer("Vehicle");
 		agent = GetComponent<NavMeshAgent>();
 		anim = GetComponent<Animator>();
+		audioSource = GetComponent<AudioSource>();
 
 		Hips = anim.GetBoneTransform(HumanBodyBones.Hips);
 		Eyes = anim.GetBoneTransform(HumanBodyBones.LeftEye);
 
 		stateMachine = GetComponent<NetworkStateMachine>();
+		OnDie += () => PlaySound(ZombieSoundType.Die);
 
 		SetBodyParts();
 	}
@@ -154,7 +160,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 	{
 		if (TargetData.IsTargeting == true && TargetData.Layer == PlayerLayer) return;
 		if (PlayerFindTimer.ExpiredOrNotRunning(Runner) == false) return;
-		int result = Physics.OverlapSphereNonAlloc(transform.position, lookDist * lookDistMul, overlapCols, PlayerMask);
+		int result = Physics.OverlapSphereNonAlloc(transform.position, lookDist * eyeSightRatio, overlapCols, PlayerMask);
 
 		if (result == 0)
 		{
@@ -167,11 +173,12 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 		Vector3 toPlayerDir = toPlayerVec.normalized;
 		float length = toPlayerVec.magnitude;
 
-		if (length < 3f || Vector3.Dot(toPlayerDir, Eyes.forward) > Mathf.Cos(viewAngle * viewAngleMul * Mathf.Deg2Rad))
+		if (length < 3f || Vector3.Dot(toPlayerDir, Eyes.forward) > Mathf.Cos(viewAngle * eyeSightRatio * Mathf.Deg2Rad))
 		{
 			if (Physics.Raycast(Eyes.position, toPlayerDir, length, FindObstacleMask) == false)
 			{
 				TargetData.SetTarget(overlapCols[0].transform, Runner.Tick);
+				PlaySound(ZombieSoundType.Trace);
 				if (agent.enabled)
 					agent.ResetPath();
 			}
@@ -198,7 +205,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 		LayerMask mask = TargetData.Layer == VehicleLayer ? VehicleFindObstacleMask : FindObstacleMask;
 		Vector3 toTargetVec = ((TargetData.Position + Vector3.up) - Eyes.position);
 		float toTargetMag = toTargetVec.magnitude;
-		if (toTargetMag < lookDist * lookDistMul * 2f)
+		if (toTargetMag < lookDist * eyeSightRatio * 2f)
 		{
 			if (Physics.Raycast(Eyes.position, toTargetVec.normalized, out RaycastHit hit, toTargetMag, mask) == false)
 			{
@@ -214,7 +221,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 			}
 		}
 
-		if (TargetData.LastFindTick + playerLostTime * Runner.TickRate < Runner.Tick)
+		if (TargetData.LastFindTick + playerLostTime * eyeSightRatio * Runner.TickRate < Runner.Tick)
 		{
 			TargetData.RemoveTarget();
 		}
@@ -447,16 +454,31 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 		switch(type)
 		{
 			case WeatherType.Sunny:
-				lookDistMul = 1f;
-				viewAngleMul = 1f;
+				eyeSightRatio = 1f;
 				break;
 			case WeatherType.Fog:
 			case WeatherType.Rain:
 			case WeatherType.Snow:
 			case WeatherType.Storm:
-				lookDistMul = Mathf.Lerp(0.9f, 0.5f, strength);
-				viewAngleMul = Mathf.Lerp(0.9f, 0.5f, strength);
+				eyeSightRatio = Mathf.Lerp(0.9f, 0.5f, strength);
 				break;
+		}
+	}
+
+	public void PlaySound(ZombieSoundType type)
+	{
+		SoundType = type;
+		SoundCnt++;
+	}
+
+	protected void SoundRender()
+	{
+		if(localSoundCnt < SoundCnt)
+		{
+			localSoundCnt = SoundCnt;
+			AudioClip clip = soundSO.GetClip(SoundType, localSoundCnt, (int)Object.Id.Raw);
+			audioSource.clip = clip;
+			audioSource.Play();
 		}
 	}
 }

@@ -2678,6 +2678,7 @@ GameObject:
   - component: {fileID: 1971667836863039804}
   - component: {fileID: 4345818454886247344}
   - component: {fileID: 605356119268392592}
+  - component: {fileID: 2926032792251621881}
   m_Layer: 8
   m_Name: WretchZombie
   m_TagString: Untagged
@@ -2738,6 +2739,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   curStateText: {fileID: 6714372019135251038}
+  soundSO: {fileID: 11400000, guid: e83701148640f3a4cb496b96bf9cc283, type: 2}
   mass: 10000
   viewAngle: 45
   lookDist: 30
@@ -2750,6 +2752,8 @@ MonoBehaviour:
   _HitBody: 0
   _HitPoint: {x: 0, y: 0, z: 0}
   _HitForce: {x: 0, y: 0, z: 0}
+  _SoundType: 0
+  _SoundCnt: 0
   _HitCnt: 0
   poisonFlyVFXPrefab: {fileID: -3771264671428907708, guid: 77db94a8e5b9ec5408d065ccfa32ec62, type: 3}
   poisonExplosionPrefab: {fileID: 8327788988040802450, guid: 746dca15ea7541745843b084ec85ca3b, type: 3}
@@ -2847,3 +2851,99 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   swingScale: 2
   force: 10000
+--- !u!82 &2926032792251621881
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9217636930084398032}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 3726079279338356809, guid: bb9db54a3b33bc547973fc4b6638e029, type: 2}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1.2
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

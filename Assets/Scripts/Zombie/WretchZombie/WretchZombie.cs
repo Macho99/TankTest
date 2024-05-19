@@ -159,7 +159,7 @@ public class WretchZombie : ZombieBase
 		if (IsDead == true)
 			return;
 
-		if (hitReactionTimer.ExpiredOrNotRunning(Runner) && damage > 500)
+		if (hitReactionTimer.ExpiredOrNotRunning(Runner) && damage > 100)
 		{
 			if (CurPoisonVFXData.fireTick == 0)
 			{
@@ -188,6 +188,7 @@ public class WretchZombie : ZombieBase
 					Decelerate();
 					LookToward(-forceDir, 120f);
 				});
+			PlaySound(ZombieSoundType.Hit);
 			stateMachine.ChangeState(State.AnimWait);
 		}
 	}

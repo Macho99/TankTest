@@ -19,6 +19,7 @@ public class ZombieTrace : ZombieState
 	float eatElapsed;
 	bool eatEnd;
 
+	TickTimer traceSoundTimer;
 	TickTimer healTimer;
 	Collider lastObstacleCol;
 	float obstacleAttackTime;
@@ -33,6 +34,7 @@ public class ZombieTrace : ZombieState
 	{
 		if (CheckTransition() == true) return;
 
+		traceSoundTimer = TickTimer.CreateFromSeconds(owner.Runner, 5f);
 		lastObstacleCol = null;
 		prevPosY = owner.transform.position.y;
 		//if (CheckTurn() == true) { return; }
@@ -102,6 +104,7 @@ public class ZombieTrace : ZombieState
 
 	private void Eat()
 	{
+		owner.PlaySound(ZombieSoundType.Eat);
 		eatEnd = false;
 		owner.Agent.ResetPath();
 		owner.SetAnimBool("Eat", true);
@@ -181,6 +184,7 @@ public class ZombieTrace : ZombieState
 				}
 				owner.Decelerate(1f);
 			});
+		owner.PlaySound(ZombieSoundType.Attack);
 		ChangeState(Zombie.State.AnimWait);
 	}
 
@@ -189,6 +193,12 @@ public class ZombieTrace : ZombieState
 		if(CheckFallAsleep() == true)
 		{
 			return;
+		}
+
+		if(traceSoundTimer.Expired(owner.Runner))
+		{
+			owner.PlaySound(ZombieSoundType.Trace);
+			traceSoundTimer = TickTimer.CreateFromSeconds(owner.Runner, 5f);
 		}
 
 		speed = owner.TraceSpeed;
@@ -232,6 +242,7 @@ public class ZombieTrace : ZombieState
 				owner.SetAnimBool("Crawl", true);
 				owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),
 					updateAction: () => owner.SetAnimFloat("SpeedY", 0f, 0.3f));
+				owner.PlaySound(ZombieSoundType.Hit);
 				ChangeState(Zombie.State.AnimWait);
 				return true;
 			}
