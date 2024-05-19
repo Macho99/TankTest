@@ -14,12 +14,12 @@ public class PlayerMainUI : SceneUI
     {
         playerStatUI.UpdateStat(statType, currentValue, maxValue);
     }
-    public void ChangeWeaponUI(Weapon weapon)
+    public void ChangeWeaponUI(Weapon weapon, int totalAmmoCount = 1)
     {
-        mainWeaponUI.ChangeWeaponUI(weapon);
+        mainWeaponUI.ChangeWeaponUI(weapon, totalAmmoCount);
     }
-    public void UpdateAmmo(Weapon weapon)
+    public void UpdateAmmo(Weapon weapon, int totalAmmoCount = 1)
     {
-        mainWeaponUI.ChangeAmmoCount(weapon);
+        mainWeaponUI.ChangeAmmoCount(weapon, totalAmmoCount);
     }
 }

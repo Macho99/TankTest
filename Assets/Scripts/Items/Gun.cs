@@ -17,9 +17,9 @@ public abstract class Gun : Weapon
     [SerializeField] protected Transform muzzlePoint;
     [SerializeField] protected AudioClip fireSFX;
     [Networked] protected Vector3 targetPoint { get; set; }
-    [Networked] public int currentAmmoCount { get; private set; }
+    [Networked] public int currentAmmoCount { get; protected set; }
 
-    [Networked] protected TickTimer refireTimer { get; set; }
+    [Networked] public TickTimer refireTimer { get; protected set; }
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
@@ -27,7 +27,7 @@ public abstract class Gun : Weapon
     public override void Spawned()
     {
         base.Spawned();
-      
+
     }
     public void SetShotPoint(Vector3 targetPoint)
     {
@@ -41,41 +41,34 @@ public abstract class Gun : Weapon
 
     public override void Attack()
     {
-        //if (muzzleFlashFx != null)
-        //{
-        //    Runner.Despawn(muzzleFlashFx);
-        //    muzzleFlashFx = null;
-        //}
-        //audioSource.clip = fireSFX;
-        //audioSource.Play();
 
-        //if (HasStateAuthority)
-        //    muzzleFlashFx = Runner.Spawn(muzzlePlashPrefab, muzzlePoint.position, muzzlePoint.rotation);
-
-
+        refireTimer = TickTimer.CreateFromSeconds(Runner, ((GunItemSO)itemData).FireInterval);
+        currentAmmoCount--;
     }
     public override bool CanAttack()
     {
-        if (!refireTimer.ExpiredOrNotRunning(Runner))
-        {
+       
+        if (currentAmmoCount <= 0)
             return false;
-        }
 
-
-        refireTimer = TickTimer.CreateFromSeconds(Runner, ((GunItemSO)itemData).FireInterval);
-
-        return true;
+ 
+        return refireTimer.ExpiredOrNotRunning(Runner);
     }
 
     public void OnFire()
     {
-        GameManager.Resource.Instantiate(muzzlePlashPrefab, muzzlePoint.position, muzzlePoint.rotation, true);
+        if (muzzlePlashPrefab != null)
+        {
+            GameObject muzzleFlash = GameManager.Resource.Instantiate(muzzlePlashPrefab, muzzlePoint, true);
+            muzzleFlash.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+
+        }
+
 
     }
-    public virtual void Reload()
+    public virtual void Reload(int ammo)
     {
-
-
+        currentAmmoCount += ammo;
 
     }
 }

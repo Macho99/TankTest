@@ -61,6 +61,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerClickHandler,IBeginDragHandler,
             if (itemCountTMP != null)
             {
                 itemCountTMP.enabled = true;
+                Debug.Log(item.currentCount);
                 itemCountTMP.text = item.currentCount.ToString();
             }
         }
@@ -101,16 +102,16 @@ public class ItemSlotUI : MonoBehaviour, IPointerClickHandler,IBeginDragHandler,
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log(eventData.pointerDrag);
+//Debug.Log(eventData.pointerDrag);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        Debug.Log("OnBeginDrag");
+        //Debug.Log("OnBeginDrag");
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        Debug.Log("OnDrag");
+        //Debug.Log("OnDrag");
     }
 }

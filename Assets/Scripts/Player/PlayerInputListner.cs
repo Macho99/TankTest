@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerInputListner : NetworkBehaviour
+public class PlayerInputListner : NetworkBehaviour,IBeforeTick
 {
     public enum PressType { Progress, Press, Release }
     [Networked] public NetworkButtons prevButton { get; private set; }
@@ -26,20 +26,7 @@ public class PlayerInputListner : NetworkBehaviour
         //if (IsInputListner == false)
         //    return;
 
-        if (GetInput(out NetworkInputData input))
-        {
-
-            input = LimitButton(input);
-
-            pressButton = input.buttons.GetPressed(prevButton);
-
-            releaseButton = input.buttons.GetReleased(prevButton);
-
-            prevButton = input.buttons;
-
-            currentInput = input;
-
-        }
+      
     }
 
     private NetworkInputData LimitButton(NetworkInputData input)
@@ -76,5 +63,23 @@ public class PlayerInputListner : NetworkBehaviour
     public void RPC_ActiveButton(ButtonType button, bool isActive)
     {
         limitButton.Set(button, isActive);
+    }
+
+    public void BeforeTick()
+    {
+        if (GetInput(out NetworkInputData input))
+        {
+
+            input = LimitButton(input);
+
+            pressButton = input.buttons.GetPressed(prevButton);
+
+            releaseButton = input.buttons.GetReleased(prevButton);
+
+            prevButton = input.buttons;
+
+            currentInput = input;
+
+        }
     }
 }

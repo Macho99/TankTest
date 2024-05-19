@@ -15,12 +15,3 @@ public abstract class WeaponItemSO : EquipmentItemSO
     public Sprite ItemDetailIcon { get { return itemDetailIcon; } }
 }
 
-public abstract class WeaponInstance : EquipmentItemInstance
-{
-    public WeaponInstance(ItemSO itemData, int count = 1) : base(itemData, count)
-    {
-
-    }
-
-
-}

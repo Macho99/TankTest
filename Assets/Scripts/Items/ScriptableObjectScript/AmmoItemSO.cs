@@ -11,15 +11,5 @@ public class AmmoItemSO : MiscItemSO
     [SerializeField] private AmmoType ammoType;
 
     public AmmoType AmmoType { get { return ammoType; } }
-    public override ItemInstance CreateItemData(int count = 1)
-    {
-        return null;
-    }
-}
-public class AmmoItemInstance : MiscItemInstance
-{
-    public AmmoItemInstance(ItemSO itemData) : base(itemData)
-    {
 
-    }
 }

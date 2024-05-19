@@ -13,10 +13,3 @@ public abstract class EquipmentItemSO : ItemSO
     public EquipmentSlotType[] SlotTypes { get { return slotType; } }
 }
 
-public abstract class EquipmentItemInstance : ItemInstance
-{
-    protected EquipmentItemInstance(ItemSO itemData, int count = 1) : base(itemData, count)
-    {
-
-    }
-}

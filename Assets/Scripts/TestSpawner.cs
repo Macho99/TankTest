@@ -47,7 +47,7 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
         if (runner == null)
         {
             runner = gameObject.AddComponent<NetworkRunner>();
-
+            
         }
         runner.ProvideInput = true;
         await runner.StartGame(new StartGameArgs()

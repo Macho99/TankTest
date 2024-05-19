@@ -37,6 +37,8 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
         //        mainUI?.UpdateStat(PlayerStatType.HPGauge, newData.currentValue, newData.maxValue);
         //    }
         //}
+
+
     }
 
     public bool Health(PlayerStatType playerStatType, int Helath)
@@ -60,6 +62,7 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 
         }
     }
+    
 
     public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
     {
@@ -89,13 +92,24 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 
     public void AfterSpawned()
     {
-        if (HasInputAuthority)
+        if (HasStateAuthority)
         {
             mainUI = GetComponent<PlayerController>().mainUI;
             for (int i = 0; i < statData.Length; i++)
             {
-                statData.Set(i, new PlayerStatData(100, 100));
-                mainUI.UpdateStat((PlayerStatType)i, statData[i].currentValue, statData[i].maxValue);
+                if (i != (int)PlayerStatType.PoisoningGauge)
+                    statData.Set(i, new PlayerStatData(100, 100));
+                else
+                    statData.Set(i, new PlayerStatData(0, 100));
+            }
+        }
+
+
+        if (HasInputAuthority)
+        {
+            for (int i = 0; i < statData.Length; i++)
+            {
+                mainUI?.UpdateStat((PlayerStatType)i, statData[i].currentValue, statData[i].maxValue);
             }
         }
     }

@@ -22,6 +22,7 @@ public class Item : NetworkBehaviour
             }
         }
     }
+
     public bool AddItemCount(int count, out int remainingCount)
     {
         if (!itemData.IsStackable)
@@ -29,27 +30,47 @@ public class Item : NetworkBehaviour
             remainingCount = -1;
             return false;
         }
-
+        //10개들어왔는대  
         int maxCount = itemData.MaxCount;
-        if (currentCount == maxCount)
-        {
-            remainingCount = count;
-            return true;
-        }
-        if (currentCount + count > maxCount)
-        {
-            remainingCount = currentCount + count - maxCount;
-            currentCount = maxCount;
-
-            return true;
-        }
-        else
+        remainingCount = maxCount - currentCount;
+        if (remainingCount > count)
         {
             currentCount += count;
             remainingCount = 0;
 
-            return true;
         }
+        else
+        {
+            currentCount += remainingCount;
+            remainingCount = count - remainingCount;
+        }
+        return true;
+
+    }
+    public void TakeOutItemCount(int count, out int remainingCount)
+    {
+
+        if (count > currentCount)
+        {
+            remainingCount = count - currentCount;
+            currentCount = 0;
+        }
+        else
+        {
+            currentCount -= count;
+
+            remainingCount = 0;
+        }
+
+        if (currentCount <= 0)
+        {
+            if (HasStateAuthority)
+            {
+
+                Runner.Despawn(Object);
+            }
+        }
+
 
     }
     public void UpdateCount()
@@ -81,7 +102,6 @@ public class Item : NetworkBehaviour
     public override void Spawned()
     {
         gameObject.SetActive(false);
-        Debug.Log(currentCount);
     }
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_SetActive(bool isActive)

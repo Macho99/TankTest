@@ -13,7 +13,7 @@ public class PlayerLandState : PlayerState
     public override void Enter()
     {
         owner.weaponController.ResetAim();
-        owner.weaponController.ChangeWeaponWeight(0f); 
+        owner.weaponController.ChangeHandWeight();
         owner.animator.SetBool("IsLand",true);
         owner.animator.SetFloat("VelocityY", owner.VelocityY);
         Debug.Log(owner.VelocityY);
@@ -24,7 +24,7 @@ public class PlayerLandState : PlayerState
 
     public override void Exit()
     {
-        owner.weaponController.ChangeWeaponWeight(1f);
+        owner.weaponController.ChangeHandWeight(1f);
         owner.animator.SetBool("IsLand", false);
         isLandStart = false;
         isLandEnd = false;

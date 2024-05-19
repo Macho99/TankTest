@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Bazooka : Gun
 {
+    [SerializeField] private GameObject warhead;
 
 
     public override void Attack()
@@ -27,23 +28,22 @@ public class Bazooka : Gun
             distance = Vector3.Distance(targetPoint, muzzlePoint.transform.position);
         }
 
-        if (Physics.Raycast(ray, out RaycastHit hit, distance + 1f))
+        bool isHit = Physics.Raycast(ray, out RaycastHit hit, distance + 1f);
+        if (isHit == false)
         {
-
-            // GameManager.Resource.Instantiate();
+            hit.point = ray.origin + ray.direction * distance;
         }
-        Debug.DrawRay(ray.origin, ray.direction * distance, Color.blue);
+        if (HasStateAuthority)
+        {
+            AttackRPGRocket rpgRocketPrefab = GameManager.Resource.Load<AttackRPGRocket>("Item/Others/RPG_Warhead");
+            AttackRPGRocket rpgRocket = Runner.Spawn(rpgRocketPrefab, transform.position, transform.rotation);
+            rpgRocket.Init(hit.point, ((WeaponItemSO)itemData).Damage);
+            Debug.Log("╬Нец");
+        }
 
-
+        warhead.gameObject.SetActive(false);
 
         targetPoint = Vector3.zero;
-        ChangeState(WeaponState.None);
-    }
-
-
-    public override void Reload()
-    {
-
     }
 
 
@@ -59,6 +59,11 @@ public class Bazooka : Gun
         base.UnEquip();
     }
 
+    public override void Reload(int ammo)
+    {
+        base.Reload(ammo);
+        warhead.gameObject.SetActive(true);
+    }
     public override bool CanAttack()
     {
         if (!base.CanAttack())

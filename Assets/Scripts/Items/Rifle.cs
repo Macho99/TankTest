@@ -8,9 +8,8 @@ public class Rifle : Gun
 {
     public override void Attack()
     {
+       
         base.Attack();
-
-
         isFireTrigger++;
 
         Ray ray = new Ray();
@@ -27,6 +26,10 @@ public class Rifle : Gun
             distance = Vector3.Distance(targetPoint, muzzlePoint.transform.position);
         }
 
+        Debug.DrawRay(ray.origin, ray.direction * distance, Color.blue);
+
+      
+
         if (Physics.Raycast(ray, out RaycastHit hit, distance + 1f))
         {
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Player"))
@@ -42,26 +45,15 @@ public class Rifle : Gun
                     impact.transform.position = hit.point;
                     impact.transform.rotation = Quaternion.FromToRotation(impact.transform.forward, hit.normal);
 
-                    Debug.Log("공격");
-
                 }
             }
 
         }
-        Debug.Log("테스트");
-        Debug.DrawRay(ray.origin, ray.direction * distance, Color.blue);
-
-
-
+        print(currentAmmoCount);
+       
         targetPoint = Vector3.zero;
-        ChangeState(WeaponState.None);
     }
 
-
-    public override void Reload()
-    {
-
-    }
 
 
     public override void Equip(PlayerController owner)
@@ -80,6 +72,7 @@ public class Rifle : Gun
     {
         if (!base.CanAttack())
             return false;
+
 
         return true;
     }

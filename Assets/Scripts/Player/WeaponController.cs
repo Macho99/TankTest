@@ -6,8 +6,9 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
 using Random = UnityEngine.Random;
-public enum WeaponAnimLayerType { Base, Pistol, Rifle, Shotgun, Bazuka, Mily, Size }
-public enum WeaponSwichingState { None, Changing }
+
+public enum WeaponState { None, Reload, Put, Draw, Shot }
+public enum WeaponAnimLayerType { Base, Pistol, Rifle, Shotgun, Bazuka, SniperRifle, Mily, Size }
 
 public class WeaponController : NetworkBehaviour, IAfterSpawned
 {
@@ -18,17 +19,19 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
     [SerializeField] private BasicCamController camController;
     [SerializeField] private Inventory inventory;
     private PlayerController controller;
-    [SerializeField, Capacity((int)AmmoType.Size)] public Ammo netAmmo { get; set; }
-    private PlayerAnimEvent animEvent;
-    private Animator animator;
-    [Networked, OnChangedRender(nameof(UpdateMainWeapon))] private Weapon netMainWeapon { get; set; }
-    private Weapon localWeapon;
     [Networked] private int weaponIndex { get; set; }
+    [Networked, Capacity(20)] private NetworkDictionary<int, Ammo> netAmmos { get; }
+    private Animator animator;
+    [Networked, OnChangedRender(nameof(UpdateMainWeapon))] private Weapon mainWeapon { get; set; }
+    private Weapon prevWeapon;
+    [Networked, OnChangedRender(nameof(UpdateHandWeight))] private float handWeight { get; set; }
     [SerializeField] private WeaponPivotData[] weaponPivotData;
     private int weaponIndexOffset;
+    private PlayerAnimEvent animEvent;
+    private float transitionSpeed;
 
-    [Networked] public WeaponSwichingState swichingState { get; private set; }
 
+    [Networked] private WeaponState weaponState { get; set; }
 
     private PlayerMainUI mainUI;
     private void Awake()
@@ -37,369 +40,400 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
         inputListner = GetComponent<PlayerInputListner>();
         animator = GetComponent<Animator>();
         weaponIndexOffset = (int)EquipmentType.Rifle;
-
-
+        controller = GetComponent<PlayerController>();
+        transitionSpeed = 2f;
     }
     public override void Spawned()
     {
         if (HasStateAuthority)
         {
-            equipment.onMainWeaponUpdate += UpdateWeapon;
+            equipment.onMainWeaponUpdate += ModifyMainWeapon;
         }
 
-    }
-    public override void FixedUpdateNetwork()
-    {
-
-
-    }
-
-    public void WeaponControls()
-    {
-        if (localWeapon != null)
+        if (HasInputAuthority)
         {
-
-
-            if (inputListner.currentInput.buttons.IsSet(ButtonType.Adherence))
-            {
-
-                camController.ChangeCamera(BasicCamController.CameraType.Aim);
-            }
-            else if (inputListner.releaseButton.IsSet(ButtonType.Adherence))
-            {
-
-                camController.ChangeCamera(BasicCamController.CameraType.None);
-            }
-
-            if (localWeapon.weaponState != WeaponState.None)
-                return;
-
-            if (inputListner.pressButton.IsSet(ButtonType.PutWeapon))
-            {
-                localWeapon.ChangeState(WeaponState.Put);
-                UnEquipWeapon();
-                return;
-            }
-
-            if (inputListner.pressButton.IsSet(ButtonType.Reload))
-            {
-                if (localWeapon is Gun == false)
-                    return;
-                localWeapon.ChangeState(WeaponState.Reload);
-                handAimIK.weight = 0f;
-                subHandIK.weight = 0f;
-                animEvent.onEndReload += () => { StartCoroutine(ChangeHandWeightRoutine()); localWeapon.ChangeState(WeaponState.None); };
-                animator.SetTrigger("Reload");
-                ((Gun)localWeapon).Reload();
-                return;
-            }
-
-
+            mainUI = controller.mainUI;
         }
 
-        if (swichingState == WeaponSwichingState.Changing)
+
+    }
+
+    private void ModifyMainWeapon(int index, Weapon weapon)
+    {
+        if (weaponIndex != index)
             return;
-
-
-        if (inputListner.currentInput.buttons.IsSet(ButtonType.FirstWeapon))
-        {
-
-
-            EquipMainWeapon(EquipmentSlotType.FirstMainWeapon);
-        }
-        else if (inputListner.currentInput.buttons.IsSet(ButtonType.SecondWeapon))
-        {
-
-            EquipMainWeapon(EquipmentSlotType.SecondMainWeapon);
-        }
-        else if (inputListner.currentInput.buttons.IsSet(ButtonType.SubWeapon))
-        {
-
-            EquipMainWeapon(EquipmentSlotType.SubWeapon);
-        }
-        else if (inputListner.currentInput.buttons.IsSet(ButtonType.MilyWeapon))
-        {
-
-            EquipMainWeapon(EquipmentSlotType.MilyWeapon);
-        }
-
-        if (inputListner.currentInput.buttons.IsSet(ButtonType.Attack))
-        {
-            if (localWeapon != null)
-            {
-                if (!localWeapon.CanAttack())
-                {
-                    Debug.Log("공격불가");
-                    return;
-                }
-
-                if (localWeapon is MilyWeapon)
-                {
-                    animator.SetFloat("AttackIndex", Random.Range(0, 4));
-                }
-                else
-                {
-                    animEvent.onFire += Fire;
-                }
-                animator.SetTrigger("Attack");
-
-            }
-
-
-        }
-    }
-    public void Fire()
-    {
-        if (localWeapon == null)
-            return;
-
-        Ray ray = new Ray();
-        Vector3 origin = ((Gun)localWeapon).GetMuzzlePoint() - camController.RayCasterTr.position;
-        //빗변의 길이와 방향
-
-        float angle = Mathf.Abs(Vector3.Angle(origin, camController.RayCasterTr.forward));
-
-        float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
-        float newZ = origin.magnitude * cos;
-
-
-        ray.origin = camController.RayCasterTr.position + camController.RayCasterTr.forward * newZ;
-        ray.direction = camController.RayCasterTr.forward;
-        if (Physics.Raycast(ray, out RaycastHit hit, 1000))
-        {
-            ((Gun)localWeapon).SetShotPoint(hit.point);
-            Debug.DrawLine(ray.origin, hit.point, Color.red, 0.1f);
-        }
-        else
-        {
-            ((Gun)localWeapon).SetShotPoint(ray.origin + ray.direction * 1000);
-        }
-
-        localWeapon.Attack();
-    }
-
-    public void EquipMainWeapon(EquipmentSlotType slotType)
-    {
-        if (equipment.netItems[(int)slotType] == null)
-        {
-            return;
-        }
-        this.weaponIndex = (int)slotType;
-        netMainWeapon = (Weapon)equipment.netItems[(int)slotType];
-    }
-
-    public void UpdateMainWeapon()
-    {
-
-        if (netMainWeapon == null)
-        {
-            if (localWeapon != null)
-            {
-                StopAllCoroutines();
-                handAimIK.weight = 0f;
-                subHandIK.weight = 0f;
-                localWeapon.SetTarget(null);
-                if (equipment.IsExistEquipmentItem(localWeapon))
-                {
-                    animator.SetTrigger("Put");
-                    Debug.Log("put");
-                    animEvent.onStartPutWeapon += OnStartPut;
-                }
-                else
-                {
-                    animator.SetLayerWeight((int)((WeaponItemSO)localWeapon.ItemData).AnimLayerType, 0f);
-
-                }
-                mainUI?.ChangeWeaponUI(null);
-
-
-            }
-
-        }
-        else
-        {
-            Debug.Log("asdadasd");
-            swichingState = WeaponSwichingState.Changing;
-            if (localWeapon == null)
-            {
-                localWeapon = netMainWeapon;
-                mainUI?.ChangeWeaponUI(localWeapon);
-                SetupMainWeapon();
-            }
-            else
-            {
-                StopAllCoroutines();
-                animEvent.onStartDrawWeapon -= OnStartDraw;
-                animEvent.onEndDrawWeapon -= OnEndDraw;
-                handAimIK.weight = 0f;
-                subHandIK.weight = 0f;
-                localWeapon.UnEquip();
-                localWeapon.SetTarget(null);
-                localWeapon.SetParent(weaponPivotData[WeaponPivotIndex()].subPivot);
-                animator.SetLayerWeight((int)((WeaponItemSO)localWeapon.ItemData).AnimLayerType, 0f);
-                Debug.Log((int)((WeaponItemSO)localWeapon.ItemData).AnimLayerType);
-                Debug.Log(animator.GetLayerWeight((int)((WeaponItemSO)localWeapon.ItemData).AnimLayerType));
-                SetupMainWeapon();
-
-            }
-
-        }
-
-    }
-    public void UpdateWeapon(int weaponIndex, Weapon weapon)
-    {
-        if (this.weaponIndex != weaponIndex)
-            return;
-
 
 
         if (weapon == null)
         {
-            if (netMainWeapon != null)
+            mainWeapon = null;
+        }
+        else
+        {
+            mainWeapon = weapon;
+        }
+    }
+
+    public void WeaponControls()
+    {
+        Aiming();
+        PressTakeOnMainweapon();
+        Attack();
+        Reloading();
+    }
+
+
+    private void PressTakeOnMainweapon()
+    {
+
+
+        if (inputListner.pressButton.IsSet(ButtonType.FirstWeapon))
+        {
+            ChangeMainWeapon(EquipmentSlotType.FirstMainWeapon);
+        }
+        else if (inputListner.pressButton.IsSet(ButtonType.SecondWeapon))
+        {
+
+            ChangeMainWeapon(EquipmentSlotType.SecondMainWeapon);
+        }
+        else if (inputListner.pressButton.IsSet(ButtonType.SubWeapon))
+        {
+
+            ChangeMainWeapon(EquipmentSlotType.SubWeapon);
+        }
+        else if (inputListner.pressButton.IsSet(ButtonType.MilyWeapon))
+        {
+
+            ChangeMainWeapon(EquipmentSlotType.MilyWeapon);
+        }
+        else if (inputListner.pressButton.IsSet(ButtonType.PutWeapon))
+        {
+            mainWeapon = null;
+        }
+
+    }
+
+    private void Attack()
+    {
+        if (GetInput(out NetworkInputData input))
+        {
+            if (input.buttons.IsSet(ButtonType.Attack))
             {
-                netMainWeapon = null;
-                netAmmo = null;
+                if (mainWeapon == null)
+                    return;
 
-                return;
-            }
-        }
-        if (netMainWeapon == weapon)
-        {
-            netMainWeapon = null;
-            netAmmo = null;
-        }
-        else if (netMainWeapon != weapon)
-        {
-            netMainWeapon = weapon;
-        }
-    }
-    public void UnEquipWeapon()
-    {
-        if (netMainWeapon != null)
-        {
-            netMainWeapon = null;
-        }
-    }
+                if (mainWeapon.CanAttack() == true)
+                {
+                    Ray ray = new Ray();
+                    Vector3 origin = ((Gun)mainWeapon).GetMuzzlePoint() - camController.RayCasterTr.position;
+                    float angle = Mathf.Abs(Vector3.Angle(origin, camController.RayCasterTr.forward));
 
-    private void SetupMainWeapon()
-    {
-        localWeapon = netMainWeapon;
-        mainUI?.ChangeWeaponUI(localWeapon);
-        animator.SetTrigger("Draw");
-        localWeapon.SetTarget(subHandIK.data.target);
-        animator.SetFloat("WeaponIndex", (float)((WeaponItemSO)localWeapon.ItemData).AnimLayerType);
-        localWeapon.SetParent(weaponPivotData[WeaponPivotIndex()].subPivot);
-        animEvent.onStartDrawWeapon += OnStartDraw;
-        animEvent.onEndDrawWeapon += OnEndDraw;
-        handAimIK.weight = 0f;
-        subHandIK.weight = 0f;
-    }
-    public void OnStartPut()
-    {
-        Debug.Log(WeaponPivotIndex());
-        localWeapon.SetParent(weaponPivotData[WeaponPivotIndex()].subPivot);
-        animator.SetLayerWeight((int)((WeaponItemSO)localWeapon.ItemData).AnimLayerType, 0f);
-        localWeapon.ChangeState(WeaponState.None);
-        localWeapon = null;
-        swichingState = WeaponSwichingState.None;
-    }
-    public void OnStartDraw()
-    {
-        localWeapon.SetActive(true);
-        localWeapon.SetParent(weaponPivotData[WeaponPivotIndex()].mainPivot);
+                    float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
+                    float newZ = origin.magnitude * cos;
 
-        Debug.Log("Start");
-    }
-    public void OnEndDraw()
-    {
-        StartCoroutine(DrawRoutine());
 
-    }
-    private IEnumerator ChangeHandWeightRoutine()
-    {
-        float speed = 2f;
-        float currentValue = 0f;
+                    ray.origin = camController.RayCasterTr.position + camController.RayCasterTr.forward * newZ;
+                    ray.direction = camController.RayCasterTr.forward;
+                    if (Physics.Raycast(ray, out RaycastHit hit, 1000))
+                    {
+                        ((Gun)mainWeapon).SetShotPoint(hit.point);
+                        Debug.DrawLine(ray.origin, hit.point, Color.red, 0.1f);
+                    }
+                    else
+                    {
+                        ((Gun)mainWeapon).SetShotPoint(ray.origin + ray.direction * 1000);
+                    }
+                    Debug.DrawRay(ray.origin, ray.direction * 1000, Color.red);
 
-        while (currentValue < 1f)
-        {
-            currentValue += speed * Time.deltaTime;
-            handAimIK.weight += currentValue;
-            subHandIK.weight += currentValue;
-            yield return null;
-        }
-
-        handAimIK.weight = 1f;
-        subHandIK.weight = 1f;
-    }
-    private IEnumerator DrawRoutine()
-    {
-        float speed = 2f;
-        float currentValue = 0f;
-
-        while (animator.GetLayerWeight((int)((WeaponItemSO)localWeapon.ItemData).AnimLayerType) < 1f)
-        {
-            currentValue += speed * Time.deltaTime;
-            animator.SetLayerWeight((int)((WeaponItemSO)localWeapon.ItemData).AnimLayerType, currentValue);
-
-            if (localWeapon.SubHandTarget != null)
-            {
-                handAimIK.weight += currentValue;
-                subHandIK.weight += currentValue;
+                    animator.SetTrigger("Attack");
+                    prevWeapon.Attack();
+                    int totalAmmoCount = mainWeapon is Gun ? inventory.GetTotalAmmoItemCount((Gun)mainWeapon) : 1;
+                    mainUI?.UpdateAmmo(mainWeapon, totalAmmoCount);
+                }
             }
 
 
-            yield return null;
+
         }
-        if (localWeapon.SubHandTarget != null)
-        {
-            handAimIK.weight += 1f;
-            subHandIK.weight += 1f;
-        }
-        animator.SetLayerWeight((int)((WeaponItemSO)localWeapon.ItemData).AnimLayerType, 1f);
-        swichingState = WeaponSwichingState.None;
-        localWeapon.ChangeState(WeaponState.None);
     }
-    public void ChangeWeaponWeight(float weight)
+    private void Reloading()
     {
-        if (localWeapon == null)
+        if (!Runner.IsForward)
             return;
 
-        handAimIK.weight = weight;
-        subHandIK.weight = weight;
+        if (inputListner.pressButton.IsSet(ButtonType.Reload))
+        {
+            if (!animator.GetCurrentAnimatorStateInfo((int)WeaponAnimLayerType.Size).IsName("Empty"))
+                return;
+
+            if (mainWeapon == null)
+                return;
+            if (weaponState != WeaponState.None)
+                return;
+
+
+            Gun mainGun = mainWeapon as Gun;
+            if (mainGun == null)
+                return;
+            if (inventory.GetTotalAmmoItemCount(mainGun) <= 0)
+                return;
+
+            if (mainGun.currentAmmoCount >= ((GunItemSO)mainGun.ItemData).MaxAmmoCount)
+                return;
+
+
+
+            Debug.Log("reload");
+            weaponState = WeaponState.Reload;
+            handWeight = 0;
+            animator.SetFloat("WeaponIndex", (float)((WeaponItemSO)mainGun.ItemData).AnimLayerType);
+            animEvent.onEndReload += EndReload;
+            animator.SetTrigger("Reload");
+
+        }
+
+    }
+    public void ChangeMainWeapon(EquipmentSlotType slotType)
+    {
+        if (weaponState != WeaponState.None)
+            return;
+
+        if (!animator.GetCurrentAnimatorStateInfo((int)WeaponAnimLayerType.Size).IsName("Empty"))
+            return;
+
+      
+        Weapon weapon = equipment.GetWeapon(slotType);
+        if (weapon != null)
+        {
+            if (weapon == mainWeapon)
+                return;
+
+            weaponState = WeaponState.Draw;
+            mainWeapon = weapon;
+            weaponIndex = (int)slotType;
+        }
+    }
+    public void ChangeHandWeight(float weight = 0)
+    {
+        handWeight = weight;
+    }
+    private void UpdateMainWeapon()
+    {
+        if (mainWeapon != prevWeapon)
+        {
+            if (prevWeapon == null)
+            {
+                if (mainWeapon != null)
+                {
+                    TakeOnMainWeapon();
+                    UpdateAmmoCount();
+                    prevWeapon = mainWeapon;
+
+                }
+            }
+            else if (prevWeapon != null)
+            {
+
+                if (mainWeapon != null)
+                {
+                    TakeOffMainWeapon(prevWeapon);
+                    prevWeapon = mainWeapon;
+                    TakeOnMainWeapon();
+                    UpdateAmmoCount();
+                }
+                else if (mainWeapon == null)
+                {
+                    if (equipment.IsHaveWeapon(prevWeapon))
+                    {
+                        PutMainWeapon(prevWeapon);
+                        UpdateAmmoCount();
+                    }
+                    else
+                    {
+                        TakeOffMainWeapon(prevWeapon);
+                        weaponState = WeaponState.None;
+                        UpdateAmmoCount();
+                        prevWeapon = mainWeapon;
+                    }
+
+                }
+            }
+
+
+        }
+    }
+    private void Aiming()
+    {
+        if (mainWeapon == null)
+            return;
+
+
+        if (inputListner.currentInput.buttons.IsSet(ButtonType.Adherence))
+        {
+            camController.ChangeCamera(BasicCamController.CameraType.Aim);
+        }
+        if (inputListner.releaseButton.IsSet(ButtonType.Adherence))
+        {
+            camController.ChangeCamera(BasicCamController.CameraType.None);
+
+        }
+    }
+    public void ResetAim()
+    {
+        camController.ChangeCamera(BasicCamController.CameraType.None);
+    }
+    public void UpdateAmmoCount()
+    {
+        int totalAmmoCount = 1;
+        if(mainWeapon != null)
+        {
+            if (mainWeapon is Gun)
+            {
+                totalAmmoCount = inventory.GetTotalAmmoItemCount((Gun)mainWeapon);
+            }
+            else
+            {
+                totalAmmoCount = 1;
+            }
+        }   
+        mainUI?.ChangeWeaponUI(mainWeapon, totalAmmoCount);
+    }
+    private void PutMainWeapon(Weapon weapon)
+    {
+        camController.ResetCamera();
+        weaponState = WeaponState.Put;
+        weapon.SetTarget(null);
+        handWeight = 0f;
+        animator.SetFloat("WeaponIndex", (float)((WeaponItemSO)weapon.ItemData).AnimLayerType);
+        animEvent.onStartPutWeapon += StartPut;
+        animator.SetTrigger("Put");
+
+    }
+    private void TakeOnMainWeapon()
+    {
+        camController.ResetCamera();
+        handWeight = 0f;
+        animator.SetFloat("WeaponIndex", (float)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType);
+        animEvent.onStartDrawWeapon += StartDraw;
+        animEvent.onStartDrawWeapon += EndDraw;
+        animator.SetTrigger("Draw");
+    }
+    private void TakeOffMainWeapon(Weapon prevWeapon)
+    {
+        camController.ResetCamera();
+        handWeight = 0f;
+        prevWeapon.SetTarget(null);
+        animator.SetLayerWeight((int)((WeaponItemSO)prevWeapon.ItemData).AnimLayerType, 0f);
+        prevWeapon.SetParent(SetupMainHandSubPivot(prevWeapon));
+
+    }
+    private void UpdateHandWeight()
+    {
+        subHandIK.weight = handWeight;
+        handAimIK.weight = handWeight;
     }
 
 
-    public void ResetAim()
-    {
-        camController.ResetCamera();
-        animator.ResetTrigger("Attack");
-        animator.ResetTrigger("Draw");
-        animator.ResetTrigger("Put");
-        animator.ResetTrigger("Shot");
-        if (!animator.GetCurrentAnimatorStateInfo((int)WeaponAnimLayerType.Size).IsName("Empty"))
-        {
+    #region 애님이벤트
 
-            animator.SetTrigger("Cancle");
-            ChangeWeaponWeight(0f);
+    private void EndReload()
+    {
+        handWeight = 1f;
+
+        Gun mainGun = mainWeapon as Gun;
+
+        int totalAmmoCount = inventory.GetTotalAmmoItemCount(mainGun);
+
+        int currentAmmoCount = mainGun.currentAmmoCount;
+        int maxAmmoCount = ((GunItemSO)mainGun.ItemData).MaxAmmoCount;
+
+        int requiredCount = maxAmmoCount - currentAmmoCount;
+
+        int amountCount = Mathf.Min(requiredCount, totalAmmoCount);
+
+
+        mainGun.Reload(amountCount);
+        AmmoType ammoType = ((GunItemSO)mainGun.ItemData).AmmoType;
+
+        inventory.PullAmmoItemCount(ammoType, amountCount);
+        totalAmmoCount -= requiredCount;
+
+        mainUI?.UpdateAmmo(mainWeapon, totalAmmoCount);
+
+
+        if (weaponState == WeaponState.Reload)
+            weaponState = WeaponState.None;
+
+    }
+    private void StartPut()
+    {
+        prevWeapon.SetParent(SetupMainHandSubPivot(prevWeapon));
+        animator.SetLayerWeight((int)((WeaponItemSO)prevWeapon.ItemData).AnimLayerType, 0f);
+        prevWeapon = mainWeapon;
+        weaponState = WeaponState.None;
+        Debug.Log(weaponState);
+    }
+
+    private void StartDraw()
+    {
+        mainWeapon.SetParent(SetupMainHandMainPivot(mainWeapon));
+        animator.SetLayerWeight((int)((WeaponItemSO)prevWeapon.ItemData).AnimLayerType, 0f);
+    }
+    private void EndDraw()
+    {
+        StartCoroutine(LerpWeaponAnimLayer());
+    }
+    private IEnumerator LerpWeaponAnimLayer()
+    {
+        float weight = 0f;
+
+        while (animator.GetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType) < 1f)
+        {
+            weight += transitionSpeed * Time.deltaTime;
+            animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, weight);
+            handWeight = weight;
+            yield return null;
         }
+        animator.SetLayerWeight((int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType, 1f);
+        mainWeapon.SetTarget(subHandIK.data.target);
+        handWeight = 1f;
+
+        weaponState = WeaponState.None;
+
+    }
+    #endregion
+
+
+    public int WeaponPivotIndex(Weapon weapon)
+    {
+        if (weapon == null)
+            return -1;
+
+        int index = (int)((WeaponItemSO)weapon.ItemData).EquipmentType - weaponIndexOffset;
+
+        return index;
+    }
+    public Transform SetupMainHandMainPivot(Weapon weapon)
+    {
+        if (weapon == null)
+            return null;
+
+        int index = WeaponPivotIndex(weapon);
+        return weaponPivotData[index].mainPivot;
+    }
+    public Transform SetupMainHandSubPivot(Weapon weapon)
+    {
+        if (weapon == null)
+            return null;
+
+        int index = WeaponPivotIndex(weapon);
+        return weaponPivotData[index].subPivot;
     }
 
     public void AfterSpawned()
     {
         UpdateMainWeapon();
-        if (HasInputAuthority)
-        {
-            mainUI = GetComponent<PlayerController>().mainUI;
-        }
-    }
-    public int WeaponPivotIndex()
-    {
-        if (localWeapon == null)
-            return -1;
-
-        int index = (int)((WeaponItemSO)localWeapon.ItemData).EquipmentType - weaponIndexOffset;
-
-        return index;
+        UpdateHandWeight();
     }
 }
 [Serializable]

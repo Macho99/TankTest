@@ -10,8 +10,5 @@ public class GasMaskSO : EquipmentItemSO
 
     public int GasProtectionAmount { get { return gasProtectionAmount; } }
 
-    public override ItemInstance CreateItemData(int count = 1)
-    {
-        throw new System.NotImplementedException();
-    }
+
 }

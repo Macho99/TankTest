@@ -15,7 +15,7 @@ public class MainWeaponUI : MonoBehaviour
     {
         this.gameObject.SetActive(false);
     }
-    public void ChangeWeaponUI(Weapon weapon)
+    public void ChangeWeaponUI(Weapon weapon,int totalAmmoCount)
     {
         if (weapon == null)
         {
@@ -29,17 +29,18 @@ public class MainWeaponUI : MonoBehaviour
 
         weaponNameTMP.text = weapon.ItemData.ItemName;
         weaponImage.sprite = ((WeaponItemSO)weapon.ItemData).ItemDetailIcon;
-        ChangeAmmoCount(weapon);
+        ChangeAmmoCount(weapon, totalAmmoCount);
     }
 
-    public void ChangeAmmoCount(Weapon weapon)
+    public void ChangeAmmoCount(Weapon weapon,int totalAmmoCount)
     {
         int maxAmmo = 0;
         int currentAmmo = 0;
         if (weapon is Gun)
         {
-            maxAmmo = ((GunItemSO)weapon.ItemData).MaxAmmoCount;
+            maxAmmo = totalAmmoCount;
             currentAmmo = ((Gun)weapon).currentAmmoCount;
+            Debug.Log(currentAmmo);
             for (int i = 0; i < ammoImages.Length; i++)
             {
 

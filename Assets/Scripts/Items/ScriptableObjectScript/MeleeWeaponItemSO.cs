@@ -9,31 +9,4 @@ public class MeleeWeaponItemSO : WeaponItemSO
 {
     [SerializeField, Range(0f, 2f)] private float attackSpeed = 1f;
 
-    public override ItemInstance CreateItemData(int count = 1)
-    {
-        return new MeleeWeaponItemInstance(this);
-    }
-}
-public class MeleeWeaponItemInstance : WeaponInstance
-{
-    public MeleeWeaponItemInstance(ItemSO itemData) : base(itemData)
-    {
-
-    }
-
-    public override ItemInstance Clone()
-    {
-        MeleeWeaponItemInstance cloneItem = new MeleeWeaponItemInstance(this.ItemData);
-
-        return cloneItem;
-    }
-
-    public override Item CreateNetworkItem(NetworkRunner runner, int count = 1)
-    {
-        Item item = runner.Spawn(itemObject);
-
-        item.Init(count);
-        item.name = this.itemData.ItemName;
-        return item;
-    }
 }

@@ -39,7 +39,6 @@ public class ItemBoxSpawner : NetworkBehaviour
     {
         var clone = randomSpawnData[GetRandomIndex()];
         Runner.Spawn(clone.itemBox, position, rotation);
-        Debug.Log($"{clone.itemBox.name}/{clone.chance}");
     }
     public int GetRandomIndex()
     {

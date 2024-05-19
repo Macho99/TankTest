@@ -12,30 +12,6 @@ public class ArmorItemSO : EquipmentItemSO
     [SerializeField] private ArmorType armorType;
     [SerializeField] private float reductionAmount;
 
-
-    public override ItemInstance CreateItemData(int count = 1)
-    {
-        return new ArmorItemInstance(this);
-    }
 }
 
 
-public class ArmorItemInstance : EquipmentItemInstance
-{
-    public ArmorItemInstance(ItemSO itemData, int count = 1) : base(itemData,count)
-    {
-    }
-    public override ItemInstance Clone()
-    {
-        ArmorItemInstance cloneItem = new ArmorItemInstance(this.ItemData);
-
-        return cloneItem;
-    }
-    public override Item CreateNetworkItem(NetworkRunner runner, int count = 1)
-    {
-        Item item = runner.Spawn(itemObject);
-        item.Init(count);
-        item.name = this.itemData.ItemName;
-        return item;
-    }
-}

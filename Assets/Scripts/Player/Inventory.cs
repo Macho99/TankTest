@@ -13,7 +13,7 @@ public struct ItemStruct : INetworkStruct
 }
 public class Inventory : NetworkBehaviour
 {
-    [Networked, Capacity(50), OnChangedRender(nameof(OnChangeItem))] private NetworkArray<Item> netItems { get; }
+    [Networked, Capacity(50), OnChangedRender(nameof(OnChangeItem))] public NetworkArray<Item> netItems { get; }
 
     private int maxCount;
     [Networked] public float Weight { get; private set; }
@@ -37,19 +37,6 @@ public class Inventory : NetworkBehaviour
             MaxWeight = 1000f;
         }
         OnChangeItem();
-    }
-    public override void Render()
-    {
-        if (Object.IsProxy)
-        {
-            for (int i = 0; i < maxCount; i++)
-            {
-                if (netItems[i] != null)
-                {
-                    Debug.Log(netItems[i].name);
-                }
-            }
-        }
     }
     public void UseItem(int index)
     {
@@ -83,18 +70,23 @@ public class Inventory : NetworkBehaviour
             {
                 if (items[i].AddItemCount(count, out int remainingCount))
                 {
+
+                    Weight += items[i].ItemData.Weight * (count - remainingCount);
                     count = remainingCount;
                     if (count <= 0)
                     {
                         newItem.ChangeItemCount(count);
+
+
                         netItems[i].SetParent(this.transform);
                         netItems[i].gameObject.SetActive(false);
-                        //Weight += netItems[i].ItemData.Weight * netItems[i].currentCount;
-                        onItemUpdate?.Invoke(i, netItems[i]);
+
+                        onItemUpdate?.Invoke(GetItemIndex(items[i]), items[i]);
+
+                        return;
                     }
                 }
             }
-
             if (count > 0)
             {
                 newItem.ChangeItemCount(count);
@@ -102,6 +94,7 @@ public class Inventory : NetworkBehaviour
                 netItems.Set(index, newItem);
                 netItems[index].SetParent(this.transform);
                 netItems[index].gameObject.SetActive(false);
+                Weight += netItems[index].ItemData.Weight * count;
                 onItemUpdate?.Invoke(index, netItems[index]);
             }
             return;
@@ -111,7 +104,6 @@ public class Inventory : NetworkBehaviour
         {
             if (netItems[i] == null)
             {
-                Debug.Log(newItem.currentCount);
 
                 if (newItem.ItemData.Weight * newItem.currentCount + Weight > MaxWeight)
                     continue;
@@ -120,7 +112,6 @@ public class Inventory : NetworkBehaviour
                 Weight += netItems[i].ItemData.Weight * netItems[i].currentCount;
                 netItems[i].SetParent(this.transform);
                 netItems[i].gameObject.SetActive(false);
-                Debug.Log("add");
                 onItemUpdate?.Invoke(i, netItems[i]);
                 break;
             }
@@ -226,14 +217,13 @@ public class Inventory : NetworkBehaviour
         }
     }
 
-    public int GetAmmoItemCount(Gun weapon)
+    public int GetTotalAmmoItemCount(Gun weapon)
     {
 
         Item[] items = Array.FindAll(netItems.ToArray(), (item) =>
          {
              if (item == null || item is Ammo == false)
                  return false;
-
              return ((GunItemSO)weapon.ItemData).AmmoType == ((AmmoItemSO)item.ItemData).AmmoType;
 
          });
@@ -246,4 +236,51 @@ public class Inventory : NetworkBehaviour
 
         return maxCount;
     }
+    public Ammo GetAmmoItems(int index, AmmoType ammoType)
+    {
+
+        if (netItems[index] == null)
+        {
+            return null;
+        }
+        if (netItems[index] is Ammo == false)
+            return null;
+
+
+
+        if (((AmmoItemSO)netItems[index].ItemData).AmmoType != ammoType)
+            return null;
+
+
+        return (Ammo)netItems[index];
+
+
+    }
+    public void PullAmmoItemCount(AmmoType ammoType, int count)
+    {
+        for (int i = 0; i < netItems.Length; i++)
+        {
+            if (netItems[i] == null)
+                continue;
+
+            if (netItems[i] is Ammo == false)
+                continue;
+
+            netItems[i].TakeOutItemCount(count, out int remaingCount);
+            count = remaingCount;
+            if (netItems[i] == null)
+                netItems.Set(i, null);
+
+            onItemUpdate?.Invoke(i, netItems[i]);
+            if (count <= 0)
+            {
+                return;
+            }
+
+        }
+
+    }
+
+
+
 }
