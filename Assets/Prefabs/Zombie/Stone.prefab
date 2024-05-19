@@ -107,10 +107,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   childCol: {fileID: 193791207832049411}
   damage: 500
-  _OwnerId:
-    Raw: 0
-  _Velocity: {x: 0, y: 0, z: 0}
-  _AngularVelocity: {x: 0, y: 0, z: 0}
+  _Owner: {fileID: 0}
 --- !u!33 &1768942680276925798
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -168,13 +165,13 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8667409808522564291}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 5a04a35adb37dc748b5bde18cbcfa3cc, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -191,7 +188,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8667409808522564291}
   serializedVersion: 4
-  m_Mass: 500000
+  m_Mass: 50000
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -202,7 +199,7 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
@@ -223,7 +220,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SyncScale: 0
-  SyncParent: 1
+  SyncParent: 0
   _interpolationTarget: {fileID: 0}
   UsePreciseRotation: 0
   UseRenderSleepThresholds: 1

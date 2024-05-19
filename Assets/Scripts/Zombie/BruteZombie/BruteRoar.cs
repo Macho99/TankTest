@@ -67,7 +67,7 @@ public class BruteRoar : BruteZombieState
 		Zombie zombie = netObj.GetComponent<Zombie>();
 		zombie.transform.rotation = Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value));
 		zombie.transform.position = owner.transform.position + pos;
-		zombie.TargetData.SetTarget(target, runner.Tick);
+		zombie.TargetData.SetTarget(target, runner.Tick + (int)(runner.TickRate * 10f));
 	}
 
 	public override void SetUp()

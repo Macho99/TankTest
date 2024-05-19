@@ -24,6 +24,9 @@ public class TargetFollower : MonoBehaviour
 
 	public void ManualUpdate()
 	{
-		transform.position = Vector3.Lerp(transform.position, target.position + offset, Time.deltaTime * speed);
+		if(target != null)
+		{
+			transform.position = Vector3.Lerp(transform.position, target.position + offset, Time.deltaTime * speed);
+		}
 	}
 }

@@ -1,16 +1,73 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DebrisRoot : MonoBehaviour
 {
-	[SerializeField] Rigidbody[] childrenRb;
+	[SerializeField] protected Rigidbody[] childrenRb;
+	[SerializeField] float fadeWaitDuration = 5f;
+	[SerializeField] float fadeDuration = 10f;
 
+	protected float curScale = 0.9f;
+
+	public event Action OnDestoyEvent;
 	public Rigidbody[] ChildrenRb { get { return childrenRb; } }
+
+	protected virtual void Awake()
+	{
+
+	}
+
+	protected virtual void OnEnable()
+	{
+		StartCoroutine(CoEnable());
+	}
+
+	protected virtual void OnDisable()
+	{
+		curScale = 0.9f;
+		OnDestoyEvent = null;
+	}
 
 	private void OnValidate()
 	{
 		InitChildren();
+	}
+
+	public void Init(float fadeWaitDuration, float fadeDuration)
+	{
+		this.fadeWaitDuration = fadeWaitDuration;
+		this.fadeDuration = fadeDuration;
+	}
+
+	private IEnumerator CoEnable()
+	{
+		yield return null;
+		yield return new WaitForSeconds(fadeWaitDuration);
+		curScale = 0.9f;
+
+		while (true)
+		{
+			float nextScale = curScale - Time.deltaTime / fadeDuration;
+			if (nextScale < 0)
+			{
+				break;
+			}
+
+			SetChildrenScale(nextScale);
+			curScale = nextScale;
+			yield return null;
+		}
+
+		OnDestoyEvent?.Invoke();
+		VirtualDestroy();
+	}
+
+	protected virtual void VirtualDestroy()
+	{
+		Destroy(gameObject);
 	}
 
 	public void InitChildren()
@@ -21,7 +78,7 @@ public class DebrisRoot : MonoBehaviour
 		}
 	}
 
-	public void SetChildrenScale(float scale)
+	private void SetChildrenScale(float scale)
 	{
 		foreach (var child in childrenRb)
 		{

@@ -5,6 +5,8 @@ using UnityEngine.AI;
 
 public class CompressObstacle : BreakableObstacle
 {
+	const string smokeVfxPath = "FX/VFX/CompressSmoke";
+
 	[SerializeField] float scaleYValue;
 	Mesh mesh;
 	Vector3[] vertices;
@@ -48,7 +50,12 @@ public class CompressObstacle : BreakableObstacle
 
 		if(immediately == false)
 		{
+			ParticleSystem vfx = GameManager.Resource.Instantiate<ParticleSystem>(smokeVfxPath, 
+				transform.position + Vector3.up, transform.rotation, true);
 
+			var shapeModule = vfx.shape;
+			shapeModule.scale = mesh.bounds.size;
+			shapeModule.position = mesh.bounds.center;
 		}
 	}
 

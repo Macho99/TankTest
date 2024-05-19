@@ -13,7 +13,7 @@ public class TargetData
 	public bool IsTargeting { get { return Transform != null; } }
 	public Transform Transform { get; private set; }
 	public Vector3 Position { get { return Transform.position; } }
-	public int Layer { get; private set; }
+	public int Layer { get { return Transform == null ? -1 : Transform.gameObject.layer; }	}
 
 	public Tick LastFindTick { get; set; }
 
@@ -41,7 +41,6 @@ public class TargetData
 	public void RemoveTarget()
 	{
 		Transform = null;
-		Layer = -1;
 	}
 
 	public void SetTarget(Transform target, Tick tick)
@@ -53,7 +52,6 @@ public class TargetData
 		else
 		{
 			Transform = target;
-			Layer = target.gameObject.layer;
 			LastFindTick = tick;
 			UpdateTargetData();
 		}
@@ -74,7 +72,7 @@ public class TargetData
 		AbsAngle = Mathf.Abs(Angle);
 	}
 
-	public bool CheckObstacleAttack(Vector3 ownerPosition)
+	public bool CheckObstacleAttack(Vector3 ownerPosition, float attackDist = 1f)
 	{
 		if (Distance > 7f)
 			return false;
@@ -84,7 +82,7 @@ public class TargetData
 
 		Vector3 offset = Vector3.up * 0.1f;
 
-		int ownerResult = Physics.RaycastNonAlloc(ownerPosition + offset, -obstacleDir, ownerHits, 1f, obstacleMask);
+		int ownerResult = Physics.RaycastNonAlloc(ownerPosition + offset, -obstacleDir, ownerHits, attackDist, obstacleMask);
 		if (ownerResult == 0) return false;
 
 		int targetResult = Physics.RaycastNonAlloc(Position + offset, obstacleDir, targetHits, 1f, obstacleMask);

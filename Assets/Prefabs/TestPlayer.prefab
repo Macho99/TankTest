@@ -259,6 +259,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4874529044856852990}
   - component: {fileID: 2060427359128742917}
+  - component: {fileID: 5300236978094158888}
   m_Layer: 3
   m_Name: Virtual Camera
   m_TagString: Untagged
@@ -321,6 +322,29 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_ComponentOwner: {fileID: 3445985278836012513}
+--- !u!114 &5300236978094158888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2407029100630622149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00b2d199b96b516448144ab30fb26aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ApplyAfter: 2
+  m_ChannelMask: 1
+  m_Gain: 1
+  m_Use2DDistance: 0
+  m_UseCameraSpace: 1
+  m_ReactionSettings:
+    m_SecondaryNoise: {fileID: 0}
+    m_AmplitudeGain: 1
+    m_FrequencyGain: 1
+    m_Duration: 1
+    m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &4409859792767236764
 GameObject:
   m_ObjectHideFlags: 0
@@ -754,6 +778,7 @@ GameObject:
   - component: {fileID: 7370577872566965626}
   - component: {fileID: 5199989640796347361}
   - component: {fileID: 2424700729127825468}
+  - component: {fileID: 7032265760966374464}
   m_Layer: 3
   m_Name: TestPlayer
   m_TagString: Untagged
@@ -799,7 +824,7 @@ MonoBehaviour:
   gravity: -9.8
   lookSpeed: 10
   moveSpeed: 5
-  damage: 1
+  damage: 1000
   knockbackPower: 30
   _YAngle: 0
   _XAngle: 0
@@ -884,3 +909,19 @@ MonoBehaviour:
     StepRequireGroundTarget: 0
     SnapDistance: 0.25
     SnapSpeed: 4
+--- !u!208 &7032265760966374464
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7109066118128555570}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 0.3, y: 1, z: 0.3}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 1, z: 0}
+  m_TimeToStationary: 0.5

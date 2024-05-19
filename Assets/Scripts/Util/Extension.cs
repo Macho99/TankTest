@@ -111,6 +111,8 @@ public static class Extension
 
 	public static bool IsLayerInMask(this LayerMask layerMask, int layer)
 	{
+		if (layer < 0) return false;
+
 		if (((1 << layer) & layerMask) > 0)
 		{
 			return true;

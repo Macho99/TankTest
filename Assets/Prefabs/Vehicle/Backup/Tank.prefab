@@ -338,6 +338,7 @@ GameObject:
   - component: {fileID: 7090624568369727499}
   - component: {fileID: 8881916731945870435}
   - component: {fileID: 2610130164622863970}
+  - component: {fileID: 4950965725657924195}
   m_Layer: 7
   m_Name: Tank
   m_TagString: Untagged
@@ -378,6 +379,8 @@ MonoBehaviour:
   lookSpeed: 20
   _CamYAngle: 0
   _CamXAngle: 0
+  engineSound: {fileID: 0}
+  trailNetObject: {fileID: 0}
   wheelYOffset: 0.1
   brakeTorque: 10000
   dashBoardPrefab: {fileID: 8108330832186224031, guid: 4edb4978c53a1104ca44b0ed0d5fb31d, type: 3}
@@ -421,6 +424,7 @@ MonoBehaviour:
   maxReverseSpeed: -15.5
   finalTorqueMultiplier: 2
   steerAngle: 0
+  headlights: []
   leftWheelTrans:
   - {fileID: 1214962575259576524}
   - {fileID: 8995305906795572466}
@@ -462,6 +466,10 @@ MonoBehaviour:
   - 22
   - 35
   - 50
+  oilConsumpAmount: 10
+  _PlayerGetOn:
+    _value: 0
+  _EngineRpm: 0
   _LerpedMoveInput: {x: 0, y: 0}
   _LeftRpm: 0
   _RightRpm: 0
@@ -492,7 +500,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab87679d37c42b34d879cc29b0168078, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 1780435454114578607}
   seatTrans: {fileID: 5480117570928288317}
   debugText: {fileID: 4534403877762001120}
   getOnObjectTrans:
@@ -500,6 +507,7 @@ MonoBehaviour:
   - {fileID: 7057164864533397634}
   - {fileID: 6623131226392469142}
   - {fileID: 6712465612983188089}
+  vehicleBody: {fileID: 8675578564334830524}
   _GetOnPlayers: []
 --- !u!114 &8675578564334830524
 MonoBehaviour:
@@ -513,10 +521,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 117bc1fec81fa314388e089d6417c678, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wreckedPrefab: {fileID: 0}
+  engineTrans: {fileID: 0}
   vehicleTrigger: {fileID: 2691392653022538291}
   maxHp: 5000
+  maxOil: 5000
+  maxEngineHp: 5000
   damage: 100
-  hitCooltime: 0.5
+  _CurHp: 0
+  _CurOil: 0
+  _CurEngineHp: 0
 --- !u!54 &7225674256980331819
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -595,6 +609,102 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 1, z: 0}
   m_TimeToStationary: 0.5
+--- !u!82 &4950965725657924195
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555861431534664298}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &633671646579528299
 GameObject:
   m_ObjectHideFlags: 0
@@ -5686,7 +5796,7 @@ MonoBehaviour:
   _HitPosition: {x: 0, y: 0, z: 0}
   _HitNormal: {x: 0, y: 0, z: 0}
   _LoadedShell: -1
-  _LeftReloadTime: 0
+  _RawLeftReloadTime: 0
 --- !u!114 &748171137692600879
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -10,6 +10,7 @@ using Fusion;
 public class VehicleMove : VehicleBehaviour
 {
 	public enum State { Park, RpmMatch, Drive, ReverseRpmMatch, Reverse, GearShift, }
+	[SerializeField] AudioClip engineSound;
 	[SerializeField] NetworkObject trailNetObject;
 	[SerializeField] float wheelYOffset = 0.2f;
 	[SerializeField] float brakeTorque = 2000f;
@@ -52,7 +53,6 @@ public class VehicleMove : VehicleBehaviour
 	public float CurGearRatio { get { return gears[CurGear]; } }
 	public float MinEngineRpm { get { return minEngineRpm; } }
 	public float MaxEngineRpm { get { return maxEngineRpm; } }
-	public float EngineRpm { get; set; }
 	public float MaxSpeed { get { return maxSpeed; } }
 	public float MaxReverseSpeed { get { return maxReverseSpeed; } }
 	public Vector2 MoveInput { get { return moveInput; } }
@@ -68,9 +68,13 @@ public class VehicleMove : VehicleBehaviour
 	public float BrakeMultiplier { get; set; }
 	public int CurGear { get; set; }
 
+	bool audioPlaying;
+	AudioSource audioSource;
 	TickTimer oilConsumTimer;
 	float engineRpmRatio;
+
 	[Networked, OnChangedRender(nameof(HeadLightControl))] public NetworkBool PlayerGetOn { get; private set; } = false;
+	[Networked] public float EngineRpm { get; set; }
 	[Networked] public Vector2 LerpedMoveInput { get; set; }
 	[Networked] public float LeftRpm { get; private set; }
 	[Networked] public float RightRpm { get; private set; }
@@ -118,6 +122,14 @@ public class VehicleMove : VehicleBehaviour
 		HeadLightControl();
 	}
 
+	protected virtual void OnValidate()
+	{
+		if(audioSource == null)
+		{
+			audioSource = gameObject.AddComponent<AudioSource>();
+		}
+	}
+
 	public void SetDashBoardGear(string gearStr)
 	{
 		if(oilFilled == false)
@@ -135,6 +147,24 @@ public class VehicleMove : VehicleBehaviour
 		//lerpedMoveInput = Vector2.Lerp(lerpedMoveInput, rawMoveInput, Runner.DeltaTime * inputSensitivity);
 
 		dashBoard?.SetRPMAndVelUI(EngineRpm, Velocity);
+
+		if(audioPlaying == true)
+		{
+			audioSource.pitch = Mathf.Lerp(1f, 3f, (EngineRpm - minEngineRpm) / (maxEngineRpm - engineRpmRatio));
+			if (PlayerGetOn == false || oilFilled == false)
+			{
+				audioSource.Stop();
+				audioPlaying = false;
+			}
+		}
+		else
+		{
+			if(PlayerGetOn == true && oilFilled == true)
+			{
+				audioSource.Play();
+				audioPlaying = true;
+			}
+		}
 
 		float leftRps = RawLeftRpm / 60f;
 		float rightRps = RawRightRpm / 60f;

@@ -41,7 +41,7 @@ public abstract class BreakableObstacle : MonoBehaviour, IHittable
 	{
 		if (owner == null)
 			owner = GetComponentInParent<BreakableObjBehaviour>();
-		if(idx == -1)
+		if(owner != null && idx == -1)
 		{
 			idx = owner.RegisterObj(this);
 		}

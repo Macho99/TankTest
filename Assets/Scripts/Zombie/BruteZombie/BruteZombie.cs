@@ -15,7 +15,7 @@ public class BruteZombie : ZombieBase
 	[SerializeField] float lookSpeed = 1.5f;
 	[SerializeField] Transform shieldHolder;
 	[SerializeField] Transform stoneHolder;
-	[SerializeField] float normalAttackDist = 3f;
+	[SerializeField] float normalAttackDist = 4f;
 	[SerializeField] float twoHandGroundCooltime = 10f;
 	[SerializeField] float dashCooltime = 20f;
 	[SerializeField] float dashDist = 15f;
@@ -51,7 +51,7 @@ public class BruteZombie : ZombieBase
 
 	public enum AttackType { Back = -1, LeftFoot, RightFoot, Smash, DoubleSmash, TwoHandSmash, GroundAttack, 
 		Jump, Dash, TwoHandGround, ThrowStone };
-	public enum State { Idle, Trace, DefenceTrace, DefenceKnockback, Stun, Search, Roar, Jump, AnimWait, Wait, }
+	public enum State { Idle, Trace, DefenceTrace, DefenceKnockback, Stun, Search, Roar, Jump, AnimWait, Wait, Die}
 
 	public event Action OnHit;
 	public event Action OnStun;
@@ -60,6 +60,8 @@ public class BruteZombie : ZombieBase
 	public TickTimer DashTimer { get; set; }
 	public TickTimer JumpTimer { get; set; }
 	public TickTimer StoneTimer { get; set; }
+	public TickTimer FootAttackTimer { get; set; }
+	public TickTimer DefenceCooltimer { get; set; }
 
 	public float NormalAttackDist { get { return normalAttackDist; } }
 	public BruteShield Shield { get; private set; }
@@ -87,8 +89,16 @@ public class BruteZombie : ZombieBase
 		stateMachine.AddState(State.Jump, new BruteJump(this));
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
 		stateMachine.AddState(State.Wait, new ZombieWait());
+		stateMachine.AddState(State.Die, new ZombieBaseDie(this));
 
 		stateMachine.InitState(State.Idle);
+		OnDie += () =>
+		{
+			LookWeight = 0f;
+			SetAnimBool("Die", true);
+			SetAnimTrigger("DefenceExit");
+			stateMachine.ChangeState(State.Die);
+		};
 	}
 
 	public override void Spawned()
@@ -145,6 +155,9 @@ public class BruteZombie : ZombieBase
 
 		if (Object.IsProxy) return;
 
+		if (IsDead)
+			return;
+
 		if (IsBerserk == false && CurHp < maxHp / 2)
 		{
 			ChangeToBerserk();
@@ -158,7 +171,7 @@ public class BruteZombie : ZombieBase
 		float absAngle = Mathf.Abs(angle);
 
 		//총알에 피격
-		if (damage < 10000)
+		if (damage < 500)
 		{
 			float shifter;
 			if(absAngle < 45f)
@@ -186,6 +199,7 @@ public class BruteZombie : ZombieBase
 		//전차에 피격
 		else
 		{
+			PlaySound(ZombieSoundType.Hit);
 			//뒤쪽에서 맞았으면 잠깐 스턴
 			if(absAngle < 90f)
 			{
@@ -327,7 +341,7 @@ public class BruteZombie : ZombieBase
 	{
 		if(drawGizmos == false) return;
 
-		Gizmos.DrawWireSphere(transform.position, lookDist);
+		Gizmos.DrawWireSphere(transform.position, lookDist * eyeSightRatio);
 
 		//근거리 공격
 		Gizmos.DrawWireSphere(transform.position, normalAttackDist);

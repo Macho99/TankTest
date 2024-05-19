@@ -15,12 +15,12 @@ public class ZombieTrace : ZombieState
 	float rotateSpeed;
 
 	float prevPosY;
-	float attackElapsed;
-	bool attacked;
 
 	float eatElapsed;
 	bool eatEnd;
 
+	TickTimer traceSoundTimer;
+	TickTimer healTimer;
 	Collider lastObstacleCol;
 	float obstacleAttackTime;
 
@@ -34,6 +34,7 @@ public class ZombieTrace : ZombieState
 	{
 		if (CheckTransition() == true) return;
 
+		traceSoundTimer = TickTimer.CreateFromSeconds(owner.Runner, 5f);
 		lastObstacleCol = null;
 		prevPosY = owner.transform.position.y;
 		//if (CheckTurn() == true) { return; }
@@ -78,14 +79,23 @@ public class ZombieTrace : ZombieState
 		}
 		else if (owner.AttackTargetMask.IsLayerInMask(owner.TargetData.Layer))
 		{
-			if(owner.TargetData.Distance < 1.5f)
+			float speedY = owner.Anim.GetFloat("SpeedY");
+			if(speedY > 1.8f && owner.TargetData.AbsAngle < 10f && owner.TargetData.Distance < 3f)
 			{
-				Attack();
+				DashAttack();
+			}
+			else if(speedY > 2.8f && owner.TargetData.AbsAngle < 5f && owner.TargetData.Distance < 5f)
+			{
+				JumpAttack();
+			}
+			else if(owner.TargetData.Distance < 1.5f)
+			{
+				DirectionAttack();
 				return true;
 			}
 			if (true == owner.TargetData.CheckObstacleAttack(owner.transform.position))
 			{
-				Attack();
+				DirectionAttack();
 				return true;
 			}
 		}
@@ -94,6 +104,7 @@ public class ZombieTrace : ZombieState
 
 	private void Eat()
 	{
+		owner.PlaySound(ZombieSoundType.Eat);
 		eatEnd = false;
 		owner.Agent.ResetPath();
 		owner.SetAnimBool("Eat", true);
@@ -127,13 +138,22 @@ public class ZombieTrace : ZombieState
 		ChangeState(Zombie.State.AnimWait);
 	}
 
-	private void Attack()
+	private void DashAttack()
 	{
-		if(owner.Anim.GetFloat("IdleShifter") > 1.5f)
-		{
-			owner.Anim.SetFloat("IdleShifter", Random.Range(0f, 1f));
-		}
+		owner.SetAnimFloat("TurnDir", 0f);
+		owner.SetAnimFloat("AttackShifter", 3f);
+		Attack();
+	}
 
+	private void JumpAttack()
+	{
+		owner.SetAnimFloat("TurnDir", 0f);
+		owner.SetAnimFloat("AttackShifter", 4f);
+		Attack();
+	}
+
+	private void DirectionAttack()
+	{
 		if(owner.TargetData.Sign < 0f && owner.TargetData.AbsAngle > 120f)
 		{
 			owner.SetAnimFloat("TurnDir", 2f);
@@ -143,20 +163,28 @@ public class ZombieTrace : ZombieState
 			owner.SetAnimFloat("TurnDir", owner.TargetData.Angle / 90f);
 		}
 
-		attacked = false;
-		attackElapsed = 0f;
 		owner.SetAnimFloat("AttackShifter", Random.Range(0, 3));
+		Attack();
+	}
+
+	private void Attack()
+	{
+		if (owner.Anim.GetFloat("IdleShifter") > 1.5f)
+		{
+			owner.Anim.SetFloat("IdleShifter", Random.Range(0f, 1f));
+		}
+		healTimer = TickTimer.CreateFromSeconds(owner.Runner, 0.4f);
 		owner.SetAnimTrigger("Attack");
-		owner.AnimWaitStruct = new AnimWaitStruct("Attack", "Trace", 
+		owner.AnimWaitStruct = new AnimWaitStruct("Attack", "Trace",
 			updateAction: () => {
-				attackElapsed += owner.Runner.DeltaTime;
-				if(attackElapsed > 0.4f && attacked == false)
+				if (healTimer.Expired(owner.Runner))
 				{
-					attacked = true;
-					owner.Attack(10);
+					healTimer = TickTimer.None;
+					owner.Heal(10);
 				}
 				owner.Decelerate(1f);
 			});
+		owner.PlaySound(ZombieSoundType.Attack);
 		ChangeState(Zombie.State.AnimWait);
 	}
 
@@ -165,6 +193,12 @@ public class ZombieTrace : ZombieState
 		if(CheckFallAsleep() == true)
 		{
 			return;
+		}
+
+		if(traceSoundTimer.Expired(owner.Runner))
+		{
+			owner.PlaySound(ZombieSoundType.Trace);
+			traceSoundTimer = TickTimer.CreateFromSeconds(owner.Runner, 5f);
 		}
 
 		speed = owner.TraceSpeed;
@@ -208,6 +242,7 @@ public class ZombieTrace : ZombieState
 				owner.SetAnimBool("Crawl", true);
 				owner.AnimWaitStruct = new AnimWaitStruct("Fall", Zombie.State.CrawlIdle.ToString(),
 					updateAction: () => owner.SetAnimFloat("SpeedY", 0f, 0.3f));
+				owner.PlaySound(ZombieSoundType.Hit);
 				ChangeState(Zombie.State.AnimWait);
 				return true;
 			}

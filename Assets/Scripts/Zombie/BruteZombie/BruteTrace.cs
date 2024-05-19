@@ -38,6 +38,8 @@ public class BruteTrace : BruteZombieState
 
 	private void ChangeToDefence()
 	{
+		if (owner.DefenceCooltimer.ExpiredOrNotRunning(owner.Runner) == false) return;
+
 		owner.Shield.ResetHp();
 		ChangeState(BruteZombie.State.DefenceTrace);
 	}
@@ -75,8 +77,8 @@ public class BruteTrace : BruteZombieState
 		}
 
 		//플레이어가 좁은 건물로 들어갈 경우
-		//if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
-		if (owner.Agent.pathStatus == NavMeshPathStatus.PathPartial)
+		if (owner.Agent.hasPath && owner.Agent.remainingDistance < 1f)
+		//if (owner.Agent.pathStatus == NavMeshPathStatus.PathPartial)
 		{
 			if (owner.TargetData.Distance > 5f)
 			{
@@ -96,7 +98,7 @@ public class BruteTrace : BruteZombieState
 			if (owner.TwoHandGroundTimer.ExpiredOrNotRunning(owner.Runner))
 			{
 				//특수 근접공격
-				if (targetData.Distance < attackDist && targetData.Angle < 60f)
+				if (targetData.Distance < attackDist && targetData.AbsAngle < 60f)
 				{
 					Attack(BruteZombie.AttackType.TwoHandGround);
 					owner.TwoHandGroundTimer = TickTimer.CreateFromSeconds(owner.Runner, owner.TwoHandGroundCooltime);
@@ -134,7 +136,7 @@ public class BruteTrace : BruteZombieState
 				//돌 던지기 공격
 				if (owner.MinStoneDist < targetData.Distance && targetData.Distance < owner.MaxStoneDist)
 				{
-					if (owner.CheckProjectile(owner.transform.position + Vector3.up * 3f, owner.Agent.pathEndPosition, 
+					if (owner.CheckProjectile(owner.transform.position + Vector3.up * 3f, owner.TargetData.Position, 
 						out stoneVelocity, 1.5f, owner.StoneSpeed, Physics.gravity, 
 						LayerMask.GetMask("Default", "Breakable", "Environment")) == true)
 					{
@@ -145,20 +147,26 @@ public class BruteTrace : BruteZombieState
 				}
 			}
 		}
-		if (targetData.Distance < owner.NormalAttackDist || owner.TargetData.CheckObstacleAttack(owner.transform.position) == true)
+		if (targetData.Distance < owner.NormalAttackDist || 
+			owner.TargetData.CheckObstacleAttack(owner.transform.position, owner.NormalAttackDist) == true)
 		{
 			BruteZombie.AttackType attackType;
-			if (targetData.Angle > 90f)
+			if (targetData.AbsAngle > 90f)
 			{
 				attackType = BruteZombie.AttackType.Back;
 			}
-            else if(targetData.Angle > 30f)
+            else if(targetData.AbsAngle > 30f && owner.FootAttackTimer.ExpiredOrNotRunning(owner.Runner))
             {
 				attackType = targetData.Sign < 0f ? BruteZombie.AttackType.LeftFoot : BruteZombie.AttackType.RightFoot;
+				owner.FootAttackTimer = TickTimer.CreateFromSeconds(owner.Runner, 8f);
             }
-			else
+			else if(targetData.AbsAngle < 20f)
 			{
 				attackType = (BruteZombie.AttackType) Random.Range(2, 6);
+			}
+			else
+			{
+				return false;
 			}
             Attack(attackType);
 			return true;
@@ -171,6 +179,7 @@ public class BruteTrace : BruteZombieState
 	TickTimer stoneThrowTimer;
 	private void Attack(BruteZombie.AttackType type)
 	{
+		owner.PlaySound(ZombieSoundType.Attack);
 		if (type == BruteZombie.AttackType.Jump)
 		{
 			owner.JumpEndPos = owner.Agent.pathEndPosition;

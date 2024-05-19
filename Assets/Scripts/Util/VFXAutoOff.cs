@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,6 @@ public class VFXAutoOff : MonoBehaviour
 	private float initOffTime; 
 
 	protected float elapsed = 0f;
-
 
 	protected virtual void Awake()
 	{
@@ -34,6 +34,17 @@ public class VFXAutoOff : MonoBehaviour
 		offTime = initOffTime;
 		transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
 		transform.localScale = Vector3.one;
+	}
+
+	public void AutoSetParentNull(float nullTime)
+	{
+		StartCoroutine(CoAutoSetParent(nullTime));
+	}
+
+	private IEnumerator CoAutoSetParent(float nullTime)
+	{
+		yield return new WaitForSeconds(nullTime);
+		transform.parent = null;
 	}
 
 	public void SetOfftimeWithElapsed(float value)

@@ -60,6 +60,36 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 		}
 	}
 
+	public override void Despawned(NetworkRunner runner, bool hasState)
+	{
+		for(int i = 0; i < vehicleBehaviours.Length; i++)
+		{
+			//게임 종료시 디스폰
+			if (vehicleBehaviours[i] == null || vehicleBehaviours[i].Object == null) return;
+
+			if (HasStateAuthority)
+			{
+				if (localGetOnPlayers[i].IsValid == true)
+				{
+					vehicleBehaviours[i].GetOff();
+				}
+			}
+			else
+			{
+				if (localGetOnPlayers[i] == localPlayer.Object.Id)
+				{
+					vehicleBehaviours[i].GetOff();
+				}
+			}
+		}
+
+		for (int i = 0; i < MAX_PLAYER; i++)
+		{
+			GetOnPlayers.Set(i, new NetworkId());
+		}
+		GetOnRender();
+	}
+
 	private void GetOnRender()
 	{
 		for(int i = 0; i < MAX_PLAYER; i++)

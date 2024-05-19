@@ -2,6 +2,7 @@
 using DistantLands.Cozy.Data;
 using Fusion;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,8 +31,18 @@ public class WeatherManager : NetworkBehaviour
 	[SerializeField] bool clearOnly;
 	[SerializeField] int initHour = 9;
 	[SerializeField] int initMinute = 0;
+	[SerializeField] float timeSpeed = 5f;
+
 	CozyWeather cozyWeather;
 	TickTimer weatherChangeTimer;
+
+	int visualWeatherCnt;
+
+	public event Action<WeatherType, float> OnWeatherChanged;
+
+	[Networked, OnChangedRender(nameof(WeatherRender))] public int WeatherCnt { get; private set; }
+	[Networked] public int TargetTick { get; private set; }
+	[Networked] public int WeatherIdx { get; private set; }
 
 	private void Awake()
 	{
@@ -47,18 +58,46 @@ public class WeatherManager : NetworkBehaviour
 
 	private void OnDestroy()
 	{
-		if(GameManager.Weather== this)
+		if(GameManager.Weather == this)
 		{
 			GameManager.Weather = null;
 		}
 	}
 
+	private void WeatherRender()
+	{
+		if(visualWeatherCnt < WeatherCnt)
+		{
+			float leftTime = (TargetTick - Runner.Tick) / Runner.TickRate;
+			leftTime = Mathf.Max(leftTime, 0);
+			cozyWeather.weatherModule.Ecosystem.SetWeather(weatherDatas[WeatherIdx].profile, leftTime);
+			StartCoroutine(CoInvokeEvent(leftTime * 0.5f));
+		}
+	}
+
+	public void GetCurWeatherInfo(out WeatherType type, out float strength)
+	{
+		type = weatherDatas[WeatherIdx].type;
+		strength = weatherDatas[WeatherIdx].strength;
+	}
+
+	private IEnumerator CoInvokeEvent(float invokeTime)
+	{
+		yield return new WaitForSeconds(invokeTime);
+		GetCurWeatherInfo(out WeatherType type, out float strength);
+		OnWeatherChanged?.Invoke(type, strength);
+	}
+
 	public override void Spawned()
 	{
 		base.Spawned();
-		int curTime = (int)Runner.RemoteRenderTime + initHour * 60 + initMinute;
+		int curTime = (int)(Runner.RemoteRenderTime * timeSpeed) + initHour * 60 + initMinute;
 		cozyWeather.timeModule.SetMinute((curTime % 60));
 		cozyWeather.timeModule.SetHour((curTime % 1440) / 60);
+		if (IsProxy)
+		{
+			WeatherRender();
+		}
 	}
 
 	public override void FixedUpdateNetwork()
@@ -72,8 +111,12 @@ public class WeatherManager : NetworkBehaviour
 			}
 
 			Random.InitState((int)DateTime.Now.Ticks);
-			weatherChangeTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(weatherChangeTime.x, weatherChangeTime.y));
-			cozyWeather.weatherModule.Ecosystem.SetWeather(weatherDatas[Random.Range(0, weatherDatas.Length)].profile, 20f);
+			float changeTime = Random.Range(30f, 50f);
+			TargetTick = Runner.Tick + (int)(changeTime * Runner.TickRate);
+			WeatherIdx = Random.Range(0, weatherDatas.Length);
+			weatherChangeTimer = TickTimer.CreateFromSeconds(Runner, 
+				changeTime + Random.Range(weatherChangeTime.x, weatherChangeTime.y));
+			WeatherCnt++;
 		}
 	}
 }

@@ -2063,6 +2063,8 @@ GameObject:
   - component: {fileID: 2486842492029769780}
   - component: {fileID: 2372892293228985871}
   - component: {fileID: 5519984252041423840}
+  - component: {fileID: 6169603677691870690}
+  - component: {fileID: 1127524193489448179}
   m_Layer: 8
   m_Name: Zombie
   m_TagString: Untagged
@@ -2102,6 +2104,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   curStateText: {fileID: 3990900717246760630}
+  soundSO: {fileID: 11400000, guid: e83701148640f3a4cb496b96bf9cc283, type: 2}
+  mass: 40
   viewAngle: 30
   lookDist: 10
   playerLostTime: 5
@@ -2112,7 +2116,9 @@ MonoBehaviour:
   _Rotation: {x: 0, y: 0, z: 0, w: 0}
   _HitBody: 0
   _HitPoint: {x: 0, y: 0, z: 0}
-  _HitVelocity: {x: 0, y: 0, z: 0}
+  _HitForce: {x: 0, y: 0, z: 0}
+  _SoundType: 0
+  _SoundCnt: 0
   _HitCnt: 0
   skins: {fileID: 1713092269831648524}
   fallAsleepThreshold: 0.3
@@ -2213,6 +2219,116 @@ MonoBehaviour:
   SyncSettings: 15
   StateHashes: 000000002c3de128c25f295d40139c6a5a82a6809f065eb81b258857c6de2875449164f03270625b602a1d7279ba12802be06da946980c4f14c2736658d4b1f8b6b6798d803811296bfb99d491de5cb3d2706fb06acf9475cf8b73ca0d286c404e865f43f639a486537d4339f096b721ea078dcb9c728c6418515a8b09ffa8694a519b6a16d3b21d0c4288f7e3e0cf5161af83d4
   TriggerHashes: 0000000079ba1280a1609f62d3b51fbb91de5cb3302b3b340d286c40e3e0cf51
+--- !u!114 &6169603677691870690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502316422207183466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15f6f227c629ed6468d1f1593de3aeb3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swingScale: 1
+  force: 60
+--- !u!82 &1127524193489448179
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502316422207183466}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 3726079279338356809, guid: bb9db54a3b33bc547973fc4b6638e029, type: 2}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 0.5
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 100
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1559949598233783430
 GameObject:
   m_ObjectHideFlags: 0
@@ -6253,8 +6369,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uD604\uC7AC \uC0C1\uD0DC: \nSpeed X : \nSpeed Y :\nTarget : null"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: da2783ba7d3a1af4a911ed816bda92dc, type: 2}
-  m_sharedMaterial: {fileID: -6754948330605757506, guid: da2783ba7d3a1af4a911ed816bda92dc, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8477f3c1a9567dd4e858870ac8981f41, type: 2}
+  m_sharedMaterial: {fileID: 7153055336002728205, guid: 8477f3c1a9567dd4e858870ac8981f41, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

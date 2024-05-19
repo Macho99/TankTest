@@ -54,7 +54,7 @@ public class WretchTrace : WretchZombieState
 			}
 			else if(owner.CurPoisonVFXData.fireTick == 0)
 			{
-				if (owner.CheckProjectile(owner.HeadTrans.position, owner.Agent.pathEndPosition,
+				if (owner.CheckProjectile(owner.HeadTrans.position, owner.TargetData.Position,
 					out Vector3 velocity, 1f, owner.PoisonSpeed, owner.PoisonGravity,
 					LayerMask.GetMask("Default", "Breakable", "Environment")) == true)
 				{
@@ -122,6 +122,7 @@ public class WretchTrace : WretchZombieState
 		owner.SetAnimFloat("ActionShifter", actionShifter);
 		owner.SetAnimTrigger("Attack");
 		owner.AnimWaitStruct = new AnimWaitStruct("Attack", WretchZombie.State.Trace.ToString(), updateAction: owner.Decelerate);
+		owner.PlaySound(ZombieSoundType.Attack);
 		ChangeState(WretchZombie.State.AnimWait);
 	}
 }

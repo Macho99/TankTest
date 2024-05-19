@@ -291,6 +291,11 @@ public class Zombie : ZombieBase
 			return;
 		}
 
+		if (CurHp > 0)
+		{
+			PlaySound(ZombieSoundType.Hit);
+		}
+
 		float hitBodyFloat = GetHitBodyFloat(zombieHitBox.BodyType);
 
 		//하체에 맞으면 하체 체력 감소
@@ -366,10 +371,5 @@ public class Zombie : ZombieBase
 			CurLegHp += amount;
 			CurLegHp = Mathf.Min(CurLegHp, MaxLegHp);
 		}
-	}
-
-	public void Attack(int damage)
-	{
-		Heal(20);
 	}
 }
