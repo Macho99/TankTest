@@ -48,6 +48,7 @@ public class BruteZombie : ZombieBase
 	public float StoneSpeed { get { return stoneSpeed; } }
 	public NetworkPrefabRef StonePrefab { get { return stonePrefab; } }
 	public Transform StoneHolder { get { return stoneHolder; } }
+	public bool CCImmune { get; set; }
 
 	public enum AttackType { Back = -1, LeftFoot, RightFoot, Smash, DoubleSmash, TwoHandSmash, GroundAttack, 
 		Jump, Dash, TwoHandGround, ThrowStone };
@@ -170,8 +171,8 @@ public class BruteZombie : ZombieBase
 		float sign = (angle >= 0f) ? 1f : -1f;
 		float absAngle = Mathf.Abs(angle);
 
-		//총알에 피격
-		if (damage < 500)
+		//총알에 피격이거나 CC면역상태일때
+		if (damage < 500 || CCImmune)
 		{
 			float shifter;
 			if(absAngle < 45f)

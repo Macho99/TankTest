@@ -446,7 +446,10 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 	public override void Despawned(NetworkRunner runner, bool hasState)
 	{
 		base.Despawned(runner, hasState);
-		GameManager.Weather.OnWeatherChanged -= WeatherChanged;
+		if(GameManager.Weather != null)
+		{
+			GameManager.Weather.OnWeatherChanged -= WeatherChanged;
+		}
 	}
 
 	public void WeatherChanged(WeatherType type, float strength)

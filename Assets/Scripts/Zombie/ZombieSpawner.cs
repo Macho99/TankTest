@@ -81,7 +81,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks, IBefo
 		{
 			isFirst = false;
 
-			for(int i = 0; i < 10; i++)
+			for(int i = 0; i < 100; i++)
 			{
 				SpawnZombie();
 			}
@@ -102,7 +102,7 @@ public class ZombieSpawner : SimulationBehaviour, INetworkRunnerCallbacks, IBefo
 	{
 		Random.InitState(runner.SessionInfo.Name.GetHashCode() * netObj.Id.Raw.GetHashCode());
 
-		Vector3 pos = Random.insideUnitSphere * 10f;
+		Vector3 pos = Random.insideUnitSphere * 100f;
 		pos.y = 0f;
 		Zombie zombie = netObj.GetComponent<Zombie>(); 
 		zombie.transform.rotation = Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value));

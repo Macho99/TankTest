@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(BruteZombie))]
 public class BruteAnimEvent : ZombieAnimEvent
@@ -13,13 +14,13 @@ public class BruteAnimEvent : ZombieAnimEvent
 	const string crackDebrisPath = "FX/PoolableDebris/SM_Env_RoadPiece_Damaged_01";
 	const string crackVfxPath = "FX/VFX/FX_splash_hit_01_floor";
 
-	[SerializeField] AudioClip swingClip;
+	[SerializeField] AudioClip[] swingClips;
 	[SerializeField] AudioClip crackClip;
 
 	protected override void InstantiateSwingVfx(Transform parent, float duration)
 	{
 		base.InstantiateSwingVfx(parent, duration);
-		GameManager.Sound.PlayOneShot(swingClip, AudioGroup.Zombie, transform);
+		GameManager.Sound.PlayOneShot(swingClips[Random.Range(0, swingClips.Length)], AudioGroup.Zombie, transform);
 	}
 
 	private void PlayGroundCrack(AnimationEvent animEvent)

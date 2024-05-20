@@ -3234,7 +3234,7 @@ MonoBehaviour:
   playerLostTime: 7
   headBloodVFX: {fileID: 2281759223855658892, guid: 5c48a4ba1a920cf409e160836fdfdcd2, type: 3}
   bodyBloodVFX: {fileID: 8428142431305946562, guid: 4eb841424a674594fb38c97285efa16a, type: 3}
-  maxHp: 10
+  maxHp: 50000
   _Position: {x: 0, y: 0, z: 0}
   _Rotation: {x: 0, y: 0, z: 0, w: 0}
   _HitBody: 0
@@ -3304,7 +3304,7 @@ MonoBehaviour:
   TotalWords: 7
   ApplyTiming: 2
   SyncSettings: 15
-  StateHashes: 0000000046980c4f14c273660d286c404e865f43a1609f62d8aa0cc447eaf891ac29706ce6e768fbfc7652114f20d932cb030fdd053fcdbc5765b29578578c3e2a0df317dede26c18c8459e8c01206a9fa0b85b1c837a21cb52b8357fc09418a4e8ca92df99db8a9dca7708c9d32a78fe02e86c430765f9deb8c0ec0fcb8ec66
+  StateHashes: 0000000046980c4f14c273660d286c404e865f43a1609f62d8aa0cc447eaf891ac29706ce6e768fbfc7652114f20d932cb030fdd053fcdbc5765b29578578c3e2a0df317dede26c18c8459e837b935014e73a6a7c01206a9fa0b85b1c837a21cb52b8357fc09418a4e8ca92df99db8a9dca7708c9d32a78fe02e86c430765f9deb8c0ec0fcb8ec66
   TriggerHashes: 000000000d286c40307e4653053fcdbc302b3b34dede26c11904ee9ca1609f62eb8c0ec0
 --- !u!195 &1570970129309034109
 NavMeshAgent:
@@ -3399,6 +3399,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   swingScale: 3
   force: 20000
+  swingClips:
+  - {fileID: 8300000, guid: bddc1df20ab9f1444bebfa94aeca5306, type: 3}
+  - {fileID: 8300000, guid: c817cbdce838f8f41b2cba21d8ca92ec, type: 3}
+  - {fileID: 8300000, guid: cbb8428976484794797c45c283dcc934, type: 3}
+  - {fileID: 8300000, guid: 646f6236e0c22404fabe3a7c0cf432ed, type: 3}
+  - {fileID: 8300000, guid: d72689495b79be54d85cbfe965c5005f, type: 3}
+  crackClip: {fileID: 8300000, guid: c2926f1054c59ab4a95a6b2997703608, type: 3}
 --- !u!82 &9167718330643357671
 AudioSource:
   m_ObjectHideFlags: 0
@@ -3419,7 +3426,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 10
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0

@@ -23,6 +23,7 @@ public class BruteJump : BruteZombieState
 
 	public override void Enter()
 	{
+		owner.CCImmune = true;
 		owner.SetAnimTrigger("Attack");
 		owner.SetAnimFloat("ActionShifter", (float) BruteZombie.AttackType.Jump);
 
@@ -44,6 +45,7 @@ public class BruteJump : BruteZombieState
 
 	public override void Exit()
 	{
+		owner.CCImmune = false;
 		owner.LookWeight = 1f;
 		owner.SyncTransfrom = true;
 		owner.Agent.enabled = true;

@@ -83,6 +83,7 @@ public class TrailerMove : NetworkBehaviour
 
 	private void OnJointBreak(float breakForce)
 	{
+		joint.connectedBody.GetComponent<VehicleMove>()?.SetTrail(null);
 		print($"트레일러 끊김: {breakForce}");
 	}
 }

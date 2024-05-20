@@ -388,6 +388,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lookSpeed: 20
+  _PlayerGetOn:
+    _value: 0
   _CamYAngle: 0
   _CamXAngle: 0
   engineSound: {fileID: 8300000, guid: 29ab67bad2ef01f40b55557d5fff870d, type: 3}
@@ -464,8 +466,6 @@ MonoBehaviour:
   - 90
   - 120
   oilConsumpAmount: 10
-  _PlayerGetOn:
-    _value: 0
   _EngineRpm: 0
   _LerpedMoveInput: {x: 0, y: 0}
   _LeftRpm: 0
@@ -522,12 +522,12 @@ MonoBehaviour:
   wreckedPrefab: {fileID: 4285425376830037281, guid: 5de31300733807b42b2167fb96e27fdc, type: 3}
   engineTrans: {fileID: 4273538926151905543}
   vehicleTrigger: {fileID: 1285313908451028329}
-  maxHp: 100
-  maxOil: 2000
-  maxEngineHp: 1000
+  maxHp: 2500
   damage: 50
   _HitSfxCnt: 0
   _CurHp: 0
+  maxOil: 2000
+  maxEngineHp: 1000
   _CurOil: 0
   _CurEngineHp: 0
 --- !u!54 &3949058092545278007
@@ -662,7 +662,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 10
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0
@@ -1110,6 +1110,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lookSpeed: 20
+  _PlayerGetOn:
+    _value: 0
   _CamYAngle: 0
   _CamXAngle: 0
 --- !u!1 &5030438631948439372
@@ -1334,6 +1336,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lookSpeed: 20
+  _PlayerGetOn:
+    _value: 0
   _CamYAngle: 0
   _CamXAngle: 0
 --- !u!1 &5407021975188614040
@@ -1918,6 +1922,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lookSpeed: 20
+  _PlayerGetOn:
+    _value: 0
   _CamYAngle: 0
   _CamXAngle: 0
 --- !u!1001 &5375285454024895932

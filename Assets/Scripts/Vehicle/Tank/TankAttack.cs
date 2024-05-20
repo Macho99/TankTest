@@ -345,7 +345,7 @@ public class TankAttack : TankBehaviour
 				}
 				idList.Add(id);
 				hittable.ApplyDamage(transform, hit.point, 
-					(attackCols[i].transform.position - hit.point).normalized * 100f, damage);
+					(attackCols[i].transform.position - hit.point).normalized * 10000f, damage);
 			}
 		}
 		else

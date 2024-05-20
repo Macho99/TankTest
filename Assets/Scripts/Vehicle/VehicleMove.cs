@@ -411,4 +411,9 @@ public class VehicleMove : VehicleBehaviour
 			light.gameObject.SetActive(PlayerGetOn);
 		}
 	}
+
+	public void SetTrail(NetworkObject obj)
+	{
+		trailNetObject = obj;
+	}
 }
