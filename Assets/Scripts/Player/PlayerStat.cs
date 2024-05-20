@@ -68,6 +68,16 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 
     public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
     {
+        if (stateMachine.curStateStr == PlayerController.PlayerState.Dead.ToString())
+        {
+            return;
+        }
+        if (statData[(int)PlayerStatType.HPGauge].currentValue <= 0)
+        {
+            return;
+        }
+
+
         force.y = 0;
 
         float angle = Vector3.Angle(transform.forward, force);
@@ -78,7 +88,7 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 
         Vector3 rot = quat * transform.forward;
 
-       print(damage);
+        print(damage);
 
         //Quaternion.LookRotation(transform.forward, .normalized);
         animator.SetFloat("BeshotDirX", rot.x);
@@ -94,6 +104,7 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
         if (newStatData.currentValue <= 0)
         {
             //Á×À½
+            stateMachine.ChangeState(PlayerController.PlayerState.Dead);
         }
         else
         {
