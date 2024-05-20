@@ -1,4 +1,5 @@
 using Fusion;
+using Fusion.Addons.FSM;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,8 +11,9 @@ using Random = UnityEngine.Random;
 public enum WeaponState { None, Reload, Put, Draw, Shot }
 public enum WeaponAnimLayerType { Base, Pistol, Rifle, Shotgun, Bazuka, SniperRifle, Mily, Size }
 
-public class WeaponController : NetworkBehaviour, IAfterSpawned
+public class WeaponController : NetworkBehaviour, IAfterSpawned , IStateMachineOwner
 {
+    [SerializeField] private WeaponStates[] weaponStates;
     [SerializeField] private Equipment equipment;
     private PlayerInputListner inputListner;
     [SerializeField] private MultiAimConstraint handAimIK;
@@ -22,25 +24,25 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
     [Networked] private int weaponIndex { get; set; }
     [Networked, Capacity(20)] private NetworkDictionary<int, Ammo> netAmmos { get; }
     private Animator animator;
-    [Networked, OnChangedRender(nameof(UpdateMainWeapon))] private Weapon mainWeapon { get; set; }
+    [Networked, OnChangedRender(nameof(UpdateMainWeapon))] public Weapon mainWeapon { get; private set; }
     private Weapon prevWeapon;
     [Networked, OnChangedRender(nameof(UpdateHandWeight))] private float handWeight { get; set; }
     [SerializeField] private WeaponPivotData[] weaponPivotData;
     private int weaponIndexOffset;
     private PlayerAnimEvent animEvent;
     private float transitionSpeed;
-
+    public StateMachine<WeaponStates> stateMachine { get; private set; }
 
     [Networked] private WeaponState weaponState { get; set; }
 
     private PlayerMainUI mainUI;
     private void Awake()
     {
-        animEvent = GetComponent<PlayerAnimEvent>();
-        inputListner = GetComponent<PlayerInputListner>();
-        animator = GetComponent<Animator>();
+        animEvent = GetComponentInParent<PlayerAnimEvent>();
+        inputListner = GetComponentInParent<PlayerInputListner>();
+        animator = GetComponentInParent<Animator>();
         weaponIndexOffset = (int)EquipmentType.Rifle;
-        controller = GetComponent<PlayerController>();
+        controller = GetComponentInParent<PlayerController>();
         transitionSpeed = 2f;
     }
     public override void Spawned()
@@ -133,26 +135,34 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
 
                 if (mainWeapon.CanAttack() == true)
                 {
-                    Ray ray = new Ray();
-                    Vector3 origin = ((Gun)mainWeapon).GetMuzzlePoint() - camController.RayCasterTr.position;
-                    float angle = Mathf.Abs(Vector3.Angle(origin, camController.RayCasterTr.forward));
-
-                    float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
-                    float newZ = origin.magnitude * cos;
-
-
-                    ray.origin = camController.RayCasterTr.position + camController.RayCasterTr.forward * newZ;
-                    ray.direction = camController.RayCasterTr.forward;
-                    if (Physics.Raycast(ray, out RaycastHit hit, 1000))
+                    if (mainWeapon is Gun)
                     {
-                        ((Gun)mainWeapon).SetShotPoint(hit.point);
-                        Debug.DrawLine(ray.origin, hit.point, Color.red, 0.1f);
+                        Ray ray = new Ray();
+                        Vector3 origin = ((Gun)mainWeapon).GetMuzzlePoint() - camController.RayCasterTr.position;
+                        float angle = Mathf.Abs(Vector3.Angle(origin, camController.RayCasterTr.forward));
+
+                        float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
+                        float newZ = origin.magnitude * cos;
+
+
+                        ray.origin = camController.RayCasterTr.position + camController.RayCasterTr.forward * newZ;
+                        ray.direction = camController.RayCasterTr.forward;
+                        if (Physics.Raycast(ray, out RaycastHit hit, 1000))
+                        {
+                            ((Gun)mainWeapon).SetShotPoint(hit.point);
+                            Debug.DrawLine(ray.origin, hit.point, Color.red, 0.1f);
+                        }
+                        else
+                        {
+                            ((Gun)mainWeapon).SetShotPoint(ray.origin + ray.direction * 1000);
+                        }
+                        Debug.DrawRay(ray.origin, ray.direction * 1000, Color.red);
                     }
-                    else
+                    else if (mainWeapon is MilyWeapon)
                     {
-                        ((Gun)mainWeapon).SetShotPoint(ray.origin + ray.direction * 1000);
+
                     }
-                    Debug.DrawRay(ray.origin, ray.direction * 1000, Color.red);
+
 
                     animator.SetTrigger("Attack");
                     prevWeapon.Attack();
@@ -449,6 +459,12 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
     {
         UpdateMainWeapon();
         UpdateHandWeight();
+    }
+
+    public void CollectStateMachines(List<IStateMachine> stateMachines)
+    {
+        stateMachine = new StateMachine<WeaponStates>("Weapon", weaponStates);
+        stateMachines.Add(stateMachine);
     }
 }
 [Serializable]

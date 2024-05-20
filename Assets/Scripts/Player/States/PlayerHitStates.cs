@@ -9,6 +9,7 @@ public class PlayerHitStates : PlayerStates
 
     protected override void OnEnterState()
     {
+        owner.movement.Kcc.SetActive(false);
         owner.weaponController.ResetAim();
         owner.weaponController.ChangeHandWeight();
         owner.movement.StopMove();
@@ -16,12 +17,15 @@ public class PlayerHitStates : PlayerStates
     }
     protected override void OnEnterStateRender()
     {
+      
         owner.animator.applyRootMotion = true;
         owner.animator.SetBool("Hit", true);
     }
 
     protected override void OnExitState()
     {
+        owner.movement.Kcc.SetActive(true);
+        owner.movement.Kcc.SetPosition(owner.transform.position);
         owner.weaponController.ChangeHandWeight(1f);
 
         isHitStart = false;

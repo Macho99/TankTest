@@ -7,6 +7,7 @@ public class PlayerDeadStates : PlayerStates
     protected override void OnEnterState()
     {
         owner.movement.StopMove();
+        owner.movement.Kcc.SetActive(false);
         owner.weaponController.ResetAim();
         owner.weaponController.ChangeHandWeight();
     }
@@ -22,8 +23,9 @@ public class PlayerDeadStates : PlayerStates
     }
     protected override void OnExitState()
     {
+        owner.movement.Kcc.SetPosition(owner.transform.position);
+        owner.movement.Kcc.SetActive(true);
 
-  
         owner.weaponController.ChangeHandWeight(1f);
     }
 }

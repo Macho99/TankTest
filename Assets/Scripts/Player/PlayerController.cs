@@ -40,7 +40,7 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
         movement = GetComponent<PlayerLocomotion>();
         InputListner = GetComponent<PlayerInputListner>();
         interact = GetComponent<PlayerInteract>();
-        weaponController = GetComponent<WeaponController>();
+        weaponController = GetComponentInChildren<WeaponController>();
         Inventory = GetComponentInChildren<Inventory>();
         //stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
         //stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
