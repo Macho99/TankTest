@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
 	private static NetworkManager networkManager;
 	private static AuthManager authManager;
 	private static DataManager dataManager;
+	private static SoundManager soundManager;
 
 	public static GameManager Instance { get { return instance; } }
 	public static PoolManager Pool { get { return poolManager; } }
@@ -25,6 +26,7 @@ public class GameManager : MonoBehaviour
 	public static WeatherManager Weather { get; set; }
 	public static FeedbackManager Feedback { get { return feedbackManager; } }
 	public static NetworkManager network { get { return networkManager; } }
+	public static SoundManager Sound { get { return soundManager; } }
 
 	public static AuthManager auth { get { return authManager; } }
 	public static DataManager data {  get { return dataManager; } }
@@ -69,5 +71,8 @@ public class GameManager : MonoBehaviour
 
         dataManager = new GameObject("DataManager").AddComponent<DataManager>();
         dataManager.transform.parent = transform;
+
+		soundManager = new GameObject("SoundManager").AddComponent<SoundManager>();
+		soundManager.transform.parent = transform;
     }
 }

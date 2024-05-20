@@ -81,6 +81,14 @@ public class TrailerMove : NetworkBehaviour
 		}
 	}
 
+	private void OnDestroy()
+	{
+		if(joint != null)
+		{
+			joint.connectedBody.GetComponent<VehicleMove>()?.SetTrail(null);
+		}
+	}
+
 	private void OnJointBreak(float breakForce)
 	{
 		joint.connectedBody.GetComponent<VehicleMove>()?.SetTrail(null);

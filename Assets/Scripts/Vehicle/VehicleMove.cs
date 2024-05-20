@@ -379,7 +379,7 @@ public class VehicleMove : VehicleBehaviour
 
 	protected override void OnAssign(TestPlayer player)
 	{
-		if (player.HasInputAuthority && Runner.IsForward)
+		if (player.HasInputAuthority && dashBoard == null)
 		{
 			dashBoard = GameManager.UI.ShowSceneUI(dashBoardPrefab);
 		}
@@ -392,7 +392,7 @@ public class VehicleMove : VehicleBehaviour
 
 	protected override void OnGetOff()
 	{
-		if (HasInputAuthority && Runner.IsForward)
+		if (dashBoard != null)
 		{
 			GameManager.UI.CloseSceneUI(dashBoard);
 			dashBoard = null;
