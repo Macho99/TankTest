@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-public class PlayerInteract : NetworkBehaviour
+public class PlayerInteract : NetworkBehaviour,IAfterSpawned
 {
     private float rayDistance;
     [SerializeField] private Transform raycastTr;
@@ -32,10 +32,7 @@ public class PlayerInteract : NetworkBehaviour
     }
     public override void Spawned()
     {
-        if (HasInputAuthority)
-        {
-            SetupLocalPlayerUI();
-        }
+     
 
 
     }
@@ -156,5 +153,11 @@ public class PlayerInteract : NetworkBehaviour
         itemContainer.ActiveItemContainerUI(false);
     }
 
-
+    public void AfterSpawned()
+    {
+        if (HasInputAuthority)
+        {
+            SetupLocalPlayerUI();
+        }
+    }
 }

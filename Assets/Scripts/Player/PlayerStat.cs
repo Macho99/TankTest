@@ -12,9 +12,11 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 
     private PlayerMainUI mainUI;
     public long HitID { get { return Object.Id.Raw << 32; } }
+    private NetworkStateMachine stateMachine;
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        stateMachine = GetComponent<NetworkStateMachine>();
     }
     public override void Spawned()
     {
@@ -62,7 +64,7 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 
         }
     }
-    
+
 
     public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
     {
@@ -76,15 +78,27 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 
         Vector3 rot = quat * transform.forward;
 
+       print(damage);
+
         //Quaternion.LookRotation(transform.forward, .normalized);
         animator.SetFloat("BeshotDirX", rot.x);
         animator.SetFloat("BeshotDirZ", rot.z);
-        animator.SetTrigger("Hit");
-        animator.applyRootMotion = true;
+
+
+
         PlayerStatData newStatData = statData[(int)PlayerStatType.HPGauge];
         newStatData.currentValue -= damage;
         if (newStatData.currentValue < 0)
             newStatData.currentValue = 0;
+
+        if (newStatData.currentValue <= 0)
+        {
+            //Á×À½
+        }
+        else
+        {
+            stateMachine.ChangeState(PlayerController.PlayerState.Hit);
+        }
 
         statData.Set((int)PlayerStatType.HPGauge, newStatData);
         mainUI?.UpdateStat(PlayerStatType.HPGauge, statData[(int)PlayerStatType.HPGauge].currentValue, statData[(int)PlayerStatType.HPGauge].maxValue);

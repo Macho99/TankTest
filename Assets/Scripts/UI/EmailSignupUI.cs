@@ -41,25 +41,26 @@ public class EmailSignupUI : PageUI
     {
         if (pwInputfield.text != pwCheckInputfield.text)
         {
-            GameManagers.Instance.UIManager.CreateMessageBoxUI("회원가입 실패", "비밀번호가 서로 다릅니다.", null);
+            GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("회원가입 실패", "비밀번호가 서로 다릅니다.", null);
             return;
         }
 
 
-        GameManagers.Instance.UIManager.ActiveLoading(true, "회원 가입 시도중입니다.");
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+        loadingUI.Init("회원 가입 시도중입니다.");
 
-        AuthResult authResult = await GameManagers.Instance.AuthManager.SignUpWithEmailAndPassword(emailInputfield.text, pwInputfield.text, nicnameInputfield.text);
-        if(authResult == null)
+        AuthResult authResult = await GameManager.auth.SignUpWithEmailAndPassword(emailInputfield.text, pwInputfield.text, nicnameInputfield.text);
+        if (authResult == null)
         {
-            GameManagers.Instance.UIManager.CreateMessageBoxUI("회원가입 실패", "회원가입에 실패 하였습니다.", null);
-           
+            GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("회원가입 실패", "회원가입에 실패 하였습니다.", null);
+
         }
         else
         {
             onSuccessRegist?.Invoke();
         }
 
-        GameManagers.Instance.UIManager.ActiveLoading(false, null);
+        loadingUI.CloseUI();
     }
     public void ReadLogineResult(Task<AuthResult> result)
     {

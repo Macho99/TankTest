@@ -21,7 +21,7 @@ public class StartSceneMainUI : MonoBehaviour
     public void Initialized()
     {
 
-        AuthManager authManager = GameManagers.Instance.AuthManager;
+        AuthManager authManager = GameManager.auth;
 
 
         if (authManager.User != null)
@@ -40,14 +40,15 @@ public class StartSceneMainUI : MonoBehaviour
                         authUI.ExistLoginInfo(false);
                         authUI.Init(authManager.User.Email, setting.isSaveID, setting.isAutoSave);
                         Debug.Log("signout");
-                        GameManagers.Instance.AuthManager.SignOut();
+                        GameManager.auth.SignOut();
+
                     }
 
 
                 }
                 else
                 {
-                    GameManagers.Instance.AuthManager.SignOut();
+                    GameManager.auth.SignOut();
                     authUI.ExistLoginInfo(false);
                 }
             }
@@ -81,7 +82,7 @@ public class StartSceneMainUI : MonoBehaviour
     public async void TryJoinLobby()
     {
         authUI.SetupStateText("로비접속을 시도하고 있습니다.");
-        StartGameResult result = await GameManagers.Instance.NetworkManager.JoinLobby();
+        StartGameResult result = await GameManager.network.JoinLobby();
         if (result.Ok)
         {
             Debug.Log("LobbyJoint Success");
@@ -92,7 +93,7 @@ public class StartSceneMainUI : MonoBehaviour
 
         Debug.Log("LobbyJoint Failed");
 
-        GameManagers.Instance.UIManager.CreateMessageBoxUI("로비 접속 실패", "로비 접속에 실패하였습니다.", null);
+        GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("로비 접속 실패", "로비 접속에 실패하였습니다.", null);
 
     }
 }

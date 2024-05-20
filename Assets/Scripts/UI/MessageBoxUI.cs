@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class MessageBoxUI : MonoBehaviour
+public class MessageBoxUI : PopUpUI
 {
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI contentText;
@@ -30,7 +30,7 @@ public class MessageBoxUI : MonoBehaviour
                 buttonName.text = createButton[i].buttonName;
                 Debug.Log(buttonName.text);
                 button.onClick.AddListener(createButton[i].onClick);
-                button.onClick.AddListener(() => { Destroy(gameObject); });
+                button.onClick.AddListener(() => { CloseUI(); });
             }
         }
         else
@@ -38,14 +38,11 @@ public class MessageBoxUI : MonoBehaviour
             Button button = Instantiate(buttonPrefab, buttonRect);
             TextMeshProUGUI buttonName = button.GetComponentInChildren<TextMeshProUGUI>();
             buttonName.text = "È®ÀÎ";
-            button.onClick.AddListener(() => { Destroy(gameObject); });
+            button.onClick.AddListener(() => { CloseUI(); });
         }
 
-
-
-
-
         this.transform.SetAsLastSibling();
+        gameObject.SetActive(true);
     }
 }
 public class CreateButton

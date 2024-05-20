@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemContainer : NetworkBehaviour
+public class ItemContainer : NetworkBehaviour,IAfterSpawned
 {
     private ItemContainerUI itemContainerUI;
     [SerializeField] private PlayerInputListner InputListner;
@@ -29,15 +29,13 @@ public class ItemContainer : NetworkBehaviour
     }
     public override void Spawned()
     {
-
         if (HasInputAuthority)
         {
-            itemContainerUI = GameManager.UI.ShowPopUpUI<ItemContainerUI>("UI/PlayerUI/itemContainerUI");
+            itemContainerUI = GameManager.UI.ShowPopUpUI<ItemContainerUI>("UI/PlayerUI/itemContainerUI",true);
             itemContainerUI.Init(this);
             itemContainerUI.CloseUI();
 
         }
-
 
         isOpened = false;
     }
@@ -88,26 +86,22 @@ public class ItemContainer : NetworkBehaviour
 
         if (Active)
         {
-
-
             itemContainerUI = GameManager.UI.ShowPopUpUI<ItemContainerUI>("UI/PlayerUI/itemContainerUI");
 
             isOpened = true;
         }
         else
         {
-
-
             if (itemContainerUI != null)
                 itemContainerUI.CloseUI();
 
             isOpened = false;
         }
     }
-    public void ExitItemSearch()
+    public void AfterSpawned()
     {
+       
+
 
     }
-
-
 }

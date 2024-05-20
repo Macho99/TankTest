@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerController : NetworkBehaviour,IAfterSpawned
 {
-    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass, Interact }
+    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass, Interact ,Hit,Dead}
 
     public NetworkStateMachine stateMachine { get; private set; }
     public Animator animator { get; private set; }
@@ -37,6 +37,7 @@ public class PlayerController : NetworkBehaviour
         stateMachine.AddState(PlayerState.Land, new PlayerLandState(this));
         stateMachine.AddState(PlayerState.Falling, new PlayerFallingState(this));
         stateMachine.AddState(PlayerState.Interact, new PlayerInteractState(this));
+        stateMachine.AddState(PlayerState.Hit, new PlayerHitState(this));
 
         stateMachine.InitState(PlayerState.StandLocomotion);
 
@@ -45,11 +46,11 @@ public class PlayerController : NetworkBehaviour
     {
         VelocityY = 0f;
         name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
-
         if (HasInputAuthority)
         {
             mainUI = GameManager.UI.ShowSceneUI<PlayerMainUI>("UI/PlayerUI/PlayerMainUI");
         }
+
 
 
     }
@@ -110,7 +111,8 @@ public class PlayerController : NetworkBehaviour
         return false;
     }
 
-
-
-
+    public void AfterSpawned()
+    {
+     
+    }
 }

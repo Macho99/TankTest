@@ -21,21 +21,22 @@ public class CreateNicnameUI : MonoBehaviour
         if (nicnameInputField.text == string.Empty)
             return;
 
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+        loadingUI.Init("회원가입을 시도 하고있습니다.");
 
-        GameManagers.Instance.UIManager.ActiveLoading(true, "회원가입을 시도 하고있습니다.");
-        AuthResult result = await GameManagers.Instance.AuthManager.LoginWithGuest();
+        AuthResult result = await GameManager.auth.LoginWithGuest();
         if (result == null)
         {
+            print("null");
             return;
         }
-        Debug.Log(nicnameInputField.text);
-        GameManagers.Instance.UIManager.ActiveLoading(true, "닉네임을 설정 하고있습니다.");
-        await GameManagers.Instance.AuthManager.UpdateUserProfile(nicnameInputField.text);
+        loadingUI.Init("닉네임을 설정 하고있습니다.");
+        await GameManager.auth.UpdateUserProfile(nicnameInputField.text);
 
         LoginSetting setting = new LoginSetting(null, true, true);
         LocalSaveLoader.SaveDataWithLocal("LoginSetting", setting);
-        GameManagers.Instance.UIManager.ActiveLoading(true, "로비에 접속을 시도하고있습니다.");
-        StartGameResult joinLobbyResult = await GameManagers.Instance.NetworkManager.JoinLobby();
+        loadingUI.Init("로비에 접속을 시도하고있습니다.");
+        StartGameResult joinLobbyResult = await GameManager.network.JoinLobby();
         if (joinLobbyResult.Ok)
         {
             this.gameObject.SetActive(false);
@@ -45,7 +46,7 @@ public class CreateNicnameUI : MonoBehaviour
         {
 
         }
-        GameManagers.Instance.UIManager.ActiveLoading(false, null);
+        loadingUI.CloseUI();
 
     }
     public void PressCancelButton()

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -23,27 +24,57 @@ public class UIManager : MonoBehaviour
 
     private void Awake()
     {
-        eventSystem = GameManager.Resource.Instantiate<EventSystem>("UI/EventSystem");
-        eventSystem.transform.parent = transform;
 
-        popUpCanvas = GameManager.Resource.Instantiate<Canvas>("UI/Canvas");
-        popUpCanvas.gameObject.name = "PopUpCanvas";
-        popUpCanvas.sortingOrder = 100;
-        popUpStack = new Stack<PopUpUI>();
+        StartSceneInit();
 
-        windowCanvas = GameManager.Resource.Instantiate<Canvas>("UI/Canvas");
-        windowCanvas.gameObject.name = "WindowCanvas";
-        windowCanvas.sortingOrder = 10;
-
-        sceneCanvas = GameManager.Resource.Instantiate<Canvas>("UI/Canvas");
-        sceneCanvas.gameObject.name = "SceneCanvas";
-        sceneCanvas.sortingOrder = 1;
-
-        inGameCanvas = GameManager.Resource.Instantiate<Canvas>("UI/Canvas");
-        inGameCanvas.gameObject.name = "InGameCanvas";
-        inGameCanvas.sortingOrder = 0;
-
+        SceneManager.sceneLoaded += StartSceneInit;
         //menu = GameManager.Resource.Instantiate<MenuUI>("UI/PopUpUI/Menu");
+    }
+    private void Start()
+    {
+     
+    }
+    private void StartSceneInit(Scene scene =default,LoadSceneMode loadScene=default) 
+    {
+        if (eventSystem == null)
+        {
+            eventSystem = GameManager.Resource.Instantiate<EventSystem>("UI/EventSystem");
+           // eventSystem.transform.parent = transform;
+        }
+
+        if (popUpCanvas == null)
+        {
+            popUpCanvas = GameManager.Resource.Instantiate<Canvas>("UI/Canvas");
+            popUpCanvas.gameObject.name = "PopUpCanvas";
+            popUpCanvas.sortingOrder = 100;
+            popUpStack = new Stack<PopUpUI>();
+        }
+
+
+
+        if (windowCanvas == null)
+        {
+            windowCanvas = GameManager.Resource.Instantiate<Canvas>("UI/Canvas");
+            windowCanvas.gameObject.name = "WindowCanvas";
+            windowCanvas.sortingOrder = 10;
+        }
+
+
+        if (sceneCanvas == null)
+        {
+            sceneCanvas = GameManager.Resource.Instantiate<Canvas>("UI/Canvas");
+            sceneCanvas.gameObject.name = "SceneCanvas";
+            sceneCanvas.sortingOrder = 1;
+        }
+
+
+        if (inGameCanvas == null)
+        {
+            inGameCanvas = GameManager.Resource.Instantiate<Canvas>("UI/Canvas");
+            inGameCanvas.gameObject.name = "InGameCanvas";
+            inGameCanvas.sortingOrder = 0;
+
+        }
     }
 
 
@@ -64,7 +95,14 @@ public class UIManager : MonoBehaviour
             {
                 NetworkObject player = runner.GetPlayerObject(runner.LocalPlayer);
                 if (player != null)
-                    player.GetComponent<PlayerInputListner>().RPC_ActiveButton(ButtonType.MouseDelta, false);
+                {
+                    PlayerInputListner inputListner = player.GetComponent<PlayerInputListner>();
+                    if (inputListner != null)
+                    {
+                        inputListner.RPC_ActiveButton(ButtonType.MouseDelta, false);
+                        Debug.Log("false");
+                    }
+                }
             }
         }
 
@@ -120,12 +158,21 @@ public class UIManager : MonoBehaviour
         }
         else
         {
+
             NetworkRunner runner = FindObjectOfType<NetworkRunner>();
             if (runner != null)
             {
+
                 NetworkObject player = runner.GetPlayerObject(runner.LocalPlayer);
                 if (player != null)
-                    player.GetComponent<PlayerInputListner>().RPC_ActiveButton(ButtonType.MouseDelta, true);
+                {
+                    PlayerInputListner inputListner = player.GetComponent<PlayerInputListner>();
+                    if (inputListner != null)
+                    {
+                        inputListner.RPC_ActiveButton(ButtonType.MouseDelta, true);
+                        Debug.Log("true");
+                    }
+                }
             }
         }
     }

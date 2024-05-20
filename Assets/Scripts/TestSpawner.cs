@@ -11,10 +11,10 @@ using UnityEngine.SceneManagement;
 
 public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCallbacks
 {
-    [SerializeField] private NetworkPrefabRef testPlayer;
+
     NetworkRunner runner;
     private PlayerControls playerControls;
-    [SerializeField] private Transform spawnPoint;
+
     private Dictionary<PlayerRef, NetworkObject> playerObjects = new Dictionary<PlayerRef, NetworkObject>();
 
     NetworkInputData playerInput = new NetworkInputData();
@@ -29,13 +29,13 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
 
     private async void Awake()
     {
+
         if (playerControls == null)
         {
             playerControls = new PlayerControls();
             playerControls.Enable();
 
         }
-
 
         // Create the NetworkSceneInfo from the current scene
         var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
@@ -47,7 +47,7 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
         if (runner == null)
         {
             runner = gameObject.AddComponent<NetworkRunner>();
-            
+
         }
         runner.ProvideInput = true;
         await runner.StartGame(new StartGameArgs()
@@ -104,24 +104,6 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
         playerInput.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
         playerInput.buttons.Set(ButtonType.Reload, playerControls.Player.Reload.IsPressed());
         playerInput.mouseDelta = lookAccum.ConsumeTickAligned(runner);
-        //NetworkInputData data = new NetworkInputData();
-        //data.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
-        //data.mouseDelta = Mouse.current.delta.ReadValue();
-        //data.buttons.Set(ButtonType.Run, playerControls.Player.Run.IsPressed());
-        //data.buttons.Set(ButtonType.Jump, playerControls.Player.Jump.IsPressed());
-        //data.buttons.Set(ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
-        //data.buttons.Set(ButtonType.Interact, playerControls.Player.Interact.IsPressed());
-        //data.buttons.Set(ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
-        //data.buttons.Set(ButtonType.DebugText, playerControls.Player.DebugText.IsPressed());
-        //data.buttons.Set(ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
-        //data.buttons.Set(ButtonType.ActiveItemContainer, playerControls.Player.ActiveItemContainer.IsPressed());
-        //data.buttons.Set(ButtonType.PutWeapon, playerControls.Player.PutWeapon.IsPressed());
-        //data.buttons.Set(ButtonType.FirstWeapon, playerControls.Player.FirstWeapon.IsPressed());
-        //data.buttons.Set(ButtonType.SecondWeapon, playerControls.Player.SecondWeapon.IsPressed());
-        //data.buttons.Set(ButtonType.SubWeapon, playerControls.Player.SubWeapon.IsPressed());
-        //data.buttons.Set(ButtonType.MilyWeapon, playerControls.Player.MilyWeapon.IsPressed());
-        //data.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
-        //data.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
 
         input.Set(playerInput);
         playerInput = default;
@@ -141,9 +123,12 @@ public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCal
 
     void INetworkRunnerCallbacks.OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
+
+        NetworkObject playerPrefab = GameManager.Resource.Load<NetworkObject>("Player/Player");
         if (runner.IsServer)
         {
-            NetworkObject playerObject = runner.Spawn(testPlayer, spawnPoint.position, spawnPoint.rotation, inputAuthority: player);
+
+            NetworkObject playerObject = runner.Spawn(playerPrefab, Vector3.zero, Quaternion.identity, inputAuthority: player);
             runner.SetPlayerObject(player, playerObject);
             playerObjects.Add(player, playerObject);
         }

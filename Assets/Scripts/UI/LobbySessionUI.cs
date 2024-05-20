@@ -21,12 +21,12 @@ public class LobbySessionUI : SimulationBehaviour
     private void OnEnable()
     {
 
-        GameManagers.Instance.NetworkManager.onSessionUpdate += UpdateSession;
+        GameManager.network.onSessionUpdate += UpdateSession;
     }
     private void OnDisable()
     {
 
-        GameManagers.Instance.NetworkManager.onSessionUpdate -= UpdateSession;
+        GameManager.network.onSessionUpdate -= UpdateSession;
 
     }
     public void UpdateSession(List<SessionInfo> sessionInfo)
@@ -38,8 +38,12 @@ public class LobbySessionUI : SimulationBehaviour
 
         foreach (SessionInfo session in sessionInfo)
         {
+
             SessionItem item = Instantiate(sessionItemPrefab, sessionItemListTr);
-            item.CreateSessionItem(session, sessionUI.JoinSession, session.Properties["Password"] != null ? privateSessionConnetUI : null);
+
+            Debug.Log(session.Properties.ContainsKey("Password"));
+            item.CreateSessionItem(session, sessionUI.JoinSession, session.Properties.ContainsKey("Password") ? privateSessionConnetUI : null);
+
         }
 
     }
@@ -51,19 +55,24 @@ public class LobbySessionUI : SimulationBehaviour
     }
     public async void PressRandomJoinButton()
     {
-        GameManagers.Instance.UIManager.ActiveLoading(true, "접속 가능한 게임 방에 접속 중입니다.");
-        StartGameResult result = await GameManagers.Instance.NetworkManager.JoinRandomSession();
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+        loadingUI.Init("접속 가능한 게임 방에 접속 중입니다.");
+        StartGameResult result = await GameManager.network.JoinRandomSession();
 
         if (result != null)
         {
             onConnetSession?.Invoke();
+            loadingUI.CloseUI();
         }
         else
         {
-            GameManagers.Instance.UIManager.CreateMessageBoxUI("방 접속 실패", "접속 가능한 게임 방이 없습니다.", null);
+            GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("방 접속 실패", "접속 가능한 게임 방이 없습니다.", null);
+
+            print("널");
+            loadingUI.CloseUI();
         }
 
-        GameManagers.Instance.UIManager.ActiveLoading(false);
+
 
     }
 

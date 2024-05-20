@@ -34,18 +34,18 @@ public class CreateSessionUI : MonoBehaviour
     }
     public async void PressCreateSessionButton()
     {
-        GameManagers.Instance.UIManager.ActiveLoading(true, "방을 만드는 중입니다.");
-        Debug.Log(nameField.text);
-        StartGameResult result = await GameManagers.Instance.NetworkManager.CreateSession(nameField.text, Convert.ToInt32(maxPlayerCoutnTMP.text), passwordField.text);
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+        loadingUI.Init("방을 만드는 중입니다.");
+      
+        StartGameResult result = await GameManager.network.CreateSession(nameField.text, Convert.ToInt32(maxPlayerCoutnTMP.text), passwordField.text);
         if (result.Ok)
         {
-            Debug.Log("createSession");
-
+            Debug.Log(nameField.text);
             onCreateSession?.Invoke();
             sessionUI.CreateSession(nameField.text, (int)maxpPlayerCountSlider.value);
             gameObject.SetActive(false);
         }
-        GameManagers.Instance.UIManager.ActiveLoading(false);
+        loadingUI.CloseUI();
     }
     public void PressCancelButton()
     {

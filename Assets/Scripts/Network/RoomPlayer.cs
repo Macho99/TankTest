@@ -20,7 +20,7 @@ public class RoomPlayer : NetworkBehaviour
     [Networked] public int BreardIndex { get; set; }
     public override void Spawned()
     {
-        userNicname = GameManagers.Instance.AuthManager.User.DisplayName;
+        userNicname = GameManager.auth.User.DisplayName;
         if (HasInputAuthority)
         {
             isHost = HasStateAuthority;
@@ -63,7 +63,7 @@ public class RoomPlayer : NetworkBehaviour
         ColorIndex = playerPreview.GetCurrenIndex(PlayerPreviewController.AppearanceType.Color);
 
 
-        GameManagers.Instance.NetworkManager.JoinIngame();
+        GameManager.network.JoinIngame();
     }
     public void ReadEvent()
     {

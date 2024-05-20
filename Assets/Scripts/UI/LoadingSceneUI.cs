@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LoadingSceneUI : MonoBehaviour
+public class LoadingSceneUI : PopUpUI
 {
     [SerializeField] private Image loadingFill;
     [SerializeField] private TextMeshProUGUI loadingProgressTMP;

@@ -21,19 +21,20 @@ public class PrivateSessionConnetUI : MonoBehaviour
 
         if ((string)sessionInfo.Properties["Password"].PropertyValue == passwordField.text)
         {
-
-            GameManagers.Instance.UIManager.ActiveLoading(true, "게임 방에 입장중 입니다.");
-            StartGameResult result = await GameManagers.Instance.NetworkManager.JoinSession(sessionInfo);
+            LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+            loadingUI.Init("게임 방에 입장중 입니다.");
+            StartGameResult result = await GameManager.network.JoinSession(sessionInfo);
             if (result != null)
             {
                 onJoin?.Invoke(sessionInfo);
                 DisableConnetUI();
             }
-            GameManagers.Instance.UIManager.ActiveLoading(false);
+            loadingUI.CloseUI();
         }
         else
         {
-            GameManagers.Instance.UIManager.CreateMessageBoxUI("방 접속 실패", "비밀번호가 맞지 않습니다.", null);
+
+            GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("방 접속 실패", "비밀번호가 맞지 않습니다.", null);
         }
     }
     public void PressCancelButton()

@@ -577,11 +577,7 @@ GameObject:
   - component: {fileID: 3330946494144906203}
   - component: {fileID: 8080159470426971581}
   - component: {fileID: 3650089992067431894}
-  - component: {fileID: -8583078720465762088}
-  - component: {fileID: -3515179120037409453}
   - component: {fileID: 3425661393646146744}
-  - component: {fileID: 307635063873297972}
-  - component: {fileID: 7862170114666396150}
   m_Layer: 0
   m_Name: PlayerPreset
   m_TagString: Player
@@ -645,73 +641,8 @@ MonoBehaviour:
   Flags: 262145
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: -3515179120037409453}
   - {fileID: 3425661393646146744}
-  - {fileID: 307635063873297972}
-  - {fileID: 7862170114666396150}
   - {fileID: 6957151355845968244}
---- !u!54 &-8583078720465762088
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 533759022505716321}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!114 &-3515179120037409453
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 533759022505716321}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1869825851, guid: 977dbcf975465374990f471e1497f563, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _settings:
-    Shape: 1
-    IsTrigger: 0
-    Radius: 0.35
-    Height: 1.8
-    Extent: 0.035
-    ColliderLayer: 0
-    CollisionLayerMask:
-      serializedVersion: 2
-      m_Bits: 129
-    ProxyInterpolationMode: 0
-    TeleportThreshold: 1
-    AntiJitterDistance: {x: 0.025, y: 0.01}
-    CompressNetworkPosition: 0
-    ForcePredictedLookRotation: 0
-    StepHeight: 0.5
-    StepDepth: 0.2
-    StepSpeed: 1
-    StepMinPushBack: 0.5
-    StepGroundCheckRadiusScale: 0.5
-    StepRequireGroundTarget: 0
-    SnapDistance: 0.25
-    SnapSpeed: 4
 --- !u!114 &3425661393646146744
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -730,38 +661,6 @@ MonoBehaviour:
   SyncSettings: 79
   StateHashes: 00000000889cfdc3271cda50
   TriggerHashes: 00000000
---- !u!114 &307635063873297972
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 533759022505716321}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a739f57d036418d46a35952d9d4f1a11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _fallingTime: 0
-  _moveSpeed: 0
-  _inputDirection: {x: 0, y: 0}
-  _jumpVelocity: 0
-  _moveDirection: {x: 0, y: 0, z: 0}
-  _CamerRotX: 0
---- !u!114 &7862170114666396150
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 533759022505716321}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba7dac2ffff3cf5448c2695201dcff37, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debugUIPrefab: {fileID: 0}
-  _FallingTime: 0
 --- !u!1 &564998262932388586
 GameObject:
   m_ObjectHideFlags: 0

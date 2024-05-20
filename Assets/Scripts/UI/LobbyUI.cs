@@ -12,7 +12,7 @@ public class LobbyUI : MonoBehaviour
 
     private void OnEnable()
     {
-        AuthManager authManager = GameManagers.Instance.AuthManager;
+        AuthManager authManager = GameManager.auth;
         if (authManager.User != null)
         {
             playerNicnameText.text = authManager.Auth.CurrentUser.DisplayName;
@@ -20,20 +20,20 @@ public class LobbyUI : MonoBehaviour
     }
     public async void PressLogOutButton()
     {
-        AuthManager auth = GameManagers.Instance.AuthManager;
-        if (auth.User.IsAnonymous)
+        AuthManager authManager = GameManager.auth;
+        if (authManager.User.IsAnonymous)
         {
-            GameManagers.Instance.AuthManager.DeletUser();
+            authManager.DeletUser();
         }
         else
         {
-            GameManagers.Instance.AuthManager.SignOut();
+            authManager.SignOut();
         }
 
 
 
         onLogout?.Invoke();
-        await GameManagers.Instance.NetworkManager.ExitLobby(false);
+        await GameManager.network.ExitLobby(false);
 
         this.gameObject.SetActive(false);
     }

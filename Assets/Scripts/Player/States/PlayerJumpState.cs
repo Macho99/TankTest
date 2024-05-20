@@ -20,7 +20,7 @@ public class PlayerJumpState : PlayerState
 
     public override void Exit()
     {
-        owner.weaponController.ChangeHandWeight(1f);
+        //owner.weaponController.ChangeHandWeight(1f);
         owner.animator.SetBool("IsJump", false);
         isJumpingStart = false;
     }

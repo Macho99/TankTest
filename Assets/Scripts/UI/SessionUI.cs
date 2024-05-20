@@ -25,7 +25,7 @@ public class SessionUI : MonoBehaviour
     private void OnEnable()
     {
         if (networkManager == null)
-            networkManager = GameManagers.Instance.NetworkManager;
+            networkManager = GameManager.network;
 
 
     }
@@ -87,7 +87,8 @@ public class SessionUI : MonoBehaviour
 
     public async void ExitSession()
     {
-        GameManagers.Instance.UIManager.ActiveLoading(true, "방을 나가는 중입니다.");
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+        loadingUI.Init("방을 나가는 중입니다.");
         StartGameResult result = await networkManager.JoinLobby();
         if (result.Ok)
         {
@@ -99,7 +100,7 @@ public class SessionUI : MonoBehaviour
             }
             sessionUserDic.Clear();
         }
-        GameManagers.Instance.UIManager.ActiveLoading(false);
+        loadingUI.CloseUI();
     }
     public void PressReadyOrStartButton()
     {

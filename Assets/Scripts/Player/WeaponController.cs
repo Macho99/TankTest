@@ -53,11 +53,21 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
         if (HasInputAuthority)
         {
             mainUI = controller.mainUI;
-        }
 
+        }
+        print(HasInputAuthority);
 
     }
+    public int GetMainWeaponAnimLayer()
+    {
+        if (mainWeapon == null)
+        {
+            return (int)WeaponAnimLayerType.Base;
+        }
 
+        return (int)((WeaponItemSO)mainWeapon.ItemData).AnimLayerType;
+
+    }
     private void ModifyMainWeapon(int index, Weapon weapon)
     {
         if (weaponIndex != index)
@@ -201,7 +211,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
         if (!animator.GetCurrentAnimatorStateInfo((int)WeaponAnimLayerType.Size).IsName("Empty"))
             return;
 
-      
+
         Weapon weapon = equipment.GetWeapon(slotType);
         if (weapon != null)
         {
@@ -215,6 +225,12 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
     }
     public void ChangeHandWeight(float weight = 0)
     {
+        if (mainWeapon == null || mainWeapon is Gun == false)
+        {
+            handWeight = 0f;
+            return;
+        }
+
         handWeight = weight;
     }
     private void UpdateMainWeapon()
@@ -285,7 +301,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
     public void UpdateAmmoCount()
     {
         int totalAmmoCount = 1;
-        if(mainWeapon != null)
+        if (mainWeapon != null)
         {
             if (mainWeapon is Gun)
             {
@@ -295,7 +311,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
             {
                 totalAmmoCount = 1;
             }
-        }   
+        }
         mainUI?.ChangeWeaponUI(mainWeapon, totalAmmoCount);
     }
     private void PutMainWeapon(Weapon weapon)
