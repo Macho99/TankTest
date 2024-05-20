@@ -201,14 +201,14 @@ public class NetworkManager : MonoBehaviour
 
 
     }
-   
+
     void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
         sessionInfos = sessionList;
         onSessionUpdate?.Invoke(sessionList);
     }
 
-  
+
 }
 public enum ButtonType
 { PlayerMove, MouseDelta, Run, Jump, Crouch, MouseLock, Interact, Reload, Adherence, ActiveItemContainer, PutWeapon, FirstWeapon, SecondWeapon, SubWeapon, MilyWeapon, BombWeapon, Attack, Size }

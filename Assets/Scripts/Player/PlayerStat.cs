@@ -1,4 +1,5 @@
 using Fusion;
+using Fusion.Addons.FSM;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,17 +7,23 @@ public enum PlayerStatType { HPGauge, ThirstGauge, HungerGauge, PoisoningGauge, 
 
 public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 {
-    [Networked, Capacity((int)PlayerStatType.Size), OnChangedRender(nameof(UpdateStat))] public NetworkArray<PlayerStatData> statData { get; }
+    [Networked, Capacity((int)PlayerStatType.Size)] public NetworkArray<PlayerStatData> statData { get; }
 
     private Animator animator;
 
     private PlayerMainUI mainUI;
     public long HitID { get { return Object.Id.Raw << 32; } }
-    private NetworkStateMachine stateMachine;
+    private StateMachine<PlayerStates> stateMachine;
+    private PlayerController controller;
+
+    [Networked]private NetworkBool isHit { get; set; }
+    [Networked]private NetworkBool isDead { get; set; }
     private void Awake()
     {
         animator = GetComponent<Animator>();
-        stateMachine = GetComponent<NetworkStateMachine>();
+        controller = GetComponent<PlayerController>();
+
+
     }
     public override void Spawned()
     {
@@ -29,18 +36,16 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
     }
     public override void FixedUpdateNetwork()
     {
-        //if (GetInput(out NetworkInputData input))
-        //{
-        //    if (input.buttons.IsSet(ButtonType.Attack))
-        //    {
-        //        PlayerStatData newData = statData[(int)PlayerStatType.HPGauge];
-        //        newData.currentValue -= 1;
-        //        statData.Set((int)PlayerStatType.HPGauge, newData);
-        //        mainUI?.UpdateStat(PlayerStatType.HPGauge, newData.currentValue, newData.maxValue);
-        //    }
-        //}
-
-
+        if (isHit)
+        {
+            stateMachine.ForceActivateState((int)PlayerController.PlayerState.Hit);
+            isHit = false;
+        }
+        if(isDead)
+        {
+            stateMachine.ForceActivateState((int)PlayerController.PlayerState.Dead);
+            isDead = false;
+        }
     }
 
     public bool Health(PlayerStatType playerStatType, int Helath)
@@ -57,19 +62,11 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
         mainUI?.UpdateStat(playerStatType, status.currentValue, status.maxValue);
         return true;
     }
-    private void UpdateStat()
-    {
-
-      
-
-    }
 
 
     public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
     {
-        print(statData[(int)PlayerStatType.HPGauge].currentValue);
-
-        if (stateMachine.curStateStr == PlayerController.PlayerState.Dead.ToString())
+        if (stateMachine.ActiveStateId == (int)PlayerController.PlayerState.Dead || stateMachine.ActiveStateId == (int)PlayerController.PlayerState.Hit)
         {
             return;
         }
@@ -107,16 +104,22 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 
         if (statData[(int)PlayerStatType.HPGauge].currentValue <= 0)
         {
-            //Á×À½
-            stateMachine.ChangeState(PlayerController.PlayerState.Dead);
+            isDead = true;
         }
         else
         {
-            stateMachine.ChangeState(PlayerController.PlayerState.Hit);
+            isHit = true;
         }
+        RPC_ApplyDamage(point, force, damage);
 
+    }
 
+    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+    private void RPC_ApplyDamage(Vector3 point, Vector3 force, int damage)
+    {
+      
 
+        mainUI?.UpdateStat(PlayerStatType.HPGauge, statData[(int)PlayerStatType.HPGauge].currentValue, statData[(int)PlayerStatType.HPGauge].maxValue);
     }
 
     public void AfterSpawned()
@@ -142,6 +145,7 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
                 mainUI.UpdateStat((PlayerStatType)i, statData[i].currentValue, statData[i].maxValue);
             }
         }
+        stateMachine = GetComponent<PlayerController>().stateMachine;
     }
 }
 public struct PlayerStatData : INetworkStruct

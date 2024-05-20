@@ -27,7 +27,7 @@ public class PlayerLocomotion : NetworkBehaviour
     [Networked] public float CamerRotX { get; set; }
     public float JumpForce { get => jumpForce; }
 
-
+ 
 
     private PlayerMove[] moves;
     public bool IsGround()
