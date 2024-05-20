@@ -42,6 +42,7 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned
         stateMachine.AddState(PlayerState.Falling, new PlayerFallingState(this));
         stateMachine.AddState(PlayerState.Interact, new PlayerInteractState(this));
         stateMachine.AddState(PlayerState.Hit, new PlayerHitState(this));
+        stateMachine.AddState(PlayerState.Dead, new PlayerDeadState(this));
 
         stateMachine.InitState(PlayerState.StandLocomotion);
 

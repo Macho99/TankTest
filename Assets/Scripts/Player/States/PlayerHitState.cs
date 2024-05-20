@@ -11,6 +11,7 @@ public class PlayerHitState : PlayerState
 
     public override void Enter()
     {
+        owner.movement.StopMove();
         owner.animator.SetTrigger("Hit");
         owner.animator.applyRootMotion = true;
         owner.weaponController.ResetAim();
@@ -35,7 +36,7 @@ public class PlayerHitState : PlayerState
     {
         int weaponIndex = owner.weaponController.GetMainWeaponAnimLayer();
         AnimatorStateInfo stateInfo = owner.animator.GetCurrentAnimatorStateInfo(weaponIndex);
-        if (stateInfo.IsName("Hit") && stateInfo.normalizedTime >= 0.95f)
+        if (stateInfo.IsName("Hit") && stateInfo.normalizedTime >= 0.98f)
         {
             ChangeState(PlayerController.PlayerState.StandLocomotion);
             return;
