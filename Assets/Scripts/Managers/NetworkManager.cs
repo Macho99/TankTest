@@ -98,6 +98,7 @@ public class NetworkManager : MonoBehaviour
         startGame.SessionProperties = sessionProperty;
         startGame.PlayerCount = maxCount;
         startGame.SceneManager = networkSceneManager;
+        startGame.Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
 
 
         StartGameResult result = await runner.StartGame(startGame);
@@ -193,11 +194,14 @@ public class NetworkManager : MonoBehaviour
     }
     public async void JoinIngame()
     {
-        int index = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/Test/TestScene.unity");
-        SceneRef sceneRef = SceneRef.FromIndex(index);
+        //int gameSceneIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/Test/TestScene.unity");
+        //SceneRef gameSceneRef = SceneRef.FromIndex(gameSceneIndex);
+
+        int loadingSceneIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/LoadingScene.unity");
+        SceneRef loadingSceneRef = SceneRef.FromIndex(loadingSceneIndex);
 
         LoadSceneManager loadSceneManager = runner.GetComponent<LoadSceneManager>();
-        await loadSceneManager.LoadGameScene(sceneRef);
+        await loadSceneManager.LoadGameScene(loadingSceneRef);
 
 
     }

@@ -42,6 +42,9 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
         interact = GetComponent<PlayerInteract>();
         weaponController = GetComponentInChildren<WeaponController>();
         Inventory = GetComponentInChildren<Inventory>();
+
+        GameManager.UI.StartSceneInit();
+        GameManager.Pool.StartSceneInit();
         //stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
         //stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
         //stateMachine.AddState(PlayerState.Jump, new PlayerJumpState(this));

@@ -63,8 +63,8 @@ public class IngameSpawner : MonoBehaviour
         NetworkEvents events = runner.GetComponent<NetworkEvents>();
         if (events != null)
         {
-            events.PlayerJoined.AddListener(OnPlayerJoined);
-            events.PlayerLeft.AddListener(OnPlayerLeft);
+            //events.PlayerJoined.AddListener(OnPlayerJoined);
+            //events.PlayerLeft.AddListener(OnPlayerLeft);
         }
 
 
@@ -95,4 +95,5 @@ public class IngameSpawner : MonoBehaviour
             runner.SetPlayerObject(player, playerObject);
         }
     }
+ 
 }

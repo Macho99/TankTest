@@ -7,6 +7,7 @@ public class PlayerDeadStates : PlayerStates
     protected override void OnEnterState()
     {
         owner.movement.StopMove();
+        owner.movement.Kcc.Collider.enabled = false;
         owner.movement.Kcc.SetActive(false);
         owner.weaponController.ResetAim();
         owner.weaponController.ChangeHandWeight();

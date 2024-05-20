@@ -22,7 +22,7 @@ public class PoolManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= StartSceneInit;
     }
-    private void StartSceneInit(Scene scene = default, LoadSceneMode loadSceneMode = default)
+    public void StartSceneInit(Scene scene = default, LoadSceneMode loadSceneMode = default)
     {
         if (poolRoot == null)
             poolRoot = new GameObject("PoolRoot").transform;

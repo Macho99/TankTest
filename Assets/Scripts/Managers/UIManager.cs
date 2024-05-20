@@ -35,7 +35,7 @@ public class UIManager : MonoBehaviour
         SceneManager.sceneLoaded -= StartSceneInit;
     }
 
-    private void StartSceneInit(Scene scene =default,LoadSceneMode loadScene=default) 
+    public void StartSceneInit(Scene scene =default,LoadSceneMode loadScene=default) 
     {
         if (eventSystem == null)
         {
