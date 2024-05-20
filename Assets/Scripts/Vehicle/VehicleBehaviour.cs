@@ -18,6 +18,7 @@ public class VehicleBehaviour : NetworkBehaviour
 	protected VehicleCam followCam;
 	protected VehicleStatUI statUI;
 
+	[Networked, OnChangedRender(nameof(PlayerGetOnRender))] public NetworkBool PlayerGetOn { get; private set; } = false;
 	[Networked, HideInInspector] public float CamYAngle { get; private set; }
 	[Networked, HideInInspector] public float CamXAngle { get; private set; }
 	[Networked] public NetworkButtons PrevButton { get; private set; }
@@ -30,6 +31,7 @@ public class VehicleBehaviour : NetworkBehaviour
 
 	public void Assign(TestPlayer player)
 	{
+		PlayerGetOn = true;
 		OnAssign(player);
 		if(followCam == null)
 		{
@@ -86,6 +88,7 @@ public class VehicleBehaviour : NetworkBehaviour
 
 	public void GetOff()
 	{
+		PlayerGetOn = false;
 		OnGetOff();
 		if(followCam != null)
 		{
@@ -121,5 +124,9 @@ public class VehicleBehaviour : NetworkBehaviour
 		{
 			followCam.transform.rotation = Quaternion.Euler(CamYAngle, CamXAngle, 0f);
 		}
+	}
+
+	protected virtual void PlayerGetOnRender()
+	{
 	}
 }

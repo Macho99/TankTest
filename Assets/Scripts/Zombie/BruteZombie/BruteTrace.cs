@@ -190,10 +190,16 @@ public class BruteTrace : BruteZombieState
 
 		owner.SetAnimFloat("ActionShifter", (int)type);
 		owner.SetAnimTrigger("Attack");
-		AnimWaitStruct animWait = new AnimWaitStruct("Attack", BruteZombie.State.Trace.ToString(), 
-			startAction: () => owner.LookWeight = 0f,
-			updateAction: owner.Decelerate, 
-			exitAction: () => owner.LookWeight = 1f);
+		AnimWaitStruct animWait = new AnimWaitStruct("Attack", BruteZombie.State.Trace.ToString(),
+			startAction: () => {
+				owner.LookWeight = 0f;
+				owner.CCImmune = true;
+				},
+			updateAction: owner.Decelerate,
+			exitAction: () => {
+				owner.LookWeight = 1f;
+				owner.CCImmune = false;
+			});
 
 		if (type == BruteZombie.AttackType.ThrowStone)
 		{

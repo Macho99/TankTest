@@ -29,8 +29,8 @@ public class WretchZombie : ZombieBase
 
 	public enum State { Idle, AnimWait, Trace, Hide, Die }
 
-	[SerializeField] VFXAutoOff poisonFlyVFXPrefab;
-	[SerializeField] VFXAutoOff poisonExplosionPrefab;
+	[SerializeField] FXAutoOff poisonFlyVFXPrefab;
+	[SerializeField] FXAutoOff poisonExplosionPrefab;
 	[SerializeField] PoisonArea poisonAreaPrefab;
 	[SerializeField] float poisonCooltime = 20f;
 	[SerializeField] float poisonRadius = 5f;
@@ -242,7 +242,7 @@ public class WretchZombie : ZombieBase
 
 	private IEnumerator CoPoison()
 	{
-		VFXAutoOff poisonFlyVFX = GameManager.Resource.Instantiate(poisonFlyVFXPrefab, 
+		FXAutoOff poisonFlyVFX = GameManager.Resource.Instantiate(poisonFlyVFXPrefab, 
 			headTrans.position, headTrans.rotation, headTrans, true);
 		poisonFlyVFX.SetOffTime(maxPoisonFlyTime * 2f);
 

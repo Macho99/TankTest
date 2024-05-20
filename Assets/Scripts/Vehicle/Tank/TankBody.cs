@@ -18,8 +18,11 @@ public class TankBody : VehicleBody
 	public float TurretRatio { get { return (float)CurTurretHp / maxTurretHp; } }
 	public float ReloadRatio { get { return (float)CurReloadHp / maxReloadHp; } }
 
-	[Networked, OnChangedRender(nameof(CurTurretChanged))] public int CurTurretHp { get; private set; }
-	[Networked, OnChangedRender(nameof(CurReloadChanged))] public int CurReloadHp { get; private set; }
+	[Networked, OnChangedRender(nameof(CurTurretChanged)), HideInInspector] 
+	public int CurTurretHp { get; private set; }
+
+	[Networked, OnChangedRender(nameof(CurReloadChanged)), HideInInspector] 
+	public int CurReloadHp { get; private set; }
 
 	public override void Spawned()
 	{

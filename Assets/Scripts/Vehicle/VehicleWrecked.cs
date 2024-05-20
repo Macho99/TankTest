@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+[RequireComponent(typeof(AudioSource))]
 public class VehicleWrecked : NetworkBehaviour
 {
 	public enum WreckPhase { Explosion, FireAndSmoke, Smoke, CalmDown }
@@ -14,6 +15,8 @@ public class VehicleWrecked : NetworkBehaviour
 	const string fireVfxPath = "FX/VFX/vfx_Fire01_v1";
 	const string smokeVfxPath = "FX/VFX/vfxgraph_StylizedSmoke_v1.5";
 	const string explosionVfxPath = "FX/VFX/BigExplosionv2";
+
+	[SerializeField] AudioClip explosionClip;
 	[SerializeField] float velocityMul = 2f;
 	[SerializeField] Vector3 smokeRadius = Vector3.one;
 	[SerializeField] Transform wheelRendererTrans;
@@ -23,6 +26,7 @@ public class VehicleWrecked : NetworkBehaviour
 	[SerializeField] Transform[] wheelTranses;
 	[SerializeField] WheelCollider[] wheelColliders;
 
+	AudioSource audioSource;
 	Rigidbody rb;
 	Queue<GameObject> fireQueue = new();
 	Queue<GameObject> smokeQueue = new();
@@ -34,6 +38,7 @@ public class VehicleWrecked : NetworkBehaviour
 	protected virtual void Awake()
 	{
 		rb = GetComponent<Rigidbody>();
+		audioSource = GetComponent<AudioSource>();
 	}
 
 	public override void Spawned()
@@ -43,6 +48,9 @@ public class VehicleWrecked : NetworkBehaviour
 			phaseTimer = TickTimer.CreateFromSeconds(Runner, 2f);
 		}
 		PhaseChange();
+
+		if(explosionClip != null)
+			audioSource.PlayOneShot(explosionClip);
 	}
 
 	public override void FixedUpdateNetwork()
@@ -60,7 +68,7 @@ public class VehicleWrecked : NetworkBehaviour
 
 	protected virtual void PlayExplosionVfx()
 	{
-		GameManager.Resource.Instantiate<VFXAutoOff>(explosionVfxPath, fireTrans.position, fireTrans.rotation, true);
+		GameManager.Resource.Instantiate<FXAutoOff>(explosionVfxPath, fireTrans.position, fireTrans.rotation, true);
 	}
 
 	protected void PhaseChange()
@@ -138,6 +146,8 @@ public class VehicleWrecked : NetworkBehaviour
 			smokeQueue.Dequeue().AddComponent<VisualEffectOff>().Init(Random.Range(0f, 5f), 5f);
 			//GameManager.Resource.Destroy(smokeQueue.Dequeue());
 		}
+
+		audioSource.Stop();
 	}
 
 	private void CheckPhase()

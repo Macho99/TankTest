@@ -18,6 +18,8 @@ public class ShatterObstacle : BreakableObstacle
 	public const string cachePath = "Assets/Resources/RayfireCache";
 	public const string resourcePath = "RayfireCache";
 
+	BreakableObjBehaviour.BreakData? breakData;
+
 	public MeshFilter MeshFilter { get { return meshFilter; } }
 
 	DebrisRoot debrisRoot;
@@ -57,6 +59,10 @@ public class ShatterObstacle : BreakableObstacle
 			debrisRoot = Instantiate(debrisRootPrefab, transform.position, transform.rotation, transform);
 			debrisRoot.Init(fadeWaitDuration, fadeDuration);
 			debrisRoot.OnDestoyEvent += () => { debrisRoot = null; };
+			if(breakData.HasValue)
+			{
+				debrisRoot.AddExplosionForce(breakData.Value.force, breakData.Value.position, 5f);
+			}
 		}
 	}
 
@@ -64,10 +70,11 @@ public class ShatterObstacle : BreakableObstacle
 	{
 		if(debrisRoot == null)
 		{
-			Debug.LogError("debrisRoot가 만들어지기 전에 BreakEffect가 호출됨");
-			return;
+			this.breakData = breakData;
 		}
-		debrisRoot.AddExplosionForce(breakData.force,
-			breakData.position, 5f);
+		else
+		{
+			debrisRoot.AddExplosionForce(breakData.force, breakData.position, 5f);
+		}
 	}
 }

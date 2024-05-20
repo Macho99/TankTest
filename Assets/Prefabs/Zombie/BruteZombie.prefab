@@ -3399,6 +3399,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   swingScale: 3
   force: 20000
+  swingClips:
+  - {fileID: 8300000, guid: bddc1df20ab9f1444bebfa94aeca5306, type: 3}
+  - {fileID: 8300000, guid: c817cbdce838f8f41b2cba21d8ca92ec, type: 3}
+  - {fileID: 8300000, guid: cbb8428976484794797c45c283dcc934, type: 3}
+  - {fileID: 8300000, guid: 646f6236e0c22404fabe3a7c0cf432ed, type: 3}
+  - {fileID: 8300000, guid: d72689495b79be54d85cbfe965c5005f, type: 3}
+  crackClip: {fileID: 8300000, guid: c2926f1054c59ab4a95a6b2997703608, type: 3}
 --- !u!82 &9167718330643357671
 AudioSource:
   m_ObjectHideFlags: 0
@@ -3419,7 +3426,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 10
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0
