@@ -59,15 +59,16 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
     }
     private void UpdateStat()
     {
-        if (HasInputAuthority)
-        {
 
-        }
+      
+
     }
 
 
     public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
     {
+        print(statData[(int)PlayerStatType.HPGauge].currentValue);
+
         if (stateMachine.curStateStr == PlayerController.PlayerState.Dead.ToString())
         {
             return;
@@ -88,7 +89,6 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
 
         Vector3 rot = quat * transform.forward;
 
-        print(damage);
 
         //Quaternion.LookRotation(transform.forward, .normalized);
         animator.SetFloat("BeshotDirX", rot.x);
@@ -101,7 +101,11 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
         if (newStatData.currentValue < 0)
             newStatData.currentValue = 0;
 
-        if (newStatData.currentValue <= 0)
+        statData.Set((int)PlayerStatType.HPGauge, newStatData);
+
+        mainUI?.UpdateStat(PlayerStatType.HPGauge, statData[(int)PlayerStatType.HPGauge].currentValue, statData[(int)PlayerStatType.HPGauge].maxValue);
+
+        if (statData[(int)PlayerStatType.HPGauge].currentValue <= 0)
         {
             //Á×À½
             stateMachine.ChangeState(PlayerController.PlayerState.Dead);
@@ -111,15 +115,15 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
             stateMachine.ChangeState(PlayerController.PlayerState.Hit);
         }
 
-        statData.Set((int)PlayerStatType.HPGauge, newStatData);
-        mainUI?.UpdateStat(PlayerStatType.HPGauge, statData[(int)PlayerStatType.HPGauge].currentValue, statData[(int)PlayerStatType.HPGauge].maxValue);
+
+
     }
 
     public void AfterSpawned()
     {
         if (HasStateAuthority)
         {
-            mainUI = GetComponent<PlayerController>().mainUI;
+
             for (int i = 0; i < statData.Length; i++)
             {
                 if (i != (int)PlayerStatType.PoisoningGauge)
@@ -129,12 +133,13 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
             }
         }
 
-
         if (HasInputAuthority)
         {
+            mainUI = GetComponent<PlayerController>().mainUI;
+
             for (int i = 0; i < statData.Length; i++)
             {
-                mainUI?.UpdateStat((PlayerStatType)i, statData[i].currentValue, statData[i].maxValue);
+                mainUI.UpdateStat((PlayerStatType)i, statData[i].currentValue, statData[i].maxValue);
             }
         }
     }

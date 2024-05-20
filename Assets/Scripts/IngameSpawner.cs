@@ -13,13 +13,17 @@ public class IngameSpawner : MonoBehaviour
 {
     NetworkRunner runner;
     [SerializeField] Transform spawnPoint;
-    private void OnEnable()
+    private void Awake()
     {
         NetworkRunner runner = FindObjectOfType<NetworkRunner>();
         if (runner != null)
         {
             this.runner = runner;
             SetupEvent(runner);
+        }
+        else
+        {
+
         }
 
 
@@ -87,7 +91,6 @@ public class IngameSpawner : MonoBehaviour
         NetworkObject playerPrefab = GameManager.Resource.Load<NetworkObject>("Player/Player");
         if (runner.IsServer)
         {
-
             NetworkObject playerObject = runner.Spawn(playerPrefab, spawnPoint.position, spawnPoint.rotation, inputAuthority: player);
             runner.SetPlayerObject(player, playerObject);
         }

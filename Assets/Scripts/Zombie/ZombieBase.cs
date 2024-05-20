@@ -160,7 +160,7 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 	{
 		if (TargetData.IsTargeting == true && TargetData.Layer == PlayerLayer) return;
 		if (PlayerFindTimer.ExpiredOrNotRunning(Runner) == false) return;
-		int result = Physics.OverlapSphereNonAlloc(transform.position, lookDist * eyeSightRatio, overlapCols, PlayerMask);
+		int result = Runner.GetPhysicsScene().OverlapSphere(transform.position, lookDist * eyeSightRatio, overlapCols, PlayerMask, QueryTriggerInteraction.UseGlobal);
 
 		if (result == 0)
 		{

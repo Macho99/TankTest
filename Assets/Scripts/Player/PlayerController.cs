@@ -64,7 +64,6 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned
         breardRoot.GetChild(decorations[(int)AppearanceType.Breard]).gameObject.SetActive(true);
         presetRoot.GetChild(decorations[(int)AppearanceType.Preset]).gameObject.SetActive(true);
 
-        print(decorations[(int)AppearanceType.Hair]);
 
     }
 

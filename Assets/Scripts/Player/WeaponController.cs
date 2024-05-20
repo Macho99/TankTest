@@ -55,7 +55,6 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned
             mainUI = controller.mainUI;
 
         }
-        print(HasInputAuthority);
 
     }
     public int GetMainWeaponAnimLayer()

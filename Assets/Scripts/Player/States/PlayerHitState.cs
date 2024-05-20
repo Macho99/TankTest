@@ -36,7 +36,7 @@ public class PlayerHitState : PlayerState
     {
         int weaponIndex = owner.weaponController.GetMainWeaponAnimLayer();
         AnimatorStateInfo stateInfo = owner.animator.GetCurrentAnimatorStateInfo(weaponIndex);
-        if (stateInfo.IsName("Hit") && stateInfo.normalizedTime >= 0.98f)
+        if (stateInfo.IsName("Hit") && stateInfo.normalizedTime >= 0.99f)
         {
             ChangeState(PlayerController.PlayerState.StandLocomotion);
             return;

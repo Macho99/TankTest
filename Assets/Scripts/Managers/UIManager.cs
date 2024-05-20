@@ -101,7 +101,6 @@ public class UIManager : MonoBehaviour
                     if (inputListner != null)
                     {
                         inputListner.RPC_ActiveButton(ButtonType.MouseDelta, false);
-                        Debug.Log("false");
                     }
                 }
             }
@@ -171,7 +170,6 @@ public class UIManager : MonoBehaviour
                     if (inputListner != null)
                     {
                         inputListner.RPC_ActiveButton(ButtonType.MouseDelta, true);
-                        Debug.Log("true");
                     }
                 }
             }
