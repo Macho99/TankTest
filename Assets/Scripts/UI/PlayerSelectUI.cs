@@ -19,11 +19,11 @@ public class PlayerSelectUI : MonoBehaviour
 
     public void PressRightButton(int index)
     {
-        previewController.ChangePreset((PlayerPreviewController.AppearanceType)index, PlayerPreviewController.ModelTransition.Right);
+        previewController.ChangePreset((AppearanceType)index, PlayerPreviewController.ModelTransition.Right);
     }
     public void PressLeftButton(int index)
     {
-        previewController.ChangePreset((PlayerPreviewController.AppearanceType)index, PlayerPreviewController.ModelTransition.Left);
+        previewController.ChangePreset((AppearanceType)index, PlayerPreviewController.ModelTransition.Left);
     }
 
 

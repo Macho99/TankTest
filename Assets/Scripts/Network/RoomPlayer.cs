@@ -57,10 +57,10 @@ public class RoomPlayer : NetworkBehaviour
     {
 
         PlayerPreviewController playerPreview = FindObjectOfType<PlayerPreviewController>();
-        HairIndex = playerPreview.GetCurrenIndex(PlayerPreviewController.AppearanceType.Hair);
-        BreardIndex = playerPreview.GetCurrenIndex(PlayerPreviewController.AppearanceType.Breard);
-        presetIndex = playerPreview.GetCurrenIndex(PlayerPreviewController.AppearanceType.Preset);
-        ColorIndex = playerPreview.GetCurrenIndex(PlayerPreviewController.AppearanceType.Color);
+        HairIndex = playerPreview.GetCurrenIndex(AppearanceType.Hair);
+        BreardIndex = playerPreview.GetCurrenIndex(AppearanceType.Breard);
+        presetIndex = playerPreview.GetCurrenIndex(AppearanceType.Preset);
+        ColorIndex = playerPreview.GetCurrenIndex(AppearanceType.Color);
 
 
         GameManager.network.JoinIngame();
@@ -71,20 +71,20 @@ public class RoomPlayer : NetworkBehaviour
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    public void RPC_AddClientPreset(PlayerPreviewController.AppearanceType appearanceType, int index)
+    public void RPC_AddClientPreset(AppearanceType appearanceType, int index)
     {
         switch (appearanceType)
         {
-            case PlayerPreviewController.AppearanceType.Hair:
+            case AppearanceType.Hair:
                 HairIndex = index;
                 break;
-            case PlayerPreviewController.AppearanceType.Breard:
+            case AppearanceType.Breard:
                 BreardIndex = index;
                 break;
-            case PlayerPreviewController.AppearanceType.Preset:
+            case AppearanceType.Preset:
                 presetIndex = index;
                 break;
-            case PlayerPreviewController.AppearanceType.Color:
+            case AppearanceType.Color:
                 ColorIndex = index;
                 break;
         }

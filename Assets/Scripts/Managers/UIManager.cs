@@ -30,10 +30,11 @@ public class UIManager : MonoBehaviour
         SceneManager.sceneLoaded += StartSceneInit;
         //menu = GameManager.Resource.Instantiate<MenuUI>("UI/PopUpUI/Menu");
     }
-    private void Start()
+    private void OnDestroy()
     {
-     
+        SceneManager.sceneLoaded -= StartSceneInit;
     }
+
     private void StartSceneInit(Scene scene =default,LoadSceneMode loadScene=default) 
     {
         if (eventSystem == null)

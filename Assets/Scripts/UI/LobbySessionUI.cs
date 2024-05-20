@@ -20,7 +20,7 @@ public class LobbySessionUI : SimulationBehaviour
     }
     private void OnEnable()
     {
-
+       
         GameManager.network.onSessionUpdate += UpdateSession;
     }
     private void OnDisable()

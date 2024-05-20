@@ -15,6 +15,7 @@ public class PlayerHitState : PlayerState
         owner.animator.applyRootMotion = true;
         owner.weaponController.ResetAim();
         owner.weaponController.ChangeHandWeight();
+
     }
 
     public override void Exit()
@@ -36,7 +37,7 @@ public class PlayerHitState : PlayerState
         AnimatorStateInfo stateInfo = owner.animator.GetCurrentAnimatorStateInfo(weaponIndex);
         if (stateInfo.IsName("Hit") && stateInfo.normalizedTime >= 0.95f)
         {
-            ChangeState(PlayerController.PlayerState.Hit);
+            ChangeState(PlayerController.PlayerState.StandLocomotion);
             return;
         }
     }

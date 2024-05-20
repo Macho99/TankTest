@@ -8,174 +8,89 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using static Unity.Collections.Unicode;
 
-public class TestSpawner : SimulationBehaviour, IBeforeUpdate, INetworkRunnerCallbacks
+public class TestSpawner : MonoBehaviour
 {
-
     NetworkRunner runner;
-    private PlayerControls playerControls;
-
-    private Dictionary<PlayerRef, NetworkObject> playerObjects = new Dictionary<PlayerRef, NetworkObject>();
-
-    NetworkInputData playerInput = new NetworkInputData();
-    Vector2Accumulator lookAccum = new Vector2Accumulator(0.02f, true);
-    public void BeforeUpdate()
+    [SerializeField] Transform spawnPoint;
+    private void OnEnable()
     {
+        NetworkRunner runner = FindObjectOfType<NetworkRunner>();
+        if (runner != null)
+        {
+            this.runner = runner;
+            SetupEvent(runner);
+        }
 
-        lookAccum.Accumulate(Mouse.current.delta.ReadValue());
-        //playerInput.mouseDelta = Mouse.current.delta.ReadValue();
 
     }
-
-    private async void Awake()
+    private void OnDisable()
     {
+        GameManager.network.onRunnerAction -= SetupEvent;
+    }
 
-        if (playerControls == null)
-        {
-            playerControls = new PlayerControls();
-            playerControls.Enable();
+    //public void SpawnZombie(NetworkRunner.OnBeforeSpawned beforeSpawned = null)
+    //{
+    //    if (beforeSpawned == null)
+    //    {
+    //        beforeSpawned = BeforeSpawned;
+    //    }
+    //    runner.Spawn(zombiePrefab, onBeforeSpawned: beforeSpawned);
+    //}
 
-        }
+    //private void BeforeSpawned(NetworkRunner runner, NetworkObject netObj)
+    //{
+    //    Random.InitState(runner.SessionInfo.Name.GetHashCode() * netObj.Id.Raw.GetHashCode());
 
-        // Create the NetworkSceneInfo from the current scene
-        var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
-        var sceneInfo = new NetworkSceneInfo();
-        if (scene.IsValid)
-        {
-            sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
-        }
+    //    Vector3 pos = Random.insideUnitSphere * 10f;
+    //    pos.y = 0f;
+    //    Zombie zombie = netObj.GetComponent<Zombie>();
+    //    zombie.transform.rotation = Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value));
+    //    zombie.transform.position = transform.position + pos;
+    //}
+    private void SetupEvent(NetworkRunner runner)
+    {
         if (runner == null)
         {
-            runner = gameObject.AddComponent<NetworkRunner>();
 
+            return;
         }
-        runner.ProvideInput = true;
-        await runner.StartGame(new StartGameArgs()
+
+        NetworkEvents events = runner.GetComponent<NetworkEvents>();
+        if (events != null)
         {
-            GameMode = GameMode.AutoHostOrClient,
-            Scene = scene,
-            SceneManager = runner.GetComponent<NetworkSceneManagerDefault>(),
-            ObjectProvider = runner.GetComponent<INetworkObjectProvider>()
+            events.PlayerJoined.AddListener(OnPlayerJoined);
+            events.PlayerLeft.AddListener(OnPlayerLeft);
+        }
 
-        });
-        runner.AddCallbacks(this);
+
+
     }
-    void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)
+
+    private void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
+        if (!runner.IsServer)
+            return;
 
+        if (runner.TryGetPlayerObject(player, out NetworkObject networkObject))
+        {
+            Debug.Log(player);
+
+            runner.Despawn(networkObject);
+        }
     }
 
-    void INetworkRunnerCallbacks.OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
-    {
-    }
 
-    void INetworkRunnerCallbacks.OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnInput(NetworkRunner runner, NetworkInput input)
-    {
-        playerInput.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
-        playerInput.buttons.Set(ButtonType.Run, playerControls.Player.Run.IsPressed());
-        playerInput.buttons.Set(ButtonType.Jump, playerControls.Player.Jump.IsPressed());
-        playerInput.buttons.Set(ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
-        playerInput.buttons.Set(ButtonType.Interact, playerControls.Player.Interact.IsPressed());
-        playerInput.buttons.Set(ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
-        playerInput.buttons.Set(ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
-        playerInput.buttons.Set(ButtonType.ActiveItemContainer, playerControls.Player.ActiveItemContainer.IsPressed());
-        playerInput.buttons.Set(ButtonType.PutWeapon, playerControls.Player.PutWeapon.IsPressed());
-        playerInput.buttons.Set(ButtonType.FirstWeapon, playerControls.Player.FirstWeapon.IsPressed());
-        playerInput.buttons.Set(ButtonType.SecondWeapon, playerControls.Player.SecondWeapon.IsPressed());
-        playerInput.buttons.Set(ButtonType.SubWeapon, playerControls.Player.SubWeapon.IsPressed());
-        playerInput.buttons.Set(ButtonType.MilyWeapon, playerControls.Player.MilyWeapon.IsPressed());
-        playerInput.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
-        playerInput.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
-        playerInput.buttons.Set(ButtonType.Reload, playerControls.Player.Reload.IsPressed());
-        playerInput.mouseDelta = lookAccum.ConsumeTickAligned(runner);
-
-        input.Set(playerInput);
-        playerInput = default;
-    }
-
-    void INetworkRunnerCallbacks.OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+    void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
 
         NetworkObject playerPrefab = GameManager.Resource.Load<NetworkObject>("Player/Player");
         if (runner.IsServer)
         {
 
-            NetworkObject playerObject = runner.Spawn(playerPrefab, Vector3.zero, Quaternion.identity, inputAuthority: player);
+            NetworkObject playerObject = runner.Spawn(playerPrefab, spawnPoint.position, spawnPoint.rotation, inputAuthority: player);
             runner.SetPlayerObject(player, playerObject);
-            playerObjects.Add(player, playerObject);
         }
     }
-
-    void INetworkRunnerCallbacks.OnPlayerLeft(NetworkRunner runner, PlayerRef player)
-    {
-        if (!runner.IsServer)
-            return;
-
-
-        if (playerObjects.TryGetValue(player, out NetworkObject playerObject))
-        {
-            if (playerObject != null)
-                runner.Despawn(playerObject);
-        }
-
-    }
-
-    void INetworkRunnerCallbacks.OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnSceneLoadDone(NetworkRunner runner)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnSceneLoadStart(NetworkRunner runner)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
-    {
-    }
-
-    void INetworkRunnerCallbacks.OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
-    {
-    }
-
-
-
 }

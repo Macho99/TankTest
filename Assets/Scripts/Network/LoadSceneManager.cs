@@ -11,6 +11,10 @@ using UnityEngine.SceneManagement;
 public class LoadSceneManager : NetworkSceneManagerDefault
 {
     private NetworkManager networkManager;
+
+    private Dictionary<PlayerRef, int[]> decoDic = new Dictionary<PlayerRef, int[]>();
+    [SerializeField] private Vector3 spawnPoint;
+    [SerializeField] private Quaternion spawnRotation;
     private void Awake()
     {
 
@@ -36,13 +40,9 @@ public class LoadSceneManager : NetworkSceneManagerDefault
         if (!Runner.IsServer)
             return;
         Runner.SessionInfo.IsOpen = false;
+        Runner.SessionInfo.IsVisible = false;
         await Runner.LoadScene(sceneRef, LoadSceneMode.Single);
-    
-
-        List<(PlayerRef, NetworkObject)> players = new List<(PlayerRef, NetworkObject)>();
-        PlayerPreviewController preview = FindObjectOfType<PlayerPreviewController>();
-
-
+        print("Load");
 
     }
     protected override void OnLoadSceneProgress(SceneRef sceneRef, float progress)
@@ -68,7 +68,7 @@ public class LoadSceneManager : NetworkSceneManagerDefault
 
         yield return null;
 
-        if (sceneRef.AsIndex == SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/GameScene.unity"))
+        if (sceneRef.AsIndex == SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/Test/TestScene.unity"))
         {
             if (scene == SceneManager.GetActiveScene())
             {
@@ -77,14 +77,39 @@ public class LoadSceneManager : NetworkSceneManagerDefault
                 {
                     if (Runner.TryGetPlayerObject(player, out NetworkObject playerObj))
                     {
-                       
-                        NetworkObject newPlayer = Runner.Spawn(playerPrefab, inputAuthority: player);
+                        RoomPlayer roomPlayer = playerObj.GetComponent<RoomPlayer>();
+
+                        int[] DecoArray = new int[(int)AppearanceType.Size];
+                        DecoArray[(int)AppearanceType.Hair] = roomPlayer.HairIndex;
+                        DecoArray[(int)AppearanceType.Breard] = roomPlayer.BreardIndex;
+                        DecoArray[(int)AppearanceType.Color] = roomPlayer.ColorIndex;
+                        DecoArray[(int)AppearanceType.Preset] = roomPlayer.presetIndex;
+                        decoDic.Add(player, DecoArray);
+
+                        NetworkObject newPlayer = Runner.Spawn(playerPrefab, spawnPoint, spawnRotation, inputAuthority: player, onBeforeSpawned: BeforePlayerSpawned);
+
+                        print(newPlayer.name);
                         Runner.SetPlayerObject(player, newPlayer);
                         Runner.Despawn(playerObj);
                     }
 
                 }
                 Debug.Log(Runner.ActivePlayers.ToArray().Length);
+            }
+        }
+        Runner.SessionInfo.IsOpen = true;
+        Runner.SessionInfo.IsVisible = true;
+    }
+
+    private void BeforePlayerSpawned(NetworkRunner runner, NetworkObject obj)
+    {
+        PlayerController player = obj.GetComponent<PlayerController>();
+        PlayerRef playerRef = obj.InputAuthority;
+        if (player != null)
+        {
+            for (int i = 0; i < (int)AppearanceType.Size; i++)
+            {
+                player.SetupDecoration((AppearanceType)i, decoDic[playerRef][i]);
             }
         }
     }

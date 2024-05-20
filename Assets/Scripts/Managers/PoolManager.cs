@@ -16,9 +16,13 @@ public class PoolManager : MonoBehaviour
         poolContainer = new Dictionary<string, Transform>();
         StartSceneInit();
 
-        SceneManager.sceneLoaded += (_, _) => { StartSceneInit(); };
+        SceneManager.sceneLoaded += StartSceneInit;
     }
-    private void StartSceneInit()
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= StartSceneInit;
+    }
+    private void StartSceneInit(Scene scene = default, LoadSceneMode loadSceneMode = default)
     {
         if (poolRoot == null)
             poolRoot = new GameObject("PoolRoot").transform;

@@ -1,9 +1,11 @@
 using Fusion;
+using Fusion.Addons.SimpleKCC;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class PlayerInputListner : NetworkBehaviour,IBeforeTick
+public class PlayerInputListner : NetworkBehaviour, IBeforeTick, IBeforeUpdate
 {
     public enum PressType { Progress, Press, Release }
     [Networked] public NetworkButtons prevButton { get; private set; }
@@ -14,19 +16,72 @@ public class PlayerInputListner : NetworkBehaviour,IBeforeTick
 
     [Networked, Capacity((int)ButtonType.Size)]
     private NetworkDictionary<ButtonType, NetworkBool> limitButton => default;
+
+    NetworkInputData playerInput = new NetworkInputData();
+    Vector2Accumulator lookAccum = new Vector2Accumulator(0.02f, true);
+    private PlayerControls playerControls;
     public override void Spawned()
     {
         for (int i = 0; i < (int)ButtonType.Size; i++)
         {
             limitButton.Add((ButtonType)i, true);
         }
+        if (HasInputAuthority)
+        {
+            NetworkEvents networkEvents = Runner.GetComponent<NetworkEvents>();
+            networkEvents.OnInput.AddListener(OnInput);
+        }
+
+    }
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        if (HasInputAuthority)
+        {
+            NetworkEvents networkEvents = Runner.GetComponent<NetworkEvents>();
+            networkEvents.OnInput.RemoveListener(OnInput);
+        }
+    }
+    private void OnEnable()
+    {
+        if (playerControls == null)
+        {
+            playerControls = new PlayerControls();
+        }
+        playerControls.Enable();
+    }
+    private void OnDisable()
+    {
+        playerControls.Disable();
+    }
+    public void OnInput(NetworkRunner runner, NetworkInput input)
+    {
+        playerInput.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
+        playerInput.buttons.Set(ButtonType.Run, playerControls.Player.Run.IsPressed());
+        playerInput.buttons.Set(ButtonType.Jump, playerControls.Player.Jump.IsPressed());
+        playerInput.buttons.Set(ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
+        playerInput.buttons.Set(ButtonType.Interact, playerControls.Player.Interact.IsPressed());
+        playerInput.buttons.Set(ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
+        playerInput.buttons.Set(ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
+        playerInput.buttons.Set(ButtonType.ActiveItemContainer, playerControls.Player.ActiveItemContainer.IsPressed());
+        playerInput.buttons.Set(ButtonType.PutWeapon, playerControls.Player.PutWeapon.IsPressed());
+        playerInput.buttons.Set(ButtonType.FirstWeapon, playerControls.Player.FirstWeapon.IsPressed());
+        playerInput.buttons.Set(ButtonType.SecondWeapon, playerControls.Player.SecondWeapon.IsPressed());
+        playerInput.buttons.Set(ButtonType.SubWeapon, playerControls.Player.SubWeapon.IsPressed());
+        playerInput.buttons.Set(ButtonType.MilyWeapon, playerControls.Player.MilyWeapon.IsPressed());
+        playerInput.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
+        playerInput.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
+        playerInput.buttons.Set(ButtonType.Reload, playerControls.Player.Reload.IsPressed());
+        playerInput.mouseDelta = lookAccum.ConsumeTickAligned(runner);
+
+        input.Set(playerInput);
+        playerInput = default;
     }
     public override void FixedUpdateNetwork()
     {
         //if (IsInputListner == false)
         //    return;
 
-      
+
     }
 
     private NetworkInputData LimitButton(NetworkInputData input)
@@ -81,5 +136,10 @@ public class PlayerInputListner : NetworkBehaviour,IBeforeTick
             currentInput = input;
 
         }
+    }
+
+    public void BeforeUpdate()
+    {
+        lookAccum.Accumulate(Mouse.current.delta.ReadValue());
     }
 }

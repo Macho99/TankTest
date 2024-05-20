@@ -5,10 +5,14 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class PlayerController : NetworkBehaviour,IAfterSpawned
-{
-    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass, Interact ,Hit,Dead}
 
+public class PlayerController : NetworkBehaviour, IAfterSpawned
+{
+    public enum PlayerState { StandLocomotion, CrouchLocomotion, Jump, Land, Falling, ClimbPass, Interact, Hit, Dead }
+    [SerializeField] private Transform presetRoot;
+    [SerializeField] private Transform hairRoot;
+    [SerializeField] private Transform breardRoot;
+    [Networked, Capacity((int)AppearanceType.Size)] public NetworkArray<int> decorations { get; }
     public NetworkStateMachine stateMachine { get; private set; }
     public Animator animator { get; private set; }
     public PlayerLocomotion movement { get; private set; }
@@ -42,6 +46,10 @@ public class PlayerController : NetworkBehaviour,IAfterSpawned
         stateMachine.InitState(PlayerState.StandLocomotion);
 
     }
+    public void SetupDecoration(AppearanceType type, int index)
+    {
+        decorations.Set((int)type, index);
+    }
     public override void Spawned()
     {
         VelocityY = 0f;
@@ -51,7 +59,11 @@ public class PlayerController : NetworkBehaviour,IAfterSpawned
             mainUI = GameManager.UI.ShowSceneUI<PlayerMainUI>("UI/PlayerUI/PlayerMainUI");
         }
 
+        hairRoot.GetChild(decorations[(int)AppearanceType.Hair]).gameObject.SetActive(true);
+        breardRoot.GetChild(decorations[(int)AppearanceType.Breard]).gameObject.SetActive(true);
+        presetRoot.GetChild(decorations[(int)AppearanceType.Preset]).gameObject.SetActive(true);
 
+        print(decorations[(int)AppearanceType.Hair]);
 
     }
 
@@ -113,6 +125,6 @@ public class PlayerController : NetworkBehaviour,IAfterSpawned
 
     public void AfterSpawned()
     {
-     
+
     }
 }

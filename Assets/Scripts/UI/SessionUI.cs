@@ -111,10 +111,10 @@ public class SessionUI : MonoBehaviour
             {
                 PlayerPreviewController playerPreview = FindObjectOfType<PlayerPreviewController>();
                 sessionUserDic[playerRef].RPC_Ready();
-                sessionUserDic[playerRef].RPC_AddClientPreset(PlayerPreviewController.AppearanceType.Preset,playerPreview.GetCurrenIndex(PlayerPreviewController.AppearanceType.Preset));
-                sessionUserDic[playerRef].RPC_AddClientPreset(PlayerPreviewController.AppearanceType.Color,playerPreview.GetCurrenIndex(PlayerPreviewController.AppearanceType.Color));
-                sessionUserDic[playerRef].RPC_AddClientPreset(PlayerPreviewController.AppearanceType.Hair,playerPreview.GetCurrenIndex(PlayerPreviewController.AppearanceType.Hair));
-                sessionUserDic[playerRef].RPC_AddClientPreset(PlayerPreviewController.AppearanceType.Breard,playerPreview.GetCurrenIndex(PlayerPreviewController.AppearanceType.Breard));
+                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Preset,playerPreview.GetCurrenIndex(AppearanceType.Preset));
+                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Color,playerPreview.GetCurrenIndex(AppearanceType.Color));
+                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Hair,playerPreview.GetCurrenIndex(AppearanceType.Hair));
+                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Breard,playerPreview.GetCurrenIndex(AppearanceType.Breard));
             }
             else
             {

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using static PlayerPreviewController;
 
+public enum AppearanceType { Hair, Breard, Preset, Color, Size }
 public class PlayerPreviewController : MonoBehaviour
 {
-    public enum AppearanceType { Hair, Breard, Preset, Color, Size }
+    
     public enum ModelTransition { Left = -1, Right = 1 }
     [SerializeField] private Transform presetRoot;
     [SerializeField] private Transform hairRoot;
