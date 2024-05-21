@@ -130,9 +130,9 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
             for (int i = 0; i < statData.Length; i++)
             {
                 if (i != (int)PlayerStatType.PoisoningGauge)
-                    statData.Set(i, new PlayerStatData(100, 100));
+                    statData.Set(i, new PlayerStatData(50000, 50000));
                 else
-                    statData.Set(i, new PlayerStatData(0, 100));
+                    statData.Set(i, new PlayerStatData(0, 50000));
             }
         }
 

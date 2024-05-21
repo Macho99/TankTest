@@ -119,4 +119,9 @@ public class WeatherManager : NetworkBehaviour
 			WeatherCnt++;
 		}
 	}
+
+	public int GetTime()
+	{
+		return (int)(Runner.RemoteRenderTime * timeSpeed) + initHour * 60 + initMinute;
+	}
 }

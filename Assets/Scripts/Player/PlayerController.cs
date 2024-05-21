@@ -69,6 +69,7 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
         if (HasInputAuthority)
         {
             mainUI = GameManager.UI.ShowSceneUI<PlayerMainUI>("UI/PlayerUI/PlayerMainUI");
+            mainUI.SetInitTime(GameManager.Weather.GetTime());
         }
 
         hairRoot.GetChild(decorations[(int)AppearanceType.Hair]).gameObject.SetActive(true);

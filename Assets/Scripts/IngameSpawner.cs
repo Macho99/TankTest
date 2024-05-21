@@ -4,18 +4,22 @@ using Fusion.Sockets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
-public class IngameSpawner : SimulationBehaviour
+public class IngameSpawner : NetworkBehaviour
 {
 	NetworkRunner runner;
+	[SerializeField] TextMeshProUGUI infoText;
 	[SerializeField] NetworkPrefabRef zombiePrefab;
 	[SerializeField] Transform spawnPoint;
 
+	bool spawned = false;
 	private PlayerControls playerControls;
 	NetworkInputData playerInput = new NetworkInputData();
 	Vector2Accumulator lookAccum = new Vector2Accumulator(0.02f, true);
@@ -26,11 +30,26 @@ public class IngameSpawner : SimulationBehaviour
 		if (runner != null)
 		{
 			this.runner = runner;
+			runner.AddBehaviour<SimulationBehaviour>();
 			SetupEvent(runner);
 		}
 		else
 		{
 
+		}
+	}
+
+	public override void Spawned()
+	{
+		base.Spawned();
+		if (HasStateAuthority)
+		{
+			infoText.text = "호스트로 연결됨";
+			SpawnInitZombie();
+		}
+		else
+		{
+			infoText.text = "클라이언트로 연결됨";
 		}
 	}
 
@@ -67,7 +86,7 @@ public class IngameSpawner : SimulationBehaviour
 	{
 		Random.InitState(runner.SessionInfo.Name.GetHashCode() * netObj.Id.Raw.GetHashCode());
 
-		Vector3 pos = Random.insideUnitSphere * 10f;
+		Vector3 pos = Random.insideUnitSphere * 100f;
 		pos.y = 0f;
 		Zombie zombie = netObj.GetComponent<Zombie>();
 		zombie.transform.rotation = Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value));
@@ -92,6 +111,14 @@ public class IngameSpawner : SimulationBehaviour
 
 
 
+	}
+
+	private void SpawnInitZombie()
+	{
+		for(int i = 0; i < 100; i++)
+		{
+			SpawnZombie(BeforeSpawned);
+		}
 	}
 
 	private void OnPlayerLeft(NetworkRunner runner, PlayerRef player)

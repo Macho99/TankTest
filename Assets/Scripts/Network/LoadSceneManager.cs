@@ -49,9 +49,9 @@ public class LoadSceneManager : NetworkSceneManagerDefault
         SceneRef gameSceneRef = SceneRef.FromIndex(gameSceneIndex);
 
         await Runner.LoadScene(sceneRef, LoadSceneMode.Additive);
-        await Runner.LoadScene(gameSceneRef, LoadSceneMode.Additive);
-        await Runner.UnloadScene(sceneRef);
+        await Runner.LoadScene(gameSceneRef, LoadSceneMode.Additive,setActiveOnLoad:true);
         await Runner.UnloadScene(startSceneRef);
+        await Runner.UnloadScene(sceneRef);
 
 
 

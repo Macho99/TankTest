@@ -94,7 +94,7 @@ public class WretchZombie : ZombieBase
 				IHittable hittable = obj.GetComponent<IHittable>();
 				if(hittable == null)
 					continue;
-				hittable.ApplyDamage(transform, obj.transform.position, Vector3.zero, 10);
+				hittable.ApplyDamage(transform, obj.transform.position, Vector3.zero, 5);
 			}
 
 			poisonHitList.Clear();
