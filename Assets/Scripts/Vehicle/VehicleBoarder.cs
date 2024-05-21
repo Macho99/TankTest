@@ -153,7 +153,13 @@ public class VehicleBoarder : InteractObject, IAfterSpawned
 
 	public void GetOff(PlayerInteract player)
 	{
-		int idx = FindIdx(player.Object.Id);
+        if (player == null)
+        {
+			Debug.LogError($"player가 null 입니다");
+			return;
+        }
+
+        int idx = FindIdx(player.Object.Id);
 		if (HasStateAuthority)
 		{
 			Vector3 pos = transform.TransformPoint(lastLocalPositions[idx]);
