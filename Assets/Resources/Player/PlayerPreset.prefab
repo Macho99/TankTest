@@ -2876,8 +2876,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7913147254082461557}
   - component: {fileID: 2116749533170883643}
-  - component: {fileID: 2847978098672596367}
-  - component: {fileID: 5703800445275999123}
   - component: {fileID: 7318930791068751222}
   m_Layer: 0
   m_Name: PlayerPreset
@@ -2925,42 +2923,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &2847978098672596367
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4865047313761227441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SortKey: 2214430056
-  ObjectInterest: 1
-  Flags: 262145
-  NestedObjects: []
-  NetworkedBehaviours:
-  - {fileID: 5703800445275999123}
---- !u!114 &5703800445275999123
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4865047313761227441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 506319458, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Animator: {fileID: 2116749533170883643}
-  TotalWords: 0
-  ApplyTiming: 2
-  SyncSettings: 79
-  StateHashes: 00000000889cfdc3271cda50
-  TriggerHashes: 00000000
 --- !u!114 &7318930791068751222
 MonoBehaviour:
   m_ObjectHideFlags: 0

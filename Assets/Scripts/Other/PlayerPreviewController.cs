@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static PlayerPreviewController;
 
 public enum AppearanceType { Hair, Breard, Preset, Color, Size }
 public class PlayerPreviewController : MonoBehaviour
@@ -32,6 +31,7 @@ public class PlayerPreviewController : MonoBehaviour
         originRotate = transform.rotation;
         appearModels = new Dictionary<AppearanceType, Transform[]>();
         selectIndexDic = new Dictionary<AppearanceType, int>();
+        Debug.LogWarning("START");
         AppearanceInit(AppearanceType.Hair, hairRoot);
         AppearanceInit(AppearanceType.Breard, breardRoot);
         AppearanceInit(AppearanceType.Preset, presetRoot);

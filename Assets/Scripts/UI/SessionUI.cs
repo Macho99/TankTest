@@ -13,8 +13,6 @@ public class SessionUI : MonoBehaviour
     [SerializeField] private RectTransform sessionUserList;
     [SerializeField] private SessionUserUI sessionUserItemPrefab;
     [SerializeField] private TextMeshProUGUI readyOrStartText;
-    public UnityEvent onSessionIn;
-    public UnityEvent onSessionOut;
     private NetworkManager networkManager;
 
     private Dictionary<PlayerRef, RoomPlayer> sessionUserDic;
@@ -71,16 +69,15 @@ public class SessionUI : MonoBehaviour
     }
     public void CreateSession(string sessionName, int maxCount)
     {
-        Debug.Log(sessionName);
+        Debug.LogWarning(gameObject);
         gameObject.SetActive(true);
-        onSessionIn?.Invoke();
+       
         sessionNameTMP.text = sessionName;
         sessionCountTMP.text = $"1/{maxCount}";
     }
     public void JoinSession(SessionInfo sessionInfo)
     {
         gameObject.SetActive(true);
-        onSessionIn?.Invoke();
         sessionNameTMP.text = sessionInfo.Name;
         sessionCountTMP.text = $"({sessionInfo.PlayerCount}/{sessionInfo.MaxPlayers})";
     }
@@ -93,7 +90,6 @@ public class SessionUI : MonoBehaviour
         if (result.Ok)
         {
             gameObject.SetActive(false);
-            onSessionOut?.Invoke();
             foreach (Transform player in sessionUserList.transform)
             {
                 Destroy(player.gameObject);

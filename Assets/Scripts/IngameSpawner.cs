@@ -70,7 +70,7 @@ public class IngameSpawner : NetworkBehaviour
 	//private async void Start()
 	//{
 	//	await GameManager.network.JoinLobby();
-	//	await GameManager.network.CreateSession("asd", 3);
+	//	await GameManager.network.CreateRoom("asd", 3);
 	//}
 
 	public void SpawnZombie(NetworkRunner.OnBeforeSpawned beforeSpawned = null)

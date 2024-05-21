@@ -13,9 +13,23 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using WebSocketSharp;
 
+
+public enum SceneType { StartScene, RoomScene, LoadingScene, GameScene }
+[Serializable]
+public class SceneData
+{
+    public SceneType SceneType;
+    public string scenePath;
+    public SceneRef GetScenRef()
+    {
+        int sceneIndex = SceneUtility.GetBuildIndexByScenePath(scenePath);
+        return SceneRef.FromIndex(sceneIndex);
+    }
+}
 public class NetworkManager : MonoBehaviour
 {
 
+    [SerializeField] public SceneData[] sceneData;
     public enum PlaceType { None, Lobby, Session, Loading, Ingame }
     NetworkRunner runner;
     NetworkRunner lobbyRunner;
@@ -52,7 +66,8 @@ public class NetworkManager : MonoBehaviour
     {
         if (runner != null)
         {
-            onRunnerAction?.Invoke(null);
+            await runner.LoadScene(sceneData[(int)SceneType.StartScene].GetScenRef());
+            print(runner.gameObject.name);
             await runner.Shutdown(true);
             runner = null;
         }
@@ -79,7 +94,7 @@ public class NetworkManager : MonoBehaviour
         }
         return result;
     }
-    public async Task<StartGameResult> CreateSession(string sessionName, int maxCount, string password = null)
+    public async Task<StartGameResult> CreateRoom(string sessionName, int maxCount, string password = null)
     {
         Dictionary<string, SessionProperty> sessionProperty = null;
 
@@ -89,7 +104,13 @@ public class NetworkManager : MonoBehaviour
             sessionProperty["Password"] = password;
             Debug.Log("»ý¼º");
         }
-        
+
+        SceneRef scene = sceneData[(int)SceneType.RoomScene].GetScenRef();
+        var sceneInfo = new NetworkSceneInfo();
+        if (scene.IsValid)
+        {
+            sceneInfo.AddSceneRef(scene);
+        }
         INetworkSceneManager networkSceneManager = runner.GetComponent<LoadSceneManager>();
 
         StartGameArgs startGame = new StartGameArgs();
@@ -100,13 +121,17 @@ public class NetworkManager : MonoBehaviour
         startGame.SessionProperties = sessionProperty;
         startGame.PlayerCount = maxCount;
         startGame.SceneManager = networkSceneManager;
-        startGame.Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
+        startGame.Scene = scene;
+
+
+
+        //startGame.Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
 
 
         StartGameResult result = await runner.StartGame(startGame);
         if (!result.Ok)
         {
-            Debug.Log(result.ErrorMessage);
+            Debug.LogWarning(result.ErrorMessage);
 
         }
         else
@@ -123,10 +148,9 @@ public class NetworkManager : MonoBehaviour
         try
         {
 
-
             StartGameResult result = await runner.StartGame(new StartGameArgs()
             {
-                GameMode = GameMode.Client,
+                GameMode = GameMode.AutoHostOrClient,
 
             });
             if (result.Ok)

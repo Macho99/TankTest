@@ -14,9 +14,13 @@ public class PlayerSelectUI : MonoBehaviour
     }
     private void OnEnable()
     {
-        previewController.ResetModel();
+       
+           
     }
-
+    private void OnDisable()
+    {
+       // previewController.ResetModel();
+    }
     public void PressRightButton(int index)
     {
         previewController.ChangePreset((AppearanceType)index, PlayerPreviewController.ModelTransition.Right);
