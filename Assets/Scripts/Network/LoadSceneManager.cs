@@ -45,7 +45,7 @@ public class LoadSceneManager : NetworkSceneManagerDefault
         SceneRef startSceneRef = SceneRef.FromIndex(starSceneIndex);
         Runner.SessionInfo.IsOpen = false;
         Runner.SessionInfo.IsVisible = false;
-        int gameSceneIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/Test/TestScene.unity");
+        int gameSceneIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/GameScene.unity");
         SceneRef gameSceneRef = SceneRef.FromIndex(gameSceneIndex);
 
         await Runner.LoadScene(sceneRef, LoadSceneMode.Additive);

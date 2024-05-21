@@ -167,9 +167,9 @@ public class VehicleMove : VehicleBehaviour
 	public override void FixedUpdateNetwork()
 	{
 		base.FixedUpdateNetwork();
-		if (GetInput(out TestInputData input) == true)
+		if (GetInput(out NetworkInputData input) == true)
 		{
-			moveInput = input.moveVec;
+			moveInput = input.inputDirection;
 		}
 		else
 		{
@@ -377,7 +377,7 @@ public class VehicleMove : VehicleBehaviour
 		}
 	}
 
-	protected override void OnAssign(TestPlayer player)
+	protected override void OnAssign(PlayerInteract player)
 	{
 		if (player.HasInputAuthority && dashBoard == null)
 		{

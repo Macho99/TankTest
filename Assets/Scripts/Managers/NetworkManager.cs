@@ -6,10 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using WebSocketSharp;
 
 public class NetworkManager : MonoBehaviour
 {
@@ -81,13 +83,13 @@ public class NetworkManager : MonoBehaviour
     {
         Dictionary<string, SessionProperty> sessionProperty = null;
 
-        if (password != string.Empty)
+        if (!password.IsNullOrEmpty())
         {
             sessionProperty = new Dictionary<string, SessionProperty>();
             sessionProperty["Password"] = password;
             Debug.Log("»ý¼º");
         }
-        runner.ProvideInput = true;
+        
         INetworkSceneManager networkSceneManager = runner.GetComponent<LoadSceneManager>();
 
         StartGameArgs startGame = new StartGameArgs();
@@ -113,6 +115,7 @@ public class NetworkManager : MonoBehaviour
 
         }
 
+        runner.ProvideInput = true;
         return result;
     }
     public async Task<StartGameResult> JoinRandomSession()

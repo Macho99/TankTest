@@ -11,14 +11,14 @@ public class BruteRoar : BruteZombieState
 {
 	bool animEntered;
 	TickTimer spawnTimer;
-	ZombieSpawner spawner;
+	IngameSpawner spawner;
 	Transform target;
 
-	public ZombieSpawner Spawner { get 
+	public IngameSpawner Spawner { get 
 		{ 
 			if (spawner == null)
 			{
-				spawner = owner.Runner.GetComponent<ZombieSpawner>();
+				spawner = GameObject.FindObjectOfType<IngameSpawner>();
 			}
 			return spawner;
 		}

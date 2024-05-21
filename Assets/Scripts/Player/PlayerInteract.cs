@@ -11,6 +11,7 @@ public class PlayerInteract : NetworkBehaviour,IAfterSpawned
     private float rayDistance;
     [SerializeField] private Transform raycastTr;
     [SerializeField] private ItemContainer itemContainer;
+    [SerializeField] LayerMask interactMask;
     private PlayerInputListner inputListner;
     public Action<bool, DetectData> onDetect;
     private DetectData interactData;
@@ -19,12 +20,17 @@ public class PlayerInteract : NetworkBehaviour,IAfterSpawned
     private InteractBehavior[] interactBehaviors;
     private InteractObject interactObject;
 
+    Collider col;
+    SimpleKCC kcc;
+
     public InteractObject InteractObject { get { return interactObject; } set { interactObject = value; } }
 
     public DetectData InteractData { get { return interactData; } set => interactData = value; }
 
     private void Awake()
     {
+        kcc = GetComponent<SimpleKCC>();
+
         rayDistance = 5f;
         interactBehaviors = new InteractBehavior[(int)InteractType.Size];
         PlayerController controller = GetComponent<PlayerController>();
@@ -32,22 +38,22 @@ public class PlayerInteract : NetworkBehaviour,IAfterSpawned
     }
     public override void Spawned()
     {
-     
-
-
+        col = GetComponentInChildren<Collider>();
     }
 
     public override void FixedUpdateNetwork()
     {
+		if (GetInput(out NetworkInputData input) == false) return;
 
-        RaycastDetect();
+		RaycastDetect();
 
 
         if (Runner.IsForward)
         {
             if (inputListner.pressButton.IsSet(ButtonType.Interact))
-            {
-                if (TryInteract())
+			{
+				print("Interact");
+				if (TryInteract())
                 {
                     interactObject.StartInteraction();
                 }
@@ -67,7 +73,7 @@ public class PlayerInteract : NetworkBehaviour,IAfterSpawned
         ray.direction = raycastTr.transform.forward;
 
         //Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.red);
-        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
+        if (Physics.Raycast(ray, out RaycastHit hit, rayDistance, interactMask, QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.TryGetComponent(out IDetectable detectObject))
             {
@@ -105,7 +111,8 @@ public class PlayerInteract : NetworkBehaviour,IAfterSpawned
 
         if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
         {
-            if (hit.collider.TryGetComponent(out InteractObject detectObject))
+            InteractObject detectObject = hit.collider.GetComponentInParent<InteractObject>();
+            if (detectObject != null)
             {
                 if (detectObject.Interact(this, out InteractObject interactObject))
                 {
@@ -160,4 +167,18 @@ public class PlayerInteract : NetworkBehaviour,IAfterSpawned
             SetupLocalPlayerUI();
         }
     }
+
+	public void KCCActive(bool value)
+	{
+		kcc.SetActive(value);
+	}
+
+	public void Teleport(Vector3 position)
+	{
+		kcc.SetPosition(position);
+	}
+	public void CollisionEnable(bool value)
+	{
+		col.enabled = value;
+	}
 }

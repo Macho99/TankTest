@@ -14,11 +14,11 @@ public class CamMover : NetworkBehaviour
 	
 	public override void FixedUpdateNetwork()
 	{
-		if(GetInput(out TestInputData input))
+		if(GetInput(out NetworkInputData input))
 		{
-			transform.Translate(new Vector3(input.moveVec.x, 0f, input.moveVec.y) * moveSpeed * Runner.DeltaTime, Space.Self);
-			yAngle -= input.lookVec.y * Runner.DeltaTime * lookSpeed;
-			xAngle += input.lookVec.x * Runner.DeltaTime * lookSpeed;
+			transform.Translate(new Vector3(input.mouseDelta.x, 0f, input.mouseDelta.y) * moveSpeed * Runner.DeltaTime, Space.Self);
+			yAngle -= input.mouseDelta.y * Runner.DeltaTime * lookSpeed;
+			xAngle += input.mouseDelta.x * Runner.DeltaTime * lookSpeed;
 			yAngle = Mathf.Clamp(yAngle, -80f, 80f);
 			transform.rotation = Quaternion.Euler(yAngle, xAngle, 0f);
 		}

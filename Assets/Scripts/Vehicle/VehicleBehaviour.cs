@@ -10,7 +10,7 @@ public class VehicleBehaviour : NetworkBehaviour
 	const string statUIPrefabPath = "UI/Vehicle/VehicleStatUI";
 
 	[SerializeField] float lookSpeed = 20f;
-	TestPlayer player;
+	PlayerInteract player;
 	protected VehicleBoarder boarder;
 	bool isFirst = true;
 
@@ -29,7 +29,7 @@ public class VehicleBehaviour : NetworkBehaviour
 		vehicleBody = boarder.VehicleBody;
 	}
 
-	public void Assign(TestPlayer player)
+	public void Assign(PlayerInteract player)
 	{
 		PlayerGetOn = true;
 		OnAssign(player);
@@ -62,12 +62,12 @@ public class VehicleBehaviour : NetworkBehaviour
 		statUI = GameManager.UI.ShowSceneUI<VehicleStatUI>(statUIPrefabPath);
 	}
 
-	protected virtual void OnAssign(TestPlayer player) { }
+	protected virtual void OnAssign(PlayerInteract player) { }
 
 	public override void FixedUpdateNetwork()
 	{
 		base.FixedUpdateNetwork();
-		if(GetInput(out TestInputData input) == false) { return; }
+		if(GetInput(out NetworkInputData input) == false) { return; }
 		NetworkButtons pressed = input.buttons.GetPressed(PrevButton);
 		NetworkButtons released = input.buttons.GetReleased(PrevButton);
 
@@ -80,7 +80,7 @@ public class VehicleBehaviour : NetworkBehaviour
 
 		RotateCam(input);
 
-		if (pressed.IsSet(Buttons.Interact))
+		if (pressed.IsSet(ButtonType.Interact))
 		{
 			GetOff();
 		}
@@ -104,7 +104,7 @@ public class VehicleBehaviour : NetworkBehaviour
 
 		if (HasStateAuthority)
 		{
-			player.Object.AssignInputAuthority(Object.InputAuthority);
+			player.Object?.AssignInputAuthority(Object.InputAuthority);
 			Object.RemoveInputAuthority();
 		}
 
@@ -113,10 +113,10 @@ public class VehicleBehaviour : NetworkBehaviour
 
 	protected virtual void OnGetOff() { }
 
-	private void RotateCam(TestInputData input)
+	private void RotateCam(NetworkInputData input)
 	{
-		CamYAngle -= input.lookVec.y * Runner.DeltaTime * lookSpeed;
-		CamXAngle += input.lookVec.x * Runner.DeltaTime * lookSpeed;
+		CamYAngle -= input.mouseDelta.y * Runner.DeltaTime * lookSpeed;
+		CamXAngle += input.mouseDelta.x * Runner.DeltaTime * lookSpeed;
 		CamXAngle = Mathf.Repeat(CamXAngle, 360f);
 		CamYAngle = Mathf.Clamp(CamYAngle, -40f, 40f);
 		

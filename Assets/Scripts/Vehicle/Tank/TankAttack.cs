@@ -103,7 +103,7 @@ public class TankAttack : TankBehaviour
 	public override void FixedUpdateNetwork()
 	{
 		base.FixedUpdateNetwork();
-		if (GetInput(out TestInputData input) == false) return;
+		if (GetInput(out NetworkInputData input) == false) return;
 
 		Vector3 camForward = Quaternion.Euler(CamYAngle, CamXAngle, 0f) * Vector3.forward;
 
@@ -115,7 +115,7 @@ public class TankAttack : TankBehaviour
 		RotateBarrel(fireForward);
 		ReloadShell();
 
-		if (input.buttons.IsSet(Buttons.Fire) == true)
+		if (input.buttons.IsSet(ButtonType.Attack) == true)
 		{
 			if(LoadedShell > 0 && intervalFireTimer.ExpiredOrNotRunning(Runner))
 			{
@@ -355,7 +355,7 @@ public class TankAttack : TankBehaviour
 		}
 	}
 
-	protected override void OnAssign(TestPlayer player)
+	protected override void OnAssign(PlayerInteract player)
 	{
 		if (player.HasInputAuthority)
 		{

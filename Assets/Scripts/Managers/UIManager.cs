@@ -18,8 +18,8 @@ public class UIManager : MonoBehaviour
     public Canvas SceneCanvas => sceneCanvas;
 
     private Canvas bossCanvas;
-
-    private bool menuOpened;
+    
+    public bool MenuOpened { get; set; }
     [HideInInspector] public UnityEvent<bool> OnHideSceneUI = new();
 
     private void Awake()
@@ -82,29 +82,30 @@ public class UIManager : MonoBehaviour
     public T ShowPopUpUI<T>(T popUpUI, bool setInactivePrev = true) where T : PopUpUI
     {
         if (popUpStack.Count > 0)
-        {
-            if (setInactivePrev == true)
+		{
+			if (setInactivePrev == true)
             {
                 PopUpUI prevUI = popUpStack.Peek();
                 prevUI.gameObject.SetActive(false);
             }
         }
         else
-        {
-            NetworkRunner runner = FindObjectOfType<NetworkRunner>();
-            if (runner != null)
-            {
-                NetworkObject player = runner.GetPlayerObject(runner.LocalPlayer);
-                if (player != null)
-                {
-                    PlayerInputListner inputListner = player.GetComponent<PlayerInputListner>();
-                    if (inputListner != null)
-                    {
-                        inputListner.RPC_ActiveButton(ButtonType.MouseDelta, false);
-                    }
-                }
-            }
-        }
+		{
+			MenuOpened = true;
+			//NetworkRunner runner = FindObjectOfType<NetworkRunner>();
+			//if (runner != null)
+			//{
+			//    NetworkObject player = runner.GetPlayerObject(runner.LocalPlayer);
+			//    if (player != null)
+			//    {
+			//        PlayerInputListner inputListner = player.GetComponent<PlayerInputListner>();
+			//        if (inputListner != null)
+			//        {
+			//            inputListner.RPC_ActiveButton(ButtonType.MouseDelta, false);
+			//        }
+			//    }
+			//}
+		}
 
         T ui = GameManager.Pool.GetUI<T>(popUpUI);
         ui.transform.SetParent(popUpCanvas.transform, false);
@@ -158,21 +159,21 @@ public class UIManager : MonoBehaviour
         }
         else
         {
+            MenuOpened = false;
+            //NetworkRunner runner = FindObjectOfType<NetworkRunner>();
+            //if (runner != null)
+            //{
 
-            NetworkRunner runner = FindObjectOfType<NetworkRunner>();
-            if (runner != null)
-            {
-
-                NetworkObject player = runner.GetPlayerObject(runner.LocalPlayer);
-                if (player != null)
-                {
-                    PlayerInputListner inputListner = player.GetComponent<PlayerInputListner>();
-                    if (inputListner != null)
-                    {
-                        inputListner.RPC_ActiveButton(ButtonType.MouseDelta, true);
-                    }
-                }
-            }
+            //    NetworkObject player = runner.GetPlayerObject(runner.LocalPlayer);
+            //    if (player != null)
+            //    {
+            //        PlayerInputListner inputListner = player.GetComponent<PlayerInputListner>();
+            //        if (inputListner != null)
+            //        {
+            //            inputListner.RPC_ActiveButton(ButtonType.MouseDelta, true);
+            //        }
+            //    }
+            //}
         }
     }
 

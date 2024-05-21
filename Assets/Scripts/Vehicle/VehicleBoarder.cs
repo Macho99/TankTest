@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
-public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
+public class VehicleBoarder : InteractObject, IAfterSpawned
 {
 	[SerializeField] Transform seatTrans;
 	[SerializeField] TextMeshProUGUI debugText;
@@ -16,7 +16,7 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 	[SerializeField] VehicleBody vehicleBody;
 
 	VehicleBehaviour[] vehicleBehaviours;
-	TestPlayer localPlayer;
+	PlayerInteract localPlayer;
 	const int MAX_PLAYER = 4;
 	Rigidbody rb;
 
@@ -28,8 +28,9 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 	[Networked, Capacity(MAX_PLAYER), OnChangedRender(nameof(GetOnRender))]
 	public NetworkArray<NetworkId> GetOnPlayers => default;
 
-	private void Awake()
+	protected override void Awake()
 	{
+		base.Awake();
 		rb = GetComponent<Rigidbody>();
 
 		if(getOnObjectTrans.Length != MAX_PLAYER)
@@ -112,7 +113,8 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 
 	private void LocalGetOn(NetworkId id)
 	{
-		TestPlayer player = Runner.FindObject(id).GetComponent<TestPlayer>();
+		PlayerInteract player = Runner.FindObject(id).GetComponent<PlayerInteract>();
+		player.transform.localScale = Vector3.one * 0.1f;
 		player.Teleport(seatTrans.position);
 		player.CollisionEnable(false);
 		player.transform.parent = seatTrans;
@@ -120,12 +122,13 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 
 	private void LocalGetOff(NetworkId id)
 	{
-		TestPlayer player = Runner.FindObject(id).GetComponent<TestPlayer>();
+		PlayerInteract player = Runner.FindObject(id).GetComponent<PlayerInteract>();
+		player.transform.localScale = Vector3.one;
 		player.CollisionEnable(true);
 		player.transform.parent = null;
 	}
 
-	public bool GetOn(TestPlayer player)
+	public bool GetOn(PlayerInteract player)
 	{
 		if (player.HasInputAuthority)
 		{
@@ -148,7 +151,7 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 		return true;
 	}
 
-	public void GetOff(TestPlayer player)
+	public void GetOff(PlayerInteract player)
 	{
 		int idx = FindIdx(player.Object.Id);
 		if (HasStateAuthority)
@@ -160,7 +163,7 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 		GetOnPlayers.Set(idx, new NetworkId());
 	}
 
-	private int AssignIdx(TestPlayer player)
+	private int AssignIdx(PlayerInteract player)
 	{
 		Vector3 playerDir = player.transform.position - transform.position;
 		playerDir.y = 0f;
@@ -200,11 +203,6 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 		return -1;
 	}
 
-	public override void FixedUpdateNetwork()
-	{
-		base.FixedUpdateNetwork();
-	}
-
 	public override void Render()
 	{
 		//StringBuilder sb = new StringBuilder();
@@ -227,5 +225,10 @@ public class VehicleBoarder : NetworkBehaviour, IAfterSpawned
 	public void AfterSpawned()
 	{
 		GetOnRender();
+	}
+
+	public override void StartInteraction()
+	{
+		GetOn(playerInteract);
 	}
 }
