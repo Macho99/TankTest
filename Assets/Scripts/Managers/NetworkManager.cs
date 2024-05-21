@@ -14,7 +14,7 @@ using UnityEngine.SceneManagement;
 using WebSocketSharp;
 
 
-public enum SceneType { StartScene, RoomScene, LoadingScene, GameScene }
+public enum SceneType { StartScene, RoomScene, LoadingScene, GameScene, Size }
 [Serializable]
 public class SceneData
 {
@@ -34,6 +34,7 @@ public class NetworkManager : MonoBehaviour
     NetworkRunner runner;
     NetworkRunner lobbyRunner;
 
+
     public event Action<List<SessionInfo>> onSessionUpdate;
     private List<SessionInfo> sessionInfos;
     private PlaceType placeType;
@@ -46,6 +47,10 @@ public class NetworkManager : MonoBehaviour
     public NetworkRunner Runner { get { return runner; } }
 
 
+    public SceneRef GetSceneRef(SceneType sceneType)
+    {
+        return sceneData[(int)sceneType].GetScenRef();
+    }
     private void Awake()
     {
         numbering = 0;
@@ -66,8 +71,11 @@ public class NetworkManager : MonoBehaviour
     {
         if (runner != null)
         {
-            await runner.LoadScene(sceneData[(int)SceneType.StartScene].GetScenRef());
-            print(runner.gameObject.name);
+            Debug.LogWarning("networkmanagersutdown");
+            if (runner.IsSceneAuthority)
+                await runner.UnloadScene(sceneData[(int)SceneType.RoomScene].GetScenRef());
+            else
+                SceneManager.UnloadSceneAsync(sceneData[(int)SceneType.RoomScene].GetScenRef().AsIndex);
             await runner.Shutdown(true);
             runner = null;
         }
@@ -75,10 +83,13 @@ public class NetworkManager : MonoBehaviour
 
         runner = GameManager.Resource.Instantiate<NetworkRunner>("Other/Runner");
         runner.gameObject.name = "SessionRunner" + numbering;
+        numbering++;
+        onRunnerAction?.Invoke(runner);
         NetworkEvents networkEvents = runner.GetComponent<NetworkEvents>();
         networkEvents.OnSessionListUpdate.AddListener(OnSessionListUpdated);
-        onRunnerAction?.Invoke(runner);
 
+
+        Debug.LogWarning(runner.gameObject.name);
         LoadSceneManager networkSceneManager = runner.GetComponent<LoadSceneManager>();
         networkSceneManager.Init(this);
         StartGameResult result = await runner.JoinSessionLobby(SessionLobby.ClientServer);
@@ -104,13 +115,10 @@ public class NetworkManager : MonoBehaviour
             sessionProperty["Password"] = password;
             Debug.Log("»ý¼º");
         }
-
-        SceneRef scene = sceneData[(int)SceneType.RoomScene].GetScenRef();
         var sceneInfo = new NetworkSceneInfo();
-        if (scene.IsValid)
-        {
-            sceneInfo.AddSceneRef(scene);
-        }
+
+        sceneInfo.AddSceneRef(sceneData[(int)SceneType.StartScene].GetScenRef());
+        sceneInfo.AddSceneRef(sceneData[(int)SceneType.RoomScene].GetScenRef(), LoadSceneMode.Additive, activeOnLoad: true);
         INetworkSceneManager networkSceneManager = runner.GetComponent<LoadSceneManager>();
 
         StartGameArgs startGame = new StartGameArgs();
@@ -121,11 +129,7 @@ public class NetworkManager : MonoBehaviour
         startGame.SessionProperties = sessionProperty;
         startGame.PlayerCount = maxCount;
         startGame.SceneManager = networkSceneManager;
-        startGame.Scene = scene;
-
-
-
-        //startGame.Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
+        startGame.Scene = sceneInfo;
 
 
         StartGameResult result = await runner.StartGame(startGame);
@@ -137,7 +141,7 @@ public class NetworkManager : MonoBehaviour
         else
         {
             placeType = PlaceType.Session;
-
+            Debug.LogWarning(result);
         }
 
         runner.ProvideInput = true;
@@ -221,14 +225,9 @@ public class NetworkManager : MonoBehaviour
     }
     public async void JoinIngame()
     {
-        //int gameSceneIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/Test/TestScene.unity");
-        //SceneRef gameSceneRef = SceneRef.FromIndex(gameSceneIndex);
-
-        int loadingSceneIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/LoadingScene.unity");
-        SceneRef loadingSceneRef = SceneRef.FromIndex(loadingSceneIndex);
 
         LoadSceneManager loadSceneManager = runner.GetComponent<LoadSceneManager>();
-        await loadSceneManager.LoadGameScene(loadingSceneRef);
+        await loadSceneManager.LoadGameScene();
 
 
     }

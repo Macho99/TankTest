@@ -39,7 +39,6 @@ public class CreateSessionUI : MonoBehaviour
         StartGameResult result = await GameManager.network.CreateRoom(nameField.text, Convert.ToInt32(maxPlayerCoutnTMP.text), passwordField.text);
         if (result.Ok)
         {
-            Debug.LogWarning("¹æ»ý¼º");
             onCreateSession?.Invoke();
             gameObject.SetActive(false);
         }

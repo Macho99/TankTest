@@ -31,7 +31,6 @@ public class PlayerPreviewController : MonoBehaviour
         originRotate = transform.rotation;
         appearModels = new Dictionary<AppearanceType, Transform[]>();
         selectIndexDic = new Dictionary<AppearanceType, int>();
-        Debug.LogWarning("START");
         AppearanceInit(AppearanceType.Hair, hairRoot);
         AppearanceInit(AppearanceType.Breard, breardRoot);
         AppearanceInit(AppearanceType.Preset, presetRoot);

@@ -21,16 +21,22 @@ public class PlayerLandStates : PlayerStates
     protected override void OnExitState()
     {
         owner.weaponController.ChangeHandWeight(1f);
-        owner.animator.SetBool("IsLand", false);
         isLandStart = false;
         isLandEnd = false;
         owner.VelocityY = 0f;
+       
+    }
+    protected override void OnExitStateRender()
+    {
+        owner.animator.SetBool("IsLand", false);
         owner.animator.SetFloat("VelocityY", 0f);
     }
 
     protected override void OnFixedUpdate()
     {
-        if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("Land"))
+
+        AnimatorStateInfo stateInfo = owner.animator.GetCurrentAnimatorStateInfo(owner.weaponController.GetMainWeaponAnimLayer());
+        if (stateInfo.IsTag("Land"))
         {
             if (!isLandStart)
             {
@@ -38,7 +44,7 @@ public class PlayerLandStates : PlayerStates
                 isLandStart = true;
             }
 
-            if (owner.animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.95f && !isLandEnd)
+            if (stateInfo.normalizedTime >= 0.95f && !isLandEnd)
             {
                 isLandEnd = true;
             }

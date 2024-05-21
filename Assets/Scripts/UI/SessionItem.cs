@@ -14,15 +14,13 @@ public class SessionItem : NetworkBehaviour
     [SerializeField] private Image sessionLockImage;
     [SerializeField] private Button sessionJoinButton;
     private SessionInfo sessionInfo;
-    private Action<SessionInfo> onSessionJoin;
     private PrivateSessionConnetUI privateSessionConnetUI;
 
-    public void CreateSessionItem(SessionInfo newSessionInfo, Action<SessionInfo> sessionJoin, PrivateSessionConnetUI privateSessionConnetUI = null)
+    public void CreateSessionItem(SessionInfo newSessionInfo,  PrivateSessionConnetUI privateSessionConnetUI = null)
     {
         if (newSessionInfo == null)
         {
             Destroy(gameObject);
-            onSessionJoin -= sessionJoin;
             return;
         }
 
@@ -34,14 +32,13 @@ public class SessionItem : NetworkBehaviour
 
         sessionLockImage.enabled = sessionInfo.Properties.ContainsKey("Password");
         sessionJoinButton.interactable = sessionInfo.PlayerCount < sessionInfo.MaxPlayers ? true : false;
-        onSessionJoin += sessionJoin;
     }
     public async void PressJoinSessionButton()
     {
 
         if (sessionInfo.Properties.ContainsKey("Password"))
         {
-            privateSessionConnetUI.ActivePrivateSeesionConneter(sessionInfo, onSessionJoin);
+            privateSessionConnetUI.ActivePrivateSeesionConneter(sessionInfo);
             Debug.Log("asdasd");
         }
         else
@@ -49,11 +46,7 @@ public class SessionItem : NetworkBehaviour
             LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
             loadingUI.Init("게임 방에 입장중 입니다.");
             StartGameResult result = await GameManager.network.JoinSession(sessionInfo);
-            if (result != null)
-            {
-
-                onSessionJoin?.Invoke(sessionInfo);
-            }
+           
             loadingUI.CloseUI();
         }
 

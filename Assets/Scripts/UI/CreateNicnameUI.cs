@@ -36,6 +36,7 @@ public class CreateNicnameUI : MonoBehaviour
         LoginSetting setting = new LoginSetting(null, true, true);
         LocalSaveLoader.SaveDataWithLocal("LoginSetting", setting);
         loadingUI.Init("로비에 접속을 시도하고있습니다.");
+        Debug.LogWarning("networkmanagersutdown");
         StartGameResult joinLobbyResult = await GameManager.network.JoinLobby();
         if (joinLobbyResult.Ok)
         {

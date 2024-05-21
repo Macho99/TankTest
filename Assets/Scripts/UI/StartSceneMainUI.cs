@@ -33,7 +33,8 @@ public class StartSceneMainUI : MonoBehaviour
                     if (setting.isAutoSave)
                     {
                         authUI.ExistLoginInfo(true);
-                        TryJoinLobby();
+                        if (GameManager.network.Runner == null)
+                            TryJoinLobby();
                     }
                     else
                     {
@@ -82,6 +83,7 @@ public class StartSceneMainUI : MonoBehaviour
     public async void TryJoinLobby()
     {
         authUI.SetupStateText("로비접속을 시도하고 있습니다.");
+        Debug.LogWarning("networkmanagersutdown");
         StartGameResult result = await GameManager.network.JoinLobby();
         if (result.Ok)
         {

@@ -10,7 +10,7 @@ public class PrivateSessionConnetUI : MonoBehaviour
     [SerializeField] private TMP_InputField passwordField;
     private SessionInfo sessionInfo;
     private Action<SessionInfo> onJoin;
-    public void ActivePrivateSeesionConneter(SessionInfo sessionInfo, Action<SessionInfo> joinAction)
+    public void ActivePrivateSeesionConneter(SessionInfo sessionInfo, Action<SessionInfo> joinAction =null)
     {
         this.sessionInfo = sessionInfo;
         this.onJoin = joinAction;

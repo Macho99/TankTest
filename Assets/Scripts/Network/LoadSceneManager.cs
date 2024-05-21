@@ -33,7 +33,7 @@ public class LoadSceneManager : NetworkSceneManagerDefault
 
     }
 
-    public async Task LoadGameScene(SceneRef sceneRef)
+    public async Task LoadGameScene()
     {
 
         if (Runner == null)
@@ -41,17 +41,15 @@ public class LoadSceneManager : NetworkSceneManagerDefault
         if (!Runner.IsServer)
             return;
 
-        int starSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        SceneRef startSceneRef = SceneRef.FromIndex(starSceneIndex);
+
         Runner.SessionInfo.IsOpen = false;
         Runner.SessionInfo.IsVisible = false;
-        int gameSceneIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/GameScene.unity");
-        SceneRef gameSceneRef = SceneRef.FromIndex(gameSceneIndex);
 
-        await Runner.LoadScene(sceneRef, LoadSceneMode.Additive);
-        await Runner.LoadScene(gameSceneRef, LoadSceneMode.Additive,setActiveOnLoad:true);
-        await Runner.UnloadScene(startSceneRef);
-        await Runner.UnloadScene(sceneRef);
+        await Runner.LoadScene(networkManager.GetSceneRef(SceneType.LoadingScene), LoadSceneMode.Additive,setActiveOnLoad: true);      
+        await Runner.LoadScene(networkManager.GetSceneRef(SceneType.GameScene), LoadSceneMode.Additive, setActiveOnLoad: true);
+        await Runner.UnloadScene(networkManager.GetSceneRef(SceneType.StartScene));
+        await Runner.UnloadScene(networkManager.GetSceneRef(SceneType.RoomScene));
+        await Runner.UnloadScene(networkManager.GetSceneRef(SceneType.LoadingScene));
 
 
 
@@ -90,7 +88,7 @@ public class LoadSceneManager : NetworkSceneManagerDefault
     {
 
         base.OnLoadSceneProgress(sceneRef, progress);
-      
+
 
 
     }
@@ -99,6 +97,7 @@ public class LoadSceneManager : NetworkSceneManagerDefault
         yield return base.LoadSceneCoroutine(sceneRef, sceneParams);
 
 
+        Debug.Log(sceneRef);
 
 
     }

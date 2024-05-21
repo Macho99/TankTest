@@ -86,16 +86,9 @@ public class SessionUI : MonoBehaviour
     {
         LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
         loadingUI.Init("방을 나가는 중입니다.");
-        StartGameResult result = await networkManager.JoinLobby();
-        if (result.Ok)
-        {
-            gameObject.SetActive(false);
-            foreach (Transform player in sessionUserList.transform)
-            {
-                Destroy(player.gameObject);
-            }
-            sessionUserDic.Clear();
-        }
+        Debug.LogWarning("networkmanagersutdown");
+        await networkManager.JoinLobby();
+    
         loadingUI.CloseUI();
     }
     public void PressReadyOrStartButton()

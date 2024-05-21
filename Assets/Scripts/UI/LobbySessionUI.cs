@@ -10,7 +10,6 @@ public class LobbySessionUI : SimulationBehaviour
     [SerializeField] private RectTransform sessionItemListTr;
     [SerializeField] private SessionItem sessionItemPrefab;
     [SerializeField] private CreateSessionUI createSessionUI;
-    [SerializeField] private SessionUI sessionUI;
     [SerializeField] private PrivateSessionConnetUI privateSessionConnetUI;
     public UnityEvent onConnetSession;
 
@@ -42,7 +41,7 @@ public class LobbySessionUI : SimulationBehaviour
             SessionItem item = Instantiate(sessionItemPrefab, sessionItemListTr);
 
             Debug.Log(session.Properties.ContainsKey("Password"));
-            item.CreateSessionItem(session, sessionUI.JoinSession, session.Properties.ContainsKey("Password") ? privateSessionConnetUI : null);
+            item.CreateSessionItem(session, session.Properties.ContainsKey("Password") ? privateSessionConnetUI : null);
 
         }
 

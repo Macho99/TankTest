@@ -28,6 +28,8 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
     private LocalPlayerDebugUI LocaldebugUI;
     public PlayerMainUI mainUI { get; private set; }
     [Networked] public float VelocityY { get; set; }
+    [SerializeField] private PlayerNameUI playerNameUI;
+    [Networked] private string playerName { get; set; }
     public PlayerStates GetState(PlayerState playerState)
     {
         return states[(int)playerState];
@@ -66,23 +68,29 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
     {
         VelocityY = 0f;
         name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
+
+
         if (HasInputAuthority)
         {
             mainUI = GameManager.UI.ShowSceneUI<PlayerMainUI>("UI/PlayerUI/PlayerMainUI");
             mainUI.SetInitTime(GameManager.Weather.GetTime());
+            string name = GameManager.auth.User.DisplayName;
+            //RPC_UserNameSetup(name);
         }
+        else
+        {
 
+        }
         hairRoot.GetChild(decorations[(int)AppearanceType.Hair]).gameObject.SetActive(true);
         breardRoot.GetChild(decorations[(int)AppearanceType.Breard]).gameObject.SetActive(true);
         presetRoot.GetChild(decorations[(int)AppearanceType.Preset]).gameObject.SetActive(true);
 
 
     }
-
+  
     public override void FixedUpdateNetwork()
     {
         Falling();
-
         movement.Move();
 
 
@@ -135,7 +143,14 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
 
     public void AfterSpawned()
     {
-
+        if (!HasInputAuthority)
+        {
+            playerNameUI.Init(playerName);
+        }
+        else
+        {
+            playerNameUI.gameObject.SetActive(false);
+        }
     }
 
     public void CollectStateMachines(List<IStateMachine> stateMachines)

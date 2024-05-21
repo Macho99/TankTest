@@ -16,10 +16,9 @@ public class PlayerFallingStates : PlayerStates
     {
         owner.animator.SetBool("IsFalling", true);
     }
-    protected override void OnExitState()
+    protected override void OnExitStateRender()
     {
-        base.OnExitState();
-
+        owner.animator.SetBool("IsFalling", false);
     }
     protected override void OnFixedUpdate()
     {

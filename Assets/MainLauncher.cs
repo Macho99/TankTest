@@ -10,9 +10,6 @@ public class MainLauncher : MonoBehaviour
 
     private void OnEnable()
     {
-
-
-
         GameManager.network.onRunnerAction += SetupEvent;
     }
     private void OnDisable()
@@ -33,7 +30,6 @@ public class MainLauncher : MonoBehaviour
         NetworkEvents events = runner.GetComponent<NetworkEvents>();
         if (events != null)
         {
-            Debug.LogWarning("Setup");  
             events.PlayerJoined.AddListener(OnPlayerJoin);
             events.PlayerLeft.AddListener(OnPlayerLeft);
         }
@@ -48,7 +44,6 @@ public class MainLauncher : MonoBehaviour
             NetworkObject roomPlayerPrefab = GameManager.Resource.Load<NetworkObject>("Player/RoomPlayer");
             NetworkObject roomPlayer = runner.Spawn(roomPlayerPrefab, Vector3.zero, Quaternion.identity, player);
             runner.SetPlayerObject(player, roomPlayer);
-            Debug.LogWarning(player);
             runner.MakeDontDestroyOnLoad(roomPlayer.gameObject);
         }
     }

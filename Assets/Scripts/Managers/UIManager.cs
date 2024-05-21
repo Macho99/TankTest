@@ -18,7 +18,7 @@ public class UIManager : MonoBehaviour
     public Canvas SceneCanvas => sceneCanvas;
 
     private Canvas bossCanvas;
-    
+
     public bool MenuOpened { get; set; }
     [HideInInspector] public UnityEvent<bool> OnHideSceneUI = new();
 
@@ -34,13 +34,41 @@ public class UIManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= StartSceneInit;
     }
+    public void AllClearUI()
+    {
+        if (eventSystem != null)
+        {
+            GameManager.Resource.Destroy(eventSystem.gameObject);
+            eventSystem = null;
+        }
+        if(popUpCanvas != null)
+        {
+            GameManager.Resource.Destroy(popUpCanvas.gameObject);
+            popUpCanvas = null;
+        }
+        if (windowCanvas != null)
+        {
+            GameManager.Resource.Destroy(windowCanvas.gameObject);
+            windowCanvas = null;
+        }
+        if (sceneCanvas != null)
+        {
+            GameManager.Resource.Destroy(sceneCanvas.gameObject);
+            sceneCanvas = null;
+        }
+        if (inGameCanvas != null)
+        {
+            GameManager.Resource.Destroy(inGameCanvas.gameObject);
+            inGameCanvas = null;
+        }
 
-    public void StartSceneInit(Scene scene =default,LoadSceneMode loadScene=default) 
+    }
+    public void StartSceneInit(Scene scene = default, LoadSceneMode loadScene = default)
     {
         if (eventSystem == null)
         {
             eventSystem = GameManager.Resource.Instantiate<EventSystem>("UI/EventSystem");
-           // eventSystem.transform.parent = transform;
+            // eventSystem.transform.parent = transform;
         }
 
         if (popUpCanvas == null)
@@ -82,30 +110,30 @@ public class UIManager : MonoBehaviour
     public T ShowPopUpUI<T>(T popUpUI, bool setInactivePrev = true) where T : PopUpUI
     {
         if (popUpStack.Count > 0)
-		{
-			if (setInactivePrev == true)
+        {
+            if (setInactivePrev == true)
             {
                 PopUpUI prevUI = popUpStack.Peek();
                 prevUI.gameObject.SetActive(false);
             }
         }
         else
-		{
-			MenuOpened = true;
-			//NetworkRunner runner = FindObjectOfType<NetworkRunner>();
-			//if (runner != null)
-			//{
-			//    NetworkObject player = runner.GetPlayerObject(runner.LocalPlayer);
-			//    if (player != null)
-			//    {
-			//        PlayerInputListner inputListner = player.GetComponent<PlayerInputListner>();
-			//        if (inputListner != null)
-			//        {
-			//            inputListner.RPC_ActiveButton(ButtonType.MouseDelta, false);
-			//        }
-			//    }
-			//}
-		}
+        {
+            MenuOpened = true;
+            //NetworkRunner runner = FindObjectOfType<NetworkRunner>();
+            //if (runner != null)
+            //{
+            //    NetworkObject player = runner.GetPlayerObject(runner.LocalPlayer);
+            //    if (player != null)
+            //    {
+            //        PlayerInputListner inputListner = player.GetComponent<PlayerInputListner>();
+            //        if (inputListner != null)
+            //        {
+            //            inputListner.RPC_ActiveButton(ButtonType.MouseDelta, false);
+            //        }
+            //    }
+            //}
+        }
 
         T ui = GameManager.Pool.GetUI<T>(popUpUI);
         ui.transform.SetParent(popUpCanvas.transform, false);
