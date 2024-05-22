@@ -10,23 +10,20 @@ using UnityEngine.SceneManagement;
 
 public class LoadSceneManager : NetworkSceneManagerDefault
 {
-    private NetworkManager networkManager;
+  
 
     private Dictionary<PlayerRef, int[]> decoDic = new Dictionary<PlayerRef, int[]>();
     [SerializeField] private Vector3 spawnPoint;
     [SerializeField] private Quaternion spawnRotation;
     private void Awake()
     {
-
+       
     }
     public override void Shutdown()
     {
 
     }
-    public void Init(NetworkManager networkManager)
-    {
-        this.networkManager = networkManager;
-    }
+   
     public void OnBeforeSpawned(NetworkRunner runner, NetworkObject obj)
     {
         obj.gameObject.SetActive(false);
@@ -53,13 +50,12 @@ public class LoadSceneManager : NetworkSceneManagerDefault
         Runner.SessionInfo.IsVisible = false;
 
        
-        await Runner.LoadScene(networkManager.GetSceneRef(SceneType.LoadingScene), LoadSceneMode.Additive, setActiveOnLoad: true);
-        await Runner.UnloadScene(networkManager.GetSceneRef(SceneType.RoomScene));
 
-        await Runner.LoadScene(networkManager.GetSceneRef(SceneType.GameScene), LoadSceneMode.Additive, setActiveOnLoad: true);
-        await Runner.UnloadScene(networkManager.GetSceneRef(SceneType.LoadingScene));
-      
+        await Runner.LoadScene(GameManager.network.GetSceneRef(SceneType.LoadingScene), LoadSceneMode.Additive, setActiveOnLoad: true);
+        await Runner.UnloadScene(GameManager.network.GetSceneRef(SceneType.RoomScene));
 
+        await Runner.LoadScene(GameManager.network.GetSceneRef(SceneType.GameScene), LoadSceneMode.Additive, setActiveOnLoad: true);
+        await Runner.UnloadScene(GameManager.network.GetSceneRef(SceneType.LoadingScene));
 
 
         NetworkObject playerPrefab = GameManager.Resource.Load<NetworkObject>("Player/Player");
@@ -112,11 +108,16 @@ public class LoadSceneManager : NetworkSceneManagerDefault
 
         yield return base.OnSceneLoaded(sceneRef, scene, sceneParams);
 
-        yield return null;
-        if (sceneRef == networkManager.GetSceneRef(SceneType.LoadingScene))
+        Debug.Log(GameManager.network);
+        if(GameManager.network != null)
         {
-            SceneManager.UnloadSceneAsync(networkManager.GetSceneRef(SceneType.StartScene).AsIndex);
+            Debug.Log("asdsad");
+            if (sceneRef == GameManager.network.GetSceneRef(SceneType.LoadingScene))
+            {
+                SceneManager.UnloadSceneAsync(GameManager.network.GetSceneRef(SceneType.StartScene).AsIndex);
+            }
         }
+      
        
     }
 

@@ -112,7 +112,8 @@ public class Zombie : ZombieBase
 		{
 			stateMachine.InitState(State.Idle);
 		}
-	}
+        minimapTarget.Init(MinimapTarget.TargetType.BasicMonster);
+    }
 
 	public override void FixedUpdateNetwork()
 	{

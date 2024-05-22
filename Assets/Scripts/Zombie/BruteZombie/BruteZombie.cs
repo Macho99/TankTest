@@ -110,7 +110,9 @@ public class BruteZombie : ZombieBase
 			Destroy(Shield.gameObject);
 			Shield = null;
 		}
-	}
+		minimapTarget.Init(MinimapTarget.TargetType.BossMonster);
+
+    }
 
 	public override void FixedUpdateNetwork()
 	{

@@ -116,8 +116,6 @@ public class NetworkManager : MonoBehaviour
 
 
         Debug.LogWarning(runner.gameObject.name);
-        LoadSceneManager networkSceneManager = runner.GetComponent<LoadSceneManager>();
-        networkSceneManager.Init(this);
         StartGameResult result = await runner.JoinSessionLobby(SessionLobby.ClientServer);
 
         if (result.Ok)
@@ -191,8 +189,6 @@ public class NetworkManager : MonoBehaviour
 
 
             Debug.LogWarning(runner.gameObject.name);
-            LoadSceneManager networkSceneManager = runner.GetComponent<LoadSceneManager>();
-            networkSceneManager.Init(this);
             await runner.JoinSessionLobby(SessionLobby.ClientServer);
         }
 

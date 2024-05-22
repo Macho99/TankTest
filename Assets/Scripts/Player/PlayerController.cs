@@ -14,6 +14,7 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
     [SerializeField] private Transform hairRoot;
     [SerializeField] private Transform breardRoot;
     [SerializeField] private PlayerStates[] states;
+    [SerializeField] private MinimapTarget minimapTarget;
     [Networked, Capacity((int)AppearanceType.Size)] public NetworkArray<int> decorations { get; }
 
     public StateMachine<PlayerStates> stateMachine { get; private set; }
@@ -75,10 +76,12 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
             mainUI = GameManager.UI.ShowSceneUI<PlayerMainUI>("UI/PlayerUI/PlayerMainUI");
             mainUI.SetInitTime(GameManager.Weather.GetTime());
             string name = GameManager.auth.User.DisplayName;
+            minimapTarget.Init(MinimapTarget.TargetType.LocalPlayer);
             //RPC_UserNameSetup(name);
         }
         else
         {
+            minimapTarget.Init(MinimapTarget.TargetType.OtherPlayer);
 
         }
         hairRoot.GetChild(decorations[(int)AppearanceType.Hair]).gameObject.SetActive(true);
@@ -87,7 +90,7 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
 
 
     }
-  
+
     public override void FixedUpdateNetwork()
     {
         Falling();

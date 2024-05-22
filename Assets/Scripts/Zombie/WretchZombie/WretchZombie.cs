@@ -81,8 +81,11 @@ public class WretchZombie : ZombieBase
 
 		stateMachine.InitState(State.Idle);
 	}
-
-	public override void FixedUpdateNetwork()
+    public override void Spawned()
+    {
+		minimapTarget.Init(MinimapTarget.TargetType.BossMonster);
+    }
+    public override void FixedUpdateNetwork()
 	{
 		base.FixedUpdateNetwork();
 

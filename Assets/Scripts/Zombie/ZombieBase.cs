@@ -19,7 +19,7 @@ public struct BoneTransform
 public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 {
 	[SerializeField] TextMeshProUGUI curStateText;
-
+	[SerializeField] protected MinimapTarget minimapTarget;
 	public struct BodyPart
 	{
 		public ZombieHitBox zombieHitBox;
