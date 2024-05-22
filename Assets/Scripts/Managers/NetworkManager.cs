@@ -34,7 +34,7 @@ public class NetworkManager : MonoBehaviour
     NetworkRunner runner;
     NetworkRunner lobbyRunner;
 
-
+    private Dictionary<PlayerRef, NetworkObject> players = new Dictionary<PlayerRef, NetworkObject>();
     public event Action<List<SessionInfo>> onSessionUpdate;
     private List<SessionInfo> sessionInfos;
     private int numbering;
@@ -42,8 +42,31 @@ public class NetworkManager : MonoBehaviour
 
     public Action<NetworkRunner> onRunnerAction;
 
-    public NetworkRunner Runner { get { return runner; } }
+    public NetworkRunner Runner { get { return runner; } set { runner = value; } }
 
+
+    public void SetPlayer(PlayerRef player, NetworkObject playerObject)
+    {
+        players.Add(player, playerObject);
+    }
+    public bool GetPlayer(PlayerRef player, out NetworkObject playerObject)
+    {
+        if (players.TryGetValue(player, out NetworkObject findPlayerObject))
+        {
+            playerObject = findPlayerObject;
+            return true;
+        }
+        playerObject = null;
+        return false;
+    }
+    public void RemovePlayer(PlayerRef player)
+    {
+        if (players.ContainsKey(player))
+        {
+            players.Remove(player);
+
+        }
+    }
 
     public SceneRef GetSceneRef(SceneType sceneType)
     {
@@ -69,6 +92,7 @@ public class NetworkManager : MonoBehaviour
     {
         if (runner != null)
         {
+
             Debug.LogWarning("networkmanagersutdown");
             if (runner.IsSceneAuthority)
                 await runner.UnloadScene(sceneData[(int)SceneType.RoomScene].GetScenRef());
@@ -84,6 +108,7 @@ public class NetworkManager : MonoBehaviour
 
         runner = GameManager.Resource.Instantiate<NetworkRunner>("Other/Runner");
         runner.gameObject.name = "SessionRunner" + numbering;
+
         numbering++;
         onRunnerAction?.Invoke(runner);
         NetworkEvents networkEvents = runner.GetComponent<NetworkEvents>();
@@ -155,7 +180,7 @@ public class NetworkManager : MonoBehaviour
 
         });
 
-        if(!result.Ok)
+        if (!result.Ok)
         {
             runner = GameManager.Resource.Instantiate<NetworkRunner>("Other/Runner");
             runner.gameObject.name = "SessionRunner" + numbering;

@@ -10,12 +10,13 @@ public class StartSceneMainUI : MonoBehaviour
 {
     [SerializeField] private AuthUI authUI;
     [SerializeField] private LobbyUI lobbyUI;
+    private MessageBoxUI messageBoxUIPrefab;
 
     Action action;
     // Start is called before the first frame update
     void Start()
     {
-
+        messageBoxUIPrefab = GameManager.Resource.Load<MessageBoxUI>("UI/MessageBoxUI");
         Initialized();
     }
     public void Initialized()
@@ -95,7 +96,7 @@ public class StartSceneMainUI : MonoBehaviour
 
         Debug.Log("LobbyJoint Failed");
 
-        GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("로비 접속 실패", "로비 접속에 실패하였습니다.", null);
+        GameManager.UI.ShowPopUpUI(messageBoxUIPrefab).Init("로비 접속 실패", "로비 접속에 실패하였습니다.", null);
 
     }
 }

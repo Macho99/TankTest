@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Windows;
 
-public class PlayerLocomotion : NetworkBehaviour
+public class PlayerLocomotion : NetworkBehaviour,IAfterSpawned
 {
     public enum MovementType { Stand, Crouch, Size }
 
@@ -57,19 +57,21 @@ public class PlayerLocomotion : NetworkBehaviour
     {
         if (HasStateAuthority)
         {
-            CamerRotX = CamController.FollowTarget.eulerAngles.x;
+           
             moveSpeed = 0f;
             simpleKCC.SetGravity(Physics.gravity.y * 2f);
             fallingTime = 0f;
         }
+        
     }
     public override void FixedUpdateNetwork()
     {
-
+        CamController.FollowTarget.localRotation = Quaternion.Euler(CamerRotX, 0f, 0f);
     }
     public override void Render()
     {
-        CamController.FollowTarget.localRotation = Quaternion.Euler(CamerRotX, 0f, 0f);
+        
+       
         animator.SetFloat("InputDirX", inputDirection.x, 0.05f, Time.deltaTime);
         animator.SetFloat("InputDirZ", inputDirection.y, 0.05f, Time.deltaTime);
         animator.SetFloat("MoveSpeed", moves[(int)movementType].MoveSpeed);
@@ -175,5 +177,10 @@ public class PlayerLocomotion : NetworkBehaviour
 
 
         return true;
+    }
+
+    public void AfterSpawned()
+    {
+        CamerRotX = CamController.FollowTarget.eulerAngles.x;
     }
 }

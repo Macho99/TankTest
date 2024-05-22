@@ -13,8 +13,12 @@ public class PlayerStandLocomotionStates : PlayerStates
     }
     protected override void OnFixedUpdate()
     {
-        owner.movement.Rotate(owner.InputListner.currentInput);
-        owner.movement.SetMove(owner.InputListner.currentInput);
+        if (GetInput(out NetworkInputData input))
+        {
+            owner.movement.Rotate(input);
+            owner.movement.SetMove(input);
+        }
+
         owner.weaponController.WeaponControls();
 
         if (owner.InputListner.pressButton.IsSet(ButtonType.Jump))

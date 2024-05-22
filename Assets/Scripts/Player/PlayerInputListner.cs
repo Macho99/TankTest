@@ -10,7 +10,6 @@ public class PlayerInputListner : NetworkBehaviour
     public enum PressType { Progress, Press, Release }
     [Networked] public NetworkButtons prevButton { get; private set; }
 
-    [Networked] public NetworkInputData currentInput { get; private set; }
     [Networked] public NetworkButtons pressButton { get; private set; }
     [Networked] public NetworkButtons releaseButton { get; private set; }
 
@@ -18,50 +17,7 @@ public class PlayerInputListner : NetworkBehaviour
     private NetworkDictionary<ButtonType, NetworkBool> limitButton => default;
 
 
-    //public override void Spawned()
-    //{
-    //    for (int i = 0; i < (int)ButtonType.Size; i++)
-    //    {
-    //        limitButton.Add((ButtonType)i, true);
-    //    }
-    //    if (HasInputAuthority)
-    //    {
-    //        NetworkEvents networkEvents = Runner.GetComponent<NetworkEvents>();
-    //        networkEvents.OnInput.AddListener(OnInput);
-    //    }
-
-    //}
-    //public override void Despawned(NetworkRunner runner, bool hasState)
-    //{
-    //    if (HasInputAuthority)
-    //    {
-    //        NetworkEvents networkEvents = Runner.GetComponent<NetworkEvents>();
-    //        networkEvents.OnInput.RemoveListener(OnInput);
-    //    }
-    //}
-    //public void OnInput(NetworkRunner runner, NetworkInput input)
-    //{
-    //    playerInput.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
-    //    playerInput.buttons.Set(ButtonType.Run, playerControls.Player.Run.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.Jump, playerControls.Player.Jump.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.Crouch, playerControls.Player.Crouch.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.Interact, playerControls.Player.Interact.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.MouseLock, playerControls.Player.TestMouseCursurLock.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.Adherence, playerControls.Player.Adherence.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.ActiveItemContainer, playerControls.Player.ActiveItemContainer.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.PutWeapon, playerControls.Player.PutWeapon.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.FirstWeapon, playerControls.Player.FirstWeapon.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.SecondWeapon, playerControls.Player.SecondWeapon.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.SubWeapon, playerControls.Player.SubWeapon.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.MilyWeapon, playerControls.Player.MilyWeapon.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
-    //    playerInput.buttons.Set(ButtonType.Reload, playerControls.Player.Reload.IsPressed());
-    //    playerInput.mouseDelta = lookAccum.ConsumeTickAligned(runner);
-
-    //    input.Set(playerInput);
-    //    playerInput = default;
-    //}
+ 
     public override void FixedUpdateNetwork()
     {
 		//if (IsInputListner == false)
@@ -78,8 +34,6 @@ public class PlayerInputListner : NetworkBehaviour
 
 			prevButton = input.buttons;
 
-			currentInput = input;
-
 		}
         else
         {
@@ -88,50 +42,5 @@ public class PlayerInputListner : NetworkBehaviour
         }
 	}
 
-    //private NetworkInputData LimitButton(NetworkInputData input)
-    //{
-    //    input.inputDirection = limitButton.Get(ButtonType.PlayerMove) == false ? Vector2.zero : input.inputDirection;
-    //    if (limitButton.Get(ButtonType.MouseDelta) == false)
-    //    {
-    //        if (HasInputAuthority)
-    //        {
-    //            Cursor.lockState = CursorLockMode.None;
-    //            Cursor.visible = true;
-    //        }
-    //        input.mouseDelta = Vector2.zero;
-    //        input.buttons.Set(ButtonType.Adherence, false);
-    //    }
-    //    else
-    //    {
-    //        if (HasInputAuthority)
-    //        {
-    //            Cursor.lockState = CursorLockMode.Locked;
-    //            Cursor.visible = false;
-    //        }
-    //    }
 
-    //    for (int i = (int)ButtonType.Run; i < (int)ButtonType.Size; i++)
-    //    {
-    //        input.buttons.Set(button: (ButtonType)i, limitButton.Get((ButtonType)i) == false ? false : input.buttons.IsSet((ButtonType)i));
-    //    }
-
-
-    //    return input;
-    //}
-
-    //[Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    //public void RPC_ActiveButton(ButtonType button, bool isActive)
-    //{
-    //    limitButton.Set(button, isActive);
-    //}
-
-    //public void BeforeTick()
-    //{
-
-    //}
-
-    //public void BeforeUpdate()
-    //{
-    //    lookAccum.Accumulate(Mouse.current.delta.ReadValue());
-    //}
 }

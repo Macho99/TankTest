@@ -7,7 +7,6 @@ using static Unity.Collections.Unicode;
 
 public class MainLauncher : MonoBehaviour
 {
-
     private void OnEnable()
     {
         GameManager.network.onRunnerAction += SetupEvent;
@@ -20,7 +19,7 @@ public class MainLauncher : MonoBehaviour
 
     private void SetupEvent(NetworkRunner runner)
     {
-      
+
         if (runner == null)
         {
 
@@ -32,9 +31,8 @@ public class MainLauncher : MonoBehaviour
         {
             events.PlayerJoined.AddListener(OnPlayerJoin);
             events.PlayerLeft.AddListener(OnPlayerLeft);
+
         }
-
-
 
     }
     private void OnPlayerJoin(NetworkRunner runner, PlayerRef player)
@@ -44,20 +42,24 @@ public class MainLauncher : MonoBehaviour
             NetworkObject roomPlayerPrefab = GameManager.Resource.Load<NetworkObject>("Player/RoomPlayer");
             NetworkObject roomPlayer = runner.Spawn(roomPlayerPrefab, Vector3.zero, Quaternion.identity, player);
             runner.SetPlayerObject(player, roomPlayer);
+            GameManager.network.SetPlayer(player, roomPlayer);
+
             runner.MakeDontDestroyOnLoad(roomPlayer.gameObject);
         }
     }
     private void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        if (!runner.IsServer)
-            return;
-
-        if (runner.TryGetPlayerObject(player, out NetworkObject networkObject))
+        Debug.LogWarning("플레이어 접속종료");
+        if (GameManager.network.GetPlayer(player,out NetworkObject playerObject))
         {
             Debug.Log(player);
-
-            runner.Despawn(networkObject);
+         
+            runner.Despawn(playerObject);
+            GameManager.network.RemovePlayer(player);
         }
+       
+
+
     }
 
 }

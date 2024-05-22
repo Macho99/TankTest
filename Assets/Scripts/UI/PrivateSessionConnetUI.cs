@@ -10,6 +10,13 @@ public class PrivateSessionConnetUI : MonoBehaviour
     [SerializeField] private TMP_InputField passwordField;
     private SessionInfo sessionInfo;
     private Action<SessionInfo> onJoin;
+    private LoadingUI loadingUIPrefab;
+    private MessageBoxUI messageBoxUIPrefab;
+    private void Awake()
+    {
+        loadingUIPrefab = GameManager.Resource.Load<LoadingUI>("UI/LoadingUI");
+        messageBoxUIPrefab = GameManager.Resource.Load<MessageBoxUI>("UI/MessageBoxUI");
+    }
     public void ActivePrivateSeesionConneter(SessionInfo sessionInfo, Action<SessionInfo> joinAction =null)
     {
         this.sessionInfo = sessionInfo;
@@ -21,7 +28,7 @@ public class PrivateSessionConnetUI : MonoBehaviour
 
         if ((string)sessionInfo.Properties["Password"].PropertyValue == passwordField.text)
         {
-            LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+            LoadingUI loadingUI = GameManager.UI.ShowPopUpUI(loadingUIPrefab);
             loadingUI.Init("게임 방에 입장중 입니다.");
             StartGameResult result = await GameManager.network.JoinSession(sessionInfo);
             if (result != null)
@@ -34,7 +41,7 @@ public class PrivateSessionConnetUI : MonoBehaviour
         else
         {
 
-            GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("방 접속 실패", "비밀번호가 맞지 않습니다.", null);
+            GameManager.UI.ShowPopUpUI(messageBoxUIPrefab).Init("방 접속 실패", "비밀번호가 맞지 않습니다.", null);
         }
     }
     public void PressCancelButton()

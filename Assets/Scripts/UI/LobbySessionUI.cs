@@ -12,10 +12,12 @@ public class LobbySessionUI : SimulationBehaviour
     [SerializeField] private CreateSessionUI createSessionUI;
     [SerializeField] private PrivateSessionConnetUI privateSessionConnetUI;
     public UnityEvent onConnetSession;
-
+    private LoadingUI loadingUIPrefab;
+    private MessageBoxUI messageBoxUIPrefab;
     private void Awake()
     {
-
+        loadingUIPrefab = GameManager.Resource.Load<LoadingUI>("UI/LoadingUI");
+        messageBoxUIPrefab = GameManager.Resource.Load<MessageBoxUI>("UI/MessageBoxUI");
     }
     private void OnEnable()
     {
@@ -54,7 +56,7 @@ public class LobbySessionUI : SimulationBehaviour
     }
     public async void PressRandomJoinButton()
     {
-        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI(loadingUIPrefab);
         loadingUI.Init("접속 가능한 게임 방에 접속 중입니다.");
         StartGameResult result = await GameManager.network.JoinRandomSession();
         loadingUI.CloseUI();
@@ -65,7 +67,7 @@ public class LobbySessionUI : SimulationBehaviour
         }
         else
         {
-            GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("방 접속 실패", "접속 가능한 게임 방이 없습니다.", null);
+            GameManager.UI.ShowPopUpUI(messageBoxUIPrefab).Init("방 접속 실패", "접속 가능한 게임 방이 없습니다.", null);
             print("널");
         }
 

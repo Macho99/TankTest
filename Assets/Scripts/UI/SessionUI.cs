@@ -14,19 +14,25 @@ public class SessionUI : MonoBehaviour
     [SerializeField] private SessionUserUI sessionUserItemPrefab;
     [SerializeField] private TextMeshProUGUI readyOrStartText;
     private NetworkManager networkManager;
+    private SessionInfo sessionInfo;
+    private LoadingUI loadingUIPrefab;
 
     private Dictionary<PlayerRef, RoomPlayer> sessionUserDic;
     private void Awake()
     {
         sessionUserDic = new Dictionary<PlayerRef, RoomPlayer>();
+        loadingUIPrefab = GameManager.Resource.Load<LoadingUI>("UI/LoadingUI");
     }
     private void OnEnable()
     {
         if (networkManager == null)
             networkManager = GameManager.network;
 
-
+        sessionInfo = networkManager.Runner.SessionInfo;
+        sessionNameTMP.text = sessionInfo.Name;
+        sessionCountTMP.text = $"({sessionInfo.PlayerCount}/{sessionInfo.MaxPlayers})";
     }
+   
 
     private void Update()
     {
@@ -67,28 +73,15 @@ public class SessionUI : MonoBehaviour
         }
 
     }
-    public void CreateSession(string sessionName, int maxCount)
-    {
-        Debug.LogWarning(gameObject);
-        gameObject.SetActive(true);
-       
-        sessionNameTMP.text = sessionName;
-        sessionCountTMP.text = $"1/{maxCount}";
-    }
-    public void JoinSession(SessionInfo sessionInfo)
-    {
-        gameObject.SetActive(true);
-        sessionNameTMP.text = sessionInfo.Name;
-        sessionCountTMP.text = $"({sessionInfo.PlayerCount}/{sessionInfo.MaxPlayers})";
-    }
+
 
     public async void ExitSession()
     {
-        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI(loadingUIPrefab);
         loadingUI.Init("방을 나가는 중입니다.");
         Debug.LogWarning("networkmanagersutdown");
         await networkManager.JoinLobby();
-    
+
         loadingUI.CloseUI();
     }
     public void PressReadyOrStartButton()
@@ -100,10 +93,10 @@ public class SessionUI : MonoBehaviour
             {
                 PlayerPreviewController playerPreview = FindObjectOfType<PlayerPreviewController>();
                 sessionUserDic[playerRef].RPC_Ready();
-                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Preset,playerPreview.GetCurrenIndex(AppearanceType.Preset));
-                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Color,playerPreview.GetCurrenIndex(AppearanceType.Color));
-                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Hair,playerPreview.GetCurrenIndex(AppearanceType.Hair));
-                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Breard,playerPreview.GetCurrenIndex(AppearanceType.Breard));
+                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Preset, playerPreview.GetCurrenIndex(AppearanceType.Preset));
+                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Color, playerPreview.GetCurrenIndex(AppearanceType.Color));
+                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Hair, playerPreview.GetCurrenIndex(AppearanceType.Hair));
+                sessionUserDic[playerRef].RPC_AddClientPreset(AppearanceType.Breard, playerPreview.GetCurrenIndex(AppearanceType.Breard));
             }
             else
             {

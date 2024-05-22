@@ -68,11 +68,19 @@ public class PlayerInteract : NetworkBehaviour,IAfterSpawned
     public void RaycastDetect()
     {
 
-        Ray ray = new Ray();
-        ray.origin = raycastTr.position;
-        ray.direction = raycastTr.transform.forward;
+   
 
-        //Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.red);
+        Ray ray = new Ray();
+        Vector3 origin = transform.position - raycastTr.position;
+        float angle = Mathf.Abs(Vector3.Angle(origin, raycastTr.forward));
+
+        float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
+        float newZ = origin.magnitude * cos;
+
+        ray.origin = raycastTr.position + raycastTr.forward * newZ;
+        ray.direction = raycastTr.forward;
+
+        Debug.DrawRay(ray.origin, ray.direction * rayDistance, Color.red);
         if (Physics.Raycast(ray, out RaycastHit hit, rayDistance, interactMask, QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.TryGetComponent(out IDetectable detectObject))
@@ -81,6 +89,7 @@ public class PlayerInteract : NetworkBehaviour,IAfterSpawned
                 this.interactData = interctData;
                 IsDetect = true;
                 onDetect?.Invoke(IsDetect, this.interactData);
+                print(hit.collider.gameObject.name);
                 return;
             }
         }

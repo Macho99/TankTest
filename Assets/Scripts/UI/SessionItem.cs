@@ -15,6 +15,12 @@ public class SessionItem : NetworkBehaviour
     [SerializeField] private Button sessionJoinButton;
     private SessionInfo sessionInfo;
     private PrivateSessionConnetUI privateSessionConnetUI;
+    private LoadingUI loadingUIPrefab;
+
+    private void Awake()
+    {
+        loadingUIPrefab = GameManager.Resource.Load<LoadingUI>("UI/LoadingUI");
+    }
 
     public void CreateSessionItem(SessionInfo newSessionInfo,  PrivateSessionConnetUI privateSessionConnetUI = null)
     {
@@ -43,7 +49,7 @@ public class SessionItem : NetworkBehaviour
         }
         else
         {
-            LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+            LoadingUI loadingUI = GameManager.UI.ShowPopUpUI(loadingUIPrefab);
             loadingUI.Init("게임 방에 입장중 입니다.");
             StartGameResult result = await GameManager.network.JoinSession(sessionInfo);
            

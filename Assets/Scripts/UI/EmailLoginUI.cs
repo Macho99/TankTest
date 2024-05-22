@@ -14,12 +14,14 @@ public class EmailLoginUI : PageUI
     [SerializeField] private TMP_InputField passwordInputfield;
     [SerializeField] private Toggle saveIDToggle;
     [SerializeField] private Toggle autoSaveToggle;
-
+    private LoadingUI loadingUIPrefab;
+    private MessageBoxUI messageBoxUIPrefab;
     public UnityEvent onSuccessLogin;
     private void Awake()
     {
         Debug.Log("awake");
-
+        loadingUIPrefab = GameManager.Resource.Load<LoadingUI>("UI/LoadingUI");
+        messageBoxUIPrefab = GameManager.Resource.Load<MessageBoxUI>("UI/MessageBoxUI");
     }
 
     public void Init(string email, bool isSaveID, bool isAutoLogin)
@@ -49,11 +51,11 @@ public class EmailLoginUI : PageUI
         UIManager uIManager = GameManager.UI;
         if (emailInputfield.text == string.Empty || passwordInputfield.text == string.Empty)
         {
-            GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("로그인 실패", "입력칸에 모두 입력 하셔야합니다.", null);
+            GameManager.UI.ShowPopUpUI(messageBoxUIPrefab).Init("로그인 실패", "입력칸에 모두 입력 하셔야합니다.", null);
             return;
         }
 
-        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI(loadingUIPrefab);
         loadingUI.Init("로그인 시도 중입니다.");
 
         AuthResult authResult = await GameManager.auth.LoginWithEmailAndPassword(emailInputfield.text, passwordInputfield.text);
@@ -73,7 +75,7 @@ public class EmailLoginUI : PageUI
             }
             else
             {
-                GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("로비 접속 실패", "연결 할 수 없습니다.", null);
+                GameManager.UI.ShowPopUpUI(messageBoxUIPrefab).Init("로비 접속 실패", "연결 할 수 없습니다.", null);
             }
             loadingUI.CloseUI();
 
@@ -81,7 +83,7 @@ public class EmailLoginUI : PageUI
         }
         else
         {
-            GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("로그인 실패", "로그인 정보가 맞지않습니다.", null);
+            GameManager.UI.ShowPopUpUI(messageBoxUIPrefab).Init("로그인 실패", "로그인 정보가 맞지않습니다.", null);
         }
 
 

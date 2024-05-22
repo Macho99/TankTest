@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 public enum WeaponState { None, Reload, Put, Draw, Shot }
 public enum WeaponAnimLayerType { Base, Pistol, Rifle, Shotgun, Bazuka, SniperRifle, Mily, Size }
 
-public class WeaponController : NetworkBehaviour, IAfterSpawned , IStateMachineOwner
+public class WeaponController : NetworkBehaviour, IAfterSpawned, IStateMachineOwner
 {
     [SerializeField] private WeaponStates[] weaponStates;
     [SerializeField] private Equipment equipment;
@@ -143,7 +143,6 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned , IStateMachineO
 
                         float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
                         float newZ = origin.magnitude * cos;
-
 
                         ray.origin = camController.RayCasterTr.position + camController.RayCasterTr.forward * newZ;
                         ray.direction = camController.RayCasterTr.forward;
@@ -293,10 +292,14 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned , IStateMachineO
             return;
 
 
-        if (inputListner.currentInput.buttons.IsSet(ButtonType.Adherence))
+        if (GetInput(out NetworkInputData input))
         {
-            camController.ChangeCamera(BasicCamController.CameraType.Aim);
+            if (input.buttons.IsSet(ButtonType.Adherence))
+            {
+                camController.ChangeCamera(BasicCamController.CameraType.Aim);
+            }
         }
+
         if (inputListner.releaseButton.IsSet(ButtonType.Adherence))
         {
             camController.ChangeCamera(BasicCamController.CameraType.None);

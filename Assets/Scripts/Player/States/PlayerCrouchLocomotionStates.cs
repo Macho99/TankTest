@@ -34,8 +34,12 @@ public class PlayerCrouchLocomotionStates : PlayerStates
         if (owner.animator.GetCurrentAnimatorStateInfo(0).IsTag("CrouchIdle") || owner.animator.GetCurrentAnimatorStateInfo(0).IsName("CrouchMove") && isCrouchToIdleStart == false)
         {
 
-            owner.movement.Rotate(owner.InputListner.currentInput);
-            owner.movement.SetMove(owner.InputListner.currentInput);
+            if(GetInput(out NetworkInputData input))
+            {
+                owner.movement.Rotate(input);
+                owner.movement.SetMove(input);
+            }
+      
             owner.weaponController.WeaponControls();
 
             if (owner.InputListner.pressButton.IsSet(ButtonType.Crouch) && owner.movement.IsGround())

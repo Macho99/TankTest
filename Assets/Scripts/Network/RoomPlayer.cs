@@ -25,13 +25,17 @@ public class RoomPlayer : NetworkBehaviour
         {
             isHost = HasStateAuthority;
             IsReady = false;
-
         }
 
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        Debug.LogWarning("despawned");
+        if (GameManager.network.GetPlayer(runner.LocalPlayer, out NetworkObject player))
+        {
+            GameManager.network.RemovePlayer(runner.LocalPlayer);
+        }
         onDespawn?.Invoke();
         if (userUI != null)
             Destroy(userUI.gameObject);
@@ -67,7 +71,8 @@ public class RoomPlayer : NetworkBehaviour
     }
     public void ReadEvent()
     {
-        userUI.ActiveReady(IsReady);
+        if (userUI != null)
+            userUI.ActiveReady(IsReady);
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]

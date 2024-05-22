@@ -54,9 +54,11 @@ public class LoadSceneManager : NetworkSceneManagerDefault
 
        
         await Runner.LoadScene(networkManager.GetSceneRef(SceneType.LoadingScene), LoadSceneMode.Additive, setActiveOnLoad: true);
-        await Runner.LoadScene(networkManager.GetSceneRef(SceneType.GameScene), LoadSceneMode.Additive, setActiveOnLoad: true);
         await Runner.UnloadScene(networkManager.GetSceneRef(SceneType.RoomScene));
+
+        await Runner.LoadScene(networkManager.GetSceneRef(SceneType.GameScene), LoadSceneMode.Additive, setActiveOnLoad: true);
         await Runner.UnloadScene(networkManager.GetSceneRef(SceneType.LoadingScene));
+      
 
 
 
@@ -83,11 +85,8 @@ public class LoadSceneManager : NetworkSceneManagerDefault
 
         }
 
-        Debug.Log(Runner.ActivePlayers.ToArray().Length);
         Runner.SessionInfo.IsOpen = true;
-        Runner.SessionInfo.IsVisible = true;
-        print("Load");
-
+        Runner.SessionInfo.IsVisible = true;    
     }
 
 
@@ -103,9 +102,6 @@ public class LoadSceneManager : NetworkSceneManagerDefault
     {
         yield return base.LoadSceneCoroutine(sceneRef, sceneParams);
      
-
-
-        Debug.Log(sceneRef);
 
 
     }

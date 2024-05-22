@@ -15,9 +15,13 @@ public class CreateSessionUI : MonoBehaviour
     [SerializeField] private Toggle publicToggle;
     [SerializeField] private Toggle privateToggle;
     [SerializeField] private TMP_InputField passwordField;
-
+    private LoadingUI loadingUIPrefab;
     public UnityEvent onCreateSession;
 
+    private void Awake()
+    {
+        loadingUIPrefab = GameManager.Resource.Load<LoadingUI>("UI/LoadingUI");
+    }
     private void OnEnable()
     {
         nameField.text = string.Empty;
@@ -33,9 +37,9 @@ public class CreateSessionUI : MonoBehaviour
     }
     public async void PressCreateSessionButton()
     {
-        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI(loadingUIPrefab);
         loadingUI.Init("방을 만드는 중입니다.");
-      
+
         StartGameResult result = await GameManager.network.CreateRoom(nameField.text, Convert.ToInt32(maxPlayerCoutnTMP.text), passwordField.text);
         if (result.Ok)
         {
