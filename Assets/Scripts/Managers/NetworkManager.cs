@@ -37,12 +37,10 @@ public class NetworkManager : MonoBehaviour
 
     public event Action<List<SessionInfo>> onSessionUpdate;
     private List<SessionInfo> sessionInfos;
-    private PlaceType placeType;
     private int numbering;
     private PlayerControls playerControls;
 
     public Action<NetworkRunner> onRunnerAction;
-    public PlaceType CurrentPlace { get { return placeType; } set { placeType = value; } }
 
     public NetworkRunner Runner { get { return runner; } }
 
@@ -75,7 +73,10 @@ public class NetworkManager : MonoBehaviour
             if (runner.IsSceneAuthority)
                 await runner.UnloadScene(sceneData[(int)SceneType.RoomScene].GetScenRef());
             else
+            {
                 SceneManager.UnloadSceneAsync(sceneData[(int)SceneType.RoomScene].GetScenRef().AsIndex);
+
+            }
             await runner.Shutdown(true);
             runner = null;
         }
@@ -97,7 +98,6 @@ public class NetworkManager : MonoBehaviour
         if (result.Ok)
         {
             Debug.Log("Lobby Join Success");
-            placeType = PlaceType.Lobby;
         }
         else
         {
@@ -117,7 +117,6 @@ public class NetworkManager : MonoBehaviour
         }
         var sceneInfo = new NetworkSceneInfo();
 
-        sceneInfo.AddSceneRef(sceneData[(int)SceneType.StartScene].GetScenRef());
         sceneInfo.AddSceneRef(sceneData[(int)SceneType.RoomScene].GetScenRef(), LoadSceneMode.Additive, activeOnLoad: true);
         INetworkSceneManager networkSceneManager = runner.GetComponent<LoadSceneManager>();
 
@@ -140,7 +139,6 @@ public class NetworkManager : MonoBehaviour
         }
         else
         {
-            placeType = PlaceType.Session;
             Debug.LogWarning(result);
         }
 
@@ -149,32 +147,31 @@ public class NetworkManager : MonoBehaviour
     }
     public async Task<StartGameResult> JoinRandomSession()
     {
-        try
+
+
+        StartGameResult result = await runner.StartGame(new StartGameArgs()
         {
+            GameMode = GameMode.Client,
 
-            StartGameResult result = await runner.StartGame(new StartGameArgs()
-            {
-                GameMode = GameMode.AutoHostOrClient,
+        });
 
-            });
-            if (result.Ok)
-            {
-                placeType = PlaceType.Session;
-            }
-            else
-            {
-                placeType = PlaceType.Lobby;
-
-            }
-            print(result);
-            return result;
-        }
-        catch (Exception e)
+        if(!result.Ok)
         {
-            Debug.Log(e.Message);
-            return null;
+            runner = GameManager.Resource.Instantiate<NetworkRunner>("Other/Runner");
+            runner.gameObject.name = "SessionRunner" + numbering;
+            numbering++;
+            onRunnerAction?.Invoke(runner);
+            NetworkEvents networkEvents = runner.GetComponent<NetworkEvents>();
+            networkEvents.OnSessionListUpdate.AddListener(OnSessionListUpdated);
+
+
+            Debug.LogWarning(runner.gameObject.name);
+            LoadSceneManager networkSceneManager = runner.GetComponent<LoadSceneManager>();
+            networkSceneManager.Init(this);
+            await runner.JoinSessionLobby(SessionLobby.ClientServer);
         }
 
+        return result;
 
 
     }
@@ -197,10 +194,6 @@ public class NetworkManager : MonoBehaviour
             IsVisible = sessionInfo.IsVisible,
 
         });
-        if (result.Ok)
-        {
-            placeType = PlaceType.Session;
-        }
         return result;
     }
     public async Task ExitLobby(bool isLobby)
@@ -215,10 +208,7 @@ public class NetworkManager : MonoBehaviour
                 runner = GameManager.Resource.Instantiate<NetworkRunner>("Other/Runner");
                 onRunnerAction?.Invoke(runner);
                 StartGameResult result = await runner.JoinSessionLobby(SessionLobby.ClientServer);
-                if (result.Ok)
-                {
-                    placeType = PlaceType.Lobby;
-                }
+
 
             }
         }

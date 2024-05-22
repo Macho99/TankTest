@@ -23,6 +23,27 @@ public class AuthManager : MonoBehaviour
         Init();
 
     }
+    private void OnDestroy()
+    {
+        if (auth.CurrentUser != null)
+        {
+            if (LocalSaveLoader.LoadDataWithLocal("LoginSetting", out LoginSetting setting))
+            {
+                if (setting.isAutoSave == false)
+                {
+                    SignOut();
+                    Debug.LogWarning("SignOut");
+                }
+            }
+            else
+            {
+                SignOut();
+                Debug.LogWarning("SignOut");
+            }
+        }
+
+
+    }
     private void Init()
     {
         auth = FirebaseAuth.DefaultInstance;

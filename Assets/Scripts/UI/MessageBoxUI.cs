@@ -13,6 +13,7 @@ public class MessageBoxUI : PopUpUI
     [SerializeField] private RectTransform buttonRect;
     [SerializeField] private Button buttonPrefab;
 
+    private List<Button> buttonList = new List<Button>();
 
 
     public void Init(string title, string content, params CreateButton[] createButton)
@@ -26,6 +27,7 @@ public class MessageBoxUI : PopUpUI
             for (int i = 0; i < createButton.Length; i++)
             {
                 Button button = Instantiate(buttonPrefab, buttonRect);
+                buttonList.Add(button);
                 TextMeshProUGUI buttonName = button.GetComponentInChildren<TextMeshProUGUI>();
                 buttonName.text = createButton[i].buttonName;
                 Debug.Log(buttonName.text);
@@ -36,13 +38,25 @@ public class MessageBoxUI : PopUpUI
         else
         {
             Button button = Instantiate(buttonPrefab, buttonRect);
+            buttonList.Add(button);
             TextMeshProUGUI buttonName = button.GetComponentInChildren<TextMeshProUGUI>();
             buttonName.text = "È®ÀÎ";
             button.onClick.AddListener(() => { CloseUI(); });
         }
 
         this.transform.SetAsLastSibling();
+        Debug.LogWarning("true");
         gameObject.SetActive(true);
+
+    }
+    public override void CloseUI()
+    {
+        for (int i = 0; i < buttonList.Count; i++)
+        {
+            Destroy(buttonList[i].gameObject);
+            buttonList.Remove(buttonList[i]);
+        }
+        base.CloseUI();
     }
 }
 public class CreateButton

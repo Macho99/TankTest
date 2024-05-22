@@ -57,18 +57,16 @@ public class LobbySessionUI : SimulationBehaviour
         LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
         loadingUI.Init("접속 가능한 게임 방에 접속 중입니다.");
         StartGameResult result = await GameManager.network.JoinRandomSession();
-
-        if (result != null)
+        loadingUI.CloseUI();
+        if (result.Ok)
         {
             onConnetSession?.Invoke();
-            loadingUI.CloseUI();
+           
         }
         else
         {
             GameManager.UI.ShowPopUpUI<MessageBoxUI>("UI/MessageBoxUI").Init("방 접속 실패", "접속 가능한 게임 방이 없습니다.", null);
-
             print("널");
-            loadingUI.CloseUI();
         }
 
 
