@@ -22,37 +22,38 @@ public class TestSpawner : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log(GameManager.network.Runner);
+
         NetworkRunner runner = FindObjectOfType<NetworkRunner>();
-        if (runner == null)
+        if (runner == null || runner.State == NetworkRunner.States.Shutdown)
         {
+            Debug.Log(GameManager.network.Runner);
             StarGame(runner);
             lookAccum.Accumulate(Mouse.current.delta.ReadValue());
+            return;
         }
-        
+
         Debug.Log("생성안함");
         SetupEvent(runner);
 
     }
     public async void StarGame(NetworkRunner runner)
     {
-        if (runner == null)
-        {
-            runner = GameManager.Resource.Instantiate<NetworkRunner>("Other/Runner");
-            runner.name = "테스트 스포너";
-            GameManager.network.Runner = runner;
-            NetworkEvents networkEvents = runner.GetComponent<NetworkEvents>();
-            SetupEvent(runner);
 
-            StartGameArgs startGameArgs = new StartGameArgs();
-            startGameArgs.GameMode = GameMode.AutoHostOrClient;
-            startGameArgs.SessionName = "Test";
-            startGameArgs.Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
-            runner.ProvideInput = true;
-            Debug.Log("생성");
-            await runner.StartGame(startGameArgs);
-            return;
-        }
+        runner = GameManager.Resource.Instantiate<NetworkRunner>("Other/Runner");
+        runner.name = "테스트 스포너";
+        GameManager.network.Runner = runner;
+        NetworkEvents networkEvents = runner.GetComponent<NetworkEvents>();
+        SetupEvent(runner);
+
+        StartGameArgs startGameArgs = new StartGameArgs();
+        startGameArgs.GameMode = GameMode.AutoHostOrClient;
+        startGameArgs.SessionName = "Test";
+        startGameArgs.Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
+        runner.ProvideInput = true;
+        Debug.Log("생성");
+        await runner.StartGame(startGameArgs);
+        return;
+
     }
 
     private void OnEnable()
@@ -140,7 +141,7 @@ public class TestSpawner : MonoBehaviour
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-       
+
         playerInput.inputDirection = playerControls.Player.Move.ReadValue<Vector2>();
         playerInput.buttons.Set(ButtonType.Run, playerControls.Player.Run.IsPressed());
         playerInput.buttons.Set(ButtonType.Jump, playerControls.Player.Jump.IsPressed());
@@ -159,7 +160,7 @@ public class TestSpawner : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            
+
         }
         playerInput.buttons.Set(ButtonType.ActiveItemContainer, playerControls.Player.ActiveItemContainer.IsPressed());
         playerInput.buttons.Set(ButtonType.PutWeapon, playerControls.Player.PutWeapon.IsPressed());
@@ -178,8 +179,8 @@ public class TestSpawner : MonoBehaviour
     private void Update()
     {
         lookAccum.Accumulate(Mouse.current.delta.ReadValue());
-      
+
     }
 
-   
+
 }
