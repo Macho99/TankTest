@@ -9,6 +9,7 @@ public class RPGExplostion : NetworkBehaviour
     [SerializeField] private float explostionSize;
     [SerializeField] private float explostionlifeTime;
     [SerializeField] private LayerMask layerMask;
+    [SerializeField] private AudioClip explostionSFX;
     [Networked] private TickTimer lifeTimer { get; set; }
     [SerializeField] private int damage;
 
@@ -35,6 +36,7 @@ public class RPGExplostion : NetworkBehaviour
             }
         }
         particle.Play();
+        GameManager.Sound.PlayOneShot(explostionSFX, AudioGroup.SFX, transform);
     }
     public override void FixedUpdateNetwork()
     {

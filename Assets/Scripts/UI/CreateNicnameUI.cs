@@ -9,7 +9,7 @@ using UnityEngine.Events;
 public class CreateNicnameUI : MonoBehaviour
 {
     [SerializeField] private TMP_InputField nicnameInputField;
-
+    [SerializeField] private AudioClip buttonClickSFX;
     public UnityEvent onSuccess;
 
     private void OnDisable()
@@ -18,9 +18,10 @@ public class CreateNicnameUI : MonoBehaviour
     }
     public async void PressRegistButton()
     {
+        GameManager.Sound.PlayOneShot(buttonClickSFX, AudioGroup.SFX, Camera.main.transform, false);
         if (nicnameInputField.text == string.Empty)
             return;
-
+       
         LoadingUI loadingUI = GameManager.UI.ShowPopUpUI<LoadingUI>("UI/LoadingUI");
         loadingUI.Init("회원가입을 시도 하고있습니다.");
 
@@ -52,6 +53,7 @@ public class CreateNicnameUI : MonoBehaviour
     }
     public void PressCancelButton()
     {
+        GameManager.Sound.PlayOneShot(buttonClickSFX, AudioGroup.SFX, Camera.main.transform, false);
         gameObject.SetActive(false);
     }
 

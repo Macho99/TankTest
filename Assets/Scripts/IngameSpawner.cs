@@ -177,8 +177,8 @@ public class IngameSpawner : NetworkBehaviour
 		playerInput.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
 		playerInput.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
 		playerInput.buttons.Set(ButtonType.Reload, playerControls.Player.Reload.IsPressed());
-
-		input.Set(playerInput);
+        playerInput.buttons.Set(ButtonType.ZombieInfoOpen, playerControls.Player.ZombieInfoOpen.IsPressed());
+        input.Set(playerInput);
 		playerInput = default;
 	}
 

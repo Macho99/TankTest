@@ -14,6 +14,7 @@ public class EmailSignupUI : PageUI
     [SerializeField] private TMP_InputField pwCheckInputfield;
     [SerializeField] private TMP_InputField nicnameInputfield;
     [SerializeField] private Button signupButton;
+    [SerializeField] private AudioClip buttonClickSFX;
     private MessageBoxUI messageBoxUIPrefab;
     private LoadingUI loadingUIPrefab;
     public UnityEvent onSuccessRegist;
@@ -76,5 +77,9 @@ public class EmailSignupUI : PageUI
             Debug.Log("complete");
         }
 
+    }
+    public void PressButtonClick()
+    {
+        GameManager.Sound.PlayOneShot(buttonClickSFX, AudioGroup.SFX, Camera.main.transform, false);
     }
 }

@@ -17,6 +17,7 @@ public class EmailLoginUI : PageUI
     private LoadingUI loadingUIPrefab;
     private MessageBoxUI messageBoxUIPrefab;
     public UnityEvent onSuccessLogin;
+    [SerializeField] private AudioClip buttonClickSFX;
     private void Awake()
     {
         Debug.Log("awake");
@@ -47,7 +48,6 @@ public class EmailLoginUI : PageUI
 
     public async void PressLoginButton()
     {
-
         UIManager uIManager = GameManager.UI;
         if (emailInputfield.text == string.Empty || passwordInputfield.text == string.Empty)
         {
@@ -93,8 +93,12 @@ public class EmailLoginUI : PageUI
         loadingUI.CloseUI();
 
     }
-    public void SaveLoginSetting()
+    public void PressButton()
     {
+        GameManager.Sound.PlayOneShot(buttonClickSFX, AudioGroup.SFX, Camera.main.transform, false);
+    }
+    public void SaveLoginSetting()
+    {   
         LoginSetting loginSetting = new LoginSetting();
         loginSetting.isSaveID = saveIDToggle.isOn;
         if (loginSetting.isSaveID == false)

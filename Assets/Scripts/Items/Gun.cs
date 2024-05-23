@@ -47,11 +47,11 @@ public abstract class Gun : Weapon
     }
     public override bool CanAttack()
     {
-       
+
         if (currentAmmoCount <= 0)
             return false;
 
- 
+
         return refireTimer.ExpiredOrNotRunning(Runner);
     }
 
@@ -61,9 +61,9 @@ public abstract class Gun : Weapon
         {
             GameObject muzzleFlash = GameManager.Resource.Instantiate(muzzlePlashPrefab, muzzlePoint, true);
             muzzleFlash.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-
+           
         }
-
+        GameManager.Sound.PlayOneShot(fireSFX, AudioGroup.SFX, transform, true);
 
     }
     public virtual void Reload(int ammo)

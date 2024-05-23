@@ -12,7 +12,7 @@ public class MessageBoxUI : PopUpUI
     [SerializeField] private TextMeshProUGUI contentText;
     [SerializeField] private RectTransform buttonRect;
     [SerializeField] private Button buttonPrefab;
-
+    [SerializeField] private AudioClip buttonClickSFX;
     private List<Button> buttonList = new List<Button>();
 
 
@@ -51,6 +51,7 @@ public class MessageBoxUI : PopUpUI
     }
     public override void CloseUI()
     {
+        GameManager.Sound.PlayOneShot(buttonClickSFX, AudioGroup.SFX, Camera.main.transform, false);
         for (int i = 0; i < buttonList.Count; i++)
         {
             Destroy(buttonList[i].gameObject);

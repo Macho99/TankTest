@@ -105,16 +105,18 @@ public class TestSpawner : MonoBehaviour
             events.PlayerJoined.AddListener(OnPlayerJoined);
             events.PlayerLeft.AddListener(OnPlayerLeft);
             events.OnInput.AddListener(OnInput);
-
+            events.OnHostMigration.AddListener(OnHostMigration);
             Debug.Log(events);
             return;
         }
 
 
-
     }
 
-
+    private void OnHostMigration(NetworkRunner runner,HostMigrationToken token)
+    {
+    
+    }
     private void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         if (!runner.IsServer)
@@ -125,9 +127,10 @@ public class TestSpawner : MonoBehaviour
             Debug.Log(player);
 
             runner.Despawn(networkObject);
+          
         }
     }
-
+    
 
     void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
@@ -171,6 +174,7 @@ public class TestSpawner : MonoBehaviour
         playerInput.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
         playerInput.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
         playerInput.buttons.Set(ButtonType.Reload, playerControls.Player.Reload.IsPressed());
+        playerInput.buttons.Set(ButtonType.ZombieInfoOpen, playerControls.Player.ZombieInfoOpen.IsPressed());
 
         input.Set(playerInput);
         playerInput = default;
