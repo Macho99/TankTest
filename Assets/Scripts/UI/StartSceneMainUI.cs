@@ -11,12 +11,18 @@ public class StartSceneMainUI : MonoBehaviour
     [SerializeField] private AuthUI authUI;
     [SerializeField] private LobbyUI lobbyUI;
     private MessageBoxUI messageBoxUIPrefab;
+    private LoadingUI loadingUIPrefab;
 
     Action action;
     // Start is called before the first frame update
     void Start()
     {
         messageBoxUIPrefab = GameManager.Resource.Load<MessageBoxUI>("UI/MessageBoxUI");
+        MessageBoxUI messageBoxUI = GameManager.UI.ShowPopUpUI(messageBoxUIPrefab);
+        messageBoxUI.CloseUI();
+        loadingUIPrefab = GameManager.Resource.Load<LoadingUI>("UI/LoadingUI");
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI(loadingUIPrefab);
+        loadingUI.CloseUI();
         Initialized();
     }
     public void Initialized()

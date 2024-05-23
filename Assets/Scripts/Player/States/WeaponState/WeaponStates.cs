@@ -5,5 +5,8 @@ using UnityEngine;
 
 public class WeaponStates : StateBehaviour<WeaponStates>
 {
-    [SerializeField] protected WeaponController owner;
+    [SerializeField] protected WeaponController weaponController;
+    [SerializeField] protected PlayerController owner;
+
+  
 }
