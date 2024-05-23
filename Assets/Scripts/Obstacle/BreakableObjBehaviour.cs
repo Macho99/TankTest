@@ -15,7 +15,7 @@ public class BreakableObjBehaviour : NetworkBehaviour
 		public float force;
 	}
 
-	const int NETWORK_ARR_LENGTH = 100;
+	const int NETWORK_ARR_LENGTH = 59;
 
 	bool spawned;
 	bool isFirstRender = true;

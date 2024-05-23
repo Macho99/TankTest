@@ -80,7 +80,7 @@ public class VehicleBehaviour : NetworkBehaviour
 
 		RotateCam(input);
 
-		if (pressed.IsSet(ButtonType.Interact))
+		if (PlayerGetOn == true && pressed.IsSet(ButtonType.Interact))
 		{
 			GetOff();
 		}
