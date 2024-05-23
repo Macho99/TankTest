@@ -13,6 +13,7 @@ public class SessionUI : MonoBehaviour
     [SerializeField] private RectTransform sessionUserList;
     [SerializeField] private SessionUserUI sessionUserItemPrefab;
     [SerializeField] private TextMeshProUGUI readyOrStartText;
+    [SerializeField] private AudioClip buttonClickSFX;
     private NetworkManager networkManager;
     private SessionInfo sessionInfo;
     private LoadingUI loadingUIPrefab;
@@ -74,7 +75,10 @@ public class SessionUI : MonoBehaviour
 
     }
 
-
+    public void PressButton()
+    {
+        GameManager.Sound.PlayOneShot(buttonClickSFX, AudioGroup.SFX, Camera.main.transform, false);
+    }
     public async void ExitSession()
     {
         LoadingUI loadingUI = GameManager.UI.ShowPopUpUI(loadingUIPrefab);

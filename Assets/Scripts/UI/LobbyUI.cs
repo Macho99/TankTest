@@ -9,7 +9,7 @@ public class LobbyUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI playerNicnameText;
     public UnityEvent onLogout;
-
+    [SerializeField] private AudioClip buttonClickSFX;
     private void OnEnable()
     {
         AuthManager authManager = GameManager.auth;
@@ -36,5 +36,9 @@ public class LobbyUI : MonoBehaviour
         await GameManager.network.ExitLobby(false);
 
         this.gameObject.SetActive(false);
+    }
+    public void PressButton()
+    {
+        GameManager.Sound.PlayOneShot(buttonClickSFX, AudioGroup.SFX, Camera.main.transform, false);
     }
 }

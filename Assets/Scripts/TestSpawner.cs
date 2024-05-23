@@ -105,16 +105,18 @@ public class TestSpawner : MonoBehaviour
             events.PlayerJoined.AddListener(OnPlayerJoined);
             events.PlayerLeft.AddListener(OnPlayerLeft);
             events.OnInput.AddListener(OnInput);
-
+            events.OnHostMigration.AddListener(OnHostMigration);
             Debug.Log(events);
             return;
         }
 
 
-
     }
 
-
+    private void OnHostMigration(NetworkRunner runner,HostMigrationToken token)
+    {
+    
+    }
     private void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
         if (!runner.IsServer)
@@ -125,9 +127,10 @@ public class TestSpawner : MonoBehaviour
             Debug.Log(player);
 
             runner.Despawn(networkObject);
+          
         }
     }
-
+    
 
     void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
