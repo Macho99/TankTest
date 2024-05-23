@@ -116,7 +116,8 @@ public class ZombieRagdollExit : ZombieState
 
 	public override void Exit()
 	{
-		owner.SyncTransfrom = true;
+		if(owner.IsDead == false)
+			owner.SyncTransfrom = true;
 
 		owner.EnableRagdoll(false);
 		owner.Anim.enabled = true;

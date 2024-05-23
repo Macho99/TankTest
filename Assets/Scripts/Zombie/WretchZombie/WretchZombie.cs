@@ -267,7 +267,7 @@ public class WretchZombie : ZombieBase
 
 		while (CurPoisonVFXData.finishTick == 0 || Runner.Tick.Raw < CurPoisonVFXData.finishTick)
 		{
-			float renderTime = Object.IsProxy ? Runner.RemoteRenderTime : Runner.LocalRenderTime;
+			float renderTime = Runner.RemoteRenderTime;
 			float startTime = CurPoisonVFXData.fireTick / Runner.TickRate;
 			float flyTime = renderTime - startTime;
 			Vector3 pos = CurPoisonVFXData.startPosition + (CurPoisonVFXData.velocity + 

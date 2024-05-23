@@ -1,16 +1,9 @@
 using Fusion;
 using Fusion.Addons.SimpleKCC;
-using Fusion.Sockets;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Events;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public class IngameSpawner : NetworkBehaviour
@@ -19,8 +12,8 @@ public class IngameSpawner : NetworkBehaviour
 	[SerializeField] TextMeshProUGUI infoText;
 	[SerializeField] NetworkPrefabRef zombiePrefab;
 	[SerializeField] Transform spawnPoint;
+	[SerializeField] bool spawnZombie;
 
-	bool spawned = false;
 	private PlayerControls playerControls;
 	NetworkInputData playerInput = new NetworkInputData();
 	Vector2Accumulator lookAccum = new Vector2Accumulator(0.02f, true);
@@ -46,7 +39,8 @@ public class IngameSpawner : NetworkBehaviour
 		if (HasStateAuthority)
 		{
 			infoText.text = "호스트로 연결됨";
-			SpawnInitZombie();
+			if(spawnZombie)
+				SpawnInitZombie();
 		}
 		else
 		{
@@ -76,6 +70,7 @@ public class IngameSpawner : NetworkBehaviour
 
 	public void SpawnZombie(NetworkRunner.OnBeforeSpawned beforeSpawned = null)
 	{
+		return;
 		if (beforeSpawned == null)
 		{
 			beforeSpawned = BeforeSpawned;

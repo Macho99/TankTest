@@ -195,7 +195,7 @@ public class ZombieTrace : ZombieState
 			return;
 		}
 
-		if(traceSoundTimer.Expired(owner.Runner))
+		if(traceSoundTimer.Expired(owner.Runner) && owner.TargetData.IsTargeting == true)
 		{
 			owner.PlaySound(ZombieSoundType.Trace);
 			traceSoundTimer = TickTimer.CreateFromSeconds(owner.Runner, 5f);

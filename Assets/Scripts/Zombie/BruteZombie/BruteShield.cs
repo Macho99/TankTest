@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 
 public class BruteShield : MonoBehaviour, IHittable
 {
-	[SerializeField] int maxShieldHp = 1000;
+	[SerializeField] int maxShieldHp = 2000;
 
 	Rigidbody rb;
 	Collider col;
