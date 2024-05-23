@@ -252,7 +252,7 @@ public class NetworkManager : MonoBehaviour
 
 }
 public enum ButtonType
-{ PlayerMove, MouseDelta, Run, Jump, Crouch, MouseLock, Interact, Reload, Adherence, ActiveItemContainer, PutWeapon, FirstWeapon, SecondWeapon, SubWeapon, MilyWeapon, BombWeapon, Attack, Size }
+{ PlayerMove, MouseDelta, Run, Jump, Crouch, MouseLock, Interact, Reload, Adherence, ActiveItemContainer, PutWeapon, FirstWeapon, SecondWeapon, SubWeapon, MilyWeapon, BombWeapon, Attack,ZombieInfoOpen ,Size }
 public struct NetworkInputData : INetworkInput
 {
 

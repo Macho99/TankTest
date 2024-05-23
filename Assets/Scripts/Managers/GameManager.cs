@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Resources;
@@ -20,10 +21,16 @@ public class GameManager : MonoBehaviour
     private static DataManager dataManager;
     private static SoundManager soundManager;
 
-    public int NormalZombieCnt { get; set; }
-    public int BruteZombieCnt { get; set; }
-    public int WretchZombieCnt { get; set; }
+    private int normalZombieCnt;
+    private int bruteZombieCnt;
+    private int wretchZombieCnt;
+    public int NormalZombieCnt { get=>normalZombieCnt; set { normalZombieCnt = value; onChangeNormalZombieCnt?.Invoke(normalZombieCnt); } }
+    public int BruteZombieCnt { get => bruteZombieCnt; set { bruteZombieCnt = value; onChangeBruteZombieCnt?.Invoke(bruteZombieCnt); } }
+    public int WretchZombieCnt { get => wretchZombieCnt; set { wretchZombieCnt = value; onChangeWretchZombieCnt?.Invoke(wretchZombieCnt); } }
 
+    public event Action<int> onChangeNormalZombieCnt;
+    public event Action<int> onChangeBruteZombieCnt;
+    public event Action<int> onChangeWretchZombieCnt;
     public static GameManager Instance { get { return instance; } }
     public static PoolManager Pool { get { return poolManager; } }
     public static ResourceManager Resource { get { return resourceManager; } }

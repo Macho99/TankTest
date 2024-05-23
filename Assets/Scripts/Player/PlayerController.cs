@@ -71,7 +71,7 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
         VelocityY = 0f;
         name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
 
-     
+
         if (HasInputAuthority)
         {
             mainUI = GameManager.UI.ShowSceneUI<PlayerMainUI>("UI/PlayerUI/PlayerMainUI");
@@ -80,6 +80,16 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
             string name = GameManager.auth.User.DisplayName;
             RPC_SettingPlayerName(name);
             playerNameUI.gameObject.SetActive(false);
+
+            mainUI.ZombieInfoUI.Init(ZombieInfoUI.ZombieType.Brute, GameManager.Instance.BruteZombieCnt);
+            GameManager.Instance.onChangeBruteZombieCnt += mainUI.ZombieInfoUI.GetSlot(ZombieInfoUI.ZombieType.Brute).UpdateSlot;
+
+            mainUI.ZombieInfoUI.Init(ZombieInfoUI.ZombieType.Wretch, GameManager.Instance.WretchZombieCnt);
+            GameManager.Instance.onChangeWretchZombieCnt += mainUI.ZombieInfoUI.GetSlot(ZombieInfoUI.ZombieType.Wretch).UpdateSlot;
+
+            mainUI.ZombieInfoUI.Init(ZombieInfoUI.ZombieType.Noraml, GameManager.Instance.NormalZombieCnt);
+            GameManager.Instance.onChangeNormalZombieCnt += mainUI.ZombieInfoUI.GetSlot(ZombieInfoUI.ZombieType.Noraml).UpdateSlot;
+
         }
         else
         {
@@ -100,7 +110,16 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
         Falling();
         movement.Move();
 
+        if (InputListner.pressButton.IsSet(ButtonType.ZombieInfoOpen))
+        {
+            if (HasInputAuthority)
+            {
+                mainUI.ZombieInfoUI.PressActiveButton();
+               
+            }
 
+        }
+    
 
 
     }
@@ -127,8 +146,6 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
             }
 
         }
-
-
     }
 
     public bool RaycastGroundCheck()
@@ -150,7 +167,7 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
 
     public void AfterSpawned()
     {
-        
+
     }
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     public void RPC_SettingPlayerName(string playerName)

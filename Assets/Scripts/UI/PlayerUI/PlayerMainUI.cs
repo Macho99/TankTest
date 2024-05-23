@@ -10,11 +10,13 @@ public class PlayerMainUI : SceneUI
     [SerializeField] private PlayerStatUI playerStatUI;
     [SerializeField] private MainWeaponUI mainWeaponUI;
     [SerializeField] TextMeshProUGUI timeText;
+    [SerializeField] private ZombieInfoUI zombieInfoUI;
     int initTime;
     float startTime;
 
     public PlayerStatUI PlayerStatUI { get { return playerStatUI; } }
     public MainWeaponUI MainWeaponUI { get { return mainWeaponUI; } }
+    public ZombieInfoUI ZombieInfoUI { get { return zombieInfoUI; } }
 
     public void UpdateStat(PlayerStatType statType, int currentValue, int maxValue)
     {
@@ -35,13 +37,18 @@ public class PlayerMainUI : SceneUI
         StartCoroutine(CoUpdateTime());
     }
 
+    public void SetupZombieInfo()
+    {
+        //GameManager.Instance.BruteZombieCnt;
+    }
+
     IEnumerator CoUpdateTime()
     {
         while (true)
-		{
+        {
             int curTime = initTime + (int)(Time.time - startTime);
-			int minute = (curTime % 60);
-			int hour = (curTime % 1440) / 60;
+            int minute = (curTime % 60);
+            int hour = (curTime % 1440) / 60;
             timeText.text = $"{hour} : {minute}";
 
             yield return new WaitForSeconds(1f);

@@ -174,6 +174,7 @@ public class TestSpawner : MonoBehaviour
         playerInput.buttons.Set(ButtonType.BombWeapon, playerControls.Player.BombWeapon.IsPressed());
         playerInput.buttons.Set(ButtonType.Attack, playerControls.Player.Attack.IsPressed());
         playerInput.buttons.Set(ButtonType.Reload, playerControls.Player.Reload.IsPressed());
+        playerInput.buttons.Set(ButtonType.ZombieInfoOpen, playerControls.Player.ZombieInfoOpen.IsPressed());
 
         input.Set(playerInput);
         playerInput = default;

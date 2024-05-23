@@ -179,6 +179,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ZombieInfoOpen"",
+                    ""type"": ""Button"",
+                    ""id"": ""48a64d65-5cad-41f8-b531-a9816f6529ec"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -412,6 +421,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Reload"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c602d379-c5c3-49de-b5a1-7fa727039433"",
+                    ""path"": ""<Keyboard>/backquote"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ZombieInfoOpen"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -437,6 +457,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Player_BombWeapon = m_Player.FindAction("BombWeapon", throwIfNotFound: true);
         m_Player_Attack = m_Player.FindAction("Attack", throwIfNotFound: true);
         m_Player_Reload = m_Player.FindAction("Reload", throwIfNotFound: true);
+        m_Player_ZombieInfoOpen = m_Player.FindAction("ZombieInfoOpen", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -515,6 +536,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_BombWeapon;
     private readonly InputAction m_Player_Attack;
     private readonly InputAction m_Player_Reload;
+    private readonly InputAction m_Player_ZombieInfoOpen;
     public struct PlayerActions
     {
         private @PlayerControls m_Wrapper;
@@ -536,6 +558,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @BombWeapon => m_Wrapper.m_Player_BombWeapon;
         public InputAction @Attack => m_Wrapper.m_Player_Attack;
         public InputAction @Reload => m_Wrapper.m_Player_Reload;
+        public InputAction @ZombieInfoOpen => m_Wrapper.m_Player_ZombieInfoOpen;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -596,6 +619,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Reload.started += instance.OnReload;
             @Reload.performed += instance.OnReload;
             @Reload.canceled += instance.OnReload;
+            @ZombieInfoOpen.started += instance.OnZombieInfoOpen;
+            @ZombieInfoOpen.performed += instance.OnZombieInfoOpen;
+            @ZombieInfoOpen.canceled += instance.OnZombieInfoOpen;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -651,6 +677,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Reload.started -= instance.OnReload;
             @Reload.performed -= instance.OnReload;
             @Reload.canceled -= instance.OnReload;
+            @ZombieInfoOpen.started -= instance.OnZombieInfoOpen;
+            @ZombieInfoOpen.performed -= instance.OnZombieInfoOpen;
+            @ZombieInfoOpen.canceled -= instance.OnZombieInfoOpen;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -687,5 +716,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnBombWeapon(InputAction.CallbackContext context);
         void OnAttack(InputAction.CallbackContext context);
         void OnReload(InputAction.CallbackContext context);
+        void OnZombieInfoOpen(InputAction.CallbackContext context);
     }
 }
