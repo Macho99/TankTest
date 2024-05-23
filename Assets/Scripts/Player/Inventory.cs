@@ -263,7 +263,12 @@ public class Inventory : NetworkBehaviour
             if (netItems[i] == null)
                 continue;
 
+            Ammo ammoItem = netItems[i] as Ammo;
             if (netItems[i] is Ammo == false)
+                continue;
+
+
+            if (ammoType != ((AmmoItemSO)ammoItem.ItemData).AmmoType)
                 continue;
 
             netItems[i].TakeOutItemCount(count, out int remaingCount);
