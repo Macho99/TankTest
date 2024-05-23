@@ -77,7 +77,7 @@ public class VehicleBoarder : InteractObject, IAfterSpawned
 			}
 			else
 			{
-				if (localPlayer == null && localGetOnPlayers[i] == localPlayer.Object.Id)
+				if (localPlayer != null && localGetOnPlayers[i] == localPlayer.Object.Id)
 				{
 					vehicleBehaviours[i].GetOff();
 				}

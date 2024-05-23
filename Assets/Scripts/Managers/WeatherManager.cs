@@ -93,6 +93,7 @@ public class WeatherManager : NetworkBehaviour
 		int curTime = (int)(Runner.RemoteRenderTime * timeSpeed) + initHour * 60 + initMinute;
 		cozyWeather.timeModule.SetMinute((curTime % 60));
 		cozyWeather.timeModule.SetHour((curTime % 1440) / 60);
+		weatherChangeTimer = TickTimer.CreateFromSeconds(Runner, 5f);
 		if (IsProxy)
 		{
 			WeatherRender();

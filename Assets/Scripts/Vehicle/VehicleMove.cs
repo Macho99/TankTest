@@ -69,7 +69,7 @@ public class VehicleMove : VehicleBehaviour
 	public float BrakeMultiplier { get; set; }
 	public int CurGear { get; set; }
 
-	bool audioPlaying;
+	bool audioPlaying = false;
 	AudioSource audioSource;
 	TickTimer oilConsumTimer;
 	float engineRpmRatio;
