@@ -136,7 +136,6 @@ public class NetworkManager : MonoBehaviour
         {
             sessionProperty = new Dictionary<string, SessionProperty>();
             sessionProperty["Password"] = password;
-            Debug.Log("»ý¼º");
         }
         var sceneInfo = new NetworkSceneInfo();
 
@@ -155,16 +154,7 @@ public class NetworkManager : MonoBehaviour
 
 
         StartGameResult result = await runner.StartGame(startGame);
-        if (!result.Ok)
-        {
-            Debug.LogWarning(result.ErrorMessage);
-
-        }
-        else
-        {
-            Debug.LogWarning(result);
-        }
-
+      
         runner.ProvideInput = true;
         return result;
     }

@@ -57,7 +57,6 @@ public class PlayerLocomotion : NetworkBehaviour,IAfterSpawned
     {
         if (HasStateAuthority)
         {
-           
             moveSpeed = 0f;
             simpleKCC.SetGravity(Physics.gravity.y * 2f);
             fallingTime = 0f;
