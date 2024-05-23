@@ -4,9 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.AI;
+using static UnityEngine.UI.GridLayoutGroup;
 using Random = UnityEngine.Random;
 
 public enum RagdollState { Animate, Ragdoll, FaceUpStand, FaceDownStand, FaceUpCrawl, FaceDownCrawl };
@@ -17,7 +16,6 @@ public class Zombie : ZombieBase
 
 	[SerializeField] Transform skins;
 	[SerializeField] float fallAsleepThreshold = 0.2f;
-	[SerializeField] TextMeshProUGUI curStateText;
 	[SerializeField] Transform ragdollHips;
 
 	TickTimer meatFindTimer;
@@ -30,8 +28,9 @@ public class Zombie : ZombieBase
 	//public static BoneTransform[] FaceUpBoneTransforms { get; private set; }
 	//public static BoneTransform[] FaceDownBoneTranforms { get; private set; }
 	public float FallAsleepThreshold { get { return fallAsleepThreshold; } }
-	public LayerMask FallAsleepMask { get; set; }
-	public LayerMask MeatMask { get; set; }
+	public LayerMask DebrisMask { get; set; }
+	public int MeatLayer { get; private set; }
+	public LayerMask MeatMask { get; private set; }
 
 	private float maxSpeed;
 	public float TraceSpeed { get 
@@ -52,7 +51,8 @@ public class Zombie : ZombieBase
 
 		CurLegHp = MaxLegHp;
 		MeatMask = LayerMask.GetMask("Meat");
-		FallAsleepMask = LayerMask.GetMask("FallAsleepObject");
+		DebrisMask = LayerMask.GetMask("Debris");
+		MeatLayer = LayerMask.NameToLayer("Meat");
 
 		Bones = Hips.GetComponentsInChildren<Transform>();
 		RagdollBones = ragdollHips.GetComponentsInChildren<Transform>();
@@ -67,7 +67,7 @@ public class Zombie : ZombieBase
 		stateMachine.AddState(State.AnimWait, new ZombieAnimWait(this));
 		stateMachine.AddState(State.CrawlIdle, new ZombieCrawlIdle(this));
 		stateMachine.AddState(State.CrawlTrace, new ZombieCrawlTrace(this));
-		stateMachine.AddState(State.Wait, new ZombieWait(this));
+		stateMachine.AddState(State.Wait, new ZombieWait());
 		stateMachine.AddState(State.RagdollEnter, new ZombieRagdollEnter(this));
 		stateMachine.AddState(State.RagdollExit, new ZombieRagdollExit(this));
 		stateMachine.AddState(State.Die, new ZombieDie(this));
@@ -79,6 +79,8 @@ public class Zombie : ZombieBase
 	{
 		base.Spawned();
 
+		GameManager.Instance.NormalZombieCnt++;
+
 		Random.InitState((int)Object.Id.Raw * Runner.SessionInfo.Name.GetHashCode());
 		maxSpeed = Random.Range(1, 4);
 
@@ -87,6 +89,7 @@ public class Zombie : ZombieBase
 		anim.SetFloat("RunShifter", Random.Range(0, 2));
 		anim.SetFloat("SprintShifter", Random.Range(0, 2));
 
+		skins.gameObject.SetActive(true);
 		int skinCnt = skins.childCount;
 		SkinIdx = Random.Range(0, skinCnt);
 
@@ -111,6 +114,12 @@ public class Zombie : ZombieBase
 		{
 			stateMachine.InitState(State.Idle);
 		}
+        minimapTarget.Init(MinimapTarget.TargetType.BasicMonster);
+    }
+	public override void Despawned(NetworkRunner runner, bool hasState)
+	{
+		base.Despawned(runner, hasState);
+		GameManager.Instance.NormalZombieCnt--;
 	}
 
 	public override void FixedUpdateNetwork()
@@ -122,7 +131,7 @@ public class Zombie : ZombieBase
 
 	private void FindMeat()
 	{
-		if (agent.hasPath || CurTargetType == TargetType.Player) return;
+		if (agent.hasPath || AttackTargetMask.IsLayerInMask(TargetData.Layer)) return;
 		if (meatFindTimer.ExpiredOrNotRunning(Runner) == false) return;
 		if (CurHp == MaxHP) return;
 
@@ -133,17 +142,18 @@ public class Zombie : ZombieBase
 		if (result == 0)
 			return;
 
-		agent.ResetPath();
-		Target = overlapCols[0].transform;
-		CurTargetType = TargetType.Meat;
+		if (agent.enabled)
+			agent.ResetPath();
+		TargetData.SetTarget(overlapCols[0].transform, Runner.Tick);
 	}
 
 	public void EnableRagdoll(bool value)
 	{
 		if(value == false)
 		{
-			foreach (BodyPart bodyPart in bodyHitParts)
+			for (int i = 0; i < bodyHitParts.Length; i++)
 			{
+				BodyPart bodyPart = bodyHitParts[i];
 				bodyPart.rb.velocity = Vector3.zero;
 				bodyPart.rb.angularVelocity = Vector3.zero;
 			}
@@ -162,29 +172,6 @@ public class Zombie : ZombieBase
 
 	public override void Render()
 	{
-		string curState = stateMachine.curStateStr;
-		StringBuilder sb = new StringBuilder();
-		string printState = curState.Equals("AnimWait") ? $"{prevState} -> AnimWait({WaitName}) -> {NextState}" : curState;
-		sb.AppendLine($"현재 상태: {printState}");
-		sb.AppendLine($"마지막 타겟 발견시간: {((LastPlayerFindTick - Runner.Tick) / (float) Runner.TickRate).ToString("F1")}");
-		sb.AppendLine($"Target: {CurTargetType}");
-		sb.Append($"CurHP: ");
-		for (int i = 0; i < CurHp; i += 50)
-		{
-			sb.Append("■");
-		}
-		sb.Append('\n');
-		sb.AppendLine($"SpeedX : {anim.GetFloat("SpeedX"):#.##}");
-		sb.AppendLine($"SpeedY : {anim.GetFloat("SpeedY"):#.##}");
-		sb.AppendLine($"PosDiff: {(transform.position - Position).sqrMagnitude.ToString("F4")}");
-		if (curState.Equals("AnimWait") == false)
-			prevState = curState;
-
-		curStateText.text = sb.ToString();
-
-
-		if (CurRagdollState != RagdollState.Animate) return;
-
 		base.Render();
 	}
 
@@ -275,7 +262,7 @@ public class Zombie : ZombieBase
 
 	private void StartRagdoll()
 	{
-		LastPlayerFindTick = Runner.Tick + Runner.TickRate * 10;
+		TargetData.LastFindTick = Runner.Tick + Runner.TickRate * 10;
 		CurRagdollState = RagdollState.Ragdoll;
 		RagdollCnt++;
 	}
@@ -295,14 +282,26 @@ public class Zombie : ZombieBase
 		return State.Idle.ToString();
 	}
 
-	public override void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, Vector3 velocity, int damage)
+	public override void ApplyDamage(Transform source, ZombieHitBox zombieHitBox, 
+		Vector3 point, Vector3 velocity, int damage, bool playHitVFX = true)
 	{
-		base.ApplyDamage(source, zombieHitBox, velocity, damage);
+		base.ApplyDamage(source, zombieHitBox, point, velocity, damage, playHitVFX);
 		if (Object.IsProxy) return;
 
 		if (CurHp <= 0)
 		{
 			StartRagdoll();
+			return;
+		}
+		else if(velocity.sqrMagnitude > 30f * 30f)
+		{
+			StartRagdoll();
+			return;
+		}
+
+		if (CurHp > 0)
+		{
+			PlaySound(ZombieSoundType.Hit);
 		}
 
 		float hitBodyFloat = GetHitBodyFloat(zombieHitBox.BodyType);
@@ -358,11 +357,7 @@ public class Zombie : ZombieBase
 			SetAnimTrigger("Hit");
 
 			AnimWaitStruct = new AnimWaitStruct("StandHit", "Idle",
-				updateAction: () =>
-				{
-					SetAnimFloat("SpeedX", 0f, 1f);
-					SetAnimFloat("SpeedY", 0f, 1f);
-				});
+				updateAction: Decelerate);
 			stateMachine.ChangeState(State.AnimWait);
 		}
 		else
@@ -371,11 +366,7 @@ public class Zombie : ZombieBase
 			SetAnimFloat("FallAsleep", 0f);
 
 			AnimWaitStruct = new AnimWaitStruct("Fall", State.CrawlIdle.ToString(),
-				updateAction: () =>
-				{
-					SetAnimFloat("SpeedX", 0f, 1f);
-					SetAnimFloat("SpeedY", 0f, 1f);
-				});
+				updateAction: Decelerate);
 			stateMachine.ChangeState(State.AnimWait);
 		}
 	}
@@ -388,10 +379,5 @@ public class Zombie : ZombieBase
 			CurLegHp += amount;
 			CurLegHp = Mathf.Min(CurLegHp, MaxLegHp);
 		}
-	}
-
-	public void Attack(int damage)
-	{
-		Heal(20);
 	}
 }

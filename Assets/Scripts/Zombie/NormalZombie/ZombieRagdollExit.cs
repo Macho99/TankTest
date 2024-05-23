@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ZombieRagdollExit : ZombieState
 {
-	const float resetBoneTime = 1f;
+	const float resetBoneTime = 2f;
 	float elapsed;
 	BoneTransform[] faceBoneTransforms;
 	string animName;
@@ -116,6 +116,9 @@ public class ZombieRagdollExit : ZombieState
 
 	public override void Exit()
 	{
+		if(owner.IsDead == false)
+			owner.SyncTransfrom = true;
+
 		owner.EnableRagdoll(false);
 		owner.Anim.enabled = true;
 	}

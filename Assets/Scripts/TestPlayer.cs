@@ -1,137 +1,168 @@
-using Cinemachine;
-using Fusion;
-using Fusion.Addons.SimpleKCC;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using TMPro;
-using UnityEditor;
-using UnityEngine;
-using UnityEngine.UI;
+//using Cinemachine;
+//using Fusion;
+//using Fusion.Addons.SimpleKCC;
+//using System;
+//using System.Collections;
+//using System.Collections.Generic;
+//using System.Text;
+//using TMPro;
+//using UnityEditor;
+//using UnityEngine;
+//using UnityEngine.UI;
 
-public class TestPlayer : NetworkBehaviour
-{
-	[SerializeField] Canvas playerCanvas;
-	[SerializeField] Image aimImg;
-	[SerializeField] Vector3 rendererOffset;
-	[SerializeField] float jumpForce = 5f;
-	[SerializeField] float gravity = -15f;
-	[SerializeField] float lookSpeed = 600f;
-	[SerializeField] float moveSpeed = 5f;
-	[SerializeField] int damage = 40;
+//public class TestPlayer : NetworkBehaviour, IHittable
+//{
+//	[SerializeField] Canvas playerCanvas;
+//	[SerializeField] Image aimImg;
+//	[SerializeField] Vector3 rendererOffset;
+//	[SerializeField] float jumpForce = 5f;
+//	[SerializeField] float gravity = -15f;
+//	[SerializeField] float lookSpeed = 600f;
+//	[SerializeField] float moveSpeed = 5f;
+//	[SerializeField] int damage = 40;
+//	[SerializeField] float knockbackPower = 30f;
 
-	Transform camRoot;
-	TextMeshProUGUI debugText;
-	SimpleKCC kcc;
+//	Collider col;
+//	Transform camRoot;
+//	TextMeshProUGUI debugText;
+//	SimpleKCC kcc;
 
-	[Networked] public NetworkButtons PrevButton { get; private set; }
-	[Networked] public float YAngle { get; private set; }
-	[Networked] public float XAngle { get; private set; }
-	new MeshRenderer renderer;
-	//float yVel;
+//	[Networked] public NetworkButtons PrevButton { get; private set; }
+//	[Networked] public float YAngle { get; private set; }
+//	[Networked] public float XAngle { get; private set; }
+//	new MeshRenderer renderer;
+//	//float yVel;
 
-	public bool IsGround { get; private set; }
+//	public bool IsGround { get; private set; }
 
-	//[Networked, HideInInspector] public Vector3 Position { get; private set; }
-	//[Networked, HideInInspector] public Quaternion Rotation { get; private set; }
-	//[Networked, HideInInspector] public Vector3 Velocity { get; private set; }
+//	public long HitID => (Object.Id.Raw << 32);
 
-	private void Awake()
-	{
-		kcc = GetComponent<SimpleKCC>();
-		renderer = GetComponentInChildren<MeshRenderer>();
-		debugText = GetComponentInChildren<TextMeshProUGUI>();
-		camRoot = GetComponentInChildren<CinemachineVirtualCamera>().transform.parent;
-	}
+//	//[Networked, HideInInspector] public Vector3 Position { get; private set; }
+//	//[Networked, HideInInspector] public Quaternion Rotation { get; private set; }
+//	//[Networked, HideInInspector] public Vector3 Velocity { get; private set; }
 
-	public override void Spawned()
-	{
-		kcc.enabled = true;
-		if (HasInputAuthority == false)	
-		{
-			camRoot.gameObject.SetActive(false);
-			playerCanvas.gameObject.SetActive(false);
-		}
-		else
-		{
-			XAngle = Vector3.Angle(Vector3.forward, transform.forward);
-		}
-	}
+//	private void Awake()
+//	{
+//		kcc = GetComponent<SimpleKCC>();
+//		renderer = GetComponentInChildren<MeshRenderer>();
+//		debugText = GetComponentInChildren<TextMeshProUGUI>();
+//		camRoot = GetComponentInChildren<CinemachineVirtualCamera>().transform.parent;
+//	}
 
-	public override void FixedUpdateNetwork()
-	{
-		if (GetInput(out TestInputData input) == false) return;
+//	public override void Spawned()
+//	{
+//		col = GetComponentInChildren<Collider>();
+//		kcc.enabled = true;
+//		if (HasInputAuthority == false)	
+//		{
+//			camRoot.gameObject.SetActive(false);
+//			playerCanvas.gameObject.SetActive(false);
+//		}
+//		else
+//		{
+//			XAngle = Vector3.Angle(Vector3.forward, transform.forward);
+//		}
+//	}
 
-		Move(input);
-		CheckFire(input);
-	}
+//	public override void FixedUpdateNetwork()
+//	{
+//		if (GetInput(out TestInputData input) == false) return;
 
-	public override void Render()
-	{
-		//StringBuilder sb = new();
-		////sb.AppendLine($"pos: {Position}");
-		////sb.AppendLine($"rot: {Rotation.eulerAngles}");
-		//sb.AppendLine($"xAngle: {xAngle.ToString("F1")}");
+//		Move(input);
+//		CheckFire(input);
+//	}
 
-		//debugText.text = sb.ToString();
-	}
+//	public override void Render()
+//	{
+//		//StringBuilder sb = new();
+//		////sb.AppendLine($"pos: {Position}");
+//		////sb.AppendLine($"rot: {Rotation.eulerAngles}");
+//		//sb.AppendLine($"xAngle: {xAngle.ToString("F1")}");
 
-	private void Move(TestInputData input)
-	{
-		float jump = 0f;
-		//print(kcc.IsGrounded);
-		if (input.buttons.IsSet(Buttons.Jump) && kcc.IsGrounded)
-		{
-			jump = jumpForce;
-		}
+//		//debugText.text = sb.ToString();
+//	}
 
-		YAngle -= input.lookVec.y * Runner.DeltaTime * lookSpeed;
-		XAngle += input.lookVec.x * Runner.DeltaTime * lookSpeed;
-		XAngle = Mathf.Repeat(XAngle, 360f);
-		YAngle = Mathf.Clamp(YAngle, -80f, 80f);
-		camRoot.localRotation = Quaternion.Euler(YAngle, 0f, 0f);
-		kcc.SetLookRotation(Quaternion.Euler(0f, XAngle, 0f));
-		kcc.Move(moveSpeed * transform.TransformDirection(new Vector3(input.moveVec.x, 0f, input.moveVec.y)), jump);
-	}
+//	private void Move(TestInputData input)
+//	{
+//		float jump = 0f;
+//		//print(kcc.IsGrounded);
+//		if (input.buttons.IsSet(Buttons.Jump) && kcc.IsGrounded)
+//		{
+//			jump = jumpForce;
+//		}
 
-	private void CheckFire(TestInputData input)
-	{
-		NetworkButtons pressed = input.buttons.GetPressed(PrevButton);
-		NetworkButtons released = input.buttons.GetReleased(PrevButton);
+//		YAngle -= input.lookVec.y * Runner.DeltaTime * lookSpeed;
+//		XAngle += input.lookVec.x * Runner.DeltaTime * lookSpeed;
+//		XAngle = Mathf.Repeat(XAngle, 360f);
+//		YAngle = Mathf.Clamp(YAngle, -80f, 80f);
+//		camRoot.localRotation = Quaternion.Euler(YAngle, 0f, 0f);
+//		kcc.SetLookRotation(Quaternion.Euler(0f, XAngle, 0f));
+//		kcc.Move(moveSpeed * transform.TransformDirection(new Vector3(input.moveVec.x, 0f, input.moveVec.y)), jump);
+//	}
 
-		PrevButton = input.buttons;
+//	private void CheckFire(TestInputData input)
+//	{
+//		NetworkButtons pressed = input.buttons.GetPressed(PrevButton);
+//		NetworkButtons released = input.buttons.GetReleased(PrevButton);
 
-		if (pressed.IsSet(Buttons.Fire))
-		{
-			aimImg.color = Color.red;
-			Fire();
-		}
-		if (released.IsSet(Buttons.Fire))
-		{
-			aimImg.color = Color.white;
-		}
-	}
+//		PrevButton = input.buttons;
 
-	private void Fire()
-	{
-		if(Physics.Raycast(camRoot.position, camRoot.forward, out RaycastHit hitInfo, 100f, LayerMask.GetMask("Monster"), QueryTriggerInteraction.Collide))
-		{
-			hitInfo.collider.GetComponent<ZombieHitBox>().ApplyDamage(transform, camRoot.forward * 30f, damage);
-		}
+//		if (pressed.IsSet(Buttons.Fire))
+//		{
+//			aimImg.color = Color.red;
+//			Fire();
+//		}
+//		if (pressed.IsSet(Buttons.Interact))
+//		{
+//			CheckTank();
+//		}
+//		if (released.IsSet(Buttons.Fire))
+//		{
+//			aimImg.color = Color.white;
+//		}
+//	}
 
-		//if (Runner.LagCompensation.Raycast(camRoot.position, camRoot.forward,
-		//	100f, Runner.LocalPlayer, out var hit, options: HitOptions.IgnoreInputAuthority))
-		//{
-		//	if (hit.Hitbox == null)
-		//	{
-		//		return;
-		//	}
+//	private void CheckTank()
+//	{
+//		if(Physics.Raycast(camRoot.position, camRoot.forward, 
+//			out RaycastHit hitInfo, 10f, LayerMask.GetMask("Vehicle")) == true)
+//		{
+//			VehicleBoarder tank = hitInfo.collider.GetComponentInParent<VehicleBoarder>();
+//			if(tank == null)
+//			{
+//				print(hitInfo.collider.name);
+//				return;
+//			}
+//			//tank.GetOn(this);
+//		}
+//	}
 
-		//	if (hit.Hitbox is ZombieHitBox zombieHitBox)
-		//	{
-		//		zombieHitBox.ApplyDamage(transform, transform.forward * 30f, 40);
-		//	}
-		//}
-	}
-}
+//	private void Fire()
+//	{
+//		if (Physics.Raycast(camRoot.position, camRoot.forward, out RaycastHit hitInfo, 100f, LayerMask.GetMask("Monster"), QueryTriggerInteraction.Collide))
+//		{
+//			hitInfo.collider.GetComponent<IHittable>().ApplyDamage(transform,
+//				hitInfo.point, camRoot.forward * knockbackPower, damage);
+//		}
+//	}
+
+//	public void CollisionEnable(bool value)
+//	{
+//		col.enabled = value;
+//	}
+
+//	public void KCCActive(bool value)
+//	{
+//		kcc.SetActive(value);
+//	}
+
+//	public void Teleport(Vector3 position)
+//	{
+//		kcc.SetPosition(position);
+//	}
+
+//	public void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
+//	{
+//		print($"{(source == null ? "null" : source.name)}로부터 {damage} 데미지");
+//	}
+//}

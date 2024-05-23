@@ -18,10 +18,13 @@ public class ZombieRagdollEnter : ZombieState
 
 	public override void Enter()
 	{
+		owner.CurRagdollState = RagdollState.Ragdoll;
+
+		owner.SyncTransfrom = false;
 		owner.Agent.enabled = false;
 		transition = false;
 		elapsed = 0f;
-		exitTime = 0.3f;
+		exitTime = 1f;
 
 		if(owner.CurHp > 0)
 		{
@@ -38,7 +41,7 @@ public class ZombieRagdollEnter : ZombieState
 		//}
 		owner.EnableRagdoll(true);
 		Rigidbody rb = owner.BodyHitParts[(int)owner.HitBody].rb;
-		rb.AddForce(owner.HitVelocity * rb.mass, ForceMode.Impulse);
+		rb.AddForce(owner.HitForce * 1.5f, ForceMode.Impulse);
 	}
 
 	public override void Exit()
@@ -48,34 +51,31 @@ public class ZombieRagdollEnter : ZombieState
 	public override void FixedUpdateNetwork()
 	{
 		elapsed += owner.Runner.DeltaTime;
-		if(transition == false)
-			owner.CurRagdollState = RagdollState.Ragdoll;
-		owner.SetAnimFloat("SpeedX", 0f, 1f);
-		owner.SetAnimFloat("SpeedY", 0f, 1f);
+		owner.Decelerate(1f);
 	}
 
 	public override void Render()
 	{
 		owner.Agent.enabled = false;
 
-		for(int i = 0; i < owner.Bones.Length; i++)
+		for (int i = 0; i < owner.Bones.Length; i++)
 		{
 			owner.Bones[i].localPosition = owner.RagdollBones[i].localPosition;
 			owner.Bones[i].localRotation = owner.RagdollBones[i].localRotation;
 		}
 
-		Vector3 prevHipPos = owner.Hips.position;
-		Vector3 newRootPos = prevHipPos;
+		//Vector3 prevHipPos = owner.Hips.position;
+		//Vector3 newRootPos = prevHipPos;
 
-		if (Physics.Raycast(prevHipPos, Vector3.down, out RaycastHit hitInfo, 5f, LayerMask.GetMask("Default")))
-		{
-			newRootPos = hitInfo.point;
-		}
+		//if (Physics.Raycast(prevHipPos, Vector3.down, out RaycastHit hitInfo, 5f, owner.EnvironMask))
+		//{
+		//	newRootPos = hitInfo.point;
+		//}
 
-		owner.transform.position = newRootPos;
+		//owner.transform.position = newRootPos;
 
-		owner.Hips.position = prevHipPos;
-		owner.RagdollHips.position = prevHipPos;
+		//owner.Hips.position = prevHipPos;
+		//owner.RagdollHips.position = prevHipPos;
 	}
 
 	public override void SetUp()

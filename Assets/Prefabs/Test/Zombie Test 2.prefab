@@ -243,15 +243,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 1
-  SphereRadius: 0
-  CapsuleRadius: 0.0848685
-  BoxExtents: {x: 0.2, y: 0.07, z: 0.07}
-  CapsuleExtents: 0.339474
-  Offset: {x: 0.2, y: 0, z: 0}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 1
+  rb: {fileID: 0}
 --- !u!1 &368687548192441760
 GameObject:
   m_ObjectHideFlags: 0
@@ -509,15 +502,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 1
-  SphereRadius: 0
-  CapsuleRadius: 0.0848685
-  BoxExtents: {x: 0.2, y: 0.07, z: 0.07}
-  CapsuleExtents: 0.339474
-  Offset: {x: 0.2, y: 0, z: 0}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 0
+  rb: {fileID: 0}
 --- !u!1 &453765070573052325
 GameObject:
   m_ObjectHideFlags: 0
@@ -1778,19 +1764,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 624a113dda34927448849b2362e148f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minIdleTime: 1
-  maxIdleTime: 10
+  viewAngle: 45
+  lookDist: 10
+  playerLostTime: 5
+  headBloodVFX: {fileID: 0}
+  bodyBloodVFX: {fileID: 0}
+  _Position: {x: 0, y: 0, z: 0}
+  _Rotation: {x: 0, y: 0, z: 0, w: 0}
+  _HitBody: 0
+  _HitVelocity: {x: 0, y: 0, z: 0}
+  _HitCnt: 0
   skins: {fileID: 1713092269831648524}
   fallAsleepThreshold: 0.3
   curStateText: {fileID: 3990900717246760630}
-  hips: {fileID: 0}
-  _SkinIdx: 0
-  _Position: {x: 0, y: 0, z: 0}
-  _Rotation: {x: 0, y: 0, z: 0, w: 0}
-  _IsRagdoll:
-    _value: 0
-  _RagdollBody: 0
-  _RagdollVelocity: {x: 0, y: 0, z: 0}
+  ragdollHips: {fileID: 0}
+  _CurRagdollState: 0
+  _RagdollCnt: 0
 --- !u!114 &5639476792328849030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1903,17 +1892,17 @@ MonoBehaviour:
   Offset: {x: 0, y: 1.2, z: 0}
   GizmosColor: {r: 0.6886792, g: 0.23064259, b: 0.23064259, a: 1}
   Hitboxes:
-  - {fileID: 6616808204544256389}
-  - {fileID: 3971871806732212838}
-  - {fileID: 8856945816282658070}
   - {fileID: 0}
-  - {fileID: 4707833873221267186}
-  - {fileID: 5013994277909943226}
-  - {fileID: 1726961935541884605}
-  - {fileID: 5372302225894101930}
-  - {fileID: 8156368625735938917}
-  - {fileID: 7088450327730514795}
-  - {fileID: 7306751902906558371}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &1559949598233783430
 GameObject:
   m_ObjectHideFlags: 0
@@ -3032,15 +3021,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 1
-  SphereRadius: 0.28
-  CapsuleRadius: 0
-  BoxExtents: {x: 0.1614976, y: 0.13918465, z: 0.19098915}
-  CapsuleExtents: 0
-  Offset: {x: -0.12033978, y: 0.0010077655, z: 0.00000011920929}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 5
+  rb: {fileID: 0}
 --- !u!1 &2628094182002918240
 GameObject:
   m_ObjectHideFlags: 0
@@ -3551,15 +3533,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 1
-  SphereRadius: 0
-  CapsuleRadius: 0.0848685
-  BoxExtents: {x: 0.2, y: 0.07, z: 0.07}
-  CapsuleExtents: 0.339474
-  Offset: {x: -0.2, y: 0, z: 0}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 3
+  rb: {fileID: 0}
 --- !u!1 &3009109551736809033
 GameObject:
   m_ObjectHideFlags: 0
@@ -5295,15 +5270,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 1
-  SphereRadius: 0
-  CapsuleRadius: 0.0848685
-  BoxExtents: {x: 0.17, y: 0.07, z: 0.07}
-  CapsuleExtents: 0.339474
-  Offset: {x: 0.17, y: 0, z: 0}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 9
+  rb: {fileID: 0}
 --- !u!1 &4483266186052176563
 GameObject:
   m_ObjectHideFlags: 0
@@ -5597,15 +5565,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 1
-  SphereRadius: 0
-  CapsuleRadius: 0.0848685
-  BoxExtents: {x: 0.22, y: 0.07, z: 0.07}
-  CapsuleExtents: 0.339474
-  Offset: {x: -0.22, y: 0, z: 0}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 8
+  rb: {fileID: 0}
 --- !u!1 &4731436626579187075
 GameObject:
   m_ObjectHideFlags: 0
@@ -6245,15 +6206,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 1
-  SphereRadius: 0
-  CapsuleRadius: 0.0848685
-  BoxExtents: {x: 0.17, y: 0.07, z: 0.07}
-  CapsuleExtents: 0.339474
-  Offset: {x: -0.17, y: 0, z: 0}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 7
+  rb: {fileID: 0}
 --- !u!1 &5749836650817412095
 GameObject:
   m_ObjectHideFlags: 0
@@ -7726,15 +7680,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 1
-  SphereRadius: 0
-  CapsuleRadius: 0.0848685
-  BoxExtents: {x: 0.2, y: 0.07, z: 0.07}
-  CapsuleExtents: 0.339474
-  Offset: {x: -0.2, y: 0, z: 0}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 2
+  rb: {fileID: 0}
 --- !u!1 &7178045574353014098
 GameObject:
   m_ObjectHideFlags: 0
@@ -8810,15 +8757,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 2
-  SphereRadius: 0.16
-  CapsuleRadius: 0
-  BoxExtents: {x: 0, y: 0, z: 0}
-  CapsuleExtents: 0
-  Offset: {x: 0, y: 0.09549457, z: 0}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 4
+  rb: {fileID: 0}
 --- !u!1 &8204749350247374432
 GameObject:
   m_ObjectHideFlags: 0
@@ -9062,15 +9002,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3261ae4b4083ce341a1813cc26273f82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Type: 1
-  SphereRadius: 0
-  CapsuleRadius: 0.0848685
-  BoxExtents: {x: 0.22, y: 0.07, z: 0.07}
-  CapsuleExtents: 0.339474
-  Offset: {x: 0.22, y: 0, z: 0}
-  Root: {fileID: 1835357077659790036}
-  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   bodyType: 10
+  rb: {fileID: 0}
 --- !u!1 &8416052801483525397
 GameObject:
   m_ObjectHideFlags: 0

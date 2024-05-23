@@ -5,36 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class ZombieDie : ZombieState
+public class ZombieDie : ZombieBaseDie
 {
-	const float despawnTime = 3f;
-	float elapsed;
+	new Zombie owner;
 
-	public ZombieDie(Zombie owner) : base(owner)
+	public ZombieDie(Zombie owner) : base(owner, 5f)
 	{
-	}
-
-	public override void Enter()
-	{
-		elapsed = 0f;
-	}
-
-	public override void Exit()
-	{
-
+		this.owner = owner;
 	}
 
 	public override void FixedUpdateNetwork()
 	{
-		elapsed += owner.Runner.DeltaTime;
-		
-		if(elapsed > despawnTime)
-		{
-			owner.Runner.Despawn(owner.Object);
-			ChangeState(Zombie.State.Wait);
-			return;
-		}
+		base.FixedUpdateNetwork();
 
+		if (despawnTimer.IsRunning == false) return;
 
 		owner.Agent.enabled = false;
 
@@ -56,15 +40,5 @@ public class ZombieDie : ZombieState
 
 		owner.Hips.position = prevHipPos;
 		owner.RagdollHips.position = prevHipPos;
-	}
-
-	public override void SetUp()
-	{
-
-	}
-
-	public override void Transition()
-	{
-
 	}
 }

@@ -7,27 +7,30 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 public enum ZombieBody { LeftHips, LeftKnee, RightHips, RightKnee,
-	Head, Pelvis, MiddleSpine, LeftArm, LeftElbow, RightArm, RightElbow, 
+	Head, Pelvis, MiddleSpine, LeftArm, LeftElbow, RightArm, RightElbow,
 	Size,
 }
 
-public class ZombieHitBox : MonoBehaviour
+public class ZombieHitBox : MonoBehaviour, IHittable
 {
-	[SerializeField] ZombieBody bodyType;
-	[SerializeField] Rigidbody rb;
+	[SerializeField] protected ZombieBody bodyType;
+	[SerializeField] protected Rigidbody rb;
 
 	public ZombieBody BodyType { get { return bodyType; } }
 	public Rigidbody RB { get { return rb; } }
 
-	private ZombieBase owner;
+	public Int64 HitID => (owner.Object.Id.Raw << 32);
 
-	private void Awake()
+	protected ZombieBase owner;
+	public ZombieBase Owner { get { return owner; } }
+
+	protected virtual void Awake()
 	{
 		owner = GetComponentInParent<ZombieBase>();
 	}
 
-	public virtual void ApplyDamage(Transform source, Vector3 velocity, int damage)
+	public virtual void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
 	{
-		owner.ApplyDamage(source, this, velocity, damage);
+		owner.ApplyDamage(source, this, point, force, damage);
 	}
 }

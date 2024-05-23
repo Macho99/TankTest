@@ -6,61 +6,18 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class ZombieCrawlIdle : ZombieState
+public class ZombieCrawlIdle : ZombieBaseIdle
 {
-	float elapsed;
-	float idleTime;
-
-	public ZombieCrawlIdle(Zombie owner) : base(owner)
+	new Zombie owner;
+	public ZombieCrawlIdle(Zombie owner) : base(owner, 3f, 20f)
 	{
+		this.owner = owner;
 	}
 
 	public override void Enter()
 	{
-		elapsed = 0f;
-		idleTime = Random.Range(3f, 30f);
+		base.Enter();
 		CheckStandUp();
-	}
-
-	public override void Exit()
-	{
-
-	}
-
-	public override void SetUp()
-	{
-
-	}
-
-	public override void Transition()
-	{
-		if(owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
-		{
-			ChangeState(Zombie.State.CrawlTrace);
-			return;
-		}
-
-		if (elapsed > idleTime)
-		{
-			owner.SetAnimTrigger("Search");
-			owner.AnimWaitStruct = new AnimWaitStruct("CrawlSearch", "CrawlIdle",
-				updateAction: () =>
-				{
-					if (owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
-					{
-						owner.SetAnimTrigger("Exit");
-						ChangeState(Zombie.State.CrawlTrace);
-					}
-				});
-			ChangeState(Zombie.State.AnimWait);
-			return;
-		}
-	}
-
-	public override void FixedUpdateNetwork()
-	{
-		elapsed += owner.Runner.DeltaTime;
-		owner.SetAnimFloat("SpeedY", 0f, 1f);
 	}
 
 	private void CheckStandUp()
@@ -71,5 +28,25 @@ public class ZombieCrawlIdle : ZombieState
 			owner.AnimWaitStruct = new AnimWaitStruct("StandUp", owner.DecideState().ToString());
 			ChangeState(Zombie.State.AnimWait);
 		}
+	}
+
+	protected override void OnTrace()
+	{
+		ChangeState(Zombie.State.CrawlTrace);
+	}
+
+	protected override void OnIdleTimerExpired()
+	{
+		owner.SetAnimTrigger("Search");
+		owner.AnimWaitStruct = new AnimWaitStruct("CrawlSearch", "CrawlIdle",
+			updateAction: () =>
+			{
+				if (owner.Agent.desiredVelocity.sqrMagnitude > 0.1f)
+				{
+					owner.SetAnimTrigger("Exit");
+					ChangeState(Zombie.State.CrawlTrace);
+				}
+			});
+		ChangeState(Zombie.State.AnimWait);
 	}
 }
