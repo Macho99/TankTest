@@ -51,7 +51,6 @@ public class WeatherManager : NetworkBehaviour
 			Destroy(gameObject);
 			return;
 		}
-
 		GameManager.Weather = this;
 		cozyWeather = GetComponent<CozyWeather>();
 	}

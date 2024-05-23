@@ -83,9 +83,18 @@ public class WretchZombie : ZombieBase
 	}
     public override void Spawned()
     {
+		base.Spawned();
+		GameManager.Instance.WretchZombieCnt++;
 		minimapTarget.Init(MinimapTarget.TargetType.BossMonster);
     }
-    public override void FixedUpdateNetwork()
+
+	public override void Despawned(NetworkRunner runner, bool hasState)
+	{
+		base.Despawned(runner, hasState);
+		GameManager.Instance.WretchZombieCnt--;
+	}
+
+	public override void FixedUpdateNetwork()
 	{
 		base.FixedUpdateNetwork();
 

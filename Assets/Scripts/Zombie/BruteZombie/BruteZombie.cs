@@ -111,8 +111,13 @@ public class BruteZombie : ZombieBase
 			Shield = null;
 		}
 		minimapTarget.Init(MinimapTarget.TargetType.BossMonster);
-
+		GameManager.Instance.BruteZombieCnt++;
     }
+	public override void Despawned(NetworkRunner runner, bool hasState)
+	{
+		base.Despawned(runner, hasState);
+		GameManager.Instance.BruteZombieCnt--;
+	}
 
 	public override void FixedUpdateNetwork()
 	{

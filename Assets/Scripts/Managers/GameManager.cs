@@ -20,6 +20,10 @@ public class GameManager : MonoBehaviour
     private static DataManager dataManager;
     private static SoundManager soundManager;
 
+    public int NormalZombieCnt { get; set; }
+    public int BruteZombieCnt { get; set; }
+    public int WretchZombieCnt { get; set; }
+
     public static GameManager Instance { get { return instance; } }
     public static PoolManager Pool { get { return poolManager; } }
     public static ResourceManager Resource { get { return resourceManager; } }

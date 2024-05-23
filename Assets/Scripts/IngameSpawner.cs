@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -86,11 +87,17 @@ public class IngameSpawner : NetworkBehaviour
 	{
 		Random.InitState(runner.SessionInfo.Name.GetHashCode() * netObj.Id.Raw.GetHashCode());
 
-		Vector3 pos = Random.insideUnitSphere * 100f;
-		pos.y = 0f;
+		Vector3 pos;
+		NavMeshHit hit;
+		do
+		{
+			pos = Random.insideUnitSphere * 100f;
+			pos.y = 0f;
+		} while (NavMesh.SamplePosition(pos, out hit, 10, -1) == false);
+
 		Zombie zombie = netObj.GetComponent<Zombie>();
-		zombie.transform.rotation = Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value));
-		zombie.transform.position = transform.position + pos;
+		zombie.SetPosAndRot(transform.position + hit.position,
+			Quaternion.LookRotation(new Vector3(Random.value, 0f, Random.value)));
 	}
 
 	private void SetupEvent(NetworkRunner runner)

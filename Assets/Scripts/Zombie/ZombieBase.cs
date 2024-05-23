@@ -387,7 +387,8 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 		Vector3 pos = transform.position;
 		Vector3 randPos = pos + Random.insideUnitSphere * range;
 		randPos.y = pos.y;
-		Agent.SetDestination(randPos);
+		if(agent.enabled == true)
+			Agent.SetDestination(randPos);
 	}
 
 	public bool CheckProjectile(Vector3 firePos, Vector3 targetPos, out Vector3 velocity,
@@ -483,5 +484,13 @@ public abstract class ZombieBase : NetworkBehaviour, IAfterSpawned
 			audioSource.clip = clip;
 			audioSource.Play();
 		}
+	}
+
+	public void SetPosAndRot(Vector3 pos, Quaternion rot)
+	{
+		transform.position = pos;
+		Position = pos;
+		transform.rotation = rot;
+		Rotation = rot;
 	}
 }
