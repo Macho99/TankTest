@@ -68,12 +68,7 @@ public class IngameSpawner : NetworkBehaviour
         GameManager.network.onRunnerAction -= SetupEvent;
     }
 
-    //private async void Start()
-    //{
-    //	await GameManager.network.JoinLobby();
-    //	await GameManager.network.CreateRoom("asd", 3);
-    //}
-
+ 
     public void SpawnZombie(NetworkRunner.OnBeforeSpawned beforeSpawned = null)
     {
         if (beforeSpawned == null)
@@ -93,7 +88,7 @@ public class IngameSpawner : NetworkBehaviour
         {
             pos = Random.insideUnitSphere * 100f;
             pos.y = 0f;
-        } while (NavMesh.SamplePosition(pos, out hit, 10, -1) == false);
+        } while (NavMesh.SamplePosition(pos, out hit, 1f, NavMesh.AllAreas) == false);
 
         Zombie zombie = netObj.GetComponent<Zombie>();
         zombie.SetPosAndRot(transform.position + hit.position,
