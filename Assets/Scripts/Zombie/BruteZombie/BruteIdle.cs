@@ -31,7 +31,8 @@ public class BruteIdle : ZombieBaseIdle
 			Vector3 pos = owner.transform.position;
 			Vector3 randPos = pos + Random.insideUnitSphere * 20f;
 			randPos.y = pos.y;
-			owner.Agent.SetDestination(randPos);
+			if(owner.Agent.enabled == true)
+				owner.Agent.SetDestination(randPos);
 			return;
 		}
 		else

@@ -15,6 +15,7 @@ public class ShatterObstacle : BreakableObstacle
 	[SerializeField] public ColliderType colType = ColliderType.Mesh;
 	[SerializeField] public string cacheName;
 	[SerializeField] public DebrisRoot debrisRootPrefab;
+
 	public const string cachePath = "Assets/Resources/RayfireCache";
 	public const string resourcePath = "RayfireCache";
 

@@ -316,9 +316,9 @@ public class TankAttack : TankBehaviour
 
 		rb.AddForceAtPosition(-barrelTrans.forward * fireRebound, barrelTrans.position, ForceMode.Impulse);
 
-		Random.InitState(Runner.Tick * unchecked((int)Object.Id.Raw));
 		CurBodyAcc = maxBodyAcc;
 		CurTurretAcc = maxTurretAcc;
+		Random.InitState(Runner.Tick * unchecked((int)Object.Id.Raw));
 		if (Physics.Raycast(firePoint.position, barrelTrans.forward + Random.insideUnitSphere * accuracy * realAccMul, 
 			out RaycastHit hit, 200f, hitMask))
 		{

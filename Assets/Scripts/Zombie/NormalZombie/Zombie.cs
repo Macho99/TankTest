@@ -79,6 +79,8 @@ public class Zombie : ZombieBase
 	{
 		base.Spawned();
 
+		GameManager.Instance.NormalZombieCnt++;
+
 		Random.InitState((int)Object.Id.Raw * Runner.SessionInfo.Name.GetHashCode());
 		maxSpeed = Random.Range(1, 4);
 
@@ -114,6 +116,11 @@ public class Zombie : ZombieBase
 		}
         minimapTarget.Init(MinimapTarget.TargetType.BasicMonster);
     }
+	public override void Despawned(NetworkRunner runner, bool hasState)
+	{
+		base.Despawned(runner, hasState);
+		GameManager.Instance.NormalZombieCnt--;
+	}
 
 	public override void FixedUpdateNetwork()
 	{
