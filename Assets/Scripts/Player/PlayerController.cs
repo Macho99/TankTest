@@ -15,8 +15,9 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
     [SerializeField] private Transform breardRoot;
     [SerializeField] private PlayerStates[] states;
     [SerializeField] private MinimapTarget minimapTarget;
+    [SerializeField] private Camera minimapCam;
     [Networked, Capacity((int)AppearanceType.Size)] public NetworkArray<int> decorations { get; }
-
+    [Networked, Capacity(50)] private string playerName { get; set; }
     public StateMachine<PlayerStates> stateMachine { get; private set; }
     public Animator animator { get; private set; }
     public PlayerLocomotion movement { get; private set; }
@@ -30,7 +31,7 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
     public PlayerMainUI mainUI { get; private set; }
     [Networked] public float VelocityY { get; set; }
     [SerializeField] private PlayerNameUI playerNameUI;
-    [Networked] private string playerName { get; set; }
+
     public PlayerStates GetState(PlayerState playerState)
     {
         return states[(int)playerState];
@@ -70,18 +71,21 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
         VelocityY = 0f;
         name = $"{Object.InputAuthority} ({(HasInputAuthority ? "Input Authority" : (HasStateAuthority ? "State Authority" : "Proxy"))})";
 
-
+     
         if (HasInputAuthority)
         {
             mainUI = GameManager.UI.ShowSceneUI<PlayerMainUI>("UI/PlayerUI/PlayerMainUI");
             mainUI.SetInitTime(GameManager.Weather.GetTime());
-            string name = GameManager.auth.User.DisplayName;
             minimapTarget.Init(MinimapTarget.TargetType.LocalPlayer);
-            //RPC_UserNameSetup(name);
+            string name = GameManager.auth.User.DisplayName;
+            RPC_SettingPlayerName(name);
+            playerNameUI.gameObject.SetActive(false);
         }
         else
         {
+            playerNameUI.Init(playerName);
             minimapTarget.Init(MinimapTarget.TargetType.OtherPlayer);
+            minimapCam.enabled = false;
 
         }
         hairRoot.GetChild(decorations[(int)AppearanceType.Hair]).gameObject.SetActive(true);
@@ -146,14 +150,13 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
 
     public void AfterSpawned()
     {
-        if (!HasInputAuthority)
-        {
-            playerNameUI.Init(playerName);
-        }
-        else
-        {
-            playerNameUI.gameObject.SetActive(false);
-        }
+        
+    }
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_SettingPlayerName(string playerName)
+    {
+        this.playerName = playerName;
+        playerNameUI.Init(playerName);
     }
 
     public void CollectStateMachines(List<IStateMachine> stateMachines)
