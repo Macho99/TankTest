@@ -161,7 +161,7 @@ public class ExplosiveBody : NetworkBehaviour, IHittable
 
 	protected void HitSfxRender()
 	{
-		GameManager.Sound.PlayOneShot(hitClip, AudioGroup.Vehicle, transform, false);
+	  GameManager.Sound.PlayOneShot(hitClip, AudioGroup.Vehicle, transform, false);
 	}
 
 	private void OnCollisionEnter(Collision collision)
