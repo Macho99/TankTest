@@ -20,7 +20,7 @@ public class SniperRifle : Gun
 
 
         RaycastHit[] results = new RaycastHit[10];
-        int resultCount = Physics.RaycastNonAlloc(ray, results, distance + 1f);
+        int resultCount = Physics.RaycastNonAlloc(ray, results, distance + 1f, HitMask);
         if (resultCount > 0)
         {
             for (int i = 0; i < resultCount; i++)

@@ -20,6 +20,7 @@ public class BruteAnimEvent : ZombieAnimEvent
 	protected override void InstantiateSwingVfx(Transform parent, float duration)
 	{
 		base.InstantiateSwingVfx(parent, duration);
+		Random.InitState((int)DateTime.Now.Ticks);
 		GameManager.Sound.PlayOneShot(swingClips[Random.Range(0, swingClips.Length)], AudioGroup.Zombie, transform);
 	}
 
