@@ -31,6 +31,19 @@ public class ZombieHitBox : MonoBehaviour, IHittable
 
 	public virtual void ApplyDamage(Transform source, Vector3 point, Vector3 force, int damage)
 	{
+		switch (bodyType)
+		{
+			case ZombieBody.Head:
+				damage *= 2;
+				break;
+			case ZombieBody.MiddleSpine:
+			case ZombieBody.Pelvis:
+				//데미지 그대로
+				break;
+			default:
+				damage = (int)(damage * 0.7f);
+				break;
+		}
 		owner.ApplyDamage(source, this, point, force, damage);
 	}
 }

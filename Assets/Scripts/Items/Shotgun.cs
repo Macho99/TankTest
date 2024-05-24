@@ -27,11 +27,12 @@ public class Shotgun : Gun
             Vector2 shotOffset = new Vector2(randOffsetX, randOffsetY);
             Vector3 newDirection = (ray.direction + new Vector3(randOffsetX, randOffsetY, 0f)).normalized;
 
-            if (Physics.Raycast(ray.origin, newDirection, out RaycastHit hit, distance + 1f))
+            if (Physics.Raycast(ray.origin, newDirection, out RaycastHit hit, distance + 1f, HitMask))
             {
                 if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Player"))
                 {
-                    if (hit.collider.TryGetComponent(out IHittable hittable))
+                    IHittable hittable = hit.collider.GetComponentInParent<IHittable>();
+                    if (hittable != null)
                     {
                         hittable.ApplyDamage(owner.transform, hit.point, ray.direction * 2f, ((WeaponItemSO)itemData).Damage);
                     }

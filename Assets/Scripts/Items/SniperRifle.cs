@@ -27,9 +27,9 @@ public class SniperRifle : Gun
             {
                 if (results[i].collider.gameObject.layer != LayerMask.NameToLayer("Player"))
                 {
-                    if (results[i].collider.TryGetComponent(out IHittable hittable))
+                    IHittable hittable = results[i].collider.GetComponentInParent<IHittable>();
+                    if (hittable != null)
                     {
-                       
                         hittable.ApplyDamage(owner.transform, results[i].point, ray.direction * 2f, ((WeaponItemSO)itemData).Damage);
                     }
                     else

@@ -14,6 +14,7 @@ public abstract class Gun : Weapon
     protected NetworkObject muzzleFlashFx;
     //파츠아이템 
     protected AudioSource audioSource;
+    protected LayerMask HitMask { get; set; }
     [SerializeField] protected Transform muzzlePoint;
     [SerializeField] protected AudioClip fireSFX;
     [Networked] protected Vector3 targetPoint { get; set; }
@@ -22,6 +23,7 @@ public abstract class Gun : Weapon
     [Networked] public TickTimer refireTimer { get; protected set; }
     private void Awake()
     {
+        HitMask = LayerMask.GetMask("Vehicle", "Monster", "Environment");
         audioSource = GetComponent<AudioSource>();
     }
     public override void Spawned()

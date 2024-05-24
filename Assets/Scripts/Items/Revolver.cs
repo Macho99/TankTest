@@ -18,11 +18,13 @@ public class Revolver : Gun
         float distance = Vector3.Distance(targetPoint, muzzlePoint.transform.position);
 
 
-        if (Physics.Raycast(ray, out RaycastHit hit, distance + 1f))
+        if (Physics.Raycast(ray, out RaycastHit hit, distance + 1f, HitMask))
         {
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Player"))
             {
-                if (hit.collider.TryGetComponent(out IHittable hittable))
+                IHittable hittable = hit.collider.GetComponentInParent<IHittable>();
+
+				if (hittable != null)
                 {
                     hittable.ApplyDamage(owner.transform, hit.point, ray.direction * 2f, ((WeaponItemSO)itemData).Damage);
                 }
