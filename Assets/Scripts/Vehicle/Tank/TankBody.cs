@@ -56,12 +56,31 @@ public class TankBody : VehicleBody
 			float engineRatio = Random.value;
 			CurEngineHp = Mathf.Max(CurEngineHp - (int)(engineRatio * damage), 0);
 		}
+		//위쪽에 맞으면 포탑과 장전 패널티
 		if(upAngle < 45f)
 		{
 			float turretRatio = Random.value;
-			float reloadRatio = Random.value;
 			CurTurretHp = Mathf.Max(CurTurretHp - (int)(turretRatio * damage), 0);
+
+			float reloadRatio = Random.value;
 			CurReloadHp = Mathf.Max(CurReloadHp - (int)(reloadRatio * damage), 0);
+		}
+		else
+		{
+			//데미지가 충분히 셀 경우 확률적으로 패널티
+			if (damage > 800)
+			{
+				if(Random.value > 0.7f)
+				{
+					float turretRatio = Random.value;
+					CurTurretHp = Mathf.Max(CurTurretHp - (int)(turretRatio * damage), 0);
+				}
+				if(Random.value > 0.7f)
+				{
+					float reloadRatio = Random.value;
+					CurReloadHp = Mathf.Max(CurReloadHp - (int)(reloadRatio * damage), 0);
+				}
+			}
 		}
 	}
 }

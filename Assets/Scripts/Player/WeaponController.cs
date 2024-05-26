@@ -17,19 +17,20 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
     [SerializeField] private Equipment equipment;
     private PlayerInputListner inputListner;
     [SerializeField] private MultiAimConstraint handAimIK;
-    [SerializeField] private TwoBoneIKConstraint subHandIK;
+    [SerializeField] public TwoBoneIKConstraint subHandIK;
     [SerializeField] private BasicCamController camController;
     [SerializeField] private Inventory inventory;
     private PlayerController controller;
     [Networked] private int weaponIndex { get; set; }
-    [Networked, Capacity(20)] private NetworkDictionary<int, Ammo> netAmmos { get; }
+
     private Animator animator;
+    [Networked, Capacity(20)] private NetworkDictionary<int, Ammo> ammos { get; }
     [Networked, OnChangedRender(nameof(UpdateMainWeapon))] public Weapon mainWeapon { get; private set; }
-    private Weapon prevWeapon;
-    [Networked, OnChangedRender(nameof(UpdateHandWeight))] private float handWeight { get; set; }
+    public Weapon prevWeapon { get; private set; }
+    [Networked, OnChangedRender(nameof(UpdateHandWeight))] public float handWeight { get; set; }
     [SerializeField] private WeaponPivotData[] weaponPivotData;
     private int weaponIndexOffset;
-    private PlayerAnimEvent animEvent;
+    public PlayerAnimEvent animEvent { get; private set; }
     private float transitionSpeed;
     public StateMachine<WeaponStates> stateMachine { get; private set; }
 
@@ -50,6 +51,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
         if (HasStateAuthority)
         {
             equipment.onMainWeaponUpdate += ModifyMainWeapon;
+
         }
 
         if (HasInputAuthority)
@@ -57,7 +59,7 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
             mainUI = controller.mainUI;
 
         }
-
+        inventory.onItemUpdate += UpdateAmmo;
     }
     public int GetMainWeaponAnimLayer()
     {
@@ -123,7 +125,60 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
         }
 
     }
+    private void UpdateAmmo(int index, Item newAmmo)
+    {
 
+        if (HasStateAuthority)
+        {
+            if (mainWeapon == null)
+                return;
+
+
+            if (mainWeapon is Gun == false)
+                return;
+
+
+            if (newAmmo == null)
+            {
+                Debug.Log(newAmmo);
+
+                if (ammos.ContainsKey(index))
+                {
+                    ammos.Remove(index);
+                }
+
+
+
+                return;
+            }
+            else
+            {
+                Debug.Log(newAmmo);
+                Ammo ammo = newAmmo as Ammo;
+                if (ammo == null)
+                    return;
+
+                if (ammos.ContainsKey(index))
+                {
+                    ammos.Set(index, ammo);
+                }
+                else
+                {
+                    ammos.Add(index, ammo);
+                }
+
+                Debug.Log(newAmmo);
+            }
+        }
+
+        if (HasInputAuthority)
+        {
+            int updateCount = inventory.GetTotalAmmoItemCount((Gun)mainWeapon);
+            mainUI?.UpdateAmmo(mainWeapon, updateCount);
+
+        }
+
+    }
     private void Attack()
     {
         if (GetInput(out NetworkInputData input))
@@ -402,12 +457,12 @@ public class WeaponController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
         Debug.Log(weaponState);
     }
 
-    private void StartDraw()
+    public void StartDraw()
     {
         mainWeapon.SetParent(SetupMainHandMainPivot(mainWeapon));
         animator.SetLayerWeight((int)((WeaponItemSO)prevWeapon.ItemData).AnimLayerType, 0f);
     }
-    private void EndDraw()
+    public void EndDraw()
     {
         StartCoroutine(LerpWeaponAnimLayer());
     }

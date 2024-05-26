@@ -6,6 +6,7 @@ using System.Drawing;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+using Color = UnityEngine.Color;
 public class BasicCamController : NetworkBehaviour
 {
     public enum CameraType { None, Aim, Zoom, Size }
@@ -15,15 +16,38 @@ public class BasicCamController : NetworkBehaviour
 
     [SerializeField] private CinemachineVirtualCamera mainCam;
     [SerializeField] private CinemachineVirtualCamera aimCam;
-    [SerializeField] private Transform raycasterTr;
+    //[SerializeField] private Transform raycasterTr;
+    [SerializeField] private Transform rayCastCam;
 
-    public Transform RayCasterTr { get => raycasterTr; }
+
+
+    public Transform RayCasterTr { get => rayCastCam; }
     public Transform FollowTarget { get => followTarget; }
     private void Awake()
     {
         followTarget = transform.Find("FollowTarget").transform;
         rotateYSpeed = 15f;
+
+
     }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_RayCast(Vector3 position, Quaternion rotation)
+    {
+        rayCastCam.transform.position = position;
+        rayCastCam.transform.rotation = rotation;
+    }
+    public override void FixedUpdateNetwork()
+    {
+        if (HasInputAuthority)
+        {
+            rayCastCam.transform.position = Camera.main.transform.position;
+            rayCastCam.transform.rotation = Camera.main.transform.rotation;
+            RPC_RayCast(rayCastCam.transform.position, rayCastCam.transform.rotation);
+        }
+        Debug.DrawRay(rayCastCam.transform.position, rayCastCam.transform.forward * 100, Color.blue);
+    }
+
     public override void Spawned()
     {
         if (!HasInputAuthority)
@@ -39,7 +63,7 @@ public class BasicCamController : NetworkBehaviour
         }
         ChangeCamera(CameraType.None);
     }
-    public float RotateX(NetworkInputData input,float rotX)
+    public float RotateX(NetworkInputData input, float rotX)
     {
         float mouseDeltaY = input.mouseDelta.y * rotateYSpeed * Runner.DeltaTime;
 
@@ -47,7 +71,7 @@ public class BasicCamController : NetworkBehaviour
         //float camAngleX = followTarget.transform.eulerAngles.x;
         float newRotX = rotX - mouseDeltaY;
 
-        newRotX = Mathf.Clamp(newRotX, -40, 40);
+        newRotX = Mathf.Clamp(newRotX, -70, 70);
         //if (newRotX < 180f)
         //{
         //    newRotX = Mathf.Clamp(newRotX, -1f, 70f);
@@ -73,4 +97,6 @@ public class BasicCamController : NetworkBehaviour
         mainCam.Priority = (int)CameraType.Size;
         aimCam.Priority = 0;
     }
+
+  
 }

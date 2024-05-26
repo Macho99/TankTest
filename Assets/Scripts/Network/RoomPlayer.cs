@@ -6,29 +6,39 @@ using UnityEngine;
 
 public class RoomPlayer : NetworkBehaviour
 {
-    private string userNicname;
     [Networked] public NetworkBool isHost { get; private set; }
     [Networked, OnChangedRender(nameof(ReadEvent))] public NetworkBool IsReady { get; private set; }
-    public string UserName { get => userNicname; }
 
     private SessionUserUI userUI;
     public event Action onReady;
     public event Action onDespawn;
+    [Networked, Capacity(100)] public string UserName { get; private set; }
     [Networked] public int presetIndex { get; set; }
     [Networked] public int ColorIndex { get; set; }
     [Networked] public int HairIndex { get; set; }
     [Networked] public int BreardIndex { get; set; }
+
     public override void Spawned()
     {
-        userNicname = GameManager.auth.User.DisplayName;
+
         if (HasInputAuthority)
         {
             isHost = HasStateAuthority;
+            UserName = GameManager.auth.Auth.CurrentUser.DisplayName;
+            RPC_NicnameSetup(UserName);
             IsReady = false;
+            Debug.LogWarning("½ºÆù");
         }
-
     }
-
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RPC_NicnameSetup(string nicname)
+    {
+        UserName = nicname;
+        if (userUI != null)
+        {
+            userUI.UpdateNicname(nicname, Object.StateAuthority);
+        }
+    }
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         Debug.LogWarning("despawned");
@@ -43,6 +53,12 @@ public class RoomPlayer : NetworkBehaviour
     }
     public void Setup(SessionUserUI sessionUserUI, PlayerRef playerRef)
     {
+        if (HasInputAuthority)
+        {
+            UserName = GameManager.auth.Auth.CurrentUser.DisplayName;
+            RPC_NicnameSetup(GameManager.auth.Auth.CurrentUser.DisplayName);
+        }
+        Debug.LogWarning(UserName);
         this.userUI = sessionUserUI;
         userUI.Setup(this, playerRef, IsReady);
         ReadEvent();

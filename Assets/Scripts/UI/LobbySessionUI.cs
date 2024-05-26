@@ -62,7 +62,6 @@ public class LobbySessionUI : SimulationBehaviour
         loadingUI.CloseUI();
         if (result.Ok)
         {
-            onConnetSession?.Invoke();
            
         }
         else

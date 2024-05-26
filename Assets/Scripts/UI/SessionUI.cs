@@ -23,6 +23,8 @@ public class SessionUI : MonoBehaviour
     {
         sessionUserDic = new Dictionary<PlayerRef, RoomPlayer>();
         loadingUIPrefab = GameManager.Resource.Load<LoadingUI>("UI/LoadingUI");
+        LoadingUI loadingUI = GameManager.UI.ShowPopUpUI(loadingUIPrefab);
+        loadingUI.CloseUI();
     }
     private void OnEnable()
     {
@@ -72,7 +74,7 @@ public class SessionUI : MonoBehaviour
                 }
             }
         }
-
+        sessionCountTMP.text = $"({sessionInfo.PlayerCount}/{sessionInfo.MaxPlayers})";
     }
 
     public void PressButton()
@@ -114,5 +116,9 @@ public class SessionUI : MonoBehaviour
                     sessionUserDic[playerRef].StartGame();
             }
         }
+    }
+    public void PressExitGame()
+    {
+        Application.Quit();
     }
 }

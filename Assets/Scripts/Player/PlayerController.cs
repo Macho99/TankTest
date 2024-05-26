@@ -49,16 +49,6 @@ public class PlayerController : NetworkBehaviour, IAfterSpawned, IStateMachineOw
 
         GameManager.UI.StartSceneInit();
         GameManager.Pool.StartSceneInit();
-        //stateMachine.AddState(PlayerState.StandLocomotion, new PlayerStandLocomotionState(this));
-        //stateMachine.AddState(PlayerState.CrouchLocomotion, new PlayerCrouchLocomotionState(this));
-        //stateMachine.AddState(PlayerState.Jump, new PlayerJumpState(this));
-        //stateMachine.AddState(PlayerState.Land, new PlayerLandState(this));
-        //stateMachine.AddState(PlayerState.Falling, new PlayerFallingState(this));
-        //stateMachine.AddState(PlayerState.Interact, new PlayerInteractState(this));
-        //stateMachine.AddState(PlayerState.Hit, new PlayerHitState(this));
-        //stateMachine.AddState(PlayerState.Dead, new PlayerDeadState(this));
-
-        //stateMachine.InitState(PlayerState.StandLocomotion);
 
 
     }

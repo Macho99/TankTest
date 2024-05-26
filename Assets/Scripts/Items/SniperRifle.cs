@@ -20,16 +20,16 @@ public class SniperRifle : Gun
 
 
         RaycastHit[] results = new RaycastHit[10];
-        int resultCount = Physics.RaycastNonAlloc(ray, results, distance + 1f);
+        int resultCount = Physics.RaycastNonAlloc(ray, results, distance + 1f, HitMask);
         if (resultCount > 0)
         {
             for (int i = 0; i < resultCount; i++)
             {
                 if (results[i].collider.gameObject.layer != LayerMask.NameToLayer("Player"))
                 {
-                    if (results[i].collider.TryGetComponent(out IHittable hittable))
+                    IHittable hittable = results[i].collider.GetComponentInParent<IHittable>();
+                    if (hittable != null)
                     {
-                       
                         hittable.ApplyDamage(owner.transform, results[i].point, ray.direction * 2f, ((WeaponItemSO)itemData).Damage);
                     }
                     else
