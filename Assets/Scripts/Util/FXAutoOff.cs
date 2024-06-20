@@ -6,12 +6,14 @@ using UnityEngine;
 public class FXAutoOff : MonoBehaviour
 {
 	[SerializeField] protected float offTime = 1f;
-	private float initOffTime; 
+	private float initOffTime;
+	private Vector3 initScale;
 
 	protected float elapsed = 0f;
 
 	protected virtual void Awake()
 	{
+		initScale = transform.localScale;
 		initOffTime = offTime;
 	}
 
@@ -33,7 +35,7 @@ public class FXAutoOff : MonoBehaviour
 	{
 		offTime = initOffTime;
 		transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-		transform.localScale = Vector3.one;
+		transform.localScale = initScale;
 	}
 
 	public void AutoSetParentNull(float nullTime)

@@ -19,14 +19,14 @@ public class ZombieAnimEvent : MonoBehaviour
 	Collider[] cols = new Collider[10];
 
 	int breakableLayer;
-	Animator anim;
+	protected Animator anim;
 	Transform lHandTrans;
 	Transform rHandTrans;
 	ZombieBase zombieBase;
 	LayerMask hitMask;
 	List<Int64> hitList = new();
 
-	private void Awake()
+	protected virtual void Awake()
 	{
 		anim = GetComponent<Animator>();
 		zombieBase = GetComponent<ZombieBase>();

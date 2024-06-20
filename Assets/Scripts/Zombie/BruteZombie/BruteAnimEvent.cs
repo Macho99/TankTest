@@ -13,15 +13,29 @@ public class BruteAnimEvent : ZombieAnimEvent
 	const string swingDebrisPath = "FX/PoolableDebris/SM_Env_DirtPile_02";
 	const string crackDebrisPath = "FX/PoolableDebris/SM_Env_RoadPiece_Damaged_01";
 	const string crackVfxPath = "FX/VFX/FX_splash_hit_01_floor";
+	const string roarVfxPath = "FX/VFX/RippleSphere";
 
 	[SerializeField] AudioClip[] swingClips;
 	[SerializeField] AudioClip crackClip;
+	Transform eyeTrans;
+
+	protected override void Awake()
+	{
+		base.Awake();
+		eyeTrans = anim.GetBoneTransform(HumanBodyBones.LeftEye);
+	}
 
 	protected override void InstantiateSwingVfx(Transform parent, float duration)
 	{
 		base.InstantiateSwingVfx(parent, duration);
 		Random.InitState((int)DateTime.Now.Ticks);
 		GameManager.Sound.PlayOneShot(swingClips[Random.Range(0, swingClips.Length)], AudioGroup.Zombie, transform);
+	}
+
+	private void InstantiateRoarVfx()
+	{
+		GameManager.Resource.Instantiate<FXAutoOff>(roarVfxPath, eyeTrans.position + eyeTrans.forward, 
+			eyeTrans.rotation, eyeTrans, true);
 	}
 
 	private void PlayGroundCrack(AnimationEvent animEvent)
