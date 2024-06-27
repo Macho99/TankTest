@@ -46,7 +46,6 @@ public class IngameSpawner : NetworkBehaviour
         if (HasStateAuthority)
         {
             infoText.text = "호스트로 연결됨";
-            SpawnInitZombie();
         }
         else
         {
@@ -115,9 +114,10 @@ public class IngameSpawner : NetworkBehaviour
 
     }
 
-    private void SpawnInitZombie()
+    public void SpawnInitZombie()
     {
-        for (int i = 0; i < 100; i++)
+        if (HasStateAuthority == false) return;
+        for (int i = 0; i < 50; i++)
         {
             SpawnZombie(BeforeSpawned);
         }
