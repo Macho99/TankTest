@@ -117,7 +117,7 @@ public class IngameSpawner : NetworkBehaviour
 
     private void SpawnInitZombie()
     {
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 30; i++)
         {
             SpawnZombie(BeforeSpawned);
         }

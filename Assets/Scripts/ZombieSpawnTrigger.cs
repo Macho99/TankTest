@@ -11,9 +11,9 @@ public class ZombieSpawnTrigger : MonoBehaviour
 		ingameSpawner = GetComponentInParent<IngameSpawner>();
 	}
 
-	private void OnTriggerEnter(Collider other)
-	{
-		ingameSpawner.SpawnInitZombie();
-		Destroy(gameObject);
-	}
+	//private void OnTriggerEnter(Collider other)
+	//{
+	//	ingameSpawner.SpawnInitZombie();
+	//	Destroy(gameObject);
+	//}
 }
