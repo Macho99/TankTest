@@ -80,11 +80,11 @@ public abstract class InteractObject : NetworkBehaviour, IDetectable
     }
     public void IsDetect(bool isDetect)
     {
-        float targetAlpha = isDetect == true ? 1f : 0f;
-        foreach (Material material in materials)
-        {
-            material.SetFloat("_Alpha", targetAlpha);
-        }
+        //float targetAlpha = isDetect == true ? 1f : 0f;
+        //foreach (Material material in materials)
+        //{
+        //    material.SetFloat("_Alpha", targetAlpha);
+        //}
     }
 
     void IDetectable.OnEnterDetect(out DetectData interactData)

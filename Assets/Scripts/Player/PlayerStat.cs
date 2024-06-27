@@ -74,7 +74,20 @@ public class PlayerStat : NetworkBehaviour, IHittable, IAfterSpawned
         {
             return;
         }
+        if(damage < 6)
+		{
+			PlayerStatData newStatData2 = statData[(int)PlayerStatType.HPGauge];
+			newStatData2.currentValue -= damage;
+			if (newStatData2.currentValue < 0)
+				newStatData2.currentValue = 0;
 
+			statData.Set((int)PlayerStatType.HPGauge, newStatData2);
+
+			mainUI?.UpdateStat(PlayerStatType.HPGauge, statData[(int)PlayerStatType.HPGauge].currentValue, statData[(int)PlayerStatType.HPGauge].maxValue);
+
+			RPC_ApplyDamage(point, force, damage);
+            return;
+		}
 
         force.y = 0;
 
